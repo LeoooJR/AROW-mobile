@@ -1,4 +1,37 @@
-# Expo HAS CHANGED
+# AROW Mobile agent guide
+
+## Project context
+
+AROW Mobile is an Android application for controlled railway research and
+development. It lets users alter the location reported by their phone by
+supplying fake GPS coordinates, enabling railway geolocation scenarios to be
+developed, simulated, and tested.
+
+AROW stands for **Advanced Railway geOlocation Workflow**. Its one-sentence
+product description is: **Google Maps for the railway world, with controlled GPS
+location simulation built in.**
+
+The application's primary concepts and workflows come from the railway domain,
+including railway milestones, stations, railways, and related geolocation data.
+Use railway terminology and semantics when modeling features instead of reducing
+them to generic map concepts.
+
+AROW Mobile has a companion desktop application with which it can exchange data.
+Preserve that relationship when designing data models, import/export behavior,
+or synchronization boundaries; do not assume the mobile application is an
+isolated system.
+
+Treat fake-location behavior as an intentional core capability for authorized
+research and development, not as incidental test tooling.
+
+## Communication contract
+
+Before changing desktop/mobile data exchange, protocol messages, simulation
+commands, applied-state reporting, transport boundaries, or compatibility rules,
+read and follow the
+[`AROW Mobile communication contract`](docs/HOW_TO_communication_contract).
+
+## Expo version requirement
 
 Read the exact versioned docs at https://docs.expo.dev/versions/v57.0.0/ before writing any code.
 
