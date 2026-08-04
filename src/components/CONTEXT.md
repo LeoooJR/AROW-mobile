@@ -116,6 +116,8 @@ The current component foundation is defined in `package.json`:
 | --- | --- | --- |
 | Expo | `~57.0.9` | Universal application runtime and SDK |
 | React Native | `0.86.2` | Native primitives and platform behavior |
+| @gluestack-ui/core | `^5.0.15` | Headless component creators and providers |
+| @gluestack-ui/utils | `^5.0.6` | Gluestack accessibility and styling utilities |
 | NativeWind | `^5.0.0-preview.4` | Universal `className` styling |
 | react-native-css | `^3.0.7` | Native CSS runtime used by NativeWind |
 | Tailwind CSS | `^4.3.3` | Utility generation and design tokens |
@@ -126,6 +128,28 @@ The current component foundation is defined in `package.json`:
 
 Verify this table when upgrading the UI stack. Follow the exact Expo SDK 57
 documentation required by the repository-level `AGENTS.md`.
+
+## Gluestack UI v5
+
+Gluestack UI is installed as a source-owned component library on top of
+NativeWind v5 and Tailwind CSS v4. Generated gluestack components belong in
+`src/components/adapters`; application code must import them directly through
+the `@/components/adapters/<component>` boundary rather than importing
+`@gluestack-ui/*` package APIs.
+
+The root `GluestackUIProvider` is the single application-level exception to the
+normal adapter dependency direction: it owns gluestack overlay and toast
+providers and is mounted once by `src/app/_layout.tsx`. Do not mount additional
+copies in routes or feature components.
+
+Use `npx gluestack-ui@latest add <component>` to add components. The repository's
+`gluestack-ui.config.json` keeps CLI output inside `src/components/adapters`.
+Review generated code before use so it follows this context, `DESIGN.md`, the
+project's semantic theme tokens, accessibility requirements, kebab-case naming,
+and strict TypeScript rules.
+
+**Before using any component, always verify the latest usage patterns at**
+**https://gluestack.io/ui/docs/components/${componentName}/**.
 
 ## File and API conventions
 
@@ -154,4 +178,3 @@ For any future code change in this directory:
 3. run `npx tsc --noEmit` and the repository lint command when configured;
 4. run the narrowest relevant tests, then verify native and web bundles when a
    styling, Metro, animation, gesture, or package boundary changes.
-
