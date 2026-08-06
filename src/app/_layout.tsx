@@ -7,7 +7,9 @@ import { GluestackUIProvider } from "@/components/adapters/gluestack-ui-provider
 export default function RootLayout() {
   return (
     <GluestackUIProvider>
-      <Stack />
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+      </Stack>
     </GluestackUIProvider>
   );
 }
