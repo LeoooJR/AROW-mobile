@@ -2,7 +2,7 @@ import { Map as MapLibreMap } from "@maplibre/maplibre-react-native";
 import { type ReactElement } from "react";
 import { StyleSheet } from "react-native";
 
-const DEFAULT_MAP_STYLE = "https://demotiles.maplibre.org/style.json";
+import { LIGHT_MAP_STYLE } from "@/components/adapters/map/map-style-light";
 
 const styles = StyleSheet.create({
   map: {
@@ -14,7 +14,7 @@ export default function Map(): ReactElement {
   return (
     <MapLibreMap
       accessibilityLabel="Carte ferroviaire interactive AROW"
-      mapStyle={DEFAULT_MAP_STYLE}
+      mapStyle={LIGHT_MAP_STYLE}
       style={styles.map}
       testID="arow-map"
     />

@@ -21,13 +21,23 @@ above the map.
 
 ## Base map
 
-Until AROW has a custom map style, use MapLibre's documented demo style at
-`https://demotiles.maplibre.org/style.json`. Keep the initial camera, gestures,
-ornaments, and rendering behavior at MapLibre's defaults unless a product
-requirement explicitly changes them.
+`map-style-light.ts` is the authority for the light base-map design. It follows
+the white and warm-grey hierarchy of the design prototype, with main railway
+infrastructure as the strongest passive feature. Brand orange remains reserved
+for active routes, selections, markers, and simulation state.
 
-Do not add sources, layers, GeoJSON, markers, annotations, location tracking, or
-map event handling without extending this context for that feature first.
+The style uses the public OpenFreeMap OpenMapTiles source and glyph service. It
+must remain free to use, keyless, and correctly attributed. The public instance
+has no availability guarantee; keep the source isolated in the style module so
+the same OpenMapTiles schema can move to self-hosted infrastructure later.
+
+Keep the initial camera, gestures, ornaments, and rendering behavior at
+MapLibre's defaults unless a product requirement explicitly changes them. Keep
+generic POIs, business icons, stations, aerodromes, housenumbers, and sprites out
+of the base style so future AROW railway data remains authoritative.
+
+Do not add GeoJSON, markers, annotations, location tracking, or map event
+handling without extending this context for that feature first.
 
 ## Platforms and runtime
 
