@@ -1,0 +1,262 @@
+# Reversible ADB operations for explicitly addressed Android emulators.
+# Physical-device serials intentionally do not match these rules.
+
+adb_commands = [
+    "adb",
+    "/Users/leojourdain/Library/Android/sdk/platform-tools/adb",
+]
+
+emulator_serials = [
+    "emulator-5554",
+    "emulator-5556",
+    "emulator-5558",
+    "emulator-5560",
+    "emulator-5562",
+    "emulator-5564",
+]
+
+prefix_rule(
+    pattern = [adb_commands, "devices"],
+    decision = "allow",
+    justification = "Listing connected Android targets is required to prove that a target is an emulator.",
+    match = [
+        "adb devices",
+        "adb devices -l",
+        "/Users/leojourdain/Library/Android/sdk/platform-tools/adb devices -l",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        adb_commands,
+        "-s",
+        emulator_serials,
+        ["get-state", "wait-for-device", "reverse", "forward", "push", "pull"],
+    ],
+    decision = "allow",
+    justification = "Connection, port-forwarding, and file-transfer operations are authorized on explicit emulator targets.",
+    match = [
+        "adb -s emulator-5554 get-state",
+        "adb -s emulator-5554 wait-for-device",
+        "adb -s emulator-5554 reverse tcp:8081 tcp:8081",
+        "adb -s emulator-5554 push app-debug.apk /data/local/tmp/app-debug.apk",
+        "adb -s emulator-5554 pull /sdcard/arow-screen.png /private/tmp/arow-screen.png",
+    ],
+    not_match = [
+        "adb -s R5CT123456A reverse tcp:8081 tcp:8081",
+        "adb reverse tcp:8081 tcp:8081",
+    ],
+)
+
+prefix_rule(
+    pattern = [adb_commands, "-s", emulator_serials, ["install", "install-multiple"]],
+    decision = "allow",
+    justification = "Installing or reinstalling development and test APKs is authorized on explicit emulator targets.",
+    match = [
+        "adb -s emulator-5554 install -r app-debug.apk",
+        "adb -s emulator-5556 install-multiple base.apk split_config.apk",
+    ],
+    not_match = [
+        "adb -s R5CT123456A install app-debug.apk",
+        "adb install app-debug.apk",
+    ],
+)
+
+prefix_rule(
+    pattern = [adb_commands, "-s", emulator_serials, "logcat"],
+    decision = "allow",
+    justification = "Reading emulator logs is authorized for development diagnostics.",
+    match = [
+        "adb -s emulator-5554 logcat",
+        "adb -s emulator-5554 logcat ReactNativeJS:V '*:S'",
+    ],
+    not_match = [
+        "adb -s R5CT123456A logcat",
+    ],
+)
+
+prefix_rule(
+    pattern = [adb_commands, "-s", emulator_serials, "logcat", "-c"],
+    decision = "prompt",
+    justification = "Clearing emulator logs is destructive and requires explicit approval.",
+    match = [
+        "adb -s emulator-5554 logcat -c",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        adb_commands,
+        "-s",
+        emulator_serials,
+        "shell",
+        "input",
+        ["tap", "swipe", "text", "keyevent", "motionevent"],
+    ],
+    decision = "allow",
+    justification = "Taps, swipes, typing, navigation, and key events are authorized on explicit emulator targets.",
+    match = [
+        "adb -s emulator-5554 shell input tap 540 720",
+        "adb -s emulator-5554 shell input swipe 540 1600 540 600 500",
+        "adb -s emulator-5554 shell input text AROW",
+        "adb -s emulator-5554 shell input keyevent KEYCODE_BACK",
+    ],
+    not_match = [
+        "adb -s R5CT123456A shell input tap 540 720",
+        "adb shell input tap 540 720",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        adb_commands,
+        "-s",
+        emulator_serials,
+        "shell",
+        "am",
+        ["start", "force-stop"],
+    ],
+    decision = "allow",
+    justification = "Opening and force-stopping development activities is authorized on explicit emulator targets.",
+    match = [
+        "adb -s emulator-5554 shell am start -W com.leooojrrr.AROWmobile/.MainActivity",
+        "adb -s emulator-5554 shell am force-stop com.leooojrrr.AROWmobile",
+    ],
+    not_match = [
+        "adb -s R5CT123456A shell am force-stop com.leooojrrr.AROWmobile",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        adb_commands,
+        "-s",
+        emulator_serials,
+        "shell",
+        ["dumpsys", "uiautomator", "screencap"],
+    ],
+    decision = "allow",
+    justification = "UI hierarchy, screenshot, and system-state inspection is authorized on explicit emulator targets.",
+    match = [
+        "adb -s emulator-5554 shell dumpsys window",
+        "adb -s emulator-5554 shell uiautomator dump /sdcard/window.xml",
+        "adb -s emulator-5554 shell screencap -p /sdcard/arow-screen.png",
+    ],
+    not_match = [
+        "adb -s R5CT123456A shell screencap -p /sdcard/arow-screen.png",
+    ],
+)
+
+prefix_rule(
+    pattern = [adb_commands, "-s", emulator_serials, "shell", "cmd", ["uimode", "location"]],
+    decision = "allow",
+    justification = "Temporary theme and mock-location state is authorized on explicit emulator targets.",
+    match = [
+        "adb -s emulator-5554 shell cmd uimode night yes",
+        "adb -s emulator-5554 shell cmd uimode night auto",
+        "adb -s emulator-5554 shell cmd location set-location-enabled true",
+    ],
+    not_match = [
+        "adb -s R5CT123456A shell cmd uimode night yes",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        adb_commands,
+        "-s",
+        emulator_serials,
+        "shell",
+        "settings",
+        ["get", "put", "delete"],
+        ["system", "secure", "global"],
+    ],
+    decision = "allow",
+    justification = "Temporary reversible emulator settings are authorized on explicit emulator targets.",
+    match = [
+        "adb -s emulator-5554 shell settings put system user_rotation 1",
+        "adb -s emulator-5554 shell settings get secure mock_location",
+        "adb -s emulator-5554 shell settings delete global http_proxy",
+    ],
+    not_match = [
+        "adb -s R5CT123456A shell settings put system user_rotation 1",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        adb_commands,
+        "-s",
+        emulator_serials,
+        "shell",
+        "pm",
+        ["list", "dump", "grant", "revoke"],
+    ],
+    decision = "allow",
+    justification = "Package inspection and reversible runtime permissions are authorized on explicit emulator targets.",
+    match = [
+        "adb -s emulator-5554 shell pm list packages com.leooojrrr.AROWmobile",
+        "adb -s emulator-5554 shell pm dump com.leooojrrr.AROWmobile",
+        "adb -s emulator-5554 shell pm grant com.leooojrrr.AROWmobile android.permission.ACCESS_FINE_LOCATION",
+        "adb -s emulator-5554 shell pm revoke com.leooojrrr.AROWmobile android.permission.ACCESS_FINE_LOCATION",
+    ],
+    not_match = [
+        "adb -s emulator-5554 shell pm clear com.leooojrrr.AROWmobile",
+        "adb -s R5CT123456A shell pm grant com.leooojrrr.AROWmobile android.permission.ACCESS_FINE_LOCATION",
+    ],
+)
+
+prefix_rule(
+    pattern = [adb_commands, "-s", emulator_serials, "shell", "appops", ["get", "set"]],
+    decision = "allow",
+    justification = "Reading and temporarily setting app operations is authorized on explicit emulator targets.",
+    match = [
+        "adb -s emulator-5554 shell appops get com.leooojrrr.AROWmobile",
+        "adb -s emulator-5554 shell appops set com.leooojrrr.AROWmobile android:mock_location allow",
+    ],
+)
+
+prefix_rule(
+    pattern = [adb_commands, "-s", emulator_serials, "shell", "svc", ["wifi", "data"]],
+    decision = "allow",
+    justification = "Temporary emulator network-state changes are authorized for testing.",
+    match = [
+        "adb -s emulator-5554 shell svc wifi disable",
+        "adb -s emulator-5554 shell svc data enable",
+    ],
+    not_match = [
+        "adb -s R5CT123456A shell svc wifi disable",
+    ],
+)
+
+prefix_rule(
+    pattern = [adb_commands, "-s", emulator_serials, "emu", ["geo", "rotate", "kill"]],
+    decision = "allow",
+    justification = "Mock coordinates, orientation, and stopping the disposable emulator are authorized testing operations.",
+    match = [
+        "adb -s emulator-5554 emu geo fix 4.85962 45.74846",
+        "adb -s emulator-5554 emu rotate",
+        "adb -s emulator-5554 emu kill",
+    ],
+    not_match = [
+        "adb -s R5CT123456A emu geo fix 4.85962 45.74846",
+    ],
+)
+
+prefix_rule(
+    pattern = [adb_commands, "-s", emulator_serials, "shell", "pm", "clear"],
+    decision = "prompt",
+    justification = "Wiping application data is destructive and requires explicit approval.",
+    match = [
+        "adb -s emulator-5554 shell pm clear com.leooojrrr.AROWmobile",
+    ],
+)
+
+prefix_rule(
+    pattern = [adb_commands, "-s", emulator_serials, "uninstall"],
+    decision = "prompt",
+    justification = "Uninstalling an application removes its data and requires explicit approval.",
+    match = [
+        "adb -s emulator-5554 uninstall com.leooojrrr.AROWmobile",
+    ],
+)
