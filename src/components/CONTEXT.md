@@ -112,19 +112,19 @@ export interface ButtonProps extends ButtonVariants {
 
 The current component foundation is defined in `package.json`:
 
-| Package | Current version | Component responsibility |
-| --- | --- | --- |
-| Expo | `~57.0.9` | Universal application runtime and SDK |
-| React Native | `0.86.2` | Native primitives and platform behavior |
-| @gluestack-ui/core | `^5.0.15` | Headless component creators and providers |
-| @gluestack-ui/utils | `^5.0.6` | Gluestack accessibility and styling utilities |
-| NativeWind | `^5.0.0-preview.4` | Universal `className` styling |
-| react-native-css | `^3.0.7` | Native CSS runtime used by NativeWind |
-| Tailwind CSS | `^4.3.3` | Utility generation and design tokens |
-| tailwind-variants | `^3.3.0` | Typed visual variants, slots, and class conflict resolution |
-| expo-image | `~57.0.1` | Application image rendering |
-| react-native-reanimated | `4.5.1` | UI-thread animations |
-| react-native-gesture-handler | `~2.32.0` | Coordinated native gestures |
+| Package                      | Current version    | Component responsibility                                    |
+| ---------------------------- | ------------------ | ----------------------------------------------------------- |
+| Expo                         | `~57.0.9`          | Universal application runtime and SDK                       |
+| React Native                 | `0.86.2`           | Native primitives and platform behavior                     |
+| @gluestack-ui/core           | `^5.0.15`          | Headless component creators and providers                   |
+| @gluestack-ui/utils          | `^5.0.6`           | Gluestack accessibility and styling utilities               |
+| NativeWind                   | `^5.0.0-preview.4` | Universal `className` styling                               |
+| react-native-css             | `^3.0.7`           | Native CSS runtime used by NativeWind                       |
+| Tailwind CSS                 | `^4.3.3`           | Utility generation and design tokens                        |
+| tailwind-variants            | `^3.3.0`           | Typed visual variants, slots, and class conflict resolution |
+| expo-image                   | `~57.0.1`          | Application image rendering                                 |
+| react-native-reanimated      | `4.5.1`            | UI-thread animations                                        |
+| react-native-gesture-handler | `~2.32.0`          | Coordinated native gestures                                 |
 
 Verify this table when upgrading the UI stack. Follow the exact Expo SDK 57
 documentation required by the repository-level `AGENTS.md`.
@@ -155,6 +155,8 @@ and strict TypeScript rules.
 
 - Use TypeScript and keep strict typing enabled.
 - Use kebab-case filenames and PascalCase component exports.
+- Export each component as its module's default export. Keep reusable component
+  prop types as explicit named exports.
 - Export component prop types explicitly. Prefer inferred local types and avoid
   `any`, broad assertions, and unnecessary pass-through props.
 - Import components directly through the configured alias, for example
