@@ -61,25 +61,29 @@ or intentionally skipped check explicitly.
 
 Before changing UI, styling, design tokens, typography, spacing, color, shape,
 iconography, motion, interaction feedback, design-related accessibility, page
-architecture, or element placement, read and follow both
+architecture, or element placement, read and follow
+[`design-prototype/android-home.html`](design-prototype/android-home.html),
+[`design-prototype/android-home-dark.html`](design-prototype/android-home-dark.html),
+and [`DESIGN.md`](DESIGN.md).
+
+The rendered visual designs expressed by
 [`design-prototype/android-home.html`](design-prototype/android-home.html) and
-[`DESIGN.md`](DESIGN.md).
+[`design-prototype/android-home-dark.html`](design-prototype/android-home-dark.html)
+are the sources of truth for the application's light and dark themes,
+respectively. When interpreting the prototypes, focus exclusively on their
+design intent, including color, typography, spacing, borders, shapes, sizing,
+alignment, element position, visual hierarchy, and page architecture. Their
+programming implementation and behavior, including functions, variables, event
+handling, and other logic, are not authoritative and must not be copied or
+treated as application requirements.
 
-The rendered visual design expressed by
-[`design-prototype/android-home.html`](design-prototype/android-home.html) is the
-source of truth for the application's design. When interpreting the prototype,
-focus exclusively on its design intent, including color, typography, spacing,
-borders, shapes, sizing, alignment, element position, visual hierarchy, and page
-architecture. Its programming implementation and behavior, including functions,
-variables, event handling, and other logic, are not authoritative and must not
-be copied or treated as application requirements.
-
-Only the user may modify or override the design prototype. Agents must not edit
-[`design-prototype/android-home.html`](design-prototype/android-home.html). When
-the prototype and [`DESIGN.md`](DESIGN.md) differ on a visual decision, follow
-the prototype; use `DESIGN.md` for complementary design guidance where the
-prototype is silent. Both sources take precedence over local component, hook,
-or constants guidance when design rules conflict.
+Only the user may modify or override the design prototypes. Agents must not edit
+[`design-prototype/android-home.html`](design-prototype/android-home.html) or
+[`design-prototype/android-home-dark.html`](design-prototype/android-home-dark.html).
+When a theme's prototype and [`DESIGN.md`](DESIGN.md) differ on a visual
+decision, follow that theme's prototype; use `DESIGN.md` for complementary
+design guidance where the prototypes are silent. These sources take precedence
+over local component, hook, or constants guidance when design rules conflict.
 
 ## Scoped source contexts
 
