@@ -94,6 +94,7 @@
     .location-row{min-height:70px;display:flex;align-items:center;gap:12px}
     .location-row+.location-row{border-top:1px solid var(--border)}
     .location-copy{min-width:0;flex:1}
+    .location-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}
     .location-head{display:flex;align-items:center;gap:8px;min-width:0}
     .location-kind{font-size:13px;line-height:1.4;font-weight:600}
     .location-state{font-size:11px;line-height:1.4;letter-spacing:.01em;opacity:.66}
@@ -102,9 +103,13 @@
     .real-location .status-dot{background:var(--success);opacity:1}
     .simulating .simulated-location .status-dot{background:var(--success);opacity:1}
     .loading .simulated-location .status-dot{background:var(--fg);opacity:.6;animation:pulse .6s ease-in-out infinite alternate}
-    .play{width:58px;height:58px;flex:0 0 auto;display:grid;place-items:center;border:2px solid var(--fg);border-radius:8px;background:var(--accent);color:var(--fg);transition:background .1s cubic-bezier(.2,0,0,1),color .1s cubic-bezier(.2,0,0,1)}
+    .locate-position{height:48px;min-width:64px;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 8px;border-radius:8px;background:transparent;font-size:11px;font-weight:650}
+    .locate-position:active{background:var(--muted)}
+    .locate-position svg{width:18px;height:18px;flex:0 0 auto}
+    .simulation-action{padding-top:10px;border-top:1px solid var(--border)}
+    .play{width:100%;height:56px;display:flex;align-items:center;justify-content:center;gap:10px;border:2px solid var(--fg);border-radius:8px;background:var(--accent);color:var(--fg);font-size:14px;font-weight:700;transition:background .1s cubic-bezier(.2,0,0,1),color .1s cubic-bezier(.2,0,0,1)}
     .play:active{background:var(--fg);color:var(--bg)}
-    .play svg{width:26px;height:26px;fill:currentColor}
+    .play svg{width:22px;height:22px;flex:0 0 auto;fill:currentColor}
     .play .pause-icon{display:none}
     .play .loading-icon{display:none;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
     .simulating .play .play-icon{display:none}
@@ -183,7 +188,7 @@
     .switch.on::before{background:var(--success);border-color:var(--fg)}
     .switch.on::after{transform:translateX(20px)}
     @media (min-width:600px){.app{max-width:412px;margin:auto;border-left:1px solid var(--border);border-right:1px solid var(--border)}body{background:var(--muted)}}
-    @media (max-width:380px){.top-zone{left:12px;right:12px;gap:8px}.search-trigger{padding:0 10px;font-size:14px}.control-bar{padding-left:12px;padding-right:12px}.location-meta{font-size:10px}.search-sheet-body,.search-sheet-footer,.search-sheet-head{padding-left:12px;padding-right:12px}}
+    @media (max-width:380px){.top-zone{left:12px;right:12px;gap:8px}.search-trigger{padding:0 10px;font-size:14px}.control-bar{padding-left:12px;padding-right:12px}.location-meta{font-size:10px}.locate-position{min-width:48px;padding:0}.locate-position span{display:none}.search-sheet-body,.search-sheet-footer,.search-sheet-head{padding-left:12px;padding-right:12px}}
     @media (max-height:700px){.control-bar{min-height:0}.location-row{min-height:64px}.point-search-sheet{max-height:72dvh}.search-sheet-head p{display:none}.search-step{padding:9px 0}}
     @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.loading .status-dot{opacity:1}}
   </style>
@@ -237,8 +242,9 @@
     </article>
 
     <section class="control-bar" data-od-id="simulation-controls" aria-label="Contrôle de la simulation">
-      <div class="location-row real-location" data-od-id="real-location-status"><span class="status-dot" aria-hidden="true"></span><div class="location-copy"><div class="location-head"><span class="location-kind">Position réelle</span><span class="location-state">Connectée</span></div><span class="location-meta" id="real-location-meta">45.74846 N · 4.85962 E · précision 3 m</span></div></div>
-      <div class="location-row simulated-location" data-od-id="simulated-location-status" hidden><span class="status-dot" aria-hidden="true"></span><div class="location-copy"><div class="location-head"><span class="location-kind">Position simulée</span><span class="location-state" id="simulated-state">En attente</span></div><span class="location-meta" id="simulated-location-meta"></span></div><button class="play" id="play" data-od-id="simulation-play-pause" aria-label="Démarrer la simulation" aria-pressed="false" aria-busy="false"><svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg><svg class="loading-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-4-6.9"/></svg></button></div>
+      <div class="location-row real-location" data-od-id="real-location-status"><span class="status-dot" aria-hidden="true"></span><div class="location-copy"><div class="location-head"><span class="location-kind">Position réelle</span><span class="location-state">Connectée</span></div><span class="location-meta" id="real-location-meta">45.74846 N · 4.85962 E · précision 3 m</span></div><div class="location-actions"><button class="locate-position" id="locate-real-position" data-od-id="locate-real-position" aria-label="Centrer la carte sur la position réelle" aria-controls="railway-map"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Centrer</span></button></div></div>
+      <div class="location-row simulated-location" data-od-id="simulated-location-status" hidden><span class="status-dot" aria-hidden="true"></span><div class="location-copy"><div class="location-head"><span class="location-kind">Position simulée</span><span class="location-state" id="simulated-state">En attente</span></div><span class="location-meta" id="simulated-location-meta"></span></div><div class="location-actions"><button class="locate-position" id="locate-simulated-position" data-od-id="locate-simulated-position" aria-label="Centrer la carte sur la position simulée" aria-controls="railway-map"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Centrer</span></button></div></div>
+      <div class="simulation-action" id="simulation-action" data-od-id="simulation-primary-action" hidden><button class="play" id="play" data-od-id="simulation-play-pause" aria-label="Démarrer la simulation" aria-pressed="false" aria-busy="false"><svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg><svg class="loading-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-4-6.9"/></svg><span id="play-label">Démarrer la simulation</span></button></div>
     </section>
 
     <div class="toast" id="toast" role="status">Position simulée envoyée</div>
@@ -326,9 +332,13 @@
     const selection=document.getElementById('selection');
     const controlBar=document.querySelector('[data-od-id="simulation-controls"]');
     const play=document.getElementById('play');
+    const playLabel=document.getElementById('play-label');
+    const simulationAction=document.getElementById('simulation-action');
     const simulatedState=document.getElementById('simulated-state');
     const simulatedMeta=document.getElementById('simulated-location-meta');
     const simulatedLocationRow=document.querySelector('[data-od-id="simulated-location-status"]');
+    const locateRealPosition=document.getElementById('locate-real-position');
+    const locateSimulatedPosition=document.getElementById('locate-simulated-position');
     const toast=document.getElementById('toast');
     const layers=document.getElementById('layers');
     const scrim=document.getElementById('scrim');
@@ -364,6 +374,7 @@
     let mapY=0;
     let currentPoi=null;
     let simulationTimer;
+    const realPosition={latitude:45.74846,longitude:4.85962,x:223,y:520};
 
     const formatCoordinates=point=>`${point.latitude.toFixed(5)} N · ${point.longitude.toFixed(5)} E`;
     const formatTarget=(point,frozen=false)=>`${formatCoordinates(point)} · ${point.railwayName} · section ${point.section} · ${point.milestoneCode}${frozen?' · position figée':''}`;
@@ -431,10 +442,10 @@
       event.preventDefault();milestoneKm.value=match[1];milestoneOffset.value=match[2];resolveMilestone();
     }
     function useResolvedPoint(){
-      if(!resolvedPoint)return;currentPoi={...resolvedPoint};trainMarker.setAttribute('transform',`translate(${resolvedPoint.x} ${resolvedPoint.y}) rotate(6)`);document.getElementById('selection-title').textContent=resolvedPoint.name;document.getElementById('selection-line').textContent=resolvedPoint.railwayName;document.getElementById('selection-section').textContent=String(resolvedPoint.section);document.getElementById('selection-milestone').textContent=resolvedPoint.milestoneCode;simulatedState.textContent='En attente';simulatedMeta.textContent=formatTarget(resolvedPoint);simulatedLocationRow.hidden=false;selection.hidden=false;app.classList.add('has-target');window.requestAnimationFrame(()=>selection.classList.add('visible'));closePointSearch();showToast('Point prêt pour la simulation');
+      if(!resolvedPoint)return;currentPoi={...resolvedPoint};trainMarker.setAttribute('transform',`translate(${resolvedPoint.x} ${resolvedPoint.y}) rotate(6)`);document.getElementById('selection-title').textContent=resolvedPoint.name;document.getElementById('selection-line').textContent=resolvedPoint.railwayName;document.getElementById('selection-section').textContent=String(resolvedPoint.section);document.getElementById('selection-milestone').textContent=resolvedPoint.milestoneCode;simulatedState.textContent='En attente';simulatedMeta.textContent=formatTarget(resolvedPoint);simulatedLocationRow.hidden=false;simulationAction.hidden=false;selection.hidden=false;app.classList.add('has-target');window.requestAnimationFrame(()=>selection.classList.add('visible'));closePointSearch();showToast('Point prêt pour la simulation');
     }
     function clearCurrentPoint(){
-      window.clearTimeout(simulationTimer);simulationTimer=null;currentPoi=null;selection.classList.remove('visible');selection.hidden=true;simulatedLocationRow.hidden=true;simulatedMeta.textContent='';simulatedState.textContent='En attente';app.classList.remove('has-target','simulating','loading');play.disabled=false;play.setAttribute('aria-pressed','false');play.setAttribute('aria-busy','false');play.setAttribute('aria-label','Démarrer la simulation');showToast('Point retiré');
+      window.clearTimeout(simulationTimer);simulationTimer=null;currentPoi=null;selection.classList.remove('visible');selection.hidden=true;simulatedLocationRow.hidden=true;simulationAction.hidden=true;simulatedMeta.textContent='';simulatedState.textContent='En attente';app.classList.remove('has-target','simulating','loading');play.disabled=false;playLabel.textContent='Démarrer la simulation';play.setAttribute('aria-pressed','false');play.setAttribute('aria-busy','false');play.setAttribute('aria-label','Démarrer la simulation');showToast('Point retiré');
     }
     function openPointSearch(){
       if(layers.classList.contains('open'))setLayers(false);app.classList.add('searching');pointSearchSheet.classList.add('open');pointSearchSheet.inert=false;pointSearchSheet.setAttribute('aria-hidden','false');searchTrigger.setAttribute('aria-expanded','true');window.setTimeout(()=>{if(!selectedRailway){lineSearch.focus();renderLineResults(lineSearch.value);return}if(!selectedSection){sectionList.querySelector('button')?.focus();return}milestoneKm.focus()},40);
@@ -450,6 +461,8 @@
     [milestoneKm,milestoneOffset].forEach(input=>{input.addEventListener('paste',parsePastedMilestone);input.addEventListener('input',()=>{input.value=input.value.replace(/\D/g,'');if(input===milestoneOffset)input.value=input.value.slice(0,2);resolveMilestone()})});
     pointSearchSheet.addEventListener('keydown',event=>{if(event.key==='Escape'){closePointSearch();return}trapFocus(pointSearchSheet,event)});
     document.getElementById('selection-close').addEventListener('click',clearCurrentPoint);
+    locateRealPosition.addEventListener('click',()=>{focusMapPoint(realPosition);showToast('Carte centrée sur la position réelle')});
+    locateSimulatedPosition.addEventListener('click',()=>{if(!currentPoi)return;focusMapPoint(currentPoi);showToast('Carte centrée sur la position simulée')});
 
     let dragStartY=0;
     const sheetDrag=document.getElementById('search-sheet-drag');
@@ -461,10 +474,10 @@
     function showToast(message){toast.textContent=message;toast.classList.add('show');window.setTimeout(()=>toast.classList.remove('show'),1800)}
     play.addEventListener('click',()=>{
       if(!currentPoi)return;
-      if(app.classList.contains('simulating')){app.classList.remove('simulating');play.setAttribute('aria-pressed','false');play.setAttribute('aria-label','Reprendre la simulation');simulatedState.textContent='En pause';simulatedMeta.textContent=formatTarget(currentPoi,true);return}
+      if(app.classList.contains('simulating')){app.classList.remove('simulating');playLabel.textContent='Reprendre la simulation';play.setAttribute('aria-pressed','false');play.setAttribute('aria-label','Reprendre la simulation');simulatedState.textContent='En pause';simulatedMeta.textContent=formatTarget(currentPoi,true);return}
       if(app.classList.contains('loading'))return;
-      app.classList.add('loading');play.disabled=true;play.setAttribute('aria-busy','true');simulatedState.textContent='Activation en cours';simulatedMeta.textContent='Connexion au fournisseur de positions simulées';
-      simulationTimer=window.setTimeout(()=>{simulationTimer=null;app.classList.remove('loading');app.classList.add('simulating');play.disabled=false;play.setAttribute('aria-busy','false');play.setAttribute('aria-pressed','true');play.setAttribute('aria-label','Mettre la simulation en pause');simulatedState.textContent='Active';simulatedMeta.textContent=formatTarget(currentPoi);showToast('Position simulée envoyée')},650);
+      app.classList.add('loading');play.disabled=true;playLabel.textContent='Activation en cours';play.setAttribute('aria-busy','true');simulatedState.textContent='Activation en cours';simulatedMeta.textContent='Connexion au fournisseur de positions simulées';
+      simulationTimer=window.setTimeout(()=>{simulationTimer=null;app.classList.remove('loading');app.classList.add('simulating');play.disabled=false;playLabel.textContent='Mettre en pause';play.setAttribute('aria-busy','false');play.setAttribute('aria-pressed','true');play.setAttribute('aria-label','Mettre la simulation en pause');simulatedState.textContent='Active';simulatedMeta.textContent=formatTarget(currentPoi);showToast('Position simulée envoyée')},650);
     });
 
     function setLayers(open){layers.classList.toggle('open',open);scrim.classList.toggle('open',open);layers.setAttribute('aria-hidden',String(!open));layers.inert=!open;layerButton.setAttribute('aria-expanded',String(open));if(open){layers.querySelector('.switch').focus()}else{layerButton.focus()}}
