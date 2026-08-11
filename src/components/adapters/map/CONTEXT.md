@@ -21,14 +21,18 @@ above the map.
 
 ## Base map
 
-`map-style-light.ts` is the authority for the light base-map design. It follows
-the white and warm-grey hierarchy of the design prototype, with main railway
-infrastructure as the strongest passive feature. Brand orange remains reserved
-for active routes, selections, markers, and simulation state.
+`map-style-light.ts` and `map-style-dark.ts` are the authorities for the light
+and dark base-map designs. They follow their respective design prototypes, with
+main railway infrastructure as the strongest passive feature. Brand orange
+remains reserved for active routes, selections, markers, and simulation state.
 
-The style uses the public OpenFreeMap OpenMapTiles source and glyph service. It
+The native adapter selects between these styles from the system color scheme
+and responds to appearance changes while the application is running. Light is
+the fallback when the system does not report a color scheme.
+
+The styles use the public OpenFreeMap OpenMapTiles source and glyph service. They
 must remain free to use, keyless, and correctly attributed. The public instance
-has no availability guarantee; keep the source isolated in the style module so
+has no availability guarantee; keep the source isolated in the style factory so
 the same OpenMapTiles schema can move to self-hosted infrastructure later.
 
 Keep the initial camera, gestures, ornaments, and rendering behavior at

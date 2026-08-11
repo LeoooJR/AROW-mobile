@@ -1,0 +1,230 @@
+# Safe Android CLI operations for the disposable AROW development emulator.
+# Keep destructive AVD and host SDK changes approval-gated.
+
+emulator_serials = [
+    "emulator-5554",
+    "emulator-5556",
+    "emulator-5558",
+    "emulator-5560",
+    "emulator-5562",
+    "emulator-5564",
+]
+
+emulator_device_options = [
+    "--device=emulator-5554",
+    "--device=emulator-5556",
+    "--device=emulator-5558",
+    "--device=emulator-5560",
+    "--device=emulator-5562",
+    "--device=emulator-5564",
+]
+
+prefix_rule(
+    pattern = ["android", "emulator", ["list", "start", "stop"]],
+    decision = "allow",
+    justification = "Listing, starting, and stopping disposable Android emulators is authorized by AGENTS.md.",
+    match = [
+        "android emulator list",
+        "android emulator start medium_phone",
+        "android emulator stop medium_phone",
+    ],
+    not_match = [
+        "android emulator create --name test",
+        "android emulator remove medium_phone",
+    ],
+)
+
+prefix_rule(
+    pattern = ["android", "info"],
+    decision = "allow",
+    justification = "Reading Android CLI and SDK configuration is a non-mutating emulator diagnostic.",
+    match = [
+        "android info",
+        "android info sdk",
+    ],
+)
+
+prefix_rule(
+    pattern = ["android", "layout", "--pretty", "--device", emulator_serials],
+    decision = "allow",
+    justification = "Inspecting the UI hierarchy is authorized when the target is explicitly an emulator.",
+    match = [
+        "android layout --pretty --device emulator-5554",
+        "android layout --pretty --device emulator-5556",
+    ],
+    not_match = [
+        "android layout --pretty",
+        "android layout --pretty --device R5CT123456A",
+    ],
+)
+
+prefix_rule(
+    pattern = ["android", "layout", "--pretty", emulator_device_options],
+    decision = "allow",
+    justification = "Inspecting the UI hierarchy is authorized when the target is explicitly an emulator.",
+    match = [
+        "android layout --pretty --device=emulator-5554",
+    ],
+    not_match = [
+        "android layout --pretty --device=R5CT123456A",
+    ],
+)
+
+prefix_rule(
+    pattern = ["android", "layout", "--diff", "--device", emulator_serials],
+    decision = "allow",
+    justification = "Reading UI hierarchy changes is authorized when the target is explicitly an emulator.",
+    match = [
+        "android layout --diff --device emulator-5554",
+    ],
+    not_match = [
+        "android layout --diff --device R5CT123456A",
+    ],
+)
+
+prefix_rule(
+    pattern = ["android", "layout", "--diff", emulator_device_options],
+    decision = "allow",
+    justification = "Reading UI hierarchy changes is authorized when the target is explicitly an emulator.",
+    match = [
+        "android layout --diff --device=emulator-5554",
+    ],
+    not_match = [
+        "android layout --diff --device=R5CT123456A",
+    ],
+)
+
+prefix_rule(
+    pattern = ["android", "run", "--device", emulator_serials],
+    decision = "allow",
+    justification = "Installing and launching development or test APKs is authorized on an explicit emulator target.",
+    match = [
+        "android run --device emulator-5554 --debug --apks app-debug.apk",
+    ],
+    not_match = [
+        "android run --device R5CT123456A --debug --apks app-debug.apk",
+        "android run --debug --apks app-debug.apk",
+    ],
+)
+
+prefix_rule(
+    pattern = ["android", "run", emulator_device_options],
+    decision = "allow",
+    justification = "Installing and launching development or test APKs is authorized on an explicit emulator target.",
+    match = [
+        "android run --device=emulator-5554 --debug --apks app-debug.apk",
+    ],
+    not_match = [
+        "android run --device=R5CT123456A --debug --apks app-debug.apk",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        "env",
+        [
+            "ANDROID_SERIAL=emulator-5554",
+            "ANDROID_SERIAL=emulator-5556",
+            "ANDROID_SERIAL=emulator-5558",
+            "ANDROID_SERIAL=emulator-5560",
+            "ANDROID_SERIAL=emulator-5562",
+            "ANDROID_SERIAL=emulator-5564",
+        ],
+        "android",
+        "screen",
+        "capture",
+    ],
+    decision = "allow",
+    justification = "Screenshots are authorized when ANDROID_SERIAL explicitly selects a disposable emulator.",
+    match = [
+        "env ANDROID_SERIAL=emulator-5554 android screen capture -o /private/tmp/arow-screen.png",
+        "env ANDROID_SERIAL=emulator-5556 android screen capture --annotate -o /private/tmp/arow-annotated.png",
+    ],
+    not_match = [
+        "android screen capture -o /private/tmp/arow-screen.png",
+        "env ANDROID_SERIAL=R5CT123456A android screen capture -o /private/tmp/arow-screen.png",
+    ],
+)
+
+prefix_rule(
+    pattern = ["./script/build_and_run.sh", ["--dev-client", "dev-client"]],
+    decision = "allow",
+    justification = "Starting Metro for the AROW development client is an authorized repository workflow.",
+    match = [
+        "./script/build_and_run.sh --dev-client",
+        "./script/build_and_run.sh dev-client",
+    ],
+    not_match = [
+        "./script/build_and_run.sh --android",
+        "./script/build_and_run.sh --help",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        "env",
+        [
+            "ANDROID_SERIAL=emulator-5554",
+            "ANDROID_SERIAL=emulator-5556",
+            "ANDROID_SERIAL=emulator-5558",
+            "ANDROID_SERIAL=emulator-5560",
+            "ANDROID_SERIAL=emulator-5562",
+            "ANDROID_SERIAL=emulator-5564",
+        ],
+        "./script/build_and_run.sh",
+        ["--android", "android"],
+    ],
+    decision = "allow",
+    justification = "Starting the AROW Android development client is authorized when ANDROID_SERIAL explicitly selects an emulator.",
+    match = [
+        "env ANDROID_SERIAL=emulator-5554 ./script/build_and_run.sh --android",
+        "env ANDROID_SERIAL=emulator-5556 ./script/build_and_run.sh android",
+    ],
+    not_match = [
+        "./script/build_and_run.sh --android",
+        "env ANDROID_SERIAL=R5CT123456A ./script/build_and_run.sh --android",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npx", "expo", "start", "--dev-client"],
+    decision = "allow",
+    justification = "Starting the local Expo development-client server is authorized for emulator testing.",
+    match = [
+        "npx expo start --dev-client",
+        "npx expo start --dev-client --localhost",
+    ],
+    not_match = [
+        "npx expo start --android",
+    ],
+)
+
+prefix_rule(
+    pattern = ["android", "emulator", ["create", "remove"]],
+    decision = "prompt",
+    justification = "Creating or deleting an AVD changes host emulator state and requires explicit approval.",
+    match = [
+        "android emulator create --name test",
+        "android emulator remove medium_phone",
+    ],
+)
+
+prefix_rule(
+    pattern = ["android", "sdk", ["install", "update", "remove"]],
+    decision = "prompt",
+    justification = "Installing, updating, or removing host SDK packages requires explicit approval.",
+    match = [
+        "android sdk install platforms/android-36",
+        "android sdk update",
+        "android sdk remove platforms/android-35",
+    ],
+)
+
+prefix_rule(
+    pattern = ["android", "update"],
+    decision = "prompt",
+    justification = "Updating the host Android CLI requires explicit approval.",
+    match = [
+        "android update",
+    ],
+)
