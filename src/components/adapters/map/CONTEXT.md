@@ -40,7 +40,20 @@ MapLibre's defaults unless a product requirement explicitly changes them. Keep
 generic POIs, business icons, stations, aerodromes, housenumbers, and sprites out
 of the base style so future AROW railway data remains authoritative.
 
-Do not add GeoJSON, markers, annotations, location tracking, or map event
+The map accepts an optional, explicitly typed current-location input from its
+owning screen. On the first available fix it centers at the approved local zoom,
+then leaves the camera under user control while later fixes move the marker. If
+the input becomes unavailable, it removes the marker and restores the global
+world view; a later fix starts a new focus cycle. Both real and controlled mocked
+fixes use this presentation behavior.
+
+The current-location marker follows the light and dark home prototypes: a brand
+orange halo and core, a theme-foreground outline, and a directional arrow. Its
+arrow uses the supplied travel heading, remains correct relative to map bearing,
+and falls back to north when heading is unavailable. Camera transitions respect
+the operating system's reduced-motion preference.
+
+Do not add other GeoJSON, markers, annotations, location tracking, or map event
 handling without extending this context for that feature first.
 
 ## Platforms and runtime

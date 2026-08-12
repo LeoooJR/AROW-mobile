@@ -1,7 +1,17 @@
 import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
-export default function Map(): ReactElement {
+export interface MapLocation {
+  readonly heading: number | null;
+  readonly latitude: number;
+  readonly longitude: number;
+}
+
+export interface MapProps {
+  readonly location?: MapLocation;
+}
+
+export default function Map(_props: MapProps): ReactElement {
   return (
     <View
       accessible

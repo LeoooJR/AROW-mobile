@@ -6,6 +6,10 @@ import { useRealLocation } from "@/hooks/platform/use-real-location";
 
 export default function Index() {
   const { openSettings, requestAccess, retry, state } = useRealLocation();
+  const currentLocation =
+    state.status === "connected" || state.status === "mocked"
+      ? state.position
+      : undefined;
   const onLocationAction = (() => {
     switch (state.status) {
       case "permissionRequired":
@@ -26,7 +30,7 @@ export default function Index() {
 
   return (
     <View className="flex-1 bg-surface">
-      <Map />
+      <Map location={currentLocation} />
       {process.env.EXPO_OS !== "web" ? (
         <RealLocationBar onAction={onLocationAction} state={state} />
       ) : null}

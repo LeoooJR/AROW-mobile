@@ -4,6 +4,7 @@ import { AppState, Linking } from "react-native";
 
 export interface RealLocationPosition {
   readonly accuracy: number | null;
+  readonly heading: number | null;
   readonly latitude: number;
   readonly longitude: number;
 }
@@ -38,11 +39,20 @@ const LOCATION_OPTIONS = {
   timeInterval: 5_000,
 } satisfies Location.LocationOptions;
 
+function normalizeHeading(heading: number | null): number | null {
+  if (heading === null || !Number.isFinite(heading) || heading < 0) {
+    return null;
+  }
+
+  return heading % 360;
+}
+
 function toRealLocationPosition(
   location: Location.LocationObject,
 ): RealLocationPosition {
   return {
     accuracy: location.coords.accuracy,
+    heading: normalizeHeading(location.coords.heading),
     latitude: location.coords.latitude,
     longitude: location.coords.longitude,
   };
