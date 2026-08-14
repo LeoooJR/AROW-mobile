@@ -47,6 +47,13 @@ the input becomes unavailable, it removes the marker and restores the global
 world view; a later fix starts a new focus cycle. Both real and controlled mocked
 fixes use this presentation behavior.
 
+The owning screen may send an explicit recenter request when the user invokes a
+real-position control. Each new request moves the camera to the latest supplied
+location at the approved local zoom, north-up, and zero pitch. Ordinary location
+updates must not issue these requests or resume automatic following. Product
+state decides whether an action is eligible to become a camera request; the map
+adapter only executes requests it receives while a location is available.
+
 The current-location marker follows the light and dark home prototypes: a brand
 orange halo and core, a theme-foreground outline, and a directional arrow. Its
 arrow uses the supplied travel heading, remains correct relative to map bearing,

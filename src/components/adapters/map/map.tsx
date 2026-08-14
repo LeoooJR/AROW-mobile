@@ -2,6 +2,7 @@ import {
   Camera,
   Map as MapLibreMap,
   Marker,
+  type CameraRef,
   type InitialViewState,
   type ViewStateChangeEvent,
 } from "@maplibre/maplibre-react-native";
@@ -32,6 +33,7 @@ export interface MapLocation {
 
 export interface MapProps {
   readonly location?: MapLocation;
+  readonly recenterRequest?: number;
 }
 
 interface CameraTarget {
@@ -135,10 +137,15 @@ function CurrentLocationMarker({
   );
 }
 
-export default function Map({ location }: MapProps): ReactElement {
+export default function Map({
+  location,
+  recenterRequest,
+}: MapProps): ReactElement {
   const colorScheme = useColorScheme();
   const reduceMotion = useReducedMotion();
+  const cameraRef = useRef<CameraRef>(null);
   const hadLocationRef = useRef(location !== undefined);
+  const lastRecenterRequestRef = useRef(recenterRequest);
   const [bearing, setBearing] = useState(0);
   const [cameraTarget, setCameraTarget] = useState<CameraTarget>(() =>
     location === undefined
@@ -159,6 +166,27 @@ export default function Map({ location }: MapProps): ReactElement {
 
     hadLocationRef.current = hasLocation;
   }, [location]);
+
+  useEffect(() => {
+    if (lastRecenterRequestRef.current === recenterRequest) {
+      return;
+    }
+
+    lastRecenterRequestRef.current = recenterRequest;
+
+    if (location === undefined) {
+      return;
+    }
+
+    cameraRef.current?.easeTo({
+      bearing: 0,
+      center: [location.longitude, location.latitude],
+      duration: reduceMotion ? 0 : CAMERA_TRANSITION_DURATION_MS,
+      easing: "ease",
+      pitch: 0,
+      zoom: LOCATION_ZOOM,
+    });
+  }, [location, recenterRequest, reduceMotion]);
 
   const onRegionDidChange = useCallback(
     (event: NativeSyntheticEvent<ViewStateChangeEvent>) => {
@@ -182,6 +210,7 @@ export default function Map({ location }: MapProps): ReactElement {
         easing="ease"
         initialViewState={INITIAL_VIEW_STATE}
         pitch={0}
+        ref={cameraRef}
         testID="arow-map-camera"
         zoom={cameraTarget.zoom}
       />

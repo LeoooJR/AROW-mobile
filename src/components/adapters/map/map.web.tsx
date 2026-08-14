@@ -9,6 +9,7 @@ export interface MapLocation {
 
 export interface MapProps {
   readonly location?: MapLocation;
+  readonly recenterRequest?: number;
 }
 
 export default function Map(_props: MapProps): ReactElement {
