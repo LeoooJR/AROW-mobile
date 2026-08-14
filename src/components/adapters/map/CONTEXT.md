@@ -47,6 +47,11 @@ the input becomes unavailable, it removes the marker and restores the global
 world view; a later fix starts a new focus cycle. Both real and controlled mocked
 fixes use this presentation behavior.
 
+`map-camera.tsx` owns the native camera constants, acquisition and loss
+lifecycle, explicit recenter requests, and reduced-motion transitions. Keep
+heading and map-bearing concerns in `map.tsx`, where they drive the location
+marker independently of camera movement.
+
 The owning screen may send an explicit recenter request when the user invokes a
 real-position control. Each new request moves the camera to the latest supplied
 location at the approved local zoom, north-up, and zero pitch. Ordinary location
