@@ -148,6 +148,23 @@ prefix_rule(
 )
 
 prefix_rule(
+    pattern = [adb_commands, "-s", emulator_serials, "shell", "wm", "density"],
+    decision = "allow",
+    justification = "Reading, temporarily overriding, and resetting display density is authorized on explicit emulator targets for responsive UI testing.",
+    match = [
+        "adb -s emulator-5554 shell wm density",
+        "adb -s emulator-5554 shell wm density 480",
+        "adb -s emulator-5554 shell wm density reset",
+        "/Users/leojourdain/Library/Android/sdk/platform-tools/adb -s emulator-5556 shell wm density 420",
+    ],
+    not_match = [
+        "adb shell wm density 480",
+        "adb -s R5CT123456A shell wm density 480",
+        "adb -s emulator-5554 shell wm size 1080x2400",
+    ],
+)
+
+prefix_rule(
     pattern = [adb_commands, "-s", emulator_serials, "shell", "cmd", ["uimode", "location"]],
     decision = "allow",
     justification = "Temporary theme and mock-location state is authorized on explicit emulator targets.",
@@ -155,6 +172,10 @@ prefix_rule(
         "adb -s emulator-5554 shell cmd uimode night yes",
         "adb -s emulator-5554 shell cmd uimode night auto",
         "adb -s emulator-5554 shell cmd location set-location-enabled true",
+        "adb -s emulator-5554 shell cmd location providers add-test-provider arow-test --requiresNetwork --supportsAltitude --supportsSpeed --supportsBearing",
+        "adb -s emulator-5554 shell cmd location providers set-test-provider-enabled arow-test true",
+        "adb -s emulator-5554 shell cmd location providers set-test-provider-location arow-test --location 45.74846,4.85962,150,1,1,90,0",
+        "adb -s emulator-5554 shell cmd location providers remove-test-provider arow-test",
     ],
     not_match = [
         "adb -s R5CT123456A shell cmd uimode night yes",
@@ -213,6 +234,11 @@ prefix_rule(
     match = [
         "adb -s emulator-5554 shell appops get com.leooojrrr.AROWmobile",
         "adb -s emulator-5554 shell appops set com.leooojrrr.AROWmobile android:mock_location allow",
+        "adb -s emulator-5554 shell appops set 2000 android:mock_location allow",
+        "adb -s emulator-5554 shell appops set 2000 android:mock_location deny",
+    ],
+    not_match = [
+        "adb -s R5CT123456A shell appops set 2000 android:mock_location allow",
     ],
 )
 
