@@ -48,9 +48,10 @@ world view; a later fix starts a new focus cycle. Both real and controlled mocke
 fixes use this presentation behavior.
 
 `map-camera.tsx` owns the native camera constants, acquisition and loss
-lifecycle, explicit recenter requests, and reduced-motion transitions. Keep
-heading and map-bearing concerns in `map.tsx`, where they drive the location
-marker independently of camera movement.
+lifecycle, explicit recenter requests, and reduced-motion transitions.
+`user-location-marker.tsx` owns the marker annotation, theme, artwork, heading,
+and map-bearing compensation. `map.tsx` coordinates the map container and
+forwards camera-bearing changes to the marker.
 
 The owning screen may send an explicit recenter request when the user invokes a
 real-position control. Each new request moves the camera to the latest supplied
