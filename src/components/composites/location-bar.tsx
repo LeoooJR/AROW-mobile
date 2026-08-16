@@ -10,20 +10,22 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Circle, Path } from "react-native-svg";
 
 import type {
-  RealLocationPosition,
+  LocationPosition,
+  MockedLocationState,
   RealLocationState,
 } from "@/hooks/platform/use-real-location";
 
-export interface RealLocationBarProps {
+export interface LocationBarProps {
   readonly onAction?: () => void;
   readonly onCenter?: () => void;
-  readonly state: RealLocationState;
+  readonly state: RealLocationState | MockedLocationState;
 }
 
 interface LocationPresentation {
   readonly accessibilityLabel: string;
   readonly detail: string;
   readonly dotClassName: string;
+  readonly kindLabel: string;
   readonly stateLabel: string;
 }
 
@@ -41,7 +43,7 @@ function formatCoordinate(
   return `${Math.abs(value).toFixed(5)} ${hemisphere}`;
 }
 
-function formatPosition(position: RealLocationPosition): string {
+function formatPosition(position: LocationPosition): string {
   const coordinates = [
     formatCoordinate(position.latitude, "N", "S"),
     formatCoordinate(position.longitude, "E", "O"),
@@ -54,13 +56,16 @@ function formatPosition(position: RealLocationPosition): string {
   return `${coordinates} · ${accuracy}`;
 }
 
-function getPresentation(state: RealLocationState): LocationPresentation {
+function getPresentation(
+  state: RealLocationState | MockedLocationState,
+): LocationPresentation {
   switch (state.status) {
     case "checking":
       return {
         accessibilityLabel: "Position réelle, vérification en cours",
         detail: "Accès à la position…",
         dotClassName: "bg-text-primary opacity-40",
+        kindLabel: "Position réelle",
         stateLabel: "Vérification",
       };
     case "permissionRequired":
@@ -69,6 +74,7 @@ function getPresentation(state: RealLocationState): LocationPresentation {
           "Position réelle, autorisation requise. Touchez pour activer la position.",
         detail: "Touchez pour activer la position",
         dotClassName: "bg-warning",
+        kindLabel: "Position réelle",
         stateLabel: "Autorisation requise",
       };
     case "requesting":
@@ -76,6 +82,7 @@ function getPresentation(state: RealLocationState): LocationPresentation {
         accessibilityLabel: "Position réelle, autorisation en cours",
         detail: "Validation de l’accès…",
         dotClassName: "bg-text-primary opacity-40",
+        kindLabel: "Position réelle",
         stateLabel: "Autorisation…",
       };
     case "locating":
@@ -83,6 +90,7 @@ function getPresentation(state: RealLocationState): LocationPresentation {
         accessibilityLabel: "Position réelle, recherche en cours",
         detail: "Recherche de la position…",
         dotClassName: "bg-text-primary opacity-40",
+        kindLabel: "Position réelle",
         stateLabel: "Connexion…",
       };
     case "connected": {
@@ -91,16 +99,18 @@ function getPresentation(state: RealLocationState): LocationPresentation {
         accessibilityLabel: `Position réelle, connectée. ${detail}`,
         detail,
         dotClassName: "bg-success",
+        kindLabel: "Position réelle",
         stateLabel: "Connectée",
       };
     }
     case "mocked": {
       const detail = formatPosition(state.position);
       return {
-        accessibilityLabel: `Position réelle, signal simulé. ${detail}`,
+        accessibilityLabel: `Position simulée, active. ${detail}`,
         detail,
-        dotClassName: "bg-warning",
-        stateLabel: "Signal simulé",
+        dotClassName: "bg-success",
+        kindLabel: "Position simulée",
+        stateLabel: "Active",
       };
     }
     case "servicesDisabled":
@@ -109,6 +119,7 @@ function getPresentation(state: RealLocationState): LocationPresentation {
           "Position réelle, services de localisation désactivés. Touchez pour réessayer.",
         detail: "Touchez pour réessayer",
         dotClassName: "bg-error",
+        kindLabel: "Position réelle",
         stateLabel: "Services désactivés",
       };
     case "denied":
@@ -118,6 +129,7 @@ function getPresentation(state: RealLocationState): LocationPresentation {
               "Position réelle, accès refusé. Touchez pour autoriser.",
             detail: "Touchez pour autoriser",
             dotClassName: "bg-error",
+            kindLabel: "Position réelle",
             stateLabel: "Accès refusé",
           }
         : {
@@ -125,6 +137,7 @@ function getPresentation(state: RealLocationState): LocationPresentation {
               "Position réelle, accès bloqué. Touchez pour ouvrir les réglages.",
             detail: "Touchez pour ouvrir les réglages",
             dotClassName: "bg-error",
+            kindLabel: "Position réelle",
             stateLabel: "Accès bloqué",
           };
     case "error":
@@ -133,6 +146,7 @@ function getPresentation(state: RealLocationState): LocationPresentation {
           "Position réelle indisponible. Touchez pour réessayer.",
         detail: "Touchez pour réessayer",
         dotClassName: "bg-error",
+        kindLabel: "Position réelle",
         stateLabel: "Indisponible",
       };
   }
@@ -151,7 +165,7 @@ function LocationContent({
       <View className="min-w-0 flex-1">
         <View className="flex-row flex-wrap items-baseline gap-x-2">
           <Text className="text-[13px] font-semibold leading-[18px] text-text-primary">
-            Position réelle
+            {presentation.kindLabel}
           </Text>
           <Text className="text-[11px] leading-[15px] text-text-muted">
             {presentation.stateLabel}
@@ -211,22 +225,24 @@ function LocationRow({
 }
 
 function CenterButton({
+  accessibilityLabel,
   color,
   compact,
   onPress,
 }: {
+  readonly accessibilityLabel: string;
   readonly color: string;
   readonly compact: boolean;
   readonly onPress: () => void;
 }): ReactElement {
   return (
     <Pressable
-      accessibilityLabel="Centrer la carte sur la position réelle"
+      accessibilityLabel={accessibilityLabel}
       accessibilityRole="button"
       className={`h-12 flex-row items-center justify-center gap-[5px] rounded-lg bg-transparent active:bg-surface-muted ${compact ? "min-w-12 px-0" : "min-w-16 px-2"}`}
       hitSlop={4}
       onPress={onPress}
-      testID="center-real-location"
+      testID="center-location"
     >
       <Svg height={18} viewBox="0 0 24 24" width={18}>
         <Circle
@@ -254,11 +270,11 @@ function CenterButton({
   );
 }
 
-export default function RealLocationBar({
+export default function LocationBar({
   onAction,
   onCenter,
   state,
-}: RealLocationBarProps): ReactElement {
+}: LocationBarProps): ReactElement {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const { width } = useWindowDimensions();
@@ -267,6 +283,7 @@ export default function RealLocationBar({
   const centerAction =
     canCenter && onCenter !== undefined ? (
       <CenterButton
+        accessibilityLabel={`Centrer la carte sur la position ${state.status === "mocked" ? "simulée" : "réelle"}`}
         color={
           colorScheme === "dark"
             ? CENTER_ICON_COLORS.dark

@@ -2,7 +2,7 @@ import * as Location from "expo-location";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, Linking } from "react-native";
 
-export interface RealLocationPosition {
+export interface LocationPosition {
   readonly accuracy: number | null;
   readonly heading: number | null;
   readonly latitude: number;
@@ -14,26 +14,29 @@ export type RealLocationState =
   | { readonly status: "permissionRequired" }
   | { readonly status: "requesting" }
   | {
-      readonly position?: RealLocationPosition;
+      readonly position?: LocationPosition;
       readonly status: "locating";
     }
   | {
-      readonly position: RealLocationPosition;
+      readonly position: LocationPosition;
       readonly status: "connected";
-    }
-  | {
-      readonly position: RealLocationPosition;
-      readonly status: "mocked";
     }
   | { readonly status: "servicesDisabled" }
   | { readonly canAskAgain: boolean; readonly status: "denied" }
   | { readonly status: "error" };
 
+export interface MockedLocationState {
+  readonly position: LocationPosition;
+  readonly status: "mocked";
+}
+
+export type LocationState = RealLocationState | MockedLocationState;
+
 export interface UseRealLocationResult {
   readonly openSettings: () => void;
   readonly requestAccess: () => void;
   readonly retry: () => void;
-  readonly state: RealLocationState;
+  readonly state: LocationState;
 }
 
 const LOCATION_OPTIONS = {
@@ -50,9 +53,9 @@ function normalizeHeading(heading: number | null): number | null {
   return heading % 360;
 }
 
-function toRealLocationPosition(
+function toLocationPosition(
   location: Location.LocationObject,
-): RealLocationPosition {
+): LocationPosition {
   return {
     accuracy: location.coords.accuracy,
     heading: normalizeHeading(location.coords.heading),
@@ -62,8 +65,8 @@ function toRealLocationPosition(
 }
 
 function getRetainedPosition(
-  state: RealLocationState,
-): RealLocationPosition | undefined {
+  state: LocationState,
+): LocationPosition | undefined {
   switch (state.status) {
     case "connected":
     case "mocked":
@@ -81,7 +84,7 @@ function getRetainedPosition(
 }
 
 export function useRealLocation(): UseRealLocationResult {
-  const [state, setState] = useState<RealLocationState>({
+  const [state, setState] = useState<LocationState>({
     status: "checking",
   });
   const mountedRef = useRef(false);
@@ -133,7 +136,7 @@ export function useRealLocation(): UseRealLocationResult {
           }
 
           setState({
-            position: toRealLocationPosition(location),
+            position: toLocationPosition(location),
             status: location.mocked === true ? "mocked" : "connected",
           });
         },
