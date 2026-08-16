@@ -1,6 +1,13 @@
 import { type ReactElement, type ReactNode } from "react";
-import { Pressable, Text, View } from "react-native";
+import {
+  Pressable,
+  Text,
+  useColorScheme,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Svg, { Circle, Path } from "react-native-svg";
 
 import type {
   RealLocationPosition,
@@ -9,6 +16,7 @@ import type {
 
 export interface RealLocationBarProps {
   readonly onAction?: () => void;
+  readonly onCenter?: () => void;
   readonly state: RealLocationState;
 }
 
@@ -18,6 +26,11 @@ interface LocationPresentation {
   readonly dotClassName: string;
   readonly stateLabel: string;
 }
+
+const CENTER_ICON_COLORS = {
+  dark: "#FAF9F6",
+  light: "#0A0A0A",
+} as const;
 
 function formatCoordinate(
   value: number,
@@ -156,10 +169,12 @@ function LocationContent({
 }
 
 function LocationRow({
+  action,
   accessibilityLabel,
   children,
   onAction,
 }: {
+  readonly action?: ReactNode;
   readonly accessibilityLabel: string;
   readonly children: ReactNode;
   readonly onAction?: () => void;
@@ -168,13 +183,16 @@ function LocationRow({
 
   if (onAction === undefined) {
     return (
-      <View
-        accessible
-        accessibilityLabel={accessibilityLabel}
-        accessibilityLiveRegion="polite"
-        className={className}
-      >
-        {children}
+      <View className={className}>
+        <View
+          accessible
+          accessibilityLabel={accessibilityLabel}
+          accessibilityLiveRegion="polite"
+          className="min-w-0 flex-1 flex-row items-center gap-3"
+        >
+          {children}
+        </View>
+        {action}
       </View>
     );
   }
@@ -192,12 +210,72 @@ function LocationRow({
   );
 }
 
+function CenterButton({
+  color,
+  compact,
+  onPress,
+}: {
+  readonly color: string;
+  readonly compact: boolean;
+  readonly onPress: () => void;
+}): ReactElement {
+  return (
+    <Pressable
+      accessibilityLabel="Centrer la carte sur la position réelle"
+      accessibilityRole="button"
+      className={`h-12 flex-row items-center justify-center gap-[5px] rounded-lg bg-transparent active:bg-surface-muted ${compact ? "min-w-12 px-0" : "min-w-16 px-2"}`}
+      hitSlop={4}
+      onPress={onPress}
+      testID="center-real-location"
+    >
+      <Svg height={18} viewBox="0 0 24 24" width={18}>
+        <Circle
+          cx={12}
+          cy={12}
+          fill="none"
+          r={4}
+          stroke={color}
+          strokeWidth={1.8}
+        />
+        <Path
+          d="M12 2v3m0 14v3M2 12h3m14 0h3"
+          fill="none"
+          stroke={color}
+          strokeLinecap="round"
+          strokeWidth={1.8}
+        />
+      </Svg>
+      {compact ? null : (
+        <Text className="text-[11px] font-semibold leading-[15px] text-text-primary">
+          Centrer
+        </Text>
+      )}
+    </Pressable>
+  );
+}
+
 export default function RealLocationBar({
   onAction,
+  onCenter,
   state,
 }: RealLocationBarProps): ReactElement {
   const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const { width } = useWindowDimensions();
   const presentation = getPresentation(state);
+  const canCenter = state.status === "connected" || state.status === "mocked";
+  const centerAction =
+    canCenter && onCenter !== undefined ? (
+      <CenterButton
+        color={
+          colorScheme === "dark"
+            ? CENTER_ICON_COLORS.dark
+            : CENTER_ICON_COLORS.light
+        }
+        compact={width <= 380}
+        onPress={onCenter}
+      />
+    ) : undefined;
 
   return (
     <View
@@ -205,6 +283,7 @@ export default function RealLocationBar({
       style={{ paddingBottom: Math.max(10, insets.bottom) }}
     >
       <LocationRow
+        action={centerAction}
         accessibilityLabel={presentation.accessibilityLabel}
         onAction={onAction}
       >

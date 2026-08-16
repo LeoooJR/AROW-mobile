@@ -119,6 +119,8 @@ prefix_rule(
     ],
 )
 
+# The screen command has no device option, so require ANDROID_SERIAL instead of
+# allowing target-ambiguous bare `android screen capture` invocations.
 prefix_rule(
     pattern = [
         "env",
@@ -139,6 +141,8 @@ prefix_rule(
     match = [
         "env ANDROID_SERIAL=emulator-5554 android screen capture -o /private/tmp/arow-screen.png",
         "env ANDROID_SERIAL=emulator-5556 android screen capture --annotate -o /private/tmp/arow-annotated.png",
+        "env ANDROID_SERIAL=emulator-5554 android screen capture -o /private/tmp/arow-android-recenter.png",
+        "env ANDROID_SERIAL=emulator-5554 android screen capture -o /private/tmp/arow-mocked-fast.png",
     ],
     not_match = [
         "android screen capture -o /private/tmp/arow-screen.png",

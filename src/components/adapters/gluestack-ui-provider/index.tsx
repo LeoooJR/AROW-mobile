@@ -3,13 +3,9 @@ import { ToastProvider } from "@gluestack-ui/core/toast/creator";
 import { useEffect } from "react";
 import { Appearance, type ViewProps, View } from "react-native";
 
-import type {
-  GluestackColorMode,
-  GluestackUIProviderProps as BaseGluestackUIProviderProps,
-} from "./types";
+import type { GluestackUIProviderProps as BaseGluestackUIProviderProps } from "./types";
 
-export interface GluestackUIProviderProps
-  extends BaseGluestackUIProviderProps {
+export interface GluestackUIProviderProps extends BaseGluestackUIProviderProps {
   style?: ViewProps["style"];
 }
 

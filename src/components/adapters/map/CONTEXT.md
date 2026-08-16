@@ -40,7 +40,39 @@ MapLibre's defaults unless a product requirement explicitly changes them. Keep
 generic POIs, business icons, stations, aerodromes, housenumbers, and sprites out
 of the base style so future AROW railway data remains authoritative.
 
-Do not add GeoJSON, markers, annotations, location tracking, or map event
+The map accepts an optional, explicitly typed current-location input from its
+owning screen. On the first available fix it centers at the approved local zoom,
+then leaves the camera under user control while later fixes move the marker. If
+the input becomes unavailable, it removes the marker and restores the global
+world view; a later fix starts a new focus cycle. Both real and controlled mocked
+fixes use this presentation behavior.
+
+While the location subscription is transiently reconnecting, the owning screen
+keeps the last valid fix supplied to the map. This retained fix preserves both
+the marker and the user-controlled viewport and does not start a new camera
+acquisition cycle. Initial acquisition without a fix and explicit unavailable or
+error states still remove the input and restore the world view.
+
+`map-camera.tsx` owns the native camera constants, acquisition and loss
+lifecycle, explicit recenter requests, and reduced-motion transitions.
+`user-location-marker.tsx` owns the marker annotation, theme, artwork, heading,
+and map-bearing compensation. `map.tsx` coordinates the map container and
+forwards camera-bearing changes to the marker.
+
+The owning screen may send an explicit recenter request when the user invokes a
+real-position control. Each new request moves the camera to the latest supplied
+location at the approved local zoom, north-up, and zero pitch. Ordinary location
+updates must not issue these requests or resume automatic following. Product
+state decides whether an action is eligible to become a camera request; the map
+adapter only executes requests it receives while a location is available.
+
+The current-location marker follows the light and dark home prototypes: a brand
+orange halo and core, a theme-foreground outline, and a directional arrow. Its
+arrow uses the supplied travel heading, remains correct relative to map bearing,
+and falls back to north when heading is unavailable. Camera transitions respect
+the operating system's reduced-motion preference.
+
+Do not add other GeoJSON, markers, annotations, location tracking, or map event
 handling without extending this context for that feature first.
 
 ## Platforms and runtime

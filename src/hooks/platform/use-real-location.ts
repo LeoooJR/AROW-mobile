@@ -4,6 +4,7 @@ import { AppState, Linking } from "react-native";
 
 export interface RealLocationPosition {
   readonly accuracy: number | null;
+  readonly heading: number | null;
   readonly latitude: number;
   readonly longitude: number;
 }
@@ -12,7 +13,10 @@ export type RealLocationState =
   | { readonly status: "checking" }
   | { readonly status: "permissionRequired" }
   | { readonly status: "requesting" }
-  | { readonly status: "locating" }
+  | {
+      readonly position?: RealLocationPosition;
+      readonly status: "locating";
+    }
   | {
       readonly position: RealLocationPosition;
       readonly status: "connected";
@@ -38,14 +42,42 @@ const LOCATION_OPTIONS = {
   timeInterval: 5_000,
 } satisfies Location.LocationOptions;
 
+function normalizeHeading(heading: number | null): number | null {
+  if (heading === null || !Number.isFinite(heading) || heading < 0) {
+    return null;
+  }
+
+  return heading % 360;
+}
+
 function toRealLocationPosition(
   location: Location.LocationObject,
 ): RealLocationPosition {
   return {
     accuracy: location.coords.accuracy,
+    heading: normalizeHeading(location.coords.heading),
     latitude: location.coords.latitude,
     longitude: location.coords.longitude,
   };
+}
+
+function getRetainedPosition(
+  state: RealLocationState,
+): RealLocationPosition | undefined {
+  switch (state.status) {
+    case "connected":
+    case "mocked":
+      return state.position;
+    case "locating":
+      return state.position;
+    case "checking":
+    case "permissionRequired":
+    case "requesting":
+    case "servicesDisabled":
+    case "denied":
+    case "error":
+      return undefined;
+  }
 }
 
 export function useRealLocation(): UseRealLocationResult {
@@ -85,7 +117,13 @@ export function useRealLocation(): UseRealLocationResult {
         return;
       }
 
-      setState({ status: "locating" });
+      setState((previousState) => {
+        const retainedPosition = getRetainedPosition(previousState);
+
+        return retainedPosition === undefined
+          ? { status: "locating" }
+          : { position: retainedPosition, status: "locating" };
+      });
 
       const subscription = await Location.watchPositionAsync(
         LOCATION_OPTIONS,
