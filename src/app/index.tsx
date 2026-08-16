@@ -16,7 +16,9 @@ export default function Index() {
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [recenterRequest, setRecenterRequest] = useState(0);
   const currentLocation =
-    state.status === "connected" || state.status === "mocked"
+    state.status === "connected" ||
+    state.status === "mocked" ||
+    state.status === "locating"
       ? state.position
       : undefined;
   const onLocationAction = (() => {

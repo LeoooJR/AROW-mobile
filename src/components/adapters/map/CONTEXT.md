@@ -47,6 +47,12 @@ the input becomes unavailable, it removes the marker and restores the global
 world view; a later fix starts a new focus cycle. Both real and controlled mocked
 fixes use this presentation behavior.
 
+While the location subscription is transiently reconnecting, the owning screen
+keeps the last valid fix supplied to the map. This retained fix preserves both
+the marker and the user-controlled viewport and does not start a new camera
+acquisition cycle. Initial acquisition without a fix and explicit unavailable or
+error states still remove the input and restore the world view.
+
 `map-camera.tsx` owns the native camera constants, acquisition and loss
 lifecycle, explicit recenter requests, and reduced-motion transitions.
 `user-location-marker.tsx` owns the marker annotation, theme, artwork, heading,

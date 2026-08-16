@@ -13,7 +13,10 @@ export type RealLocationState =
   | { readonly status: "checking" }
   | { readonly status: "permissionRequired" }
   | { readonly status: "requesting" }
-  | { readonly status: "locating" }
+  | {
+      readonly position?: RealLocationPosition;
+      readonly status: "locating";
+    }
   | {
       readonly position: RealLocationPosition;
       readonly status: "connected";
@@ -58,6 +61,25 @@ function toRealLocationPosition(
   };
 }
 
+function getRetainedPosition(
+  state: RealLocationState,
+): RealLocationPosition | undefined {
+  switch (state.status) {
+    case "connected":
+    case "mocked":
+      return state.position;
+    case "locating":
+      return state.position;
+    case "checking":
+    case "permissionRequired":
+    case "requesting":
+    case "servicesDisabled":
+    case "denied":
+    case "error":
+      return undefined;
+  }
+}
+
 export function useRealLocation(): UseRealLocationResult {
   const [state, setState] = useState<RealLocationState>({
     status: "checking",
@@ -95,7 +117,13 @@ export function useRealLocation(): UseRealLocationResult {
         return;
       }
 
-      setState({ status: "locating" });
+      setState((previousState) => {
+        const retainedPosition = getRetainedPosition(previousState);
+
+        return retainedPosition === undefined
+          ? { status: "locating" }
+          : { position: retainedPosition, status: "locating" };
+      });
 
       const subscription = await Location.watchPositionAsync(
         LOCATION_OPTIONS,
