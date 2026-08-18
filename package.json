@@ -73,6 +73,7 @@
     "lint": "expo lint",
     "test": "jest",
     "test:coverage": "jest --coverage",
+    "test:e2e": "maestro test .maestro",
     "test:watch": "jest --watch"
   },
   "overrides": {

@@ -1,0 +1,19 @@
+appId: com.leooojrrr.AROWmobile
+name: Home smoke
+tags:
+  - smoke
+---
+# Preserve app data, then reconnect the development client to host Metro.
+- launchApp:
+    permissions:
+      location: allow
+- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+- extendedWaitUntil:
+    visible:
+      id: "arow-map"
+    timeout: 60000
+- assertVisible:
+    id: "arow-map"
+- assertVisible:
+    id: "location-status"
+- assertVisible: "Position réelle"
