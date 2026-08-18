@@ -1,7 +1,5 @@
 executionOrder:
   continueOnFailure: false
   flowsOrder:
-    - home-smoke
-    - location-permission
-flows:
-  - "flows/*.yaml"
+    - mock-phone-location
+flows: "tests/**"

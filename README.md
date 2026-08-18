@@ -51,7 +51,7 @@ Prepare the application before running the suite:
    ./script/build_and_run.sh --android
    ```
 
-3. In another terminal, run both Maestro flows:
+3. In another terminal, run every Maestro journey:
 
    ```bash
    npm run test:e2e
@@ -64,6 +64,11 @@ maestro --device emulator-5554 test .maestro
 ```
 
 The local suite does not use Maestro Cloud or EAS Cloud.
+
+The suite uses a goal-driven user-journey structure. The current
+`mock-phone-location` journey covers opening the railway map and granting
+location permission. It will grow to cover coordinate selection and mock
+location activation as those stages are implemented.
 
 ## Get a fresh project
 

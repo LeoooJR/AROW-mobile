@@ -20,12 +20,11 @@ emulator_device_options = [
     "--device=emulator-5564",
 ]
 
-# Keep this allowlist limited to reviewed flows that do not wipe application
+# Keep this allowlist limited to reviewed journeys that do not wipe application
 # data, uninstall packages, delete files, or perform other destructive actions.
 arow_maestro_targets = [
     ".maestro",
-    ".maestro/flows/home-smoke.yaml",
-    ".maestro/flows/location-permission.yaml",
+    ".maestro/tests/mock-phone-location.yaml",
 ]
 
 prefix_rule(
@@ -49,8 +48,7 @@ prefix_rule(
     justification = "Running reviewed AROW Maestro flows is authorized when the target is explicitly an Android emulator.",
     match = [
         "maestro --device emulator-5554 test .maestro",
-        "maestro --device emulator-5556 test .maestro/flows/home-smoke.yaml",
-        "maestro --device emulator-5558 test .maestro/flows/location-permission.yaml",
+        "maestro --device emulator-5556 test .maestro/tests/mock-phone-location.yaml",
     ],
     not_match = [
         "maestro test .maestro",
@@ -70,8 +68,7 @@ prefix_rule(
     justification = "Running reviewed AROW Maestro flows is authorized when the target is explicitly an Android emulator.",
     match = [
         "maestro --device=emulator-5554 test .maestro",
-        "maestro --device=emulator-5556 test .maestro/flows/home-smoke.yaml",
-        "maestro --device=emulator-5558 test .maestro/flows/location-permission.yaml",
+        "maestro --device=emulator-5556 test .maestro/tests/mock-phone-location.yaml",
     ],
     not_match = [
         "maestro --device=R5CT123456A test .maestro",

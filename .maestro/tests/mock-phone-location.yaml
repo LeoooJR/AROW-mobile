@@ -1,11 +1,14 @@
 appId: com.leooojrrr.AROWmobile
-name: Location permission
+name: Mock phone location
 tags:
-  - permissions
+  - journey
+  - location
 ---
-# Preserve app data, reset only the permission state exercised by this flow,
-# then reconnect the development client to host Metro.
-- launchApp:
+# This goal-driven journey currently covers reaching the railway map and
+# granting location permission. Extend it as coordinate selection and mock
+# location activation become available; do not clear the development client's
+# remembered Metro connection.
+- setPermissions:
     permissions:
       location: unset
 - openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
