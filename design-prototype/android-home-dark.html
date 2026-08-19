@@ -49,10 +49,16 @@
     .map-meta{font:500 10px var(--mono);fill:var(--fg);opacity:.62}
     .station-dot{fill:var(--bg);stroke:var(--fg);stroke-width:3}
     .station-dot.active{fill:var(--fg);stroke:var(--bg);stroke-width:3}
-    .milestone{opacity:0;transition:opacity .15s cubic-bezier(.2,0,0,1)}
+    .map-feature{cursor:pointer}
+    .feature-hit{fill:transparent;stroke:none}
+    .feature-focus-ring{fill:none;stroke:var(--accent);stroke-width:3;opacity:0;pointer-events:none}
+    .map-feature:focus-visible .feature-focus-ring{opacity:1}
+    .milestone{opacity:0;pointer-events:none;transition:opacity .15s cubic-bezier(.2,0,0,1)}
     .milestone circle{fill:var(--fg)}
     .milestone rect{fill:var(--bg);stroke:var(--border)}
-    .show-milestones .milestone{opacity:1}
+    .milestone .feature-hit{fill:transparent;stroke:none}
+    .milestone .feature-focus-ring{fill:none;stroke:var(--accent)}
+    .show-milestones .milestone{opacity:1;pointer-events:auto}
     .section-highlight{fill:none;stroke:var(--accent);stroke-width:9;stroke-linecap:round;opacity:0;pointer-events:none;transition:opacity .16s cubic-bezier(.2,0,0,1)}
     .searching .section-highlight.active{opacity:1}
     .search-point-marker{opacity:0;pointer-events:none;transition:opacity .16s cubic-bezier(.2,0,0,1)}
@@ -64,7 +70,7 @@
     .has-target #train-marker{opacity:1}
     .searching #train-marker{opacity:0}
     .hide-railways .rail-bed,.hide-railways .rail,.hide-railways .rail-ties,.hide-railways .route-active{opacity:0!important}
-    .hide-stations .station-dot,.hide-stations .station-label{opacity:0}
+    .hide-stations .station-feature{opacity:0;pointer-events:none}
     .marker-halo{fill:var(--accent);opacity:.14}
     .marker-core{fill:var(--accent);stroke:var(--fg);stroke-width:2}
     .marker-arrow{fill:var(--fg)}
@@ -95,6 +101,7 @@
     .fact-label{display:block;font-size:11px;line-height:1.3;opacity:.62}
     .fact-value{display:block;margin-top:3px;font:600 12px/1.4 var(--mono)}
     .fact-line .fact-value{font-family:var(--font)}
+    .fact-coordinates{grid-column:1/-1;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
     .control-bar{position:fixed;z-index:4;left:0;right:0;bottom:0;width:100%;max-width:412px;min-height:0;margin-inline:auto;padding:0 16px max(10px,env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--border)}
     .location-row{min-height:70px;display:flex;align-items:center;gap:12px}
     .location-copy{min-width:0;flex:1}
@@ -224,14 +231,13 @@
       <use href="#mainRail" id="section-paris-1" class="section-highlight" data-section-key="paris-marseille:1"/>
       <path id="section-paris-2" class="section-highlight" data-section-key="paris-marseille:2" d="M250 620C307 650 350 716 430 720"/>
       <path id="section-lyon-1" class="section-highlight" data-section-key="lyon-geneve:1" d="M160 300C216 318 280 313 430 287"/>
-      <circle class="station-dot" cx="163" cy="300" r="7"/><circle class="station-dot active" cx="251" cy="621" r="7"/><circle class="station-dot" cx="92" cy="190" r="7"/>
-      <text class="map-label station-label" x="177" y="288">Lyon Part-Dieu</text><text class="map-meta station-label" x="177" y="305">BV · 239+00</text>
-      <text class="map-label station-label" x="267" y="608">Lyon-Jean-Macé</text><text class="map-meta station-label" x="267" y="625">HALTE · 241+00</text>
-      <text class="map-label station-label" x="24" y="207">Collonges</text><text class="map-meta station-label" x="24" y="224">238+00</text>
+      <g class="station-feature map-feature" data-od-id="map-station-lyon-part-dieu" role="button" tabindex="0" aria-label="Afficher les informations de la gare Lyon Part-Dieu" data-feature-type="Gare" data-feature-name="Lyon Part-Dieu" data-feature-line="Lyon–Genève" data-feature-section="1" data-feature-milestone="239+00" data-feature-coordinates="45.75542 N · 4.86221 E"><circle class="feature-hit" cx="163" cy="300" r="22"/><circle class="feature-focus-ring" cx="163" cy="300" r="16"/><circle class="station-dot" cx="163" cy="300" r="7"/><text class="map-label station-label" x="177" y="288">Lyon Part-Dieu</text><text class="map-meta station-label" x="177" y="305">BV · 239+00</text></g>
+      <g class="station-feature map-feature" data-od-id="map-station-lyon-jean-mace" role="button" tabindex="0" aria-label="Afficher les informations de la halte Lyon-Jean-Macé" data-feature-type="Halte" data-feature-name="Lyon-Jean-Macé" data-feature-line="Paris–Marseille" data-feature-section="1" data-feature-milestone="241+00" data-feature-coordinates="45.74491 N · 4.86234 E"><circle class="feature-hit" cx="251" cy="621" r="22"/><circle class="feature-focus-ring" cx="251" cy="621" r="16"/><circle class="station-dot active" cx="251" cy="621" r="7"/><text class="map-label station-label" x="267" y="608">Lyon-Jean-Macé</text><text class="map-meta station-label" x="267" y="625">HALTE · 241+00</text></g>
+      <g class="station-feature map-feature" data-od-id="map-station-collonges" role="button" tabindex="0" aria-label="Afficher les informations de la gare Collonges" data-feature-type="Gare" data-feature-name="Collonges" data-feature-line="Lyon–Genève" data-feature-section="1" data-feature-milestone="238+00" data-feature-coordinates="45.76016 N · 4.83872 E"><circle class="feature-hit" cx="92" cy="190" r="22"/><circle class="feature-focus-ring" cx="92" cy="190" r="16"/><circle class="station-dot" cx="92" cy="190" r="7"/><text class="map-label station-label" x="24" y="207">Collonges</text><text class="map-meta station-label" x="24" y="224">238+00</text></g>
       <text class="map-label" x="276" y="405">La Villette</text><text class="map-label" x="28" y="454">Presqu’île</text><text class="map-label" x="278" y="710">Gerland</text>
-      <g class="milestone" data-od-id="milestone-239-00"><circle cx="190" cy="384" r="4" fill="#0a0a0a"/><rect x="116" y="352" width="68" height="26" rx="6" fill="#ffffff" stroke="#e7e7e2"/><text class="map-meta" x="127" y="369">239+00</text></g>
-      <g class="milestone" data-od-id="milestone-240-00"><circle cx="223" cy="520" r="4" fill="#0a0a0a"/><rect x="145" y="488" width="68" height="26" rx="6" fill="#ffffff" stroke="#e7e7e2"/><text class="map-meta" x="156" y="505">240+00</text></g>
-      <g class="milestone" data-od-id="milestone-241-00"><circle cx="251" cy="620" r="4" fill="#0a0a0a"/><rect x="176" y="638" width="68" height="26" rx="6" fill="#ffffff" stroke="#e7e7e2"/><text class="map-meta" x="187" y="655">241+00</text></g>
+      <g class="milestone map-feature" data-od-id="milestone-239-00" role="button" tabindex="-1" aria-label="Afficher les informations du point kilométrique 239+00" data-feature-type="Point kilométrique" data-feature-name="PK 239+00" data-feature-line="Paris–Marseille" data-feature-section="1" data-feature-milestone="239+00" data-feature-coordinates="45.75218 N · 4.85618 E"><rect class="feature-hit" x="112" y="348" width="76" height="44" rx="8"/><rect class="feature-focus-ring" x="112" y="348" width="76" height="44" rx="8"/><circle cx="190" cy="384" r="4" fill="#0a0a0a"/><rect x="116" y="352" width="68" height="26" rx="6" fill="#ffffff" stroke="#e7e7e2"/><text class="map-meta" x="127" y="369">239+00</text></g>
+      <g class="milestone map-feature" data-od-id="milestone-240-00" role="button" tabindex="-1" aria-label="Afficher les informations du point kilométrique 240+00" data-feature-type="Point kilométrique" data-feature-name="PK 240+00" data-feature-line="Paris–Marseille" data-feature-section="1" data-feature-milestone="240+00" data-feature-coordinates="45.74852 N · 4.85970 E"><rect class="feature-hit" x="141" y="484" width="76" height="44" rx="8"/><rect class="feature-focus-ring" x="141" y="484" width="76" height="44" rx="8"/><circle cx="223" cy="520" r="4" fill="#0a0a0a"/><rect x="145" y="488" width="68" height="26" rx="6" fill="#ffffff" stroke="#e7e7e2"/><text class="map-meta" x="156" y="505">240+00</text></g>
+      <g class="milestone map-feature" data-od-id="milestone-241-00" role="button" tabindex="-1" aria-label="Afficher les informations du point kilométrique 241+00" data-feature-type="Point kilométrique" data-feature-name="PK 241+00" data-feature-line="Paris–Marseille" data-feature-section="1" data-feature-milestone="241+00" data-feature-coordinates="45.74491 N · 4.86234 E"><rect class="feature-hit" x="172" y="634" width="76" height="44" rx="8"/><rect class="feature-focus-ring" x="172" y="634" width="76" height="44" rx="8"/><circle cx="251" cy="620" r="4" fill="#0a0a0a"/><rect x="176" y="638" width="68" height="26" rx="6" fill="#ffffff" stroke="#e7e7e2"/><text class="map-meta" x="187" y="655">241+00</text></g>
       <g id="train-marker" transform="translate(223 535) rotate(6)"><circle class="marker-halo" r="25"/><circle class="marker-core" r="13"/><path class="marker-arrow" d="M0-7 5 6 0 3-5 6z"/></g>
       <g id="search-point-marker" class="search-point-marker" transform="translate(223 520)"><circle class="point-halo" r="25"/><circle class="point-core" r="10"/><rect class="point-label" x="-36" y="-43" width="72" height="25" rx="6"/><text id="search-point-label" class="map-meta" x="-25" y="-27">240+00</text></g>
     </svg>
@@ -245,6 +251,11 @@
     <article class="selection" id="selection" data-od-id="selected-railway-poi" hidden>
       <div class="selection-head"><div><p class="eyebrow">Point sélectionné</p><h2 id="selection-title" data-od-id="selected-poi-title">Point kilométrique</h2></div><button class="close" id="selection-close" data-od-id="close-poi-details" aria-label="Retirer le point sélectionné"><svg width="22" height="22" viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
       <div class="facts"><div class="fact fact-line"><span class="fact-label">Ligne</span><span class="fact-value" id="selection-line">Lyon–Genève</span></div><div class="fact fact-section"><span class="fact-label">Section</span><span class="fact-value" id="selection-section">1</span></div><div class="fact fact-milestone"><span class="fact-label">Repère</span><span class="fact-value" id="selection-milestone">239+00</span></div></div>
+    </article>
+
+    <article class="selection" id="map-feature-details" data-od-id="map-feature-details" aria-live="polite" hidden>
+      <div class="selection-head"><div><p class="eyebrow" id="map-feature-type">Élément cartographique</p><h2 id="map-feature-title">Repère ferroviaire</h2></div><button class="close" id="map-feature-close" data-od-id="close-map-feature-details" aria-label="Fermer les informations du repère"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+      <div class="facts"><div class="fact fact-line"><span class="fact-label">Ligne</span><span class="fact-value" id="map-feature-line"></span></div><div class="fact fact-section"><span class="fact-label">Section</span><span class="fact-value" id="map-feature-section"></span></div><div class="fact fact-milestone"><span class="fact-label">Repère</span><span class="fact-value" id="map-feature-milestone"></span></div><div class="fact fact-coordinates"><span class="fact-label">Coordonnées</span><span class="fact-value" id="map-feature-coordinates"></span></div></div>
     </article>
 
     <section class="control-bar" data-od-id="simulation-controls" aria-label="Contrôle de la simulation">
@@ -335,6 +346,13 @@
     const searchPointLabel=document.getElementById('search-point-label');
     const trainMarker=document.getElementById('train-marker');
     const selection=document.getElementById('selection');
+    const mapFeatureDetails=document.getElementById('map-feature-details');
+    const mapFeatureType=document.getElementById('map-feature-type');
+    const mapFeatureTitle=document.getElementById('map-feature-title');
+    const mapFeatureLine=document.getElementById('map-feature-line');
+    const mapFeatureSection=document.getElementById('map-feature-section');
+    const mapFeatureMilestone=document.getElementById('map-feature-milestone');
+    const mapFeatureCoordinates=document.getElementById('map-feature-coordinates');
     const controlBar=document.querySelector('[data-od-id="simulation-controls"]');
     const play=document.getElementById('play');
     const playLabel=document.getElementById('play-label');
@@ -378,6 +396,7 @@
     let mapX=0;
     let mapY=0;
     let currentPoi=null;
+    let activeMapFeature=null;
     let simulationTimer;
     const realPosition={latitude:45.74846,longitude:4.85962,x:223,y:520};
 
@@ -447,7 +466,7 @@
       event.preventDefault();milestoneKm.value=match[1];milestoneOffset.value=match[2];resolveMilestone();
     }
     function useResolvedPoint(){
-      if(!resolvedPoint)return;currentPoi={...resolvedPoint};trainMarker.setAttribute('transform',`translate(${resolvedPoint.x} ${resolvedPoint.y}) rotate(6)`);document.getElementById('selection-title').textContent=resolvedPoint.name;document.getElementById('selection-line').textContent=resolvedPoint.railwayName;document.getElementById('selection-section').textContent=String(resolvedPoint.section);document.getElementById('selection-milestone').textContent=resolvedPoint.milestoneCode;currentLocationKind.textContent='Position simulée';currentLocationState.textContent='En attente';currentLocationMeta.textContent=formatPosition(resolvedPoint);locateCurrentPosition.setAttribute('aria-label','Centrer la carte sur la position simulée');simulationAction.hidden=false;selection.hidden=false;app.classList.add('has-target');window.requestAnimationFrame(()=>selection.classList.add('visible'));closePointSearch();showToast('Point prêt pour la simulation');
+      if(!resolvedPoint)return;hideMapFeatureDetails(false);currentPoi={...resolvedPoint};trainMarker.setAttribute('transform',`translate(${resolvedPoint.x} ${resolvedPoint.y}) rotate(6)`);document.getElementById('selection-title').textContent=resolvedPoint.name;document.getElementById('selection-line').textContent=resolvedPoint.railwayName;document.getElementById('selection-section').textContent=String(resolvedPoint.section);document.getElementById('selection-milestone').textContent=resolvedPoint.milestoneCode;currentLocationKind.textContent='Position simulée';currentLocationState.textContent='En attente';currentLocationMeta.textContent=formatPosition(resolvedPoint);locateCurrentPosition.setAttribute('aria-label','Centrer la carte sur la position simulée');simulationAction.hidden=false;selection.hidden=false;app.classList.add('has-target');window.requestAnimationFrame(()=>selection.classList.add('visible'));closePointSearch();showToast('Point prêt pour la simulation');
     }
     function clearCurrentPoint(){
       window.clearTimeout(simulationTimer);simulationTimer=null;currentPoi=null;selection.classList.remove('visible');selection.hidden=true;simulationAction.hidden=true;currentLocationKind.textContent='Position réelle';currentLocationState.textContent='Connectée';currentLocationMeta.textContent=formatPosition(realPosition);locateCurrentPosition.setAttribute('aria-label','Centrer la carte sur la position réelle');app.classList.remove('has-target','simulating','loading');play.disabled=false;playLabel.textContent='Démarrer la simulation';play.setAttribute('aria-pressed','false');play.setAttribute('aria-busy','false');play.setAttribute('aria-label','Démarrer la simulation');showToast('Point retiré');
@@ -458,6 +477,14 @@
     function closePointSearch(){app.classList.remove('searching');pointSearchSheet.classList.remove('open');pointSearchSheet.inert=true;pointSearchSheet.setAttribute('aria-hidden','true');searchTrigger.setAttribute('aria-expanded','false');searchTrigger.focus()}
     function resetRailway(){selectedRailway=null;selectedSection=null;resolvedPoint=null;lineEntry.hidden=false;selectedLineCard.hidden=true;lineStepStatus.textContent='À renseigner';lineSearch.value='';clearSections();clearResolvedPoint(true);sectionStep.classList.add('disabled');sectionStep.setAttribute('aria-disabled','true');renderLineResults();lineSearch.focus();announce('Sélection de ligne réinitialisée.')}
     function trapFocus(container,event){if(event.key!=='Tab')return;const focusable=[...container.querySelectorAll('button:not(:disabled),input:not(:disabled)')].filter(element=>element.offsetParent!==null);if(!focusable.length)return;const first=focusable[0];const last=focusable[focusable.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}}
+
+    function showMapFeatureDetails(feature){
+      if(app.classList.contains('map-focus'))setMapFocusMode(false);activeMapFeature=feature;selection.classList.remove('visible');mapFeatureType.textContent=feature.dataset.featureType;mapFeatureTitle.textContent=feature.dataset.featureName;mapFeatureLine.textContent=feature.dataset.featureLine;mapFeatureSection.textContent=feature.dataset.featureSection;mapFeatureMilestone.textContent=feature.dataset.featureMilestone;mapFeatureCoordinates.textContent=feature.dataset.featureCoordinates;mapFeatureDetails.hidden=false;window.requestAnimationFrame(()=>{mapFeatureDetails.classList.add('visible');document.getElementById('map-feature-close').focus()});announce(`${feature.dataset.featureType} ${feature.dataset.featureName}. Ligne ${feature.dataset.featureLine}, section ${feature.dataset.featureSection}, repère ${feature.dataset.featureMilestone}.`);
+    }
+    function hideMapFeatureDetails(restoreSelection=true,restoreFocus=false){const feature=activeMapFeature;activeMapFeature=null;mapFeatureDetails.classList.remove('visible');mapFeatureDetails.hidden=true;if(restoreSelection&&currentPoi){selection.hidden=false;window.requestAnimationFrame(()=>selection.classList.add('visible'))}if(restoreFocus&&feature&&feature.getAttribute('tabindex')==='0')feature.focus()}
+    document.querySelectorAll('.map-feature').forEach(feature=>{feature.addEventListener('click',event=>{event.stopPropagation();showMapFeatureDetails(feature)});feature.addEventListener('keydown',event=>{if(event.key!=='Enter'&&event.key!==' ')return;event.preventDefault();event.stopPropagation();showMapFeatureDetails(feature)})});
+    document.getElementById('map-feature-close').addEventListener('click',()=>hideMapFeatureDetails(true,true));
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&mapFeatureDetails.classList.contains('visible')){event.preventDefault();hideMapFeatureDetails(true,true)}});
 
     searchTrigger.addEventListener('click',openPointSearch);pointSearchClose.addEventListener('click',closePointSearch);document.getElementById('change-line').addEventListener('click',resetRailway);usePoint.addEventListener('click',useResolvedPoint);
     lineSearch.addEventListener('keydown',event=>{if(event.key!=='ArrowDown')return;const first=lineResults.querySelector('[role="option"]');if(!first)return;event.preventDefault();first.focus()});
@@ -487,7 +514,8 @@
     function setLayers(open){layers.classList.toggle('open',open);scrim.classList.toggle('open',open);layers.setAttribute('aria-hidden',String(!open));layers.inert=!open;layerButton.setAttribute('aria-expanded',String(open));if(open){layers.querySelector('.switch').focus()}else{layerButton.focus()}}
     layerButton.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();if(pointSearchSheet.classList.contains('open'))closePointSearch();setLayers(true)});document.getElementById('layers-close').addEventListener('click',()=>setLayers(false));scrim.addEventListener('click',()=>setLayers(false));
     layers.addEventListener('keydown',event=>{if(event.key==='Escape'){setLayers(false);return}trapFocus(layers,event)});
-    document.querySelectorAll('.switch').forEach(item=>item.addEventListener('click',()=>{const on=item.classList.toggle('on');const layer=item.dataset.layer;item.setAttribute('aria-checked',String(on));item.setAttribute('aria-label',`${on?'Masquer':'Afficher'} ${layer==='railways'?'les voies ferrées':layer==='stations'?'les gares et haltes':'les points kilométriques'}`);if(layer==='milestones'){app.classList.toggle('show-milestones',on)}else{app.classList.toggle(`hide-${layer}`,!on)}}));
+    function syncFeatureInteractivity(layer,on){const selector=layer==='milestones'?'.milestone.map-feature':layer==='stations'?'.station-feature':null;if(!selector)return;document.querySelectorAll(selector).forEach(feature=>feature.setAttribute('tabindex',on?'0':'-1'));if(!on&&mapFeatureDetails.classList.contains('visible'))hideMapFeatureDetails()}
+    document.querySelectorAll('.switch').forEach(item=>item.addEventListener('click',()=>{const on=item.classList.toggle('on');const layer=item.dataset.layer;item.setAttribute('aria-checked',String(on));item.setAttribute('aria-label',`${on?'Masquer':'Afficher'} ${layer==='railways'?'les voies ferrées':layer==='stations'?'les gares et haltes':'les points kilométriques'}`);if(layer==='milestones'){app.classList.toggle('show-milestones',on)}else{app.classList.toggle(`hide-${layer}`,!on)}syncFeatureInteractivity(layer,on)}));
 
     function setMapFocusMode(enabled){
       if(enabled){if(pointSearchSheet.classList.contains('open'))closePointSearch();if(layers.classList.contains('open'))setLayers(false);toast.classList.remove('show')}
@@ -502,7 +530,7 @@
     function resetMapView(){mapScale=1;mapX=0;mapY=0;map.style.transformOrigin='center';applyMapTransform()}
     function focusMapPoint(point){mapScale=1.12;mapX=(206-point.x)*.25;mapY=(300-point.y)*.22;map.style.transformOrigin='center';applyMapTransform()}
     function startGesture(){const points=[...pointers.values()];if(points.length===1){panStart={x:points[0].x,y:points[0].y,mapX,mapY}}if(points.length===2){pinchStartDistance=distance(points[0],points[1]);pinchStartScale=mapScale;pinchStartMidpoint=midpoint(points[0],points[1]);pinchStartTranslation={x:mapX,y:mapY};const rect=map.getBoundingClientRect();map.style.transformOrigin=`${pinchStartMidpoint.x-rect.left}px ${pinchStartMidpoint.y-rect.top}px`}}
-    map.addEventListener('pointerdown',event=>{event.preventDefault();map.setPointerCapture(event.pointerId);pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});map.classList.add('gesturing');startGesture()});
+    map.addEventListener('pointerdown',event=>{if(event.target.closest?.('.map-feature'))return;event.preventDefault();map.setPointerCapture(event.pointerId);pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});map.classList.add('gesturing');startGesture()});
     map.addEventListener('pointermove',event=>{if(!pointers.has(event.pointerId))return;pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});const points=[...pointers.values()];if(points.length===2&&pinchStartDistance>0){const currentMidpoint=midpoint(points[0],points[1]);mapScale=clamp(pinchStartScale*distance(points[0],points[1])/pinchStartDistance,1,2.4);mapX=pinchStartTranslation.x+(currentMidpoint.x-pinchStartMidpoint.x);mapY=pinchStartTranslation.y+(currentMidpoint.y-pinchStartMidpoint.y);applyMapTransform();return}if(points.length===1&&mapScale>1){mapX=panStart.mapX+(points[0].x-panStart.x);mapY=panStart.mapY+(points[0].y-panStart.y);applyMapTransform()}});
     function endPointer(event){pointers.delete(event.pointerId);pinchStartDistance=0;if(pointers.size===0){map.classList.remove('gesturing')}else{startGesture()}}
     map.addEventListener('pointerup',endPointer);map.addEventListener('pointercancel',endPointer);
