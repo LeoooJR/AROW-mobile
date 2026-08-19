@@ -203,6 +203,7 @@ function LocationRow({
           accessibilityLabel={accessibilityLabel}
           accessibilityLiveRegion="polite"
           className="min-w-0 flex-1 flex-row items-center gap-3"
+          testID="location-status"
         >
           {children}
         </View>
@@ -218,6 +219,7 @@ function LocationRow({
       accessibilityRole="button"
       className={`${className} bg-canvas active:bg-surface-muted`}
       onPress={onAction}
+      testID="location-status"
     >
       {children}
     </Pressable>

@@ -1,0 +1,119 @@
+# Safe local Maestro operations for explicitly addressed Android emulators.
+# Physical-device serials, target-ambiguous tests, arbitrary flows, cloud
+# operations, and destructive setup intentionally do not match allow rules.
+
+emulator_serials = [
+    "emulator-5554",
+    "emulator-5556",
+    "emulator-5558",
+    "emulator-5560",
+    "emulator-5562",
+    "emulator-5564",
+]
+
+emulator_device_options = [
+    "--device=emulator-5554",
+    "--device=emulator-5556",
+    "--device=emulator-5558",
+    "--device=emulator-5560",
+    "--device=emulator-5562",
+    "--device=emulator-5564",
+]
+
+# Keep this allowlist limited to reviewed journeys that do not wipe application
+# data, uninstall packages, delete files, or perform other destructive actions.
+arow_maestro_targets = [
+    ".maestro",
+    ".maestro/tests/mock-phone-location.yaml",
+]
+
+prefix_rule(
+    pattern = ["maestro", "--version"],
+    decision = "allow",
+    justification = "Reading the installed Maestro version is a non-destructive local diagnostic.",
+    match = [
+        "maestro --version",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        "maestro",
+        "--device",
+        emulator_serials,
+        "test",
+        arow_maestro_targets,
+    ],
+    decision = "allow",
+    justification = "Running reviewed AROW Maestro flows is authorized when the target is explicitly an Android emulator.",
+    match = [
+        "maestro --device emulator-5554 test .maestro",
+        "maestro --device emulator-5556 test .maestro/tests/mock-phone-location.yaml",
+    ],
+    not_match = [
+        "maestro test .maestro",
+        "maestro --device R5CT123456A test .maestro",
+        "maestro --device emulator-5554 test arbitrary-flow.yaml",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        "maestro",
+        emulator_device_options,
+        "test",
+        arow_maestro_targets,
+    ],
+    decision = "allow",
+    justification = "Running reviewed AROW Maestro flows is authorized when the target is explicitly an Android emulator.",
+    match = [
+        "maestro --device=emulator-5554 test .maestro",
+        "maestro --device=emulator-5556 test .maestro/tests/mock-phone-location.yaml",
+    ],
+    not_match = [
+        "maestro --device=R5CT123456A test .maestro",
+        "maestro --device=emulator-5554 test arbitrary-flow.yaml",
+    ],
+)
+
+prefix_rule(
+    pattern = ["npm", "run", "test:e2e"],
+    decision = "prompt",
+    justification = "The npm shortcut does not identify its target device, so approval is required unless the workflow is changed to select an emulator explicitly.",
+    match = [
+        "npm run test:e2e",
+    ],
+)
+
+prefix_rule(
+    pattern = ["maestro", "test"],
+    decision = "prompt",
+    justification = "A Maestro test without an explicit approved emulator target may reach a physical device and requires approval.",
+    match = [
+        "maestro test .maestro",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        "maestro",
+        [
+            "bugreport",
+            "cloud",
+            "download-samples",
+            "login",
+            "logout",
+            "start-device",
+        ],
+    ],
+    decision = "prompt",
+    justification = "External uploads, credential changes, downloads, reports, and device creation remain approval-gated.",
+    match = [
+        "maestro bugreport",
+        "maestro cloud app.apk .maestro",
+        "maestro download-samples",
+        "maestro login",
+        "maestro logout",
+        "maestro start-device --platform android",
+    ],
+)

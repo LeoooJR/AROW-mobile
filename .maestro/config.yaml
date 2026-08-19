@@ -1,0 +1,5 @@
+executionOrder:
+  continueOnFailure: false
+  flowsOrder:
+    - mock-phone-location
+flows: "tests/**"

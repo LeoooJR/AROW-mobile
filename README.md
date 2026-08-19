@@ -25,6 +25,51 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## Local Android end-to-end tests
+
+The Maestro suite runs on the local host against the Android development
+client. Maestro must be installed separately; it is not an npm dependency.
+
+Prepare the application before running the suite:
+
+1. Start an Android emulator, for example:
+
+   ```bash
+   android emulator start medium_phone
+   ```
+
+2. Install and open the development client once if it is not already installed:
+
+   ```bash
+   npx expo run:android
+   ```
+
+   For subsequent runs, start Metro on its default port and open the installed
+   client with the repository helper:
+
+   ```bash
+   ./script/build_and_run.sh --android
+   ```
+
+3. In another terminal, run every Maestro journey:
+
+   ```bash
+   npm run test:e2e
+   ```
+
+When multiple devices are connected, address the emulator explicitly:
+
+```bash
+maestro --device emulator-5554 test .maestro
+```
+
+The local suite does not use Maestro Cloud or EAS Cloud.
+
+The suite uses a goal-driven user-journey structure. The current
+`mock-phone-location` journey covers opening the railway map and granting
+location permission. It will grow to cover coordinate selection and mock
+location activation as those stages are implemented.
+
 ## Get a fresh project
 
 When you're ready, run:

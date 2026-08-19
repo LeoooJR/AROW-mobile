@@ -57,6 +57,12 @@ or intentionally skipped check explicitly.
   intended.
 - For JavaScript or TypeScript changes, run `npm run lint` and
   `npx tsc --noEmit`, plus the narrowest relevant tests when tests exist.
+- Successful Jest or Maestro tests do not replace a live application test.
+  Agents must still launch and exercise the affected behavior on an Android
+  virtual device before reporting the work as complete.
+- When Maestro E2E testing applies, run every configured flow. After the suite
+  passes, record and present the flows that exercise the feature produced or
+  changed by the work so the user can review it. Do not record unrelated flows.
 - For dependency or Expo configuration changes, run
   `npx expo install --check` and any focused configuration diagnostic needed by
   the change.

@@ -109,6 +109,7 @@ describe("LocationBar", () => {
 
       expect(screen.getByLabelText(label)).toBeOnTheScreen();
       expect(screen.getByText(detail)).toBeOnTheScreen();
+      expect(screen.getByTestId("location-status")).toBeOnTheScreen();
       expect(screen.queryByTestId("center-location")).toBeNull();
     },
   );
