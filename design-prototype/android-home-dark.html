@@ -75,6 +75,11 @@
     @keyframes pulse{to{opacity:1}}
     .map-action{width:56px;height:56px;display:grid;place-items:center;background:var(--bg);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 12px var(--bg)}
     .map-action svg{width:22px;height:22px}
+    .focus-exit-icon{display:none}
+    .map-focus .top-zone{left:auto;width:56px}
+    .map-focus .search-trigger,.map-focus #layers-button,.map-focus .selection,.map-focus .control-bar,.map-focus .toast,.map-focus .point-search-sheet,.map-focus .layers,.map-focus .scrim{display:none!important}
+    .map-focus .focus-enter-icon{display:none}
+    .map-focus .focus-exit-icon{display:block}
     .selection{position:absolute;z-index:3;left:16px;right:16px;bottom:var(--control-bar-offset,96px);background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px 14px 12px;box-shadow:0 6px 18px var(--bg);transform:translateY(20px);opacity:0;pointer-events:none;transition:bottom .15s cubic-bezier(.2,0,0,1),transform .2s cubic-bezier(.2,0,0,1),opacity .15s cubic-bezier(.2,0,0,1)}
     .selection.visible{transform:translateY(0);opacity:1;pointer-events:auto}
     .selection-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
@@ -92,7 +97,6 @@
     .fact-line .fact-value{font-family:var(--font)}
     .control-bar{position:fixed;z-index:4;left:0;right:0;bottom:0;width:100%;max-width:412px;min-height:0;margin-inline:auto;padding:0 16px max(10px,env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--border)}
     .location-row{min-height:70px;display:flex;align-items:center;gap:12px}
-    .location-row+.location-row{border-top:1px solid var(--border)}
     .location-copy{min-width:0;flex:1}
     .location-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}
     .location-head{display:flex;align-items:center;gap:8px;min-width:0}
@@ -100,9 +104,10 @@
     .location-state{font-size:11px;line-height:1.4;letter-spacing:.01em;opacity:.66}
     .location-meta{display:block;margin-top:4px;font:11px/1.5 var(--mono);letter-spacing:.01em;opacity:.66}
     .status-dot{width:8px;height:8px;border-radius:50%;background:var(--fg);opacity:.36}
-    .real-location .status-dot{background:var(--success);opacity:1}
-    .simulating .simulated-location .status-dot{background:var(--success);opacity:1}
-    .loading .simulated-location .status-dot{background:var(--fg);opacity:.6;animation:pulse .6s ease-in-out infinite alternate}
+    .current-location .status-dot{background:var(--success);opacity:1}
+    .has-target .current-location .status-dot{background:var(--fg);opacity:.36}
+    .simulating .current-location .status-dot{background:var(--success);opacity:1}
+    .loading .current-location .status-dot{background:var(--fg);opacity:.6;animation:pulse .6s ease-in-out infinite alternate}
     .locate-position{height:48px;min-width:64px;display:flex;align-items:center;justify-content:center;gap:5px;padding:0 8px;border-radius:8px;background:transparent;font-size:11px;font-weight:650}
     .locate-position:active{background:var(--muted)}
     .locate-position svg{width:18px;height:18px;flex:0 0 auto}
@@ -118,7 +123,7 @@
     .loading .play .play-icon,.loading .play .pause-icon{display:none}
     .loading .play .loading-icon{display:block;animation:spin .6s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .toast{position:absolute;z-index:8;left:50%;bottom:var(--control-bar-offset,96px);transform:translate(-50%,12px);max-width:calc(100% - 32px);padding:10px 14px;border-radius:8px;background:var(--fg);color:var(--bg);font-size:13px;font-weight:600;line-height:1.4;letter-spacing:.01em;text-align:center;opacity:0;pointer-events:none;transition:bottom .15s cubic-bezier(.2,0,0,1),transform .2s cubic-bezier(.2,0,0,1),opacity .15s cubic-bezier(.2,0,0,1)}
+    .toast{position:absolute;z-index:8;left:50%;bottom:var(--control-bar-offset,96px);transform:translate(-50%,12px);width:max-content;max-width:calc(100% - 32px);padding:10px 14px;border-radius:8px;background:var(--fg);color:var(--bg);font-size:13px;font-weight:600;line-height:1.4;letter-spacing:.01em;text-align:center;opacity:0;pointer-events:none;transition:bottom .15s cubic-bezier(.2,0,0,1),transform .2s cubic-bezier(.2,0,0,1),opacity .15s cubic-bezier(.2,0,0,1)}
     .toast.show{opacity:1;transform:translate(-50%,0)}
     .point-search-sheet{position:absolute;z-index:7;left:0;right:0;bottom:0;max-height:58dvh;display:flex;flex-direction:column;background:var(--bg);border-radius:14px 14px 0 0;border-top:1px solid var(--border);transform:translateY(110%);transition:transform .22s cubic-bezier(.2,0,0,1)}
     .point-search-sheet.open{transform:translateY(0)}
@@ -234,6 +239,7 @@
     <section class="top-zone" data-od-id="poi-search-region" aria-label="Recherche cartographique">
       <button class="search-trigger" id="search-trigger" data-od-id="open-point-search" aria-controls="point-search-sheet" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Rechercher un point</span></button>
       <button class="map-action" id="layers-button" data-od-id="map-layers-button" aria-label="Afficher les couches de la carte" aria-controls="layers" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="m12 4 8 4-8 4-8-4 8-4Zm-8 9 8 4 8-4M4 17l8 4 8-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></button>
+      <button class="map-action" id="map-focus-button" data-od-id="map-focus-button" aria-label="Activer le mode carte seule" aria-controls="railway-map" aria-pressed="false"><svg class="focus-enter-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5m11 5h5v-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="focus-exit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 9H4V4m11 5h5V4M9 15H4v5m11-5h5v5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </section>
 
     <article class="selection" id="selection" data-od-id="selected-railway-poi" hidden>
@@ -242,8 +248,7 @@
     </article>
 
     <section class="control-bar" data-od-id="simulation-controls" aria-label="Contrôle de la simulation">
-      <div class="location-row real-location" data-od-id="real-location-status"><span class="status-dot" aria-hidden="true"></span><div class="location-copy"><div class="location-head"><span class="location-kind">Position réelle</span><span class="location-state">Connectée</span></div><span class="location-meta" id="real-location-meta">45.74846 N · 4.85962 E · précision 3 m</span></div><div class="location-actions"><button class="locate-position" id="locate-real-position" data-od-id="locate-real-position" aria-label="Centrer la carte sur la position réelle" aria-controls="railway-map"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Centrer</span></button></div></div>
-      <div class="location-row simulated-location" data-od-id="simulated-location-status" hidden><span class="status-dot" aria-hidden="true"></span><div class="location-copy"><div class="location-head"><span class="location-kind">Position simulée</span><span class="location-state" id="simulated-state">En attente</span></div><span class="location-meta" id="simulated-location-meta"></span></div><div class="location-actions"><button class="locate-position" id="locate-simulated-position" data-od-id="locate-simulated-position" aria-label="Centrer la carte sur la position simulée" aria-controls="railway-map"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Centrer</span></button></div></div>
+      <div class="location-row current-location" data-od-id="current-location-status"><span class="status-dot" aria-hidden="true"></span><div class="location-copy" aria-live="polite"><div class="location-head"><span class="location-kind" id="current-location-kind">Position réelle</span><span class="location-state" id="current-location-state">Connectée</span></div><span class="location-meta" id="current-location-meta">45.74846 N · 4.85962 E · précision 3 m</span></div><div class="location-actions"><button class="locate-position" id="locate-current-position" data-od-id="locate-current-position" aria-label="Centrer la carte sur la position réelle" aria-controls="railway-map"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Centrer</span></button></div></div>
       <div class="simulation-action" id="simulation-action" data-od-id="simulation-primary-action" hidden><button class="play" id="play" data-od-id="simulation-play-pause" aria-label="Démarrer la simulation" aria-pressed="false" aria-busy="false"><svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zm6 0h4v14h-4z"/></svg><svg class="loading-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-4-6.9"/></svg><span id="play-label">Démarrer la simulation</span></button></div>
     </section>
 
@@ -334,15 +339,15 @@
     const play=document.getElementById('play');
     const playLabel=document.getElementById('play-label');
     const simulationAction=document.getElementById('simulation-action');
-    const simulatedState=document.getElementById('simulated-state');
-    const simulatedMeta=document.getElementById('simulated-location-meta');
-    const simulatedLocationRow=document.querySelector('[data-od-id="simulated-location-status"]');
-    const locateRealPosition=document.getElementById('locate-real-position');
-    const locateSimulatedPosition=document.getElementById('locate-simulated-position');
+    const currentLocationKind=document.getElementById('current-location-kind');
+    const currentLocationState=document.getElementById('current-location-state');
+    const currentLocationMeta=document.getElementById('current-location-meta');
+    const locateCurrentPosition=document.getElementById('locate-current-position');
     const toast=document.getElementById('toast');
     const layers=document.getElementById('layers');
     const scrim=document.getElementById('scrim');
     const layerButton=document.getElementById('layers-button');
+    const mapFocusButton=document.getElementById('map-focus-button');
     const railways=[
       {id:'paris-marseille',name:'Paris–Marseille',code:'DÉMO-PM',sections:[
         {number:1,pathId:'section-paris-1',min:'239+00',max:'241+00',points:{
@@ -377,7 +382,7 @@
     const realPosition={latitude:45.74846,longitude:4.85962,x:223,y:520};
 
     const formatCoordinates=point=>`${point.latitude.toFixed(5)} N · ${point.longitude.toFixed(5)} E`;
-    const formatTarget=(point,frozen=false)=>`${formatCoordinates(point)} · ${point.railwayName} · section ${point.section} · ${point.milestoneCode}${frozen?' · position figée':''}`;
+    const formatPosition=point=>`${formatCoordinates(point)} · précision 3 m`;
     const normalize=value=>value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr');
     const markerValue=code=>{const [km,offset]=code.split('+').map(Number);return km+(offset/100)};
     const announce=message=>{searchAnnouncer.textContent='';window.setTimeout(()=>{searchAnnouncer.textContent=message},20)};
@@ -442,10 +447,10 @@
       event.preventDefault();milestoneKm.value=match[1];milestoneOffset.value=match[2];resolveMilestone();
     }
     function useResolvedPoint(){
-      if(!resolvedPoint)return;currentPoi={...resolvedPoint};trainMarker.setAttribute('transform',`translate(${resolvedPoint.x} ${resolvedPoint.y}) rotate(6)`);document.getElementById('selection-title').textContent=resolvedPoint.name;document.getElementById('selection-line').textContent=resolvedPoint.railwayName;document.getElementById('selection-section').textContent=String(resolvedPoint.section);document.getElementById('selection-milestone').textContent=resolvedPoint.milestoneCode;simulatedState.textContent='En attente';simulatedMeta.textContent=formatTarget(resolvedPoint);simulatedLocationRow.hidden=false;simulationAction.hidden=false;selection.hidden=false;app.classList.add('has-target');window.requestAnimationFrame(()=>selection.classList.add('visible'));closePointSearch();showToast('Point prêt pour la simulation');
+      if(!resolvedPoint)return;currentPoi={...resolvedPoint};trainMarker.setAttribute('transform',`translate(${resolvedPoint.x} ${resolvedPoint.y}) rotate(6)`);document.getElementById('selection-title').textContent=resolvedPoint.name;document.getElementById('selection-line').textContent=resolvedPoint.railwayName;document.getElementById('selection-section').textContent=String(resolvedPoint.section);document.getElementById('selection-milestone').textContent=resolvedPoint.milestoneCode;currentLocationKind.textContent='Position simulée';currentLocationState.textContent='En attente';currentLocationMeta.textContent=formatPosition(resolvedPoint);locateCurrentPosition.setAttribute('aria-label','Centrer la carte sur la position simulée');simulationAction.hidden=false;selection.hidden=false;app.classList.add('has-target');window.requestAnimationFrame(()=>selection.classList.add('visible'));closePointSearch();showToast('Point prêt pour la simulation');
     }
     function clearCurrentPoint(){
-      window.clearTimeout(simulationTimer);simulationTimer=null;currentPoi=null;selection.classList.remove('visible');selection.hidden=true;simulatedLocationRow.hidden=true;simulationAction.hidden=true;simulatedMeta.textContent='';simulatedState.textContent='En attente';app.classList.remove('has-target','simulating','loading');play.disabled=false;playLabel.textContent='Démarrer la simulation';play.setAttribute('aria-pressed','false');play.setAttribute('aria-busy','false');play.setAttribute('aria-label','Démarrer la simulation');showToast('Point retiré');
+      window.clearTimeout(simulationTimer);simulationTimer=null;currentPoi=null;selection.classList.remove('visible');selection.hidden=true;simulationAction.hidden=true;currentLocationKind.textContent='Position réelle';currentLocationState.textContent='Connectée';currentLocationMeta.textContent=formatPosition(realPosition);locateCurrentPosition.setAttribute('aria-label','Centrer la carte sur la position réelle');app.classList.remove('has-target','simulating','loading');play.disabled=false;playLabel.textContent='Démarrer la simulation';play.setAttribute('aria-pressed','false');play.setAttribute('aria-busy','false');play.setAttribute('aria-label','Démarrer la simulation');showToast('Point retiré');
     }
     function openPointSearch(){
       if(layers.classList.contains('open'))setLayers(false);app.classList.add('searching');pointSearchSheet.classList.add('open');pointSearchSheet.inert=false;pointSearchSheet.setAttribute('aria-hidden','false');searchTrigger.setAttribute('aria-expanded','true');window.setTimeout(()=>{if(!selectedRailway){lineSearch.focus();renderLineResults(lineSearch.value);return}if(!selectedSection){sectionList.querySelector('button')?.focus();return}milestoneKm.focus()},40);
@@ -461,8 +466,7 @@
     [milestoneKm,milestoneOffset].forEach(input=>{input.addEventListener('paste',parsePastedMilestone);input.addEventListener('input',()=>{input.value=input.value.replace(/\D/g,'');if(input===milestoneOffset)input.value=input.value.slice(0,2);resolveMilestone()})});
     pointSearchSheet.addEventListener('keydown',event=>{if(event.key==='Escape'){closePointSearch();return}trapFocus(pointSearchSheet,event)});
     document.getElementById('selection-close').addEventListener('click',clearCurrentPoint);
-    locateRealPosition.addEventListener('click',()=>{focusMapPoint(realPosition);showToast('Carte centrée sur la position réelle')});
-    locateSimulatedPosition.addEventListener('click',()=>{if(!currentPoi)return;focusMapPoint(currentPoi);showToast('Carte centrée sur la position simulée')});
+    locateCurrentPosition.addEventListener('click',()=>{const point=currentPoi||realPosition;focusMapPoint(point);showToast(`Carte centrée sur la position ${currentPoi?'simulée':'réelle'}`)});
 
     let dragStartY=0;
     const sheetDrag=document.getElementById('search-sheet-drag');
@@ -474,16 +478,23 @@
     function showToast(message){toast.textContent=message;toast.classList.add('show');window.setTimeout(()=>toast.classList.remove('show'),1800)}
     play.addEventListener('click',()=>{
       if(!currentPoi)return;
-      if(app.classList.contains('simulating')){app.classList.remove('simulating');playLabel.textContent='Reprendre la simulation';play.setAttribute('aria-pressed','false');play.setAttribute('aria-label','Reprendre la simulation');simulatedState.textContent='En pause';simulatedMeta.textContent=formatTarget(currentPoi,true);return}
+      if(app.classList.contains('simulating')){app.classList.remove('simulating');playLabel.textContent='Reprendre la simulation';play.setAttribute('aria-pressed','false');play.setAttribute('aria-label','Reprendre la simulation');currentLocationState.textContent='En pause';currentLocationMeta.textContent=formatPosition(currentPoi);return}
       if(app.classList.contains('loading'))return;
-      app.classList.add('loading');play.disabled=true;playLabel.textContent='Activation en cours';play.setAttribute('aria-busy','true');simulatedState.textContent='Activation en cours';simulatedMeta.textContent='Connexion au fournisseur de positions simulées';
-      simulationTimer=window.setTimeout(()=>{simulationTimer=null;app.classList.remove('loading');app.classList.add('simulating');play.disabled=false;playLabel.textContent='Mettre en pause';play.setAttribute('aria-busy','false');play.setAttribute('aria-pressed','true');play.setAttribute('aria-label','Mettre la simulation en pause');simulatedState.textContent='Active';simulatedMeta.textContent=formatTarget(currentPoi);showToast('Position simulée envoyée')},650);
+      app.classList.add('loading');play.disabled=true;playLabel.textContent='Activation en cours';play.setAttribute('aria-busy','true');currentLocationState.textContent='Activation en cours';currentLocationMeta.textContent=formatPosition(currentPoi);
+      simulationTimer=window.setTimeout(()=>{simulationTimer=null;app.classList.remove('loading');app.classList.add('simulating');play.disabled=false;playLabel.textContent='Mettre en pause';play.setAttribute('aria-busy','false');play.setAttribute('aria-pressed','true');play.setAttribute('aria-label','Mettre la simulation en pause');currentLocationState.textContent='Active';currentLocationMeta.textContent=formatPosition(currentPoi);showToast('Position simulée envoyée')},650);
     });
 
     function setLayers(open){layers.classList.toggle('open',open);scrim.classList.toggle('open',open);layers.setAttribute('aria-hidden',String(!open));layers.inert=!open;layerButton.setAttribute('aria-expanded',String(open));if(open){layers.querySelector('.switch').focus()}else{layerButton.focus()}}
     layerButton.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();if(pointSearchSheet.classList.contains('open'))closePointSearch();setLayers(true)});document.getElementById('layers-close').addEventListener('click',()=>setLayers(false));scrim.addEventListener('click',()=>setLayers(false));
     layers.addEventListener('keydown',event=>{if(event.key==='Escape'){setLayers(false);return}trapFocus(layers,event)});
     document.querySelectorAll('.switch').forEach(item=>item.addEventListener('click',()=>{const on=item.classList.toggle('on');const layer=item.dataset.layer;item.setAttribute('aria-checked',String(on));item.setAttribute('aria-label',`${on?'Masquer':'Afficher'} ${layer==='railways'?'les voies ferrées':layer==='stations'?'les gares et haltes':'les points kilométriques'}`);if(layer==='milestones'){app.classList.toggle('show-milestones',on)}else{app.classList.toggle(`hide-${layer}`,!on)}}));
+
+    function setMapFocusMode(enabled){
+      if(enabled){if(pointSearchSheet.classList.contains('open'))closePointSearch();if(layers.classList.contains('open'))setLayers(false);toast.classList.remove('show')}
+      app.classList.toggle('map-focus',enabled);mapFocusButton.setAttribute('aria-pressed',String(enabled));mapFocusButton.setAttribute('aria-label',enabled?'Quitter le mode carte seule':'Activer le mode carte seule');mapFocusButton.focus();
+    }
+    mapFocusButton.addEventListener('click',()=>setMapFocusMode(!app.classList.contains('map-focus')));
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'&&app.classList.contains('map-focus')){event.preventDefault();setMapFocusMode(false)}});
 
     const pointers=new Map();let pinchStartDistance=0;let pinchStartScale=1;let pinchStartMidpoint={x:0,y:0};let pinchStartTranslation={x:0,y:0};let panStart={x:0,y:0,mapX:0,mapY:0};
     const clamp=(value,min,max)=>Math.min(max,Math.max(min,value));const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);const midpoint=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
