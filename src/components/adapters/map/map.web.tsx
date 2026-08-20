@@ -1,6 +1,8 @@
 import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
+import type { RailwayLineKey, RailwayLineMetadata } from "@/types/railway-line";
+
 export interface MapLocation {
   readonly heading: number | null;
   readonly latitude: number;
@@ -9,7 +11,10 @@ export interface MapLocation {
 
 export interface MapProps {
   readonly location?: MapLocation;
+  readonly onRailwayPress?: (railway: RailwayLineMetadata) => void;
+  readonly railwayData?: string;
   readonly recenterRequest?: number;
+  readonly selectedRailway?: RailwayLineKey;
 }
 
 export default function Map(_props: MapProps): ReactElement {
