@@ -2,5 +2,4 @@ executionOrder:
   continueOnFailure: false
   flowsOrder:
     - mock-phone-location
-    - inspect-railway-line
 flows: "tests/**"
