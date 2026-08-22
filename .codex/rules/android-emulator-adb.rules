@@ -49,6 +49,30 @@ prefix_rule(
 )
 
 prefix_rule(
+    pattern = [
+        adb_commands,
+        "-s",
+        emulator_serials,
+        "shell",
+        "screenrecord",
+        "--bit-rate",
+        ["2000000", "4000000"],
+        "/sdcard/arow-e2e-recording.mp4",
+    ],
+    decision = "allow",
+    justification = "Screen recording is an authorized fallback for a reviewed AROW E2E journey when Maestro's local recorder fails.",
+    match = [
+        "adb -s emulator-5554 shell screenrecord --bit-rate 2000000 /sdcard/arow-e2e-recording.mp4",
+        "/Users/leojourdain/Library/Android/sdk/platform-tools/adb -s emulator-5556 shell screenrecord --bit-rate 4000000 /sdcard/arow-e2e-recording.mp4",
+    ],
+    not_match = [
+        "adb shell screenrecord --bit-rate 2000000 /sdcard/arow-e2e-recording.mp4",
+        "adb -s R5CT123456A shell screenrecord --bit-rate 2000000 /sdcard/arow-e2e-recording.mp4",
+        "adb -s emulator-5554 shell screenrecord --bit-rate 2000000 /sdcard/another-file.mp4",
+    ],
+)
+
+prefix_rule(
     pattern = [adb_commands, "-s", emulator_serials, ["install", "install-multiple"]],
     decision = "allow",
     justification = "Installing or reinstalling development and test APKs is authorized on explicit emulator targets.",
