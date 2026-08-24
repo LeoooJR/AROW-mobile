@@ -28,7 +28,7 @@ arow_maestro_targets = [
 ]
 
 arow_maestro_recording_outputs = [
-    "/private/tmp/arow-e2e-recording.mp4",
+    ".maestro/artifacts/arow-e2e-recording.mp4",
 ]
 
 prefix_rule(
@@ -83,12 +83,12 @@ prefix_rule(
     decision = "allow",
     justification = "Recording a reviewed AROW E2E journey locally is authorized when the target is explicitly an Android emulator and the output is a temporary review artifact.",
     match = [
-        "maestro --device emulator-5554 record --local .maestro/tests/mock-phone-location.yaml /private/tmp/arow-e2e-recording.mp4",
+        "maestro --device emulator-5554 record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4",
     ],
     not_match = [
-        "maestro record --local .maestro/tests/mock-phone-location.yaml /private/tmp/arow-e2e-recording.mp4",
-        "maestro --device R5CT123456A record --local .maestro/tests/mock-phone-location.yaml /private/tmp/arow-e2e-recording.mp4",
-        "maestro --device emulator-5554 record --local arbitrary-flow.yaml /private/tmp/arow-e2e-recording.mp4",
+        "maestro record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4",
+        "maestro --device R5CT123456A record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4",
+        "maestro --device emulator-5554 record --local arbitrary-flow.yaml .maestro/artifacts/arow-e2e-recording.mp4",
         "maestro --device emulator-5554 record --local .maestro/tests/mock-phone-location.yaml ./e2e-recording.mp4",
     ],
 )
@@ -105,10 +105,10 @@ prefix_rule(
     decision = "allow",
     justification = "Recording a reviewed AROW E2E journey locally is authorized when the target is explicitly an Android emulator and the output is a temporary review artifact.",
     match = [
-        "maestro --device=emulator-5554 record --local .maestro/tests/mock-phone-location.yaml /private/tmp/arow-e2e-recording.mp4",
+        "maestro --device=emulator-5554 record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4",
     ],
     not_match = [
-        "maestro --device=R5CT123456A record --local .maestro/tests/mock-phone-location.yaml /private/tmp/arow-e2e-recording.mp4",
+        "maestro --device=R5CT123456A record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4",
     ],
 )
 

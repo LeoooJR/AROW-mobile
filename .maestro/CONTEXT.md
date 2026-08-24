@@ -18,13 +18,15 @@ These instructions apply to the Maestro configuration and flows under
 ## Recording
 
 Record only the flows that exercise the feature being delivered. The complete
-suite must pass before recording.
+suite must pass before recording. Run these commands from the repository root,
+with `maestro` and `adb` available on `PATH`; project rules must not encode a
+coworker's home directory or local Android SDK installation path.
 
 Use Maestro's local recorder first. The output name is intentionally generic so
 it remains valid as the journey evolves:
 
 ```bash
-maestro --device emulator-5554 record --local .maestro/tests/mock-phone-location.yaml /private/tmp/arow-e2e-recording.mp4
+maestro --device emulator-5554 record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4
 ```
 
 Present the video only when the recorded flow passes. If Maestro's local
@@ -43,8 +45,9 @@ maestro --device emulator-5554 test .maestro/tests/mock-phone-location.yaml
 Then copy the fallback recording to the host for review:
 
 ```bash
-adb -s emulator-5554 pull /sdcard/arow-e2e-recording.mp4 /private/tmp/arow-e2e-recording.mp4
+adb -s emulator-5554 pull /sdcard/arow-e2e-recording.mp4 .maestro/artifacts/arow-e2e-recording.mp4
 ```
 
 Do not use ADB recording before trying Maestro's local recorder. Do not present
-a recording from a failed flow.
+a recording from a failed flow. Files under `.maestro/artifacts/` are local
+review outputs and are intentionally excluded from version control.

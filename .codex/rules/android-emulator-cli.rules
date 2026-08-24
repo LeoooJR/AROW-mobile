@@ -139,14 +139,14 @@ prefix_rule(
     decision = "allow",
     justification = "Screenshots are authorized when ANDROID_SERIAL explicitly selects a disposable emulator.",
     match = [
-        "env ANDROID_SERIAL=emulator-5554 android screen capture -o /private/tmp/arow-screen.png",
-        "env ANDROID_SERIAL=emulator-5556 android screen capture --annotate -o /private/tmp/arow-annotated.png",
-        "env ANDROID_SERIAL=emulator-5554 android screen capture -o /private/tmp/arow-android-recenter.png",
-        "env ANDROID_SERIAL=emulator-5554 android screen capture -o /private/tmp/arow-mocked-fast.png",
+        "env ANDROID_SERIAL=emulator-5554 android screen capture -o .maestro/artifacts/arow-screen.png",
+        "env ANDROID_SERIAL=emulator-5556 android screen capture --annotate -o .maestro/artifacts/arow-annotated.png",
+        "env ANDROID_SERIAL=emulator-5554 android screen capture -o .maestro/artifacts/arow-android-recenter.png",
+        "env ANDROID_SERIAL=emulator-5554 android screen capture -o .maestro/artifacts/arow-mocked-fast.png",
     ],
     not_match = [
-        "android screen capture -o /private/tmp/arow-screen.png",
-        "env ANDROID_SERIAL=R5CT123456A android screen capture -o /private/tmp/arow-screen.png",
+        "android screen capture -o .maestro/artifacts/arow-screen.png",
+        "env ANDROID_SERIAL=R5CT123456A android screen capture -o .maestro/artifacts/arow-screen.png",
     ],
 )
 
