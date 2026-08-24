@@ -3,8 +3,8 @@ import { Pressable, Text, useColorScheme, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 
-import Card from "@/components/adapters/card";
-import Divider from "@/components/adapters/divider";
+import Card from "@/components/primitives/card";
+import Divider from "@/components/primitives/divider";
 import type { RailwayLineMetadata } from "@/types/railway-line";
 
 export interface RailwayDetailsCardProps {
