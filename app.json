@@ -40,7 +40,8 @@
           "locationWhenInUsePermission": "Autorisez AROW Mobile à utiliser votre position pendant l’utilisation de l’app."
         }
       ],
-      "@maplibre/maplibre-react-native"
+      "@maplibre/maplibre-react-native",
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,
