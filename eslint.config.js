@@ -2,6 +2,7 @@
 const { defineConfig } = require("eslint/config");
 const expoConfig = require("eslint-config-expo/flat");
 const eslintPluginPrettierRecommended = require("eslint-plugin-prettier/recommended");
+const globals = require("globals");
 const testingLibrary = require("eslint-plugin-testing-library");
 
 module.exports = defineConfig([
@@ -13,6 +14,12 @@ module.exports = defineConfig([
       "**/__tests__/**/*.{js,jsx,ts,tsx}",
       "**/*.{spec,test}.{js,jsx,ts,tsx}",
     ],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+        ...globals.node,
+      },
+    },
     rules: {
       ...testingLibrary.configs["flat/react"].rules,
       // RNTL v14 fireEvent APIs are async; the React preset models them as sync.

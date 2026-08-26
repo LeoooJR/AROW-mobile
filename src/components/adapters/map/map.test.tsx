@@ -62,6 +62,18 @@ jest.mock("./milestone-layer", () => {
   };
 });
 
+jest.mock("./railway-lines-source", () => {
+  const { View: MockView } =
+    jest.requireActual<typeof import("react-native")>("react-native");
+
+  return {
+    __esModule: true,
+    default: (props: Record<string, unknown>) => (
+      <MockView {...props} testID="mock-railway-lines-source" />
+    ),
+  };
+});
+
 describe("Map", () => {
   afterEach(() => {
     jest.restoreAllMocks();
@@ -86,6 +98,7 @@ describe("Map", () => {
     );
     expect(screen.queryByTestId("mock-user-location-marker")).toBeNull();
     expect(screen.queryByTestId("mock-milestone-layer")).toBeNull();
+    expect(screen.queryByTestId("mock-railway-lines-source")).toBeNull();
   });
 
   test("uses the dark style and forwards location to camera and marker", async () => {
@@ -139,6 +152,32 @@ describe("Map", () => {
     expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
       "milestones",
       MILESTONES,
+    );
+  });
+
+  test("forwards the railway source, selection, and press callback", async () => {
+    const onRailwayPress = jest.fn();
+    const selectedRailway = { codeLigne: "340311", rangTroncon: 1 };
+
+    await render(
+      <Map
+        onRailwayPress={onRailwayPress}
+        railwayData="file:///railways.geojson"
+        selectedRailway={selectedRailway}
+      />,
+    );
+
+    expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
+      "data",
+      "file:///railways.geojson",
+    );
+    expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
+      "onRailwayPress",
+      onRailwayPress,
+    );
+    expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
+      "selectedRailway",
+      selectedRailway,
     );
   });
 });

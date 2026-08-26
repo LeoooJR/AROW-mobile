@@ -2,6 +2,7 @@ import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
 import { type MilestoneFeatureCollection } from "@/features/milestones/milestones";
+import type { RailwayLineKey, RailwayLineMetadata } from "@/types/railway-line";
 
 export interface MapLocation {
   readonly heading: number | null;
@@ -12,7 +13,10 @@ export interface MapLocation {
 export interface MapProps {
   readonly location?: MapLocation;
   readonly milestones?: MilestoneFeatureCollection;
+  readonly onRailwayPress?: (railway: RailwayLineMetadata) => void;
+  readonly railwayData?: string;
   readonly recenterRequest?: number;
+  readonly selectedRailway?: RailwayLineKey;
 }
 
 export default function Map(_props: MapProps): ReactElement {

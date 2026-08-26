@@ -41,6 +41,7 @@
         }
       ],
       "@maplibre/maplibre-react-native",
+      "expo-asset",
       "expo-sqlite"
     ],
     "experiments": {

@@ -1,13 +1,14 @@
 appId: com.leooojrrr.AROWmobile
-name: Mock phone location
+name: Inspect a railway line after granting location access
 tags:
   - journey
   - location
+  - map
+  - railway
 ---
-# This goal-driven journey currently covers reaching the railway map and
-# granting location permission. Extend it as coordinate selection and mock
-# location activation become available; do not clear the development client's
-# remembered Metro connection.
+# Preserve the development client's remembered Metro connection while following
+# the first-use journey from location permission to railway exploration.
+- stopApp
 - setPermissions:
     permissions:
       location: unset
@@ -30,3 +31,26 @@ tags:
 - assertNotVisible: "(Autorisation requise|Accès refusé)"
 - assertVisible:
     id: "location-status"
+- setLocation:
+    latitude: 49.4364444709
+    longitude: 1.121872878
+- extendedWaitUntil:
+    visible: ".*49\\.43644 N.*"
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "(Connectée|Active)"
+    timeout: 30000
+- waitForAnimationToEnd
+# This point follows the Paris–Le Havre main line north of the centered fix.
+- tapOn:
+    point: "510,1008"
+    retryTapIfNoChange: true
+- extendedWaitUntil:
+    visible: "Ligne de Paris-St-Lazare au Havre"
+    timeout: 10000
+- assertVisible: "340000"
+- assertVisible: "1"
+- assertVisible: "000\\+031 → 227\\+918"
+- tapOn:
+    id: "close-railway-details"
+- assertNotVisible: "Ligne de Paris-St-Lazare au Havre"

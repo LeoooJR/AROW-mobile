@@ -36,6 +36,8 @@ yarn-error.*
 
 # Tests
 coverage/
+.maestro/artifacts/*
+!.maestro/artifacts/.gitkeep
 
 # Local environment files
 .env*.local
