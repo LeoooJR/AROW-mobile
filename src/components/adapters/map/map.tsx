@@ -12,8 +12,10 @@ import {
 import MapCamera from "@/components/adapters/map/map-camera";
 import { DARK_MAP_STYLE } from "@/components/adapters/map/map-style-dark";
 import { LIGHT_MAP_STYLE } from "@/components/adapters/map/map-style-light";
+import MilestoneLayer from "@/components/adapters/map/milestone-layer";
 import RailwayLinesSource from "@/components/adapters/map/railway-lines-source";
 import UserLocationMarker from "@/components/adapters/map/user-location-marker";
+import { type MilestoneFeatureCollection } from "@/features/milestones/milestones";
 import type { RailwayLineKey, RailwayLineMetadata } from "@/types/railway-line";
 
 export interface MapLocation {
@@ -24,6 +26,7 @@ export interface MapLocation {
 
 export interface MapProps {
   readonly location?: MapLocation;
+  readonly milestones?: MilestoneFeatureCollection;
   readonly onRailwayPress?: (railway: RailwayLineMetadata) => void;
   readonly railwayData?: string;
   readonly recenterRequest?: number;
@@ -38,6 +41,7 @@ const styles = StyleSheet.create({
 
 export default function Map({
   location,
+  milestones,
   onRailwayPress,
   railwayData,
   recenterRequest,
@@ -68,6 +72,9 @@ export default function Map({
           onRailwayPress={onRailwayPress}
           selectedRailway={selectedRailway}
         />
+      )}
+      {milestones === undefined ? null : (
+        <MilestoneLayer milestones={milestones} />
       )}
       {location === undefined ? null : (
         <UserLocationMarker bearing={bearing} location={location} />

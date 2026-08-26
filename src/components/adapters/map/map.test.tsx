@@ -1,9 +1,16 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
+import { type MilestoneFeatureCollection } from "@/features/milestones/milestones";
+
 import { DARK_MAP_STYLE } from "./map-style-dark";
 import { LIGHT_MAP_STYLE } from "./map-style-light";
 import Map from "./map";
+
+const MILESTONES: MilestoneFeatureCollection = {
+  features: [],
+  type: "FeatureCollection",
+};
 
 jest.mock("@maplibre/maplibre-react-native", () => {
   const { View: MockView } =
@@ -43,6 +50,18 @@ jest.mock("./user-location-marker", () => {
   };
 });
 
+jest.mock("./milestone-layer", () => {
+  const { View: MockView } =
+    jest.requireActual<typeof import("react-native")>("react-native");
+
+  return {
+    __esModule: true,
+    default: (props: Record<string, unknown>) => (
+      <MockView {...props} testID="mock-milestone-layer" />
+    ),
+  };
+});
+
 jest.mock("./railway-lines-source", () => {
   const { View: MockView } =
     jest.requireActual<typeof import("react-native")>("react-native");
@@ -78,6 +97,8 @@ describe("Map", () => {
       3,
     );
     expect(screen.queryByTestId("mock-user-location-marker")).toBeNull();
+    expect(screen.queryByTestId("mock-milestone-layer")).toBeNull();
+    expect(screen.queryByTestId("mock-railway-lines-source")).toBeNull();
   });
 
   test("uses the dark style and forwards location to camera and marker", async () => {
@@ -120,6 +141,17 @@ describe("Map", () => {
     expect(screen.getByTestId("mock-user-location-marker")).toHaveProp(
       "bearing",
       37,
+    );
+  });
+
+  test("forwards milestone data to its presentation layer", async () => {
+    jest.spyOn(ReactNative, "useColorScheme").mockReturnValue("light");
+
+    await render(<Map milestones={MILESTONES} />);
+
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+      "milestones",
+      MILESTONES,
     );
   });
 

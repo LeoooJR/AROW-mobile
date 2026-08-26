@@ -5,6 +5,7 @@ import { View } from "react-native";
 import Map from "@/components/adapters/map/map";
 import LocationBar from "@/components/composites/location-bar";
 import RailwayDetailsCard from "@/components/composites/railway-details-card";
+import { useMilestones } from "@/features/milestones/use-milestones";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 import railwayLinesAsset from "@/statics/lignes-par-type.geojson";
 import type { RailwayLineMetadata } from "@/types/railway-line";
@@ -12,6 +13,7 @@ import type { RailwayLineMetadata } from "@/types/railway-line";
 export default function Index() {
   const [railwayAssets] = useAssets(railwayLinesAsset);
   const { openSettings, requestAccess, retry, state } = useRealLocation();
+  const milestoneState = useMilestones();
   const [recenterRequest, setRecenterRequest] = useState(0);
   const [selectedRailway, setSelectedRailway] = useState<
     RailwayLineMetadata | undefined
@@ -62,6 +64,11 @@ export default function Index() {
     <View className="flex-1 bg-surface">
       <Map
         location={currentLocation}
+        milestones={
+          milestoneState.status === "ready"
+            ? milestoneState.collection
+            : undefined
+        }
         onRailwayPress={setSelectedRailway}
         railwayData={railwayData}
         recenterRequest={recenterRequest}

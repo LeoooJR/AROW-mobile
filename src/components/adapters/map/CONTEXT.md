@@ -13,6 +13,12 @@ files, request device location, persist state, select routes, or own simulation
 workflows. Add future map inputs and callbacks through narrow, explicitly typed
 props when a product requirement needs them.
 
+The map accepts an optional, typed GeoJSON collection of railway milestones from
+its owning screen. It renders these points without querying SQLite or interpreting
+loading and failure states. Milestone dots appear from zoom 10 and collision-aware
+labels from zoom 13; touch handling and selection remain outside the adapter until
+explicitly added.
+
 ## Layout
 
 The map fills the complete bounds supplied by its parent. Screen routes own the
