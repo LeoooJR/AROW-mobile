@@ -27,12 +27,25 @@ arow_maestro_targets = [
     ".maestro/tests/mock-phone-location.yaml",
 ]
 
+arow_maestro_recording_outputs = [
+    ".maestro/artifacts/arow-e2e-recording.mp4",
+]
+
 prefix_rule(
     pattern = ["maestro", "--version"],
     decision = "allow",
     justification = "Reading the installed Maestro version is a non-destructive local diagnostic.",
     match = [
         "maestro --version",
+    ],
+)
+
+prefix_rule(
+    pattern = ["maestro", "record", "--help"],
+    decision = "allow",
+    justification = "Reading Maestro's local recording help is a non-destructive diagnostic.",
+    match = [
+        "maestro record --help",
     ],
 )
 
@@ -54,6 +67,48 @@ prefix_rule(
         "maestro test .maestro",
         "maestro --device R5CT123456A test .maestro",
         "maestro --device emulator-5554 test arbitrary-flow.yaml",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        "maestro",
+        "--device",
+        emulator_serials,
+        "record",
+        "--local",
+        ".maestro/tests/mock-phone-location.yaml",
+        arow_maestro_recording_outputs,
+    ],
+    decision = "allow",
+    justification = "Recording a reviewed AROW E2E journey locally is authorized when the target is explicitly an Android emulator and the output is a temporary review artifact.",
+    match = [
+        "maestro --device emulator-5554 record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4",
+    ],
+    not_match = [
+        "maestro record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4",
+        "maestro --device R5CT123456A record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4",
+        "maestro --device emulator-5554 record --local arbitrary-flow.yaml .maestro/artifacts/arow-e2e-recording.mp4",
+        "maestro --device emulator-5554 record --local .maestro/tests/mock-phone-location.yaml ./e2e-recording.mp4",
+    ],
+)
+
+prefix_rule(
+    pattern = [
+        "maestro",
+        emulator_device_options,
+        "record",
+        "--local",
+        ".maestro/tests/mock-phone-location.yaml",
+        arow_maestro_recording_outputs,
+    ],
+    decision = "allow",
+    justification = "Recording a reviewed AROW E2E journey locally is authorized when the target is explicitly an Android emulator and the output is a temporary review artifact.",
+    match = [
+        "maestro --device=emulator-5554 record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4",
+    ],
+    not_match = [
+        "maestro --device=R5CT123456A record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4",
     ],
 )
 

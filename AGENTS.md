@@ -62,7 +62,12 @@ or intentionally skipped check explicitly.
   virtual device before reporting the work as complete.
 - When Maestro E2E testing applies, run every configured flow. After the suite
   passes, record and present the flows that exercise the feature produced or
-  changed by the work so the user can review it. Do not record unrelated flows.
+  changed by the work so the user can review it. Record with Maestro's local
+  recorder first. Use ADB `screenrecord` only when the Maestro recording fails,
+  and rerun the same passing Maestro flow while the fallback recording is
+  active. Do not record unrelated flows or present a recording from a failed
+  run. Follow [`.maestro/CONTEXT.md`](.maestro/CONTEXT.md) for the commands and
+  maintenance rules.
 - For dependency or Expo configuration changes, run
   `npx expo install --check` and any focused configuration diagnostic needed by
   the change.
@@ -146,6 +151,8 @@ over local component, hook, or constants guidance when design rules conflict.
 Before creating, moving, or modifying files in these directories, read and
 follow the matching context:
 
+- [`.maestro/CONTEXT.md`](.maestro/CONTEXT.md) for Maestro journeys and
+  recordings;
 - [`src/components/CONTEXT.md`](src/components/CONTEXT.md) for components;
 - [`src/hooks/CONTEXT.md`](src/hooks/CONTEXT.md) for shared UI and platform hooks;
 - [`src/constants/CONTEXT.md`](src/constants/CONTEXT.md) for design tokens.

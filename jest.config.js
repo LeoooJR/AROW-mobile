@@ -17,6 +17,7 @@ module.exports = {
     },
   },
   moduleNameMapper: {
+    "\\.geojson$": "<rootDir>/src/test/asset-mock.ts",
     "^@/assets/(.*)$": "<rootDir>/assets/$1",
     "^@/(.*)$": "<rootDir>/src/$1",
   },
