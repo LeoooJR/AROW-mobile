@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { useSQLiteContext } from "expo-sqlite";
 import type { Feature, FeatureCollection, Point } from "geojson";
 
 export interface MilestoneProperties {
@@ -19,6 +17,7 @@ export type MilestoneFeatureCollection = FeatureCollection<
 >;
 
 export type MilestoneState =
+  | { readonly status: "unavailable" }
   | { readonly status: "loading" }
   | {
       readonly collection: MilestoneFeatureCollection;
@@ -35,11 +34,6 @@ interface MilestoneDatabaseRow {
   readonly longitude: number;
   readonly rg_troncon: number;
 }
-
-const MILESTONE_QUERY = `
-  SELECT ligne, code_ligne, km, label, rg_troncon, latitude, longitude
-  FROM kilometric_points
-`;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -121,36 +115,4 @@ export function milestoneRowsToFeatureCollection(
     }),
     type: "FeatureCollection",
   };
-}
-
-export function useMilestones(): MilestoneState {
-  const database = useSQLiteContext();
-  const [state, setState] = useState<MilestoneState>({ status: "loading" });
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadMilestones(): Promise<void> {
-      try {
-        const rows = await database.getAllAsync<unknown>(MILESTONE_QUERY);
-        const collection = milestoneRowsToFeatureCollection(rows);
-
-        if (active) {
-          setState({ collection, status: "ready" });
-        }
-      } catch {
-        if (active) {
-          setState({ status: "error" });
-        }
-      }
-    }
-
-    void loadMilestones();
-
-    return () => {
-      active = false;
-    };
-  }, [database]);
-
-  return state;
 }

@@ -1,14 +1,12 @@
 import { render, screen } from "@testing-library/react-native";
 
-import {
-  type MilestoneFeatureCollection,
-  useMilestones,
-} from "@/features/milestones/milestones";
+import { type MilestoneFeatureCollection } from "@/features/milestones/milestones";
+import { useMilestones } from "@/features/milestones/use-milestones";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 
 import Index from "@/app/index";
 
-jest.mock("@/features/milestones/milestones", () => ({
+jest.mock("@/features/milestones/use-milestones", () => ({
   useMilestones: jest.fn(),
 }));
 

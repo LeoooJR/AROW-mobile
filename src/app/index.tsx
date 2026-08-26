@@ -3,7 +3,7 @@ import { View } from "react-native";
 
 import Map from "@/components/adapters/map/map";
 import LocationBar from "@/components/composites/location-bar";
-import { useMilestones } from "@/features/milestones/milestones";
+import { useMilestones } from "@/features/milestones/use-milestones";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 
 export default function Index() {

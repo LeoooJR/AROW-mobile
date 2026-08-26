@@ -1,7 +1,8 @@
 import { renderHook, waitFor } from "@testing-library/react-native";
 import { useSQLiteContext } from "expo-sqlite";
 
-import { milestoneRowsToFeatureCollection, useMilestones } from "./milestones";
+import { milestoneRowsToFeatureCollection } from "./milestones";
+import { useMilestones } from "./use-milestones";
 
 jest.mock("expo-sqlite", () => ({
   useSQLiteContext: jest.fn(),
