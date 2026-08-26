@@ -1,6 +1,8 @@
 import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
+import { type MilestoneFeatureCollection } from "@/features/milestones/milestones";
+
 export interface MapLocation {
   readonly heading: number | null;
   readonly latitude: number;
@@ -9,6 +11,7 @@ export interface MapLocation {
 
 export interface MapProps {
   readonly location?: MapLocation;
+  readonly milestones?: MilestoneFeatureCollection;
   readonly recenterRequest?: number;
 }
 

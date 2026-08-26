@@ -3,10 +3,12 @@ import { View } from "react-native";
 
 import Map from "@/components/adapters/map/map";
 import LocationBar from "@/components/composites/location-bar";
+import { useMilestones } from "@/features/milestones/milestones";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 
 export default function Index() {
   const { openSettings, requestAccess, retry, state } = useRealLocation();
+  const milestoneState = useMilestones();
   const [recenterRequest, setRecenterRequest] = useState(0);
   const currentLocation =
     state.status === "connected" ||
@@ -51,7 +53,15 @@ export default function Index() {
 
   return (
     <View className="flex-1 bg-surface">
-      <Map location={currentLocation} recenterRequest={recenterRequest} />
+      <Map
+        location={currentLocation}
+        milestones={
+          milestoneState.status === "ready"
+            ? milestoneState.collection
+            : undefined
+        }
+        recenterRequest={recenterRequest}
+      />
       {process.env.EXPO_OS !== "web" ? (
         <LocationBar
           onAction={onLocationAction}

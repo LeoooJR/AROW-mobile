@@ -12,7 +12,9 @@ import {
 import MapCamera from "@/components/adapters/map/map-camera";
 import { DARK_MAP_STYLE } from "@/components/adapters/map/map-style-dark";
 import { LIGHT_MAP_STYLE } from "@/components/adapters/map/map-style-light";
+import MilestoneLayer from "@/components/adapters/map/milestone-layer";
 import UserLocationMarker from "@/components/adapters/map/user-location-marker";
+import { type MilestoneFeatureCollection } from "@/features/milestones/milestones";
 
 export interface MapLocation {
   readonly heading: number | null;
@@ -22,6 +24,7 @@ export interface MapLocation {
 
 export interface MapProps {
   readonly location?: MapLocation;
+  readonly milestones?: MilestoneFeatureCollection;
   readonly recenterRequest?: number;
 }
 
@@ -33,6 +36,7 @@ const styles = StyleSheet.create({
 
 export default function Map({
   location,
+  milestones,
   recenterRequest,
 }: MapProps): ReactElement {
   const colorScheme = useColorScheme();
@@ -54,6 +58,9 @@ export default function Map({
       testID="arow-map"
     >
       <MapCamera location={location} recenterRequest={recenterRequest} />
+      {milestones === undefined ? null : (
+        <MilestoneLayer milestones={milestones} />
+      )}
       {location === undefined ? null : (
         <UserLocationMarker bearing={bearing} location={location} />
       )}
