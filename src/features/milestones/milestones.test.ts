@@ -70,7 +70,7 @@ describe("milestoneRowsToFeatureCollection", () => {
     ["an invalid longitude", { ...VALID_ROW, longitude: -181 }],
   ])("rejects %s", (_description, row) => {
     expect(() => milestoneRowsToFeatureCollection([row])).toThrow(
-      "Invalid kilometric point at row 0",
+      "Invalid milestone at row 0",
     );
   });
 });

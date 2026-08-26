@@ -26,7 +26,7 @@ export type MilestoneState =
     }
   | { readonly status: "error" };
 
-interface KilometricPointRow {
+interface MilestoneDatabaseRow {
   readonly code_ligne: number;
   readonly km: number;
   readonly label: string;
@@ -66,10 +66,10 @@ function isCoordinate(
   );
 }
 
-function parseKilometricPointRow(
+function parseMilestoneDatabaseRow(
   value: unknown,
   index: number,
-): KilometricPointRow {
+): MilestoneDatabaseRow {
   if (
     !isRecord(value) ||
     !isNonEmptyString(value.ligne) ||
@@ -80,7 +80,7 @@ function parseKilometricPointRow(
     !isCoordinate(value.latitude, -90, 90) ||
     !isCoordinate(value.longitude, -180, 180)
   ) {
-    throw new Error(`Invalid kilometric point at row ${index}`);
+    throw new Error(`Invalid milestone at row ${index}`);
   }
 
   return {
@@ -99,7 +99,7 @@ export function milestoneRowsToFeatureCollection(
 ): MilestoneFeatureCollection {
   return {
     features: rows.map((value, index) => {
-      const row = parseKilometricPointRow(value, index);
+      const row = parseMilestoneDatabaseRow(value, index);
 
       return {
         geometry: {
