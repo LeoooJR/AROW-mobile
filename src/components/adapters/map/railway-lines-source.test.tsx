@@ -73,7 +73,7 @@ describe("RailwayLinesSource", () => {
     await render(
       <RailwayLinesSource
         data="file:///railways.geojson"
-        selectedRailway={{ codeLigne: "340311", rangTroncon: 1 }}
+        selectedSection={{ lineCode: "340311", sectionRank: 1 }}
       />,
     );
 
@@ -88,12 +88,12 @@ describe("RailwayLinesSource", () => {
   });
 
   test("emits validated railway metadata and stops press propagation", async () => {
-    const onRailwayPress = jest.fn();
+    const onFeaturePress = jest.fn();
     const stopPropagation = jest.fn();
     await render(
       <RailwayLinesSource
         data="file:///railways.geojson"
-        onRailwayPress={onRailwayPress}
+        onFeaturePress={onFeaturePress}
       />,
     );
 
@@ -103,24 +103,25 @@ describe("RailwayLinesSource", () => {
     });
 
     expect(stopPropagation).toHaveBeenCalledTimes(1);
-    expect(onRailwayPress).toHaveBeenCalledWith({
-      codeLigne: "340311",
+    expect(onFeaturePress).toHaveBeenCalledWith({
+      endMilestone: "137+980",
       gaiaId: "4718490e-6665-11e3-afff-01f464e0362d",
+      kind: "railway",
+      lineCode: "340311",
       name: "Raccordement de Rouen-Martainville",
-      pkDebut: "136+772",
-      pkFin: "137+980",
-      rangTroncon: 1,
-      type: "Raccordement",
+      railwayType: "Raccordement",
+      sectionRank: 1,
+      startMilestone: "136+772",
     });
   });
 
   test("ignores malformed or incorrectly identified features", async () => {
-    const onRailwayPress = jest.fn();
+    const onFeaturePress = jest.fn();
     const stopPropagation = jest.fn();
     await render(
       <RailwayLinesSource
         data="file:///railways.geojson"
-        onRailwayPress={onRailwayPress}
+        onFeaturePress={onFeaturePress}
       />,
     );
 
@@ -132,6 +133,6 @@ describe("RailwayLinesSource", () => {
     });
 
     expect(stopPropagation).not.toHaveBeenCalled();
-    expect(onRailwayPress).not.toHaveBeenCalled();
+    expect(onFeaturePress).not.toHaveBeenCalled();
   });
 });

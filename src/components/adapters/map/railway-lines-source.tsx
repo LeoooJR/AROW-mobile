@@ -8,15 +8,17 @@ import { type ReactElement } from "react";
 import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 
 import {
-  railwayLineId,
-  type RailwayLineKey,
-  type RailwayLineMetadata,
-} from "@/types/railway-line";
+  canonicalRailwayLineCode,
+  railwaySectionId,
+  type MapFeature,
+  type RailwayFeature,
+  type RailwaySectionKey,
+} from "@/types/map-feature";
 
 export interface RailwayLinesSourceProps {
   readonly data: string;
-  readonly onRailwayPress?: (railway: RailwayLineMetadata) => void;
-  readonly selectedRailway?: RailwayLineKey;
+  readonly onFeaturePress?: (feature: MapFeature) => void;
+  readonly selectedSection?: RailwaySectionKey;
 }
 
 interface RailwayLineProperties {
@@ -75,19 +77,21 @@ function isRailwayLineProperties(
 
   return (
     typeof properties.code_ligne === "string" &&
+    /^\d{6}$/.test(properties.code_ligne) &&
     typeof properties.idgaia === "string" &&
     typeof properties.lib_ligne === "string" &&
     typeof properties.pkd === "string" &&
     typeof properties.pkf === "string" &&
     typeof properties.rg_troncon === "number" &&
     Number.isInteger(properties.rg_troncon) &&
+    properties.rg_troncon > 0 &&
     typeof properties.type_ligne === "string"
   );
 }
 
-function metadataFromFeature(
+function railwayFromFeature(
   feature: GeoJSON.Feature,
-): RailwayLineMetadata | undefined {
+): RailwayFeature | undefined {
   if (
     feature.geometry.type !== "LineString" &&
     feature.geometry.type !== "MultiLineString"
@@ -99,23 +103,24 @@ function metadataFromFeature(
     return undefined;
   }
 
-  const metadata: RailwayLineMetadata = {
-    codeLigne: feature.properties.code_ligne,
+  const railway: RailwayFeature = {
+    endMilestone: feature.properties.pkf,
     gaiaId: feature.properties.idgaia,
+    kind: "railway",
+    lineCode: canonicalRailwayLineCode(feature.properties.code_ligne),
     name: feature.properties.lib_ligne,
-    pkDebut: feature.properties.pkd,
-    pkFin: feature.properties.pkf,
-    rangTroncon: feature.properties.rg_troncon,
-    type: feature.properties.type_ligne,
+    railwayType: feature.properties.type_ligne,
+    sectionRank: feature.properties.rg_troncon,
+    startMilestone: feature.properties.pkd,
   };
 
-  return feature.id === railwayLineId(metadata) ? metadata : undefined;
+  return feature.id === railwaySectionId(railway) ? railway : undefined;
 }
 
 export default function RailwayLinesSource({
   data,
-  onRailwayPress,
-  selectedRailway,
+  onFeaturePress,
+  selectedSection,
 }: RailwayLinesSourceProps): ReactElement {
   const colorScheme = useColorScheme();
   const colors =
@@ -125,15 +130,15 @@ export default function RailwayLinesSource({
     event: NativeSyntheticEvent<PressEventWithFeatures>,
   ): void => {
     const railway = event.nativeEvent.features
-      .map(metadataFromFeature)
-      .find((metadata) => metadata !== undefined);
+      .map(railwayFromFeature)
+      .find((feature) => feature !== undefined);
 
     if (railway === undefined) {
       return;
     }
 
     event.stopPropagation();
-    onRailwayPress?.(railway);
+    onFeaturePress?.(railway);
   };
 
   return (
@@ -145,6 +150,7 @@ export default function RailwayLinesSource({
     >
       <Layer
         id="arow-railway-lines-passive"
+        key="arow-railway-lines-passive"
         layout={{
           "line-cap": "round",
           "line-join": "round",
@@ -158,10 +164,11 @@ export default function RailwayLinesSource({
         testID="railway-lines-passive-layer"
         type="line"
       />
-      {selectedRailway === undefined ? null : (
+      {selectedSection === undefined ? null : (
         <Layer
-          filter={["==", ["id"], railwayLineId(selectedRailway)]}
+          filter={["==", ["id"], railwaySectionId(selectedSection)]}
           id="arow-railway-lines-selected"
+          key="arow-railway-lines-selected"
           layout={{
             "line-cap": "round",
             "line-join": "round",

@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react-native";
 import { useSQLiteContext } from "expo-sqlite";
 
-import { milestoneRowsToFeatureCollection } from "./milestones";
+import { milestoneRowsToFeatures } from "./milestones";
 import { useMilestones } from "./use-milestones";
 
 jest.mock("expo-sqlite", () => ({
@@ -31,37 +31,22 @@ function deferred<T>() {
   return { promise, reject, resolve };
 }
 
-describe("milestoneRowsToFeatureCollection", () => {
-  test("converts a database row to a stable GeoJSON point", () => {
-    expect(milestoneRowsToFeatureCollection([VALID_ROW])).toEqual({
-      features: [
-        {
-          geometry: {
-            coordinates: [4.86234, 45.74491],
-            type: "Point",
-          },
-          id: "1000:1:241",
-          properties: {
-            codeLigne: 1000,
-            kilometer: 241,
-            label: "241+000",
-            latitude: 45.74491,
-            ligne: "001000-1",
-            longitude: 4.86234,
-            sectionRank: 1,
-          },
-          type: "Feature",
-        },
-      ],
-      type: "FeatureCollection",
-    });
+describe("milestoneRowsToFeatures", () => {
+  test("converts a database row to a normalized domain milestone", () => {
+    expect(milestoneRowsToFeatures([VALID_ROW])).toEqual([
+      {
+        coordinates: { latitude: 45.74491, longitude: 4.86234 },
+        kilometer: 241,
+        kind: "milestone",
+        label: "241+000",
+        lineCode: "001000",
+        sectionRank: 1,
+      },
+    ]);
   });
 
-  test("returns an empty collection for an empty result", () => {
-    expect(milestoneRowsToFeatureCollection([])).toEqual({
-      features: [],
-      type: "FeatureCollection",
-    });
+  test("returns an empty list for an empty result", () => {
+    expect(milestoneRowsToFeatures([])).toEqual([]);
   });
 
   test.each([
@@ -70,9 +55,15 @@ describe("milestoneRowsToFeatureCollection", () => {
     ["an invalid latitude", { ...VALID_ROW, latitude: 91 }],
     ["an invalid longitude", { ...VALID_ROW, longitude: -181 }],
   ])("rejects %s", (_description, row) => {
-    expect(() => milestoneRowsToFeatureCollection([row])).toThrow(
+    expect(() => milestoneRowsToFeatures([row])).toThrow(
       "Invalid milestone at row 0",
     );
+  });
+
+  test("rejects a row whose stored railway section disagrees with its keys", () => {
+    expect(() =>
+      milestoneRowsToFeatures([{ ...VALID_ROW, ligne: "001000-2" }]),
+    ).toThrow("Invalid milestone railway section at row 0");
   });
 });
 
@@ -97,7 +88,7 @@ describe("useMilestones", () => {
 
     await waitFor(() => {
       expect(view.result.current).toEqual({
-        collection: milestoneRowsToFeatureCollection([VALID_ROW]),
+        milestones: milestoneRowsToFeatures([VALID_ROW]),
         status: "ready",
       });
     });

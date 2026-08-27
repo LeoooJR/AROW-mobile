@@ -5,11 +5,11 @@ import Svg, { Path } from "react-native-svg";
 
 import Card from "@/components/primitives/card";
 import Divider from "@/components/primitives/divider";
-import type { RailwayLineMetadata } from "@/types/railway-line";
+import type { GeographicCoordinates, MapFeature } from "@/types/map-feature";
 
-export interface RailwayDetailsCardProps {
+export interface MapFeatureDetailsCardProps {
+  readonly feature: MapFeature;
   readonly onClose: () => void;
-  readonly railway: RailwayLineMetadata;
 }
 
 const ICON_COLORS = {
@@ -39,13 +39,34 @@ function Fact({
   );
 }
 
-export default function RailwayDetailsCard({
+function formatCoordinate(
+  value: number,
+  positiveDirection: "E" | "N",
+  negativeDirection: "S" | "W",
+): string {
+  const direction = value >= 0 ? positiveDirection : negativeDirection;
+  return `${Math.abs(value).toFixed(5)} ${direction}`;
+}
+
+function formatCoordinates(coordinates: GeographicCoordinates): string {
+  return `${formatCoordinate(coordinates.latitude, "N", "S")} · ${formatCoordinate(coordinates.longitude, "E", "W")}`;
+}
+
+export default function MapFeatureDetailsCard({
+  feature,
   onClose,
-  railway,
-}: RailwayDetailsCardProps): ReactElement {
+}: MapFeatureDetailsCardProps): ReactElement {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
   const isDark = colorScheme === "dark";
+  const eyebrow =
+    feature.kind === "railway" ? feature.railwayType : "Point kilométrique";
+  const title =
+    feature.kind === "railway" ? feature.name : `PK ${feature.label}`;
+  const milestone =
+    feature.kind === "railway"
+      ? `${feature.startMilestone} → ${feature.endMilestone}`
+      : feature.label;
 
   return (
     <Card
@@ -59,7 +80,7 @@ export default function RailwayDetailsCard({
           ? "0 6px 18px rgba(0, 0, 0, 0.28)"
           : "0 6px 18px rgba(10, 10, 10, 0.12)",
       }}
-      testID="railway-details-card"
+      testID="map-feature-details-card"
     >
       <View className="flex-row items-start justify-between gap-3">
         <View className="min-w-0 flex-1 gap-1">
@@ -67,22 +88,22 @@ export default function RailwayDetailsCard({
             className="font-mono text-[11px] font-bold uppercase leading-[14px] tracking-[0.88px] text-text-primary"
             selectable
           >
-            {railway.type}
+            {eyebrow}
           </Text>
           <Text
             className="text-lg font-semibold leading-[23px] text-text-primary"
             selectable
           >
-            {railway.name}
+            {title}
           </Text>
         </View>
         <Pressable
-          accessibilityLabel="Fermer les informations de la ligne"
+          accessibilityLabel="Fermer les informations de l’élément cartographique"
           accessibilityRole="button"
           className="-mr-2.5 -mt-2.5 size-12 items-center justify-center rounded-lg bg-transparent active:bg-surface-muted"
           hitSlop={4}
           onPress={onClose}
-          testID="close-railway-details"
+          testID="close-map-feature-details"
         >
           <Svg height={22} viewBox="0 0 24 24" width={22}>
             <Path
@@ -98,17 +119,28 @@ export default function RailwayDetailsCard({
 
       <Divider className="mt-3 bg-border-subtle" />
       <View className="py-2.5">
-        <Fact label="Code ligne" value={railway.codeLigne} />
+        <Fact label="Code ligne" value={feature.lineCode} />
       </View>
       <Divider className="bg-border-subtle" />
       <View className="flex-row py-2.5">
-        <Fact label="Tronçon" value={String(railway.rangTroncon)} />
+        <Fact label="Section" value={String(feature.sectionRank)} />
         <Divider
           className="mx-3 h-auto self-stretch bg-border-subtle"
           orientation="vertical"
         />
-        <Fact label="Repères" value={`${railway.pkDebut} → ${railway.pkFin}`} />
+        <Fact label="Repère" value={milestone} />
       </View>
+      {feature.kind === "milestone" ? (
+        <>
+          <Divider className="bg-border-subtle" />
+          <View className="pt-2.5">
+            <Fact
+              label="Coordonnées"
+              value={formatCoordinates(feature.coordinates)}
+            />
+          </View>
+        </>
+      ) : null}
     </Card>
   );
 }

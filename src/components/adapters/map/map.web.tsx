@@ -1,22 +1,23 @@
 import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
-import { type MilestoneFeatureCollection } from "@/features/milestones/milestones";
-import type { RailwayLineKey, RailwayLineMetadata } from "@/types/railway-line";
+import type {
+  GeographicCoordinates,
+  MapFeature,
+  MilestoneFeature,
+} from "@/types/map-feature";
 
-export interface MapLocation {
+export interface MapLocation extends GeographicCoordinates {
   readonly heading: number | null;
-  readonly latitude: number;
-  readonly longitude: number;
 }
 
 export interface MapProps {
   readonly location?: MapLocation;
-  readonly milestones?: MilestoneFeatureCollection;
-  readonly onRailwayPress?: (railway: RailwayLineMetadata) => void;
+  readonly milestones?: readonly MilestoneFeature[];
+  readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly railwayData?: string;
   readonly recenterRequest?: number;
-  readonly selectedRailway?: RailwayLineKey;
+  readonly selectedFeature?: MapFeature;
 }
 
 export default function Map(_props: MapProps): ReactElement {

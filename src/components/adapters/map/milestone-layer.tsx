@@ -1,20 +1,44 @@
 import {
   GeoJSONSource,
   Layer,
+  type PressEventWithFeatures,
   type SymbolLayerSpecification,
 } from "@maplibre/maplibre-react-native";
-import { type ReactElement } from "react";
-import { useColorScheme } from "react-native";
+import type { Feature, FeatureCollection, Point } from "geojson";
+import { type ReactElement, useMemo } from "react";
+import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 
-import { type MilestoneFeatureCollection } from "@/features/milestones/milestones";
+import {
+  canonicalRailwayLineCode,
+  milestoneId,
+  type MapFeature,
+  type MilestoneFeature,
+} from "@/types/map-feature";
 
 export interface MilestoneLayerProps {
-  readonly milestones: MilestoneFeatureCollection;
+  readonly milestones: readonly MilestoneFeature[];
+  readonly onFeaturePress?: (feature: MapFeature) => void;
+  readonly selectedMilestone?: MilestoneFeature;
 }
+
+interface MilestoneGeoJSONProperties {
+  readonly kilometer: number;
+  readonly kind: "milestone";
+  readonly label: string;
+  readonly lineCode: string;
+  readonly sectionRank: number;
+}
+
+type MilestoneGeoJSONFeature = Feature<Point, MilestoneGeoJSONProperties>;
+type MilestoneFeatureCollection = FeatureCollection<
+  Point,
+  MilestoneGeoJSONProperties
+>;
 
 interface MilestonePalette {
   readonly border: string;
   readonly label: string;
+  readonly selected: string;
   readonly surface: string;
 }
 
@@ -22,11 +46,13 @@ const MILESTONE_PALETTES = {
   dark: {
     border: "#363632",
     label: "#FAF9F6",
+    selected: "#FF7A1A",
     surface: "#10100F",
   },
   light: {
     border: "#E7E7E2",
     label: "#0A0A0A",
+    selected: "#FF6A00",
     surface: "#FFFFFF",
   },
 } as const satisfies Record<"dark" | "light", MilestonePalette>;
@@ -43,17 +69,124 @@ const LABEL_LAYOUT = {
   "text-size": 10,
 } satisfies SymbolLayerSpecification["layout"];
 
+export function milestonesToFeatureCollection(
+  milestones: readonly MilestoneFeature[],
+): MilestoneFeatureCollection {
+  return {
+    features: milestones.map((milestone): MilestoneGeoJSONFeature => ({
+      geometry: {
+        coordinates: [
+          milestone.coordinates.longitude,
+          milestone.coordinates.latitude,
+        ],
+        type: "Point",
+      },
+      id: milestoneId(milestone),
+      properties: {
+        kilometer: milestone.kilometer,
+        kind: milestone.kind,
+        label: milestone.label,
+        lineCode: milestone.lineCode,
+        sectionRank: milestone.sectionRank,
+      },
+      type: "Feature",
+    })),
+    type: "FeatureCollection",
+  };
+}
+
+function isMilestoneProperties(
+  properties: GeoJSON.GeoJsonProperties,
+): properties is MilestoneGeoJSONProperties {
+  return (
+    properties !== null &&
+    properties.kind === "milestone" &&
+    typeof properties.lineCode === "string" &&
+    /^\d{6}$/.test(properties.lineCode) &&
+    typeof properties.sectionRank === "number" &&
+    Number.isInteger(properties.sectionRank) &&
+    properties.sectionRank > 0 &&
+    typeof properties.kilometer === "number" &&
+    Number.isInteger(properties.kilometer) &&
+    properties.kilometer >= 0 &&
+    typeof properties.label === "string" &&
+    properties.label.length > 0
+  );
+}
+
+function milestoneFromFeature(
+  feature: GeoJSON.Feature,
+): MilestoneFeature | undefined {
+  if (
+    feature.geometry.type !== "Point" ||
+    !isMilestoneProperties(feature.properties)
+  ) {
+    return undefined;
+  }
+
+  const [longitude, latitude, ...remainingCoordinates] =
+    feature.geometry.coordinates;
+  if (
+    remainingCoordinates.length > 0 ||
+    !Number.isFinite(latitude) ||
+    latitude < -90 ||
+    latitude > 90 ||
+    !Number.isFinite(longitude) ||
+    longitude < -180 ||
+    longitude > 180
+  ) {
+    return undefined;
+  }
+
+  const milestone: MilestoneFeature = {
+    coordinates: { latitude, longitude },
+    kilometer: feature.properties.kilometer,
+    kind: "milestone",
+    label: feature.properties.label,
+    lineCode: canonicalRailwayLineCode(feature.properties.lineCode),
+    sectionRank: feature.properties.sectionRank,
+  };
+
+  return feature.id === milestoneId(milestone) ? milestone : undefined;
+}
+
 export default function MilestoneLayer({
   milestones,
+  onFeaturePress,
+  selectedMilestone,
 }: MilestoneLayerProps): ReactElement {
   const colorScheme = useColorScheme();
   const palette =
     colorScheme === "dark" ? MILESTONE_PALETTES.dark : MILESTONE_PALETTES.light;
+  const collection = useMemo(
+    () => milestonesToFeatureCollection(milestones),
+    [milestones],
+  );
+
+  const onPress = (
+    event: NativeSyntheticEvent<PressEventWithFeatures>,
+  ): void => {
+    const milestone = event.nativeEvent.features
+      .map(milestoneFromFeature)
+      .find((feature) => feature !== undefined);
+
+    if (milestone === undefined) {
+      return;
+    }
+
+    event.stopPropagation();
+    onFeaturePress?.(milestone);
+  };
 
   return (
-    <GeoJSONSource data={milestones} id="railway-milestones-source">
+    <GeoJSONSource
+      data={collection}
+      id="railway-milestones-source"
+      onPress={onPress}
+    >
       <Layer
         id="railway-milestone-dots"
+        key="railway-milestone-dots"
         minzoom={10}
         paint={{
           "circle-color": palette.label,
@@ -63,8 +196,24 @@ export default function MilestoneLayer({
         }}
         type="circle"
       />
+      {selectedMilestone === undefined ? null : (
+        <Layer
+          filter={["==", ["id"], milestoneId(selectedMilestone)]}
+          id="railway-milestone-selected"
+          key="railway-milestone-selected"
+          minzoom={10}
+          paint={{
+            "circle-color": palette.selected,
+            "circle-radius": 7,
+            "circle-stroke-color": palette.label,
+            "circle-stroke-width": 2,
+          }}
+          type="circle"
+        />
+      )}
       <Layer
         id="railway-milestone-labels"
+        key="railway-milestone-labels"
         layout={LABEL_LAYOUT}
         minzoom={13}
         paint={{

@@ -1,16 +1,21 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
-import { type MilestoneFeatureCollection } from "@/features/milestones/milestones";
+import type { MilestoneFeature } from "@/types/map-feature";
 
 import { DARK_MAP_STYLE } from "./map-style-dark";
 import { LIGHT_MAP_STYLE } from "./map-style-light";
 import Map from "./map";
 
-const MILESTONES: MilestoneFeatureCollection = {
-  features: [],
-  type: "FeatureCollection",
-};
+const MILESTONE = {
+  coordinates: { latitude: 45.74, longitude: 4.86 },
+  kilometer: 241,
+  kind: "milestone",
+  label: "241+000",
+  lineCode: "001000",
+  sectionRank: 1,
+} as const satisfies MilestoneFeature;
+const MILESTONES = [MILESTONE] as const;
 
 jest.mock("@maplibre/maplibre-react-native", () => {
   const { View: MockView } =
@@ -155,15 +160,15 @@ describe("Map", () => {
     );
   });
 
-  test("forwards the railway source, selection, and press callback", async () => {
-    const onRailwayPress = jest.fn();
-    const selectedRailway = { codeLigne: "340311", rangTroncon: 1 };
+  test("forwards a shared callback and derives linked milestone selection", async () => {
+    const onFeaturePress = jest.fn();
 
     await render(
       <Map
-        onRailwayPress={onRailwayPress}
+        milestones={MILESTONES}
+        onFeaturePress={onFeaturePress}
         railwayData="file:///railways.geojson"
-        selectedRailway={selectedRailway}
+        selectedFeature={MILESTONE}
       />,
     );
 
@@ -172,12 +177,20 @@ describe("Map", () => {
       "file:///railways.geojson",
     );
     expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
-      "onRailwayPress",
-      onRailwayPress,
+      "onFeaturePress",
+      onFeaturePress,
     );
     expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
-      "selectedRailway",
-      selectedRailway,
+      "selectedSection",
+      { lineCode: "001000", sectionRank: 1 },
+    );
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+      "onFeaturePress",
+      onFeaturePress,
+    );
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+      "selectedMilestone",
+      MILESTONE,
     );
   });
 });

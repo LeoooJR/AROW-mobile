@@ -5,7 +5,7 @@ import {
   within,
 } from "@testing-library/react-native";
 
-import type { RailwayLineMetadata } from "@/types/railway-line";
+import type { MapFeature } from "@/types/map-feature";
 
 import Index from "@/app/index";
 
@@ -48,21 +48,30 @@ jest.mock("@/components/adapters/map/map", () => {
   return {
     __esModule: true,
     default: ({
-      onRailwayPress,
-      selectedRailway,
+      onFeaturePress,
+      selectedFeature,
     }: {
-      readonly onRailwayPress?: (value: RailwayLineMetadata) => void;
-      readonly selectedRailway?: RailwayLineMetadata;
+      readonly onFeaturePress?: (value: MapFeature) => void;
+      readonly selectedFeature?: MapFeature;
     }) => {
-      const railway: RailwayLineMetadata = {
-        codeLigne: "340311",
+      const railway = {
+        endMilestone: "137+980",
         gaiaId: "4718490e-6665-11e3-afff-01f464e0362d",
+        kind: "railway",
+        lineCode: "340311",
         name: "Raccordement de Rouen-Martainville",
-        pkDebut: "136+772",
-        pkFin: "137+980",
-        rangTroncon: 1,
-        type: "Raccordement",
-      };
+        railwayType: "Raccordement",
+        sectionRank: 1,
+        startMilestone: "136+772",
+      } as const;
+      const milestone = {
+        coordinates: { latitude: 45.74491, longitude: 4.86234 },
+        kilometer: 241,
+        kind: "milestone",
+        label: "241+000",
+        lineCode: "001000",
+        sectionRank: 1,
+      } as const;
 
       return (
         <MockView>
@@ -70,12 +79,25 @@ jest.mock("@/components/adapters/map/map", () => {
             accessibilityLabel="Choisir une ligne test"
             accessibilityRole="button"
             onPress={() => {
-              onRailwayPress?.(railway);
+              onFeaturePress?.(railway);
             }}
           >
             <MockText>Carte</MockText>
           </MockPressable>
-          <MockText>{selectedRailway?.codeLigne ?? "Aucune ligne"}</MockText>
+          <MockPressable
+            accessibilityLabel="Choisir un point kilométrique test"
+            accessibilityRole="button"
+            onPress={() => {
+              onFeaturePress?.(milestone);
+            }}
+          >
+            <MockText>Point</MockText>
+          </MockPressable>
+          <MockText>
+            {selectedFeature?.kind === "railway"
+              ? selectedFeature.name
+              : (selectedFeature?.label ?? "Aucun élément")}
+          </MockText>
         </MockView>
       );
     },
@@ -92,30 +114,49 @@ jest.mock("@/components/composites/location-bar", () => {
   };
 });
 
-describe("Index railway selection", () => {
-  test("shows, highlights, and closes railway details from a map press", async () => {
+describe("Index map feature selection", () => {
+  test("shows, replaces, and closes shared feature details", async () => {
     const user = userEvent.setup();
     await render(<Index />);
 
-    expect(screen.getByText("Aucune ligne")).toBeOnTheScreen();
-    expect(screen.queryByTestId("railway-details-card")).toBeNull();
+    expect(screen.getByText("Aucun élément")).toBeOnTheScreen();
+    expect(screen.queryByTestId("map-feature-details-card")).toBeNull();
 
     await user.press(
       screen.getByRole("button", { name: "Choisir une ligne test" }),
     );
 
-    expect(screen.getByTestId("railway-details-card")).toBeOnTheScreen();
+    expect(screen.getByTestId("map-feature-details-card")).toBeOnTheScreen();
     expect(
-      within(screen.getByTestId("railway-details-card")).getByText("340311"),
+      within(screen.getByTestId("map-feature-details-card")).getByText(
+        "340311",
+      ),
     ).toBeOnTheScreen();
 
     await user.press(
       screen.getByRole("button", {
-        name: "Fermer les informations de la ligne",
+        name: "Choisir un point kilométrique test",
       }),
     );
 
-    expect(screen.queryByTestId("railway-details-card")).toBeNull();
-    expect(screen.getByText("Aucune ligne")).toBeOnTheScreen();
+    expect(
+      within(screen.getByTestId("map-feature-details-card")).getByText(
+        "PK 241+000",
+      ),
+    ).toBeOnTheScreen();
+    expect(
+      within(screen.getByTestId("map-feature-details-card")).getByText(
+        "001000",
+      ),
+    ).toBeOnTheScreen();
+
+    await user.press(
+      screen.getByRole("button", {
+        name: "Fermer les informations de l’élément cartographique",
+      }),
+    );
+
+    expect(screen.queryByTestId("map-feature-details-card")).toBeNull();
+    expect(screen.getByText("Aucun élément")).toBeOnTheScreen();
   });
 });

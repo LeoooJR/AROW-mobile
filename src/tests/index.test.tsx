@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react-native";
 
-import { type MilestoneFeatureCollection } from "@/features/milestones/milestones";
 import { useMilestones } from "@/features/milestones/use-milestones";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
+import type { MilestoneFeature } from "@/types/map-feature";
 
 import Index from "@/app/index";
 
@@ -40,10 +40,7 @@ jest.mock("@/components/composites/location-bar", () => {
 
 const useMilestonesMock = jest.mocked(useMilestones);
 const useRealLocationMock = jest.mocked(useRealLocation);
-const MILESTONES: MilestoneFeatureCollection = {
-  features: [],
-  type: "FeatureCollection",
-};
+const MILESTONES = [] satisfies readonly MilestoneFeature[];
 
 describe("Index", () => {
   beforeEach(() => {
@@ -65,7 +62,7 @@ describe("Index", () => {
 
   test("passes ready milestone and location data to the map", async () => {
     useMilestonesMock.mockReturnValue({
-      collection: MILESTONES,
+      milestones: MILESTONES,
       status: "ready",
     });
 
