@@ -3,8 +3,8 @@ import {
   milestoneId,
   railwaySectionId,
   railwaySectionKey,
-  type MapFeature,
-} from "./map-feature";
+} from "./map-features";
+import type { MapFeature } from "@/types/map-feature";
 
 describe("map feature identities", () => {
   test("normalizes numeric railway line codes without losing leading zeroes", () => {

@@ -21,23 +21,32 @@ interface CameraTarget {
   readonly zoom: number;
 }
 
-const CAMERA_TRANSITION_DURATION_MS = 700;
-const LOCATION_ZOOM = 15;
-const WORLD_CAMERA_TARGET: CameraTarget = {
-  center: [0, 0],
-  zoom: 0,
-};
-const INITIAL_VIEW_STATE = {
-  bearing: 0,
-  center: WORLD_CAMERA_TARGET.center,
-  pitch: 0,
-  zoom: WORLD_CAMERA_TARGET.zoom,
-} satisfies InitialViewState;
+interface MapCameraSettings {
+  readonly initialViewState: InitialViewState;
+  readonly locationZoom: number;
+  readonly transitionDurationMs: number;
+  readonly worldTarget: CameraTarget;
+}
+
+const DEFAULT_MAP_CAMERA_SETTINGS = {
+  initialViewState: {
+    bearing: 0,
+    center: [0, 0],
+    pitch: 0,
+    zoom: 0,
+  },
+  locationZoom: 15,
+  transitionDurationMs: 700,
+  worldTarget: {
+    center: [0, 0],
+    zoom: 0,
+  },
+} satisfies MapCameraSettings;
 
 function locationCameraTarget(location: MapCameraLocation): CameraTarget {
   return {
     center: [location.longitude, location.latitude],
-    zoom: LOCATION_ZOOM,
+    zoom: DEFAULT_MAP_CAMERA_SETTINGS.locationZoom,
   };
 }
 
@@ -51,7 +60,7 @@ export default function MapCamera({
   const lastRecenterRequestRef = useRef(recenterRequest);
   const [cameraTarget, setCameraTarget] = useState<CameraTarget>(() =>
     location === undefined
-      ? WORLD_CAMERA_TARGET
+      ? DEFAULT_MAP_CAMERA_SETTINGS.worldTarget
       : locationCameraTarget(location),
   );
 
@@ -61,7 +70,7 @@ export default function MapCamera({
     if (!hadLocationRef.current && location !== undefined) {
       setCameraTarget(locationCameraTarget(location));
     } else if (hadLocationRef.current && !hasLocation) {
-      setCameraTarget(WORLD_CAMERA_TARGET);
+      setCameraTarget(DEFAULT_MAP_CAMERA_SETTINGS.worldTarget);
     }
 
     hadLocationRef.current = hasLocation;
@@ -81,10 +90,12 @@ export default function MapCamera({
     cameraRef.current?.easeTo({
       bearing: 0,
       center: [location.longitude, location.latitude],
-      duration: reduceMotion ? 0 : CAMERA_TRANSITION_DURATION_MS,
+      duration: reduceMotion
+        ? 0
+        : DEFAULT_MAP_CAMERA_SETTINGS.transitionDurationMs,
       easing: "ease",
       pitch: 0,
-      zoom: LOCATION_ZOOM,
+      zoom: DEFAULT_MAP_CAMERA_SETTINGS.locationZoom,
     });
   }, [location, recenterRequest, reduceMotion]);
 
@@ -92,9 +103,11 @@ export default function MapCamera({
     <Camera
       bearing={0}
       center={cameraTarget.center}
-      duration={reduceMotion ? 0 : CAMERA_TRANSITION_DURATION_MS}
+      duration={
+        reduceMotion ? 0 : DEFAULT_MAP_CAMERA_SETTINGS.transitionDurationMs
+      }
       easing="ease"
-      initialViewState={INITIAL_VIEW_STATE}
+      initialViewState={DEFAULT_MAP_CAMERA_SETTINGS.initialViewState}
       pitch={0}
       ref={cameraRef}
       testID="arow-map-camera"

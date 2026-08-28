@@ -15,8 +15,8 @@ import { LIGHT_MAP_STYLE } from "@/components/adapters/map/map-style-light";
 import MilestoneLayer from "@/components/adapters/map/milestone-layer";
 import RailwayLinesSource from "@/components/adapters/map/railway-lines-source";
 import UserLocationMarker from "@/components/adapters/map/user-location-marker";
+import { railwaySectionKey } from "@/features/map-features/map-features";
 import {
-  railwaySectionKey,
   type GeographicCoordinates,
   type MapFeature,
   type MilestoneFeature,

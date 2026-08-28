@@ -1,7 +1,5 @@
-import {
-  canonicalRailwayLineCode,
-  type MilestoneFeature,
-} from "@/types/map-feature";
+import { canonicalRailwayLineCode } from "@/features/map-features/map-features";
+import type { MilestoneFeature } from "@/types/map-feature";
 
 export type MilestoneState =
   | { readonly status: "unavailable" }

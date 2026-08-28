@@ -8,8 +8,16 @@ import { type ReactElement } from "react";
 import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 
 import {
+  isCanonicalRailwayLineCode,
+  isPositiveInteger,
+  isRecord,
+  isString,
+} from "@/components/adapters/map/geojson-validation";
+import {
   canonicalRailwayLineCode,
   railwaySectionId,
+} from "@/features/map-features/map-features";
+import {
   type MapFeature,
   type RailwayFeature,
   type RailwaySectionKey,
@@ -71,21 +79,27 @@ const SELECTED_LINE_WIDTH: LineWidth = [
 function isRailwayLineProperties(
   properties: GeoJSON.GeoJsonProperties,
 ): properties is RailwayLineProperties {
-  if (properties === null) {
+  if (!isRecord(properties)) {
     return false;
   }
 
+  return hasRailwayIdentity(properties) && hasRailwayMetadata(properties);
+}
+
+function hasRailwayIdentity(properties: Record<string, unknown>): boolean {
   return (
-    typeof properties.code_ligne === "string" &&
-    /^\d{6}$/.test(properties.code_ligne) &&
-    typeof properties.idgaia === "string" &&
-    typeof properties.lib_ligne === "string" &&
-    typeof properties.pkd === "string" &&
-    typeof properties.pkf === "string" &&
-    typeof properties.rg_troncon === "number" &&
-    Number.isInteger(properties.rg_troncon) &&
-    properties.rg_troncon > 0 &&
-    typeof properties.type_ligne === "string"
+    isCanonicalRailwayLineCode(properties.code_ligne) &&
+    isPositiveInteger(properties.rg_troncon)
+  );
+}
+
+function hasRailwayMetadata(properties: Record<string, unknown>): boolean {
+  return (
+    isString(properties.idgaia) &&
+    isString(properties.lib_ligne) &&
+    isString(properties.pkd) &&
+    isString(properties.pkf) &&
+    isString(properties.type_ligne)
   );
 }
 

@@ -9,11 +9,18 @@ import { type ReactElement, useMemo } from "react";
 import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 
 import {
+  geographicCoordinatesFromPosition,
+  isCanonicalRailwayLineCode,
+  isNonEmptyString,
+  isNonNegativeInteger,
+  isPositiveInteger,
+  isRecord,
+} from "@/components/adapters/map/geojson-validation";
+import {
   canonicalRailwayLineCode,
   milestoneId,
-  type MapFeature,
-  type MilestoneFeature,
-} from "@/types/map-feature";
+} from "@/features/map-features/map-features";
+import { type MapFeature, type MilestoneFeature } from "@/types/map-feature";
 
 export interface MilestoneLayerProps {
   readonly milestones: readonly MilestoneFeature[];
@@ -98,20 +105,24 @@ export function milestonesToFeatureCollection(
 function isMilestoneProperties(
   properties: GeoJSON.GeoJsonProperties,
 ): properties is MilestoneGeoJSONProperties {
+  if (!isRecord(properties)) {
+    return false;
+  }
+
+  return hasMilestoneIdentity(properties) && hasMilestoneMetadata(properties);
+}
+
+function hasMilestoneIdentity(properties: Record<string, unknown>): boolean {
   return (
-    properties !== null &&
     properties.kind === "milestone" &&
-    typeof properties.lineCode === "string" &&
-    /^\d{6}$/.test(properties.lineCode) &&
-    typeof properties.sectionRank === "number" &&
-    Number.isInteger(properties.sectionRank) &&
-    properties.sectionRank > 0 &&
-    typeof properties.kilometer === "number" &&
-    Number.isInteger(properties.kilometer) &&
-    properties.kilometer >= 0 &&
-    typeof properties.label === "string" &&
-    properties.label.length > 0
+    isCanonicalRailwayLineCode(properties.lineCode) &&
+    isPositiveInteger(properties.sectionRank) &&
+    isNonNegativeInteger(properties.kilometer)
   );
+}
+
+function hasMilestoneMetadata(properties: Record<string, unknown>): boolean {
+  return isNonEmptyString(properties.label);
 }
 
 function milestoneFromFeature(
@@ -124,22 +135,15 @@ function milestoneFromFeature(
     return undefined;
   }
 
-  const [longitude, latitude, ...remainingCoordinates] =
-    feature.geometry.coordinates;
-  if (
-    remainingCoordinates.length > 0 ||
-    !Number.isFinite(latitude) ||
-    latitude < -90 ||
-    latitude > 90 ||
-    !Number.isFinite(longitude) ||
-    longitude < -180 ||
-    longitude > 180
-  ) {
+  const coordinates = geographicCoordinatesFromPosition(
+    feature.geometry.coordinates,
+  );
+  if (coordinates === undefined) {
     return undefined;
   }
 
   const milestone: MilestoneFeature = {
-    coordinates: { latitude, longitude },
+    coordinates,
     kilometer: feature.properties.kilometer,
     kind: "milestone",
     label: feature.properties.label,

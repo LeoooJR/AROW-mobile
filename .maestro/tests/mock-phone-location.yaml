@@ -42,9 +42,10 @@ tags:
     visible: "(Connectée|Active)"
     timeout: 30000
 - waitForAnimationToEnd
-# The 509+000 milestone is visible northwest of the centered fix.
+# The 509+000 milestone is visible northwest of the centered fix after the
+# fresh-start status bar settles.
 - tapOn:
-    point: "172,758"
+    point: "172,810"
     retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "PK 509\\+000"
