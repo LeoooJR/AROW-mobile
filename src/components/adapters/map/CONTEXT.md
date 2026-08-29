@@ -14,9 +14,11 @@ workflows. Add future map inputs and callbacks through narrow, explicitly typed
 props when a product requirement needs them.
 
 The map accepts optional immutable `Milestone` domain instances from its owning
-screen and converts them to GeoJSON only inside this adapter boundary. It
-renders these points without querying SQLite or interpreting loading and failure
-states. Milestone dots appear from zoom 10 and collision-aware labels from zoom 13.
+screen and converts them to GeoJSON only inside this adapter boundary. It keeps
+an empty milestone source mounted while data is unavailable so its dot layer can
+act as the stable ordering anchor. It renders no points in that state and does
+not query SQLite or interpret loading and failure states. Milestone dots appear
+from zoom 10 and collision-aware labels from zoom 13.
 
 ## Layout
 
@@ -87,6 +89,10 @@ geometry fields. The owning screen remains responsible for the single selected
 feature and passes it back for orange highlighting. A selected milestone
 highlights both its point and parent railway section. The adapter does not load
 files, query persistence, or own selection state.
+
+All railway layers are explicitly inserted below the milestone-dot anchor.
+Consequently milestone dots, selected points, and labels retain visual and press
+priority over passive and selected railways regardless of source loading order.
 
 Do not add other GeoJSON, markers, annotations, location tracking, or map event
 handling without extending this context for that feature first.

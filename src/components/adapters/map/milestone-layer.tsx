@@ -16,6 +16,7 @@ import {
   isPositiveInteger,
   isRecord,
 } from "@/components/adapters/map/geojson-validation";
+import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
 import { type MapFeature } from "@/features/map-features/map-feature";
 import { Milestone } from "@/features/milestones/milestone";
 
@@ -183,8 +184,8 @@ export default function MilestoneLayer({
       onPress={onPress}
     >
       <Layer
-        id="railway-milestone-dots"
-        key="railway-milestone-dots"
+        id={MAP_LAYER_IDS.milestone.dots}
+        key={MAP_LAYER_IDS.milestone.dots}
         minzoom={10}
         paint={{
           "circle-color": palette.label,
@@ -197,8 +198,8 @@ export default function MilestoneLayer({
       {selectedMilestone === undefined ? null : (
         <Layer
           filter={["==", ["id"], selectedMilestone.id]}
-          id="railway-milestone-selected"
-          key="railway-milestone-selected"
+          id={MAP_LAYER_IDS.milestone.selected}
+          key={MAP_LAYER_IDS.milestone.selected}
           minzoom={10}
           paint={{
             "circle-color": palette.selected,
@@ -210,8 +211,8 @@ export default function MilestoneLayer({
         />
       )}
       <Layer
-        id="railway-milestone-labels"
-        key="railway-milestone-labels"
+        id={MAP_LAYER_IDS.milestone.labels}
+        key={MAP_LAYER_IDS.milestone.labels}
         layout={LABEL_LAYOUT}
         minzoom={13}
         paint={{

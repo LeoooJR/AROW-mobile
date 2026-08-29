@@ -38,6 +38,8 @@ const styles = StyleSheet.create({
   },
 });
 
+const EMPTY_MILESTONES = Object.freeze([]) satisfies readonly Milestone[];
+
 export default function Map({
   location,
   milestones,
@@ -69,18 +71,16 @@ export default function Map({
       testID="arow-map"
     >
       <MapCamera location={location} recenterRequest={recenterRequest} />
+      <MilestoneLayer
+        milestones={milestones ?? EMPTY_MILESTONES}
+        onFeaturePress={onFeaturePress}
+        selectedMilestone={selectedMilestone}
+      />
       {railwayData === undefined ? null : (
         <RailwayLinesSource
           data={railwayData}
           onFeaturePress={onFeaturePress}
           selectedSection={selectedSection}
-        />
-      )}
-      {milestones === undefined ? null : (
-        <MilestoneLayer
-          milestones={milestones}
-          onFeaturePress={onFeaturePress}
-          selectedMilestone={selectedMilestone}
         />
       )}
       {location === undefined ? null : (

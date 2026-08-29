@@ -4,6 +4,7 @@ import * as ReactNative from "react-native";
 import { RailwaySectionKey } from "@/features/map-features/railway-section-key";
 import { Railway } from "@/features/railways/railway";
 
+import { MAP_LAYER_IDS } from "./map-layer-ids";
 import RailwayLinesSource from "./railway-lines-source";
 
 jest.mock("@maplibre/maplibre-react-native", () => {
@@ -61,6 +62,10 @@ describe("RailwayLinesSource", () => {
       7,
     );
     expect(screen.getByTestId("railway-lines-passive-layer")).toHaveProp(
+      "beforeId",
+      MAP_LAYER_IDS.milestone.dots,
+    );
+    expect(screen.getByTestId("railway-lines-passive-layer")).toHaveProp(
       "paint",
       expect.objectContaining({
         "line-color": "#0A0A0A",
@@ -83,6 +88,10 @@ describe("RailwayLinesSource", () => {
     expect(screen.getByTestId("railway-lines-selected-layer")).toHaveProp(
       "filter",
       ["==", ["id"], "340311:1"],
+    );
+    expect(screen.getByTestId("railway-lines-selected-layer")).toHaveProp(
+      "beforeId",
+      MAP_LAYER_IDS.milestone.dots,
     );
     expect(screen.getByTestId("railway-lines-selected-layer")).toHaveProp(
       "paint",

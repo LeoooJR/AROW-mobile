@@ -66,6 +66,17 @@ tags:
 - assertVisible: "893000"
 - assertVisible: "1"
 - assertVisible: "499\\+752 → 511\\+605"
+# A selected railway remains below overlapping milestones for rendering and
+# press dispatch, so the milestone can replace the railway selection.
+- tapOn:
+    point: "172,810"
+    retryTapIfNoChange: true
+- extendedWaitUntil:
+    visible: "PK 509\\+000"
+    timeout: 10000
+- assertNotVisible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
+- assertVisible: "POINT KILOMÉTRIQUE"
+- assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
 - tapOn:
     id: "close-map-feature-details"
-- assertNotVisible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
+- assertNotVisible: "PK 509\\+000"

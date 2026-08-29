@@ -13,6 +13,7 @@ import {
   isPositiveInteger,
   isRecord,
 } from "@/components/adapters/map/geojson-validation";
+import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
 import type { MapFeature } from "@/features/map-features/map-feature";
 import { RailwaySectionKey } from "@/features/map-features/railway-section-key";
 import { Railway } from "@/features/railways/railway";
@@ -154,8 +155,9 @@ export default function RailwayLinesSource({
       testID="railway-lines-source"
     >
       <Layer
-        id="arow-railway-lines-passive"
-        key="arow-railway-lines-passive"
+        beforeId={MAP_LAYER_IDS.milestone.dots}
+        id={MAP_LAYER_IDS.railway.passive}
+        key={MAP_LAYER_IDS.railway.passive}
         layout={{
           "line-cap": "round",
           "line-join": "round",
@@ -171,9 +173,10 @@ export default function RailwayLinesSource({
       />
       {selectedSection === undefined ? null : (
         <Layer
+          beforeId={MAP_LAYER_IDS.milestone.dots}
           filter={["==", ["id"], selectedSection.id]}
-          id="arow-railway-lines-selected"
-          key="arow-railway-lines-selected"
+          id={MAP_LAYER_IDS.railway.selected}
+          key={MAP_LAYER_IDS.railway.selected}
           layout={{
             "line-cap": "round",
             "line-join": "round",

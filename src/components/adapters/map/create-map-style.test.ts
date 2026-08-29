@@ -1,4 +1,5 @@
 import { createMapStyle } from "./create-map-style";
+import { MAP_LAYER_IDS } from "./map-layer-ids";
 import { DARK_MAP_STYLE } from "./map-style-dark";
 import { LIGHT_MAP_STYLE } from "./map-style-light";
 
@@ -33,12 +34,12 @@ describe("createMapStyle", () => {
     expect(new Set(layerIds).size).toBe(layerIds.length);
     expect(layerIds).toEqual(
       expect.arrayContaining([
-        "railway-tunnel",
-        "railway-service-bed",
-        "railway-service",
-        "railway-main-bed",
-        "railway-main-ties",
-        "railway-main",
+        MAP_LAYER_IDS.base.railwayTunnel,
+        MAP_LAYER_IDS.base.railwayServiceBed,
+        MAP_LAYER_IDS.base.railwayService,
+        MAP_LAYER_IDS.base.railwayMainBed,
+        MAP_LAYER_IDS.base.railwayMainTies,
+        MAP_LAYER_IDS.base.railwayMain,
       ]),
     );
   });
@@ -47,19 +48,19 @@ describe("createMapStyle", () => {
     const style = createMapStyle("Palette map", palette);
     const layers = new Map(style.layers.map((layer) => [layer.id, layer]));
 
-    expect(layers.get("background")).toHaveProperty(
+    expect(layers.get(MAP_LAYER_IDS.base.background)).toHaveProperty(
       "paint.background-color",
       palette.canvas,
     );
-    expect(layers.get("railway-main")).toHaveProperty(
+    expect(layers.get(MAP_LAYER_IDS.base.railwayMain)).toHaveProperty(
       "paint.line-color",
       palette.text,
     );
-    expect(layers.get("label-road")).toHaveProperty(
+    expect(layers.get(MAP_LAYER_IDS.base.labelRoad)).toHaveProperty(
       "paint.text-color",
       palette.textMuted,
     );
-    expect(layers.get("boundary-country")).toHaveProperty(
+    expect(layers.get(MAP_LAYER_IDS.base.boundaryCountry)).toHaveProperty(
       "paint.line-color",
       palette.borderStrong,
     );
@@ -67,10 +68,10 @@ describe("createMapStyle", () => {
 
   test("exports distinct light and dark application styles", () => {
     const lightBackground = LIGHT_MAP_STYLE.layers.find(
-      (layer) => layer.id === "background",
+      (layer) => layer.id === MAP_LAYER_IDS.base.background,
     );
     const darkBackground = DARK_MAP_STYLE.layers.find(
-      (layer) => layer.id === "background",
+      (layer) => layer.id === MAP_LAYER_IDS.base.background,
     );
 
     expect(LIGHT_MAP_STYLE.name).toBe("AROW Light");

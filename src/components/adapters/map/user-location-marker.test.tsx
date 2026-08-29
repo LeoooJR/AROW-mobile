@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
+import { MAP_LAYER_IDS } from "./map-layer-ids";
 import UserLocationMarker from "./user-location-marker";
 
 jest.mock("@maplibre/maplibre-react-native", () => {
@@ -54,12 +55,13 @@ describe("UserLocationMarker", () => {
     );
     expect(screen.getByTestId("mock-map-marker")).toHaveProp(
       "id",
-      "current-location-marker",
+      MAP_LAYER_IDS.userLocation,
     );
     expect(screen.getByTestId("mock-map-marker")).toHaveProp(
       "lngLat",
       [2.2137, 46.2276],
     );
+    expect(screen.getByTestId("mock-map-marker")).toHaveStyle({ zIndex: 1 });
     expect(screen.getByLabelText("Position actuelle")).toBeOnTheScreen();
     expect(screen.getByTestId("mock-marker-svg")).toHaveStyle({
       transform: [{ rotate: "60deg" }],

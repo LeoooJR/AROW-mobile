@@ -83,7 +83,7 @@ describe("Map", () => {
     jest.restoreAllMocks();
   });
 
-  test("uses the light map style and omits the marker without a location", async () => {
+  test("uses the light map style and keeps an empty milestone anchor", async () => {
     jest.spyOn(ReactNative, "useColorScheme").mockReturnValue("light");
 
     await render(<Map recenterRequest={3} />);
@@ -101,7 +101,10 @@ describe("Map", () => {
       3,
     );
     expect(screen.queryByTestId("mock-user-location-marker")).toBeNull();
-    expect(screen.queryByTestId("mock-milestone-layer")).toBeNull();
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+      "milestones",
+      [],
+    );
     expect(screen.queryByTestId("mock-railway-lines-source")).toBeNull();
   });
 

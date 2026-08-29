@@ -3,6 +3,8 @@ import { type ReactElement } from "react";
 import { StyleSheet, useColorScheme, View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 
+import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
+
 interface UserLocation {
   readonly heading: number | null;
   readonly latitude: number;
@@ -31,6 +33,9 @@ const MARKER_COLORS = {
 } as const satisfies Record<"dark" | "light", MarkerColors>;
 
 const styles = StyleSheet.create({
+  mapOverlay: {
+    zIndex: 1,
+  },
   marker: {
     alignItems: "center",
     height: 50,
@@ -56,15 +61,16 @@ export default function UserLocationMarker({
   return (
     <Marker
       anchor="center"
-      id="current-location-marker"
+      id={MAP_LAYER_IDS.userLocation}
       lngLat={[location.longitude, location.latitude]}
+      style={styles.mapOverlay}
     >
       <View
         accessible
         accessibilityLabel="Position actuelle"
         pointerEvents="none"
         style={styles.marker}
-        testID="current-location-marker"
+        testID={MAP_LAYER_IDS.userLocation}
       >
         <Svg
           height={50}

@@ -3,6 +3,7 @@ import * as ReactNative from "react-native";
 
 import { Milestone } from "@/features/milestones/milestone";
 
+import { MAP_LAYER_IDS } from "./map-layer-ids";
 import MilestoneLayer, {
   milestonesToFeatureCollection,
 } from "./milestone-layer";
@@ -70,15 +71,15 @@ describe("MilestoneLayer", () => {
       "data",
       milestonesToFeatureCollection(MILESTONES),
     );
-    expect(screen.getByTestId("mock-railway-milestone-dots")).toHaveProp(
-      "minzoom",
-      10,
-    );
-    expect(screen.getByTestId("mock-railway-milestone-labels")).toHaveProp(
-      "minzoom",
-      13,
-    );
-    expect(screen.getByTestId("mock-railway-milestone-labels")).toHaveProp(
+    expect(
+      screen.getByTestId(`mock-${MAP_LAYER_IDS.milestone.dots}`),
+    ).toHaveProp("minzoom", 10);
+    expect(
+      screen.getByTestId(`mock-${MAP_LAYER_IDS.milestone.labels}`),
+    ).toHaveProp("minzoom", 13);
+    expect(
+      screen.getByTestId(`mock-${MAP_LAYER_IDS.milestone.labels}`),
+    ).toHaveProp(
       "layout",
       expect.objectContaining({
         "text-allow-overlap": false,
@@ -136,11 +137,12 @@ describe("MilestoneLayer", () => {
       <MilestoneLayer milestones={MILESTONES} selectedMilestone={MILESTONE} />,
     );
 
-    expect(screen.getByTestId("mock-railway-milestone-selected")).toHaveProp(
-      "filter",
-      ["==", ["id"], "001000:1:241"],
-    );
-    expect(screen.getByTestId("mock-railway-milestone-selected")).toHaveProp(
+    expect(
+      screen.getByTestId(`mock-${MAP_LAYER_IDS.milestone.selected}`),
+    ).toHaveProp("filter", ["==", ["id"], "001000:1:241"]);
+    expect(
+      screen.getByTestId(`mock-${MAP_LAYER_IDS.milestone.selected}`),
+    ).toHaveProp(
       "paint",
       expect.objectContaining({ "circle-color": "#FF6A00" }),
     );
@@ -151,14 +153,18 @@ describe("MilestoneLayer", () => {
 
     await render(<MilestoneLayer milestones={MILESTONES} />);
 
-    expect(screen.getByTestId("mock-railway-milestone-dots")).toHaveProp(
+    expect(
+      screen.getByTestId(`mock-${MAP_LAYER_IDS.milestone.dots}`),
+    ).toHaveProp(
       "paint",
       expect.objectContaining({
         "circle-color": "#FAF9F6",
         "circle-stroke-color": "#363632",
       }),
     );
-    expect(screen.getByTestId("mock-railway-milestone-labels")).toHaveProp(
+    expect(
+      screen.getByTestId(`mock-${MAP_LAYER_IDS.milestone.labels}`),
+    ).toHaveProp(
       "paint",
       expect.objectContaining({
         "text-color": "#FAF9F6",
