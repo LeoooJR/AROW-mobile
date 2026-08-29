@@ -13,10 +13,10 @@ files, request device location, persist state, select routes, or own simulation
 workflows. Add future map inputs and callbacks through narrow, explicitly typed
 props when a product requirement needs them.
 
-The map accepts optional domain milestone features from its owning screen and
-converts them to GeoJSON only inside this adapter boundary. It renders these
-points without querying SQLite or interpreting loading and failure states.
-Milestone dots appear from zoom 10 and collision-aware labels from zoom 13.
+The map accepts optional immutable `Milestone` domain instances from its owning
+screen and converts them to GeoJSON only inside this adapter boundary. It
+renders these points without querying SQLite or interpreting loading and failure
+states. Milestone dots appear from zoom 10 and collision-aware labels from zoom 13.
 
 ## Layout
 
@@ -80,12 +80,13 @@ the operating system's reduced-motion preference.
 The bundled AROW railway reference is supplied by the owning screen as a local
 GeoJSON URI. The adapter renders it from regional zoom onward as a restrained
 interactive line layer and translates validated source properties to the shared
-domain map-feature model when a feature is pressed. Milestone presses produce
-the other member of that same discriminated model. The owning screen remains
-responsible for the single selected feature and passes it back for orange
-highlighting. A selected milestone highlights both its point and parent railway
-section. The adapter does not load files, query persistence, or own selection
-state.
+domain `Railway` class when a feature is pressed. Milestone presses produce
+`Milestone` instances, and their shared railway-section key drives parent-line
+highlighting. The generic map-feature abstraction itself carries no railway or
+geometry fields. The owning screen remains responsible for the single selected
+feature and passes it back for orange highlighting. A selected milestone
+highlights both its point and parent railway section. The adapter does not load
+files, query persistence, or own selection state.
 
 Do not add other GeoJSON, markers, annotations, location tracking, or map event
 handling without extending this context for that feature first.

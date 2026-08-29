@@ -15,12 +15,9 @@ import { LIGHT_MAP_STYLE } from "@/components/adapters/map/map-style-light";
 import MilestoneLayer from "@/components/adapters/map/milestone-layer";
 import RailwayLinesSource from "@/components/adapters/map/railway-lines-source";
 import UserLocationMarker from "@/components/adapters/map/user-location-marker";
-import { railwaySectionKey } from "@/features/map-features/map-features";
-import {
-  type GeographicCoordinates,
-  type MapFeature,
-  type MilestoneFeature,
-} from "@/types/map-feature";
+import type { MapFeature } from "@/features/map-features/map-feature";
+import type { Milestone } from "@/features/milestones/milestone";
+import type { GeographicCoordinates } from "@/types/geographic-coordinates";
 
 export interface MapLocation extends GeographicCoordinates {
   readonly heading: number | null;
@@ -28,7 +25,7 @@ export interface MapLocation extends GeographicCoordinates {
 
 export interface MapProps {
   readonly location?: MapLocation;
-  readonly milestones?: readonly MilestoneFeature[];
+  readonly milestones?: readonly Milestone[];
   readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly railwayData?: string;
   readonly recenterRequest?: number;
@@ -52,9 +49,7 @@ export default function Map({
   const colorScheme = useColorScheme();
   const [bearing, setBearing] = useState(0);
   const selectedSection =
-    selectedFeature === undefined
-      ? undefined
-      : railwaySectionKey(selectedFeature);
+    selectedFeature === undefined ? undefined : selectedFeature.key;
   const selectedMilestone =
     selectedFeature?.kind === "milestone" ? selectedFeature : undefined;
 

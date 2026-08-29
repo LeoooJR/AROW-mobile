@@ -5,10 +5,10 @@ import { View } from "react-native";
 import Map from "@/components/adapters/map/map";
 import LocationBar from "@/components/composites/location-bar";
 import MapFeatureDetailsCard from "@/components/composites/map-feature-details-card";
+import type { MapFeature } from "@/features/map-features/map-feature";
 import { useMilestones } from "@/features/milestones/use-milestones";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 import railwayLinesAsset from "@/statics/lignes-par-type.geojson";
-import type { MapFeature } from "@/types/map-feature";
 
 export default function Index() {
   const [railwayAssets] = useAssets(railwayLinesAsset);

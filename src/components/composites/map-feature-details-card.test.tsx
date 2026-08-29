@@ -1,6 +1,7 @@
 import { render, screen, userEvent } from "@testing-library/react-native";
 
-import type { MilestoneFeature, RailwayFeature } from "@/types/map-feature";
+import { Milestone } from "@/features/milestones/milestone";
+import { Railway } from "@/features/railways/railway";
 
 import MapFeatureDetailsCard from "./map-feature-details-card";
 
@@ -8,25 +9,23 @@ jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ bottom: 24, left: 0, right: 0, top: 0 }),
 }));
 
-const railway = {
+const railway = new Railway({
   endMilestone: "137+980",
   gaiaId: "4718490e-6665-11e3-afff-01f464e0362d",
-  kind: "railway",
   lineCode: "340311",
   name: "Raccordement de Rouen-Martainville",
   railwayType: "Raccordement",
   sectionRank: 1,
   startMilestone: "136+772",
-} as const satisfies RailwayFeature;
+});
 
-const milestone = {
+const milestone = new Milestone({
   coordinates: { latitude: 45.74491, longitude: 4.86234 },
   kilometer: 241,
-  kind: "milestone",
   label: "241+000",
   lineCode: "001000",
   sectionRank: 1,
-} as const satisfies MilestoneFeature;
+});
 
 describe("MapFeatureDetailsCard", () => {
   test("shows compact operational railway metadata", async () => {
@@ -60,10 +59,15 @@ describe("MapFeatureDetailsCard", () => {
   test("formats coordinates in the southern and western hemispheres", async () => {
     await render(
       <MapFeatureDetailsCard
-        feature={{
-          ...milestone,
-          coordinates: { latitude: -12.5, longitude: -3.25 },
-        }}
+        feature={
+          new Milestone({
+            coordinates: { latitude: -12.5, longitude: -3.25 },
+            kilometer: milestone.kilometer,
+            label: milestone.label,
+            lineCode: milestone.lineCode,
+            sectionRank: milestone.sectionRank,
+          })
+        }
         onClose={jest.fn()}
       />,
     );

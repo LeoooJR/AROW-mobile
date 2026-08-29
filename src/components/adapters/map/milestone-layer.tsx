@@ -16,16 +16,13 @@ import {
   isPositiveInteger,
   isRecord,
 } from "@/components/adapters/map/geojson-validation";
-import {
-  canonicalRailwayLineCode,
-  milestoneId,
-} from "@/features/map-features/map-features";
-import { type MapFeature, type MilestoneFeature } from "@/types/map-feature";
+import { type MapFeature } from "@/features/map-features/map-feature";
+import { Milestone } from "@/features/milestones/milestone";
 
 export interface MilestoneLayerProps {
-  readonly milestones: readonly MilestoneFeature[];
+  readonly milestones: readonly Milestone[];
   readonly onFeaturePress?: (feature: MapFeature) => void;
-  readonly selectedMilestone?: MilestoneFeature;
+  readonly selectedMilestone?: Milestone;
 }
 
 interface MilestoneGeoJSONProperties {
@@ -77,7 +74,7 @@ const LABEL_LAYOUT = {
 } satisfies SymbolLayerSpecification["layout"];
 
 export function milestonesToFeatureCollection(
-  milestones: readonly MilestoneFeature[],
+  milestones: readonly Milestone[],
 ): MilestoneFeatureCollection {
   return {
     features: milestones.map((milestone): MilestoneGeoJSONFeature => ({
@@ -88,7 +85,7 @@ export function milestonesToFeatureCollection(
         ],
         type: "Point",
       },
-      id: milestoneId(milestone),
+      id: milestone.id,
       properties: {
         kilometer: milestone.kilometer,
         kind: milestone.kind,
@@ -125,9 +122,7 @@ function hasMilestoneMetadata(properties: Record<string, unknown>): boolean {
   return isNonEmptyString(properties.label);
 }
 
-function milestoneFromFeature(
-  feature: GeoJSON.Feature,
-): MilestoneFeature | undefined {
+function milestoneFromFeature(feature: GeoJSON.Feature): Milestone | undefined {
   if (
     feature.geometry.type !== "Point" ||
     !isMilestoneProperties(feature.properties)
@@ -142,16 +137,15 @@ function milestoneFromFeature(
     return undefined;
   }
 
-  const milestone: MilestoneFeature = {
+  const milestone = new Milestone({
     coordinates,
     kilometer: feature.properties.kilometer,
-    kind: "milestone",
     label: feature.properties.label,
-    lineCode: canonicalRailwayLineCode(feature.properties.lineCode),
+    lineCode: feature.properties.lineCode,
     sectionRank: feature.properties.sectionRank,
-  };
+  });
 
-  return feature.id === milestoneId(milestone) ? milestone : undefined;
+  return feature.id === milestone.id ? milestone : undefined;
 }
 
 export default function MilestoneLayer({
@@ -202,7 +196,7 @@ export default function MilestoneLayer({
       />
       {selectedMilestone === undefined ? null : (
         <Layer
-          filter={["==", ["id"], milestoneId(selectedMilestone)]}
+          filter={["==", ["id"], selectedMilestone.id]}
           id="railway-milestone-selected"
           key="railway-milestone-selected"
           minzoom={10}

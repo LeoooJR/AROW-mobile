@@ -1,6 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
+import { RailwaySectionKey } from "@/features/map-features/railway-section-key";
+import { Railway } from "@/features/railways/railway";
+
 import RailwayLinesSource from "./railway-lines-source";
 
 jest.mock("@maplibre/maplibre-react-native", () => {
@@ -73,7 +76,7 @@ describe("RailwayLinesSource", () => {
     await render(
       <RailwayLinesSource
         data="file:///railways.geojson"
-        selectedSection={{ lineCode: "340311", sectionRank: 1 }}
+        selectedSection={new RailwaySectionKey("340311", 1)}
       />,
     );
 
@@ -103,16 +106,10 @@ describe("RailwayLinesSource", () => {
     });
 
     expect(stopPropagation).toHaveBeenCalledTimes(1);
-    expect(onFeaturePress).toHaveBeenCalledWith({
-      endMilestone: "137+980",
-      gaiaId: "4718490e-6665-11e3-afff-01f464e0362d",
-      kind: "railway",
-      lineCode: "340311",
-      name: "Raccordement de Rouen-Martainville",
-      railwayType: "Raccordement",
-      sectionRank: 1,
-      startMilestone: "136+772",
-    });
+    expect(onFeaturePress).toHaveBeenCalledWith(expect.any(Railway));
+    const pressedRailway = onFeaturePress.mock.calls[0]?.[0];
+    expect(pressedRailway?.id).toBe("340311:1");
+    expect(pressedRailway?.name).toBe("Raccordement de Rouen-Martainville");
   });
 
   test("ignores malformed or incorrectly identified features", async () => {

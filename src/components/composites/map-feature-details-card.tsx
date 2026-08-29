@@ -5,7 +5,8 @@ import Svg, { Path } from "react-native-svg";
 
 import Card from "@/components/primitives/card";
 import Divider from "@/components/primitives/divider";
-import type { GeographicCoordinates, MapFeature } from "@/types/map-feature";
+import type { MapFeature } from "@/features/map-features/map-feature";
+import type { GeographicCoordinates } from "@/types/geographic-coordinates";
 
 export interface MapFeatureDetailsCardProps {
   readonly feature: MapFeature;

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
-import type { MilestoneFeature } from "@/types/map-feature";
+import { Milestone } from "@/features/milestones/milestone";
 
 import MilestoneLayer, {
   milestonesToFeatureCollection,
@@ -26,14 +26,13 @@ jest.mock("@maplibre/maplibre-react-native", () => {
   };
 });
 
-const MILESTONE = {
+const MILESTONE = new Milestone({
   coordinates: { latitude: 45.74, longitude: 4.86 },
   kilometer: 241,
-  kind: "milestone",
   label: "241+000",
   lineCode: "001000",
   sectionRank: 1,
-} as const satisfies MilestoneFeature;
+});
 
 const MILESTONES = [MILESTONE] as const;
 
@@ -105,7 +104,10 @@ describe("MilestoneLayer", () => {
     });
 
     expect(stopPropagation).toHaveBeenCalledTimes(1);
-    expect(onFeaturePress).toHaveBeenCalledWith(MILESTONE);
+    expect(onFeaturePress).toHaveBeenCalledWith(expect.any(Milestone));
+    const pressedMilestone = onFeaturePress.mock.calls[0]?.[0];
+    expect(pressedMilestone?.id).toBe(MILESTONE.id);
+    expect(pressedMilestone?.label).toBe(MILESTONE.label);
   });
 
   test("ignores malformed or incorrectly identified features", async () => {

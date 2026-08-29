@@ -1,6 +1,6 @@
 import type { Position } from "geojson";
 
-import type { GeographicCoordinates } from "@/types/map-feature";
+import type { GeographicCoordinates } from "@/types/geographic-coordinates";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;

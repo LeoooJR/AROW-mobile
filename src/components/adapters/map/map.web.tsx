@@ -1,11 +1,9 @@
 import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
-import type {
-  GeographicCoordinates,
-  MapFeature,
-  MilestoneFeature,
-} from "@/types/map-feature";
+import type { MapFeature } from "@/features/map-features/map-feature";
+import type { Milestone } from "@/features/milestones/milestone";
+import type { GeographicCoordinates } from "@/types/geographic-coordinates";
 
 export interface MapLocation extends GeographicCoordinates {
   readonly heading: number | null;
@@ -13,7 +11,7 @@ export interface MapLocation extends GeographicCoordinates {
 
 export interface MapProps {
   readonly location?: MapLocation;
-  readonly milestones?: readonly MilestoneFeature[];
+  readonly milestones?: readonly Milestone[];
   readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly railwayData?: string;
   readonly recenterRequest?: number;

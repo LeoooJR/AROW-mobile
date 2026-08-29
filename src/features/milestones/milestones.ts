@@ -1,11 +1,10 @@
-import { canonicalRailwayLineCode } from "@/features/map-features/map-features";
-import type { MilestoneFeature } from "@/types/map-feature";
+import { Milestone } from "@/features/milestones/milestone";
 
-export type MilestoneState =
+export type MilestoneLoadState =
   | { readonly status: "unavailable" }
   | { readonly status: "loading" }
   | {
-      readonly milestones: readonly MilestoneFeature[];
+      readonly milestones: readonly Milestone[];
       readonly status: "ready";
     }
   | { readonly status: "error" };
@@ -84,25 +83,24 @@ function parseMilestoneDatabaseRow(
 
 export function milestoneRowsToFeatures(
   rows: readonly unknown[],
-): readonly MilestoneFeature[] {
+): readonly Milestone[] {
   return rows.map((value, index) => {
     const row = parseMilestoneDatabaseRow(value, index);
-    const lineCode = canonicalRailwayLineCode(row.code_ligne);
-
-    if (row.ligne !== `${lineCode}-${row.rg_troncon}`) {
-      throw new Error(`Invalid milestone railway section at row ${index}`);
-    }
-
-    return {
+    const milestone = new Milestone({
       coordinates: {
         latitude: row.latitude,
         longitude: row.longitude,
       },
       kilometer: row.km,
-      kind: "milestone",
       label: row.label,
-      lineCode,
+      lineCode: row.code_ligne,
       sectionRank: row.rg_troncon,
-    } satisfies MilestoneFeature;
+    });
+
+    if (row.ligne !== `${milestone.lineCode}-${milestone.sectionRank}`) {
+      throw new Error(`Invalid milestone railway section at row ${index}`);
+    }
+
+    return milestone;
   });
 }

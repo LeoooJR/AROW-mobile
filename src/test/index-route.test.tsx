@@ -5,7 +5,7 @@ import {
   within,
 } from "@testing-library/react-native";
 
-import type { MapFeature } from "@/types/map-feature";
+import type { MapFeature } from "@/features/map-features/map-feature";
 
 import Index from "@/app/index";
 
@@ -39,6 +39,12 @@ jest.mock("@/hooks/platform/use-real-location", () => ({
 }));
 
 jest.mock("@/components/adapters/map/map", () => {
+  const { Milestone: MockMilestone } = jest.requireActual<
+    typeof import("@/features/milestones/milestone")
+  >("@/features/milestones/milestone");
+  const { Railway: MockRailway } = jest.requireActual<
+    typeof import("@/features/railways/railway")
+  >("@/features/railways/railway");
   const {
     Pressable: MockPressable,
     Text: MockText,
@@ -54,24 +60,22 @@ jest.mock("@/components/adapters/map/map", () => {
       readonly onFeaturePress?: (value: MapFeature) => void;
       readonly selectedFeature?: MapFeature;
     }) => {
-      const railway = {
+      const railway = new MockRailway({
         endMilestone: "137+980",
         gaiaId: "4718490e-6665-11e3-afff-01f464e0362d",
-        kind: "railway",
         lineCode: "340311",
         name: "Raccordement de Rouen-Martainville",
         railwayType: "Raccordement",
         sectionRank: 1,
         startMilestone: "136+772",
-      } as const;
-      const milestone = {
+      });
+      const milestone = new MockMilestone({
         coordinates: { latitude: 45.74491, longitude: 4.86234 },
         kilometer: 241,
-        kind: "milestone",
         label: "241+000",
         lineCode: "001000",
         sectionRank: 1,
-      } as const;
+      });
 
       return (
         <MockView>

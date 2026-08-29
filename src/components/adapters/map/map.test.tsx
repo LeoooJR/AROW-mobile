@@ -1,20 +1,19 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
-import type { MilestoneFeature } from "@/types/map-feature";
+import { Milestone } from "@/features/milestones/milestone";
 
 import { DARK_MAP_STYLE } from "./map-style-dark";
 import { LIGHT_MAP_STYLE } from "./map-style-light";
 import Map from "./map";
 
-const MILESTONE = {
+const MILESTONE = new Milestone({
   coordinates: { latitude: 45.74, longitude: 4.86 },
   kilometer: 241,
-  kind: "milestone",
   label: "241+000",
   lineCode: "001000",
   sectionRank: 1,
-} as const satisfies MilestoneFeature;
+});
 const MILESTONES = [MILESTONE] as const;
 
 jest.mock("@maplibre/maplibre-react-native", () => {
@@ -182,7 +181,7 @@ describe("Map", () => {
     );
     expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
       "selectedSection",
-      { lineCode: "001000", sectionRank: 1 },
+      MILESTONE.key,
     );
     expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
       "onFeaturePress",

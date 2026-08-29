@@ -9,19 +9,13 @@ import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 
 import {
   isCanonicalRailwayLineCode,
+  isNonEmptyString,
   isPositiveInteger,
   isRecord,
-  isString,
 } from "@/components/adapters/map/geojson-validation";
-import {
-  canonicalRailwayLineCode,
-  railwaySectionId,
-} from "@/features/map-features/map-features";
-import {
-  type MapFeature,
-  type RailwayFeature,
-  type RailwaySectionKey,
-} from "@/types/map-feature";
+import type { MapFeature } from "@/features/map-features/map-feature";
+import { RailwaySectionKey } from "@/features/map-features/railway-section-key";
+import { Railway } from "@/features/railways/railway";
 
 export interface RailwayLinesSourceProps {
   readonly data: string;
@@ -95,17 +89,15 @@ function hasRailwayIdentity(properties: Record<string, unknown>): boolean {
 
 function hasRailwayMetadata(properties: Record<string, unknown>): boolean {
   return (
-    isString(properties.idgaia) &&
-    isString(properties.lib_ligne) &&
-    isString(properties.pkd) &&
-    isString(properties.pkf) &&
-    isString(properties.type_ligne)
+    isNonEmptyString(properties.idgaia) &&
+    isNonEmptyString(properties.lib_ligne) &&
+    isNonEmptyString(properties.pkd) &&
+    isNonEmptyString(properties.pkf) &&
+    isNonEmptyString(properties.type_ligne)
   );
 }
 
-function railwayFromFeature(
-  feature: GeoJSON.Feature,
-): RailwayFeature | undefined {
+function railwayFromFeature(feature: GeoJSON.Feature): Railway | undefined {
   if (
     feature.geometry.type !== "LineString" &&
     feature.geometry.type !== "MultiLineString"
@@ -117,18 +109,17 @@ function railwayFromFeature(
     return undefined;
   }
 
-  const railway: RailwayFeature = {
+  const railway = new Railway({
     endMilestone: feature.properties.pkf,
     gaiaId: feature.properties.idgaia,
-    kind: "railway",
-    lineCode: canonicalRailwayLineCode(feature.properties.code_ligne),
+    lineCode: feature.properties.code_ligne,
     name: feature.properties.lib_ligne,
     railwayType: feature.properties.type_ligne,
     sectionRank: feature.properties.rg_troncon,
     startMilestone: feature.properties.pkd,
-  };
+  });
 
-  return feature.id === railwaySectionId(railway) ? railway : undefined;
+  return feature.id === railway.id ? railway : undefined;
 }
 
 export default function RailwayLinesSource({
@@ -180,7 +171,7 @@ export default function RailwayLinesSource({
       />
       {selectedSection === undefined ? null : (
         <Layer
-          filter={["==", ["id"], railwaySectionId(selectedSection)]}
+          filter={["==", ["id"], selectedSection.id]}
           id="arow-railway-lines-selected"
           key="arow-railway-lines-selected"
           layout={{

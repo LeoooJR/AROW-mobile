@@ -1,5 +1,5 @@
-import { type MilestoneState } from "./milestones";
+import { type MilestoneLoadState } from "./milestones";
 
-export function useMilestones(): MilestoneState {
+export function useMilestones(): MilestoneLoadState {
   return { status: "unavailable" };
 }
