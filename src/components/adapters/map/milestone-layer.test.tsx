@@ -111,6 +111,36 @@ describe("MilestoneLayer", () => {
     expect(pressedMilestone?.label).toBe(MILESTONE.label);
   });
 
+  test("accepts altitude in a pressed milestone position", async () => {
+    const onFeaturePress = jest.fn();
+    const stopPropagation = jest.fn();
+    const feature = milestonesToFeatureCollection(MILESTONES).features[0];
+    const featureWithAltitude = {
+      ...feature,
+      geometry: {
+        ...feature.geometry,
+        coordinates: [...feature.geometry.coordinates, 172],
+      },
+    };
+    await render(
+      <MilestoneLayer
+        milestones={MILESTONES}
+        onFeaturePress={onFeaturePress}
+      />,
+    );
+
+    await fireEvent(screen.getByTestId("mock-milestone-source"), "press", {
+      nativeEvent: { features: [featureWithAltitude] },
+      stopPropagation,
+    });
+
+    expect(stopPropagation).toHaveBeenCalledTimes(1);
+    expect(onFeaturePress).toHaveBeenCalledWith(expect.any(Milestone));
+    expect(onFeaturePress.mock.calls[0]?.[0].coordinates).toEqual(
+      MILESTONE.coordinates,
+    );
+  });
+
   test("ignores malformed or incorrectly identified features", async () => {
     const onFeaturePress = jest.fn();
     const stopPropagation = jest.fn();

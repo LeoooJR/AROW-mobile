@@ -42,14 +42,16 @@ function isCoordinateInRange(
 export function geographicCoordinatesFromPosition(
   position: Position,
 ): GeographicCoordinates | undefined {
-  if (position.length !== 2) {
+  if (position.length !== 2 && position.length !== 3) {
     return undefined;
   }
 
-  const [longitude, latitude] = position;
+  const [longitude, latitude, altitude] = position;
   if (
     !isCoordinateInRange(latitude, -90, 90) ||
-    !isCoordinateInRange(longitude, -180, 180)
+    !isCoordinateInRange(longitude, -180, 180) ||
+    (position.length === 3 &&
+      (typeof altitude !== "number" || !Number.isFinite(altitude)))
   ) {
     return undefined;
   }
