@@ -4,19 +4,19 @@ import { View } from "react-native";
 
 import Map from "@/components/adapters/map/map";
 import LocationBar from "@/components/composites/location-bar";
-import RailwayDetailsCard from "@/components/composites/railway-details-card";
+import MapFeatureDetailsCard from "@/components/composites/map-feature-details-card";
+import type { MapFeature } from "@/features/map-features/map-feature";
 import { useMilestones } from "@/features/milestones/use-milestones";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 import railwayLinesAsset from "@/statics/lignes-par-type.geojson";
-import type { RailwayLineMetadata } from "@/types/railway-line";
 
 export default function Index() {
   const [railwayAssets] = useAssets(railwayLinesAsset);
   const { openSettings, requestAccess, retry, state } = useRealLocation();
   const milestoneState = useMilestones();
   const [recenterRequest, setRecenterRequest] = useState(0);
-  const [selectedRailway, setSelectedRailway] = useState<
-    RailwayLineMetadata | undefined
+  const [selectedFeature, setSelectedFeature] = useState<
+    MapFeature | undefined
   >();
   const railwayData = railwayAssets?.[0]?.localUri ?? railwayAssets?.[0]?.uri;
   const currentLocation =
@@ -66,20 +66,21 @@ export default function Index() {
         location={currentLocation}
         milestones={
           milestoneState.status === "ready"
-            ? milestoneState.collection
+            ? milestoneState.milestones
             : undefined
         }
-        onRailwayPress={setSelectedRailway}
+        onFeaturePress={setSelectedFeature}
         railwayData={railwayData}
         recenterRequest={recenterRequest}
-        selectedRailway={selectedRailway}
+        selectedFeature={selectedFeature}
       />
-      {process.env.EXPO_OS !== "web" && selectedRailway !== undefined ? (
-        <RailwayDetailsCard
+      {process.env.EXPO_OS !== "web" && selectedFeature !== undefined ? (
+        <MapFeatureDetailsCard
+          feature={selectedFeature}
+          key={selectedFeature.kind}
           onClose={() => {
-            setSelectedRailway(undefined);
+            setSelectedFeature(undefined);
           }}
-          railway={selectedRailway}
         />
       ) : null}
       {process.env.EXPO_OS !== "web" ? (

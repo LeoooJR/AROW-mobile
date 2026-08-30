@@ -8,15 +8,20 @@ import { type ReactElement } from "react";
 import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 
 import {
-  railwayLineId,
-  type RailwayLineKey,
-  type RailwayLineMetadata,
-} from "@/types/railway-line";
+  isCanonicalRailwayLineCode,
+  isNonEmptyString,
+  isPositiveInteger,
+  isRecord,
+} from "@/components/adapters/map/geojson-validation";
+import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
+import type { MapFeature } from "@/features/map-features/map-feature";
+import { RailwaySectionKey } from "@/features/map-features/railway-section-key";
+import { Railway } from "@/features/railways/railway";
 
 export interface RailwayLinesSourceProps {
   readonly data: string;
-  readonly onRailwayPress?: (railway: RailwayLineMetadata) => void;
-  readonly selectedRailway?: RailwayLineKey;
+  readonly onFeaturePress?: (feature: MapFeature) => void;
+  readonly selectedSection?: RailwaySectionKey;
 }
 
 interface RailwayLineProperties {
@@ -69,25 +74,31 @@ const SELECTED_LINE_WIDTH: LineWidth = [
 function isRailwayLineProperties(
   properties: GeoJSON.GeoJsonProperties,
 ): properties is RailwayLineProperties {
-  if (properties === null) {
+  if (!isRecord(properties)) {
     return false;
   }
 
+  return hasRailwayIdentity(properties) && hasRailwayMetadata(properties);
+}
+
+function hasRailwayIdentity(properties: Record<string, unknown>): boolean {
   return (
-    typeof properties.code_ligne === "string" &&
-    typeof properties.idgaia === "string" &&
-    typeof properties.lib_ligne === "string" &&
-    typeof properties.pkd === "string" &&
-    typeof properties.pkf === "string" &&
-    typeof properties.rg_troncon === "number" &&
-    Number.isInteger(properties.rg_troncon) &&
-    typeof properties.type_ligne === "string"
+    isCanonicalRailwayLineCode(properties.code_ligne) &&
+    isPositiveInteger(properties.rg_troncon)
   );
 }
 
-function metadataFromFeature(
-  feature: GeoJSON.Feature,
-): RailwayLineMetadata | undefined {
+function hasRailwayMetadata(properties: Record<string, unknown>): boolean {
+  return (
+    isNonEmptyString(properties.idgaia) &&
+    isNonEmptyString(properties.lib_ligne) &&
+    isNonEmptyString(properties.pkd) &&
+    isNonEmptyString(properties.pkf) &&
+    isNonEmptyString(properties.type_ligne)
+  );
+}
+
+function railwayFromFeature(feature: GeoJSON.Feature): Railway | undefined {
   if (
     feature.geometry.type !== "LineString" &&
     feature.geometry.type !== "MultiLineString"
@@ -99,23 +110,23 @@ function metadataFromFeature(
     return undefined;
   }
 
-  const metadata: RailwayLineMetadata = {
-    codeLigne: feature.properties.code_ligne,
+  const railway = new Railway({
+    endMilestone: feature.properties.pkf,
     gaiaId: feature.properties.idgaia,
+    lineCode: feature.properties.code_ligne,
     name: feature.properties.lib_ligne,
-    pkDebut: feature.properties.pkd,
-    pkFin: feature.properties.pkf,
-    rangTroncon: feature.properties.rg_troncon,
-    type: feature.properties.type_ligne,
-  };
+    railwayType: feature.properties.type_ligne,
+    sectionRank: feature.properties.rg_troncon,
+    startMilestone: feature.properties.pkd,
+  });
 
-  return feature.id === railwayLineId(metadata) ? metadata : undefined;
+  return feature.id === railway.id ? railway : undefined;
 }
 
 export default function RailwayLinesSource({
   data,
-  onRailwayPress,
-  selectedRailway,
+  onFeaturePress,
+  selectedSection,
 }: RailwayLinesSourceProps): ReactElement {
   const colorScheme = useColorScheme();
   const colors =
@@ -125,15 +136,15 @@ export default function RailwayLinesSource({
     event: NativeSyntheticEvent<PressEventWithFeatures>,
   ): void => {
     const railway = event.nativeEvent.features
-      .map(metadataFromFeature)
-      .find((metadata) => metadata !== undefined);
+      .map(railwayFromFeature)
+      .find((feature) => feature !== undefined);
 
     if (railway === undefined) {
       return;
     }
 
     event.stopPropagation();
-    onRailwayPress?.(railway);
+    onFeaturePress?.(railway);
   };
 
   return (
@@ -144,7 +155,9 @@ export default function RailwayLinesSource({
       testID="railway-lines-source"
     >
       <Layer
-        id="arow-railway-lines-passive"
+        beforeId={MAP_LAYER_IDS.milestone.dots}
+        id={MAP_LAYER_IDS.railway.passive}
+        key={MAP_LAYER_IDS.railway.passive}
         layout={{
           "line-cap": "round",
           "line-join": "round",
@@ -158,10 +171,12 @@ export default function RailwayLinesSource({
         testID="railway-lines-passive-layer"
         type="line"
       />
-      {selectedRailway === undefined ? null : (
+      {selectedSection === undefined ? null : (
         <Layer
-          filter={["==", ["id"], railwayLineId(selectedRailway)]}
-          id="arow-railway-lines-selected"
+          beforeId={MAP_LAYER_IDS.milestone.dots}
+          filter={["==", ["id"], selectedSection.id]}
+          id={MAP_LAYER_IDS.railway.selected}
+          key={MAP_LAYER_IDS.railway.selected}
           layout={{
             "line-cap": "round",
             "line-join": "round",

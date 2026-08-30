@@ -1,13 +1,14 @@
 appId: com.leooojrrr.AROWmobile
-name: Inspect a railway line after granting location access
+name: Inspect railway and milestone map features after granting location access
 tags:
   - journey
   - location
   - map
+  - milestone
   - railway
 ---
 # Preserve the development client's remembered Metro connection while following
-# the first-use journey from location permission to railway exploration.
+# the first-use journey from location permission to map-feature exploration.
 - stopApp
 - setPermissions:
     permissions:
@@ -32,25 +33,50 @@ tags:
 - assertVisible:
     id: "location-status"
 - setLocation:
-    latitude: 49.4364444709
-    longitude: 1.121872878
+    latitude: 45.74491
+    longitude: 4.86234
 - extendedWaitUntil:
-    visible: ".*49\\.43644 N.*"
+    visible: ".*45\\.74491 N.*"
     timeout: 30000
 - extendedWaitUntil:
     visible: "(Connectée|Active)"
     timeout: 30000
 - waitForAnimationToEnd
-# This point follows the Paris–Le Havre main line north of the centered fix.
+# The 509+000 milestone is visible northwest of the centered fix after the
+# fresh-start status bar settles.
 - tapOn:
-    point: "510,1008"
+    point: "172,810"
     retryTapIfNoChange: true
 - extendedWaitUntil:
-    visible: "Ligne de Paris-St-Lazare au Havre"
+    visible: "PK 509\\+000"
     timeout: 10000
-- assertVisible: "340000"
+- assertVisible: "POINT KILOMÉTRIQUE"
+- assertVisible: "893000"
 - assertVisible: "1"
-- assertVisible: "000\\+031 → 227\\+918"
+- assertVisible: "509\\+000"
+- assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
+# Replace the milestone selection with its parent railway section.
 - tapOn:
-    id: "close-railway-details"
-- assertNotVisible: "Ligne de Paris-St-Lazare au Havre"
+    point: "260,300"
+    retryTapIfNoChange: true
+- extendedWaitUntil:
+    visible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
+    timeout: 10000
+- assertNotVisible: "PK 509\\+000"
+- assertVisible: "893000"
+- assertVisible: "1"
+- assertVisible: "499\\+752 → 511\\+605"
+# A selected railway remains below overlapping milestones for rendering and
+# press dispatch, so the milestone can replace the railway selection.
+- tapOn:
+    point: "172,810"
+    retryTapIfNoChange: true
+- extendedWaitUntil:
+    visible: "PK 509\\+000"
+    timeout: 10000
+- assertNotVisible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
+- assertVisible: "POINT KILOMÉTRIQUE"
+- assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
+- tapOn:
+    id: "close-map-feature-details"
+- assertNotVisible: "PK 509\\+000"

@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 
-import {
-  milestoneRowsToFeatureCollection,
-  type MilestoneState,
-} from "./milestones";
+import { milestoneRowsToFeatures, type MilestoneLoadState } from "./milestones";
 
 const MILESTONE_QUERY = `
   SELECT ligne, code_ligne, km, label, rg_troncon, latitude, longitude
   FROM kilometric_points
 `;
 
-export function useMilestones(): MilestoneState {
+export function useMilestones(): MilestoneLoadState {
   const database = useSQLiteContext();
-  const [state, setState] = useState<MilestoneState>({ status: "loading" });
+  const [state, setState] = useState<MilestoneLoadState>({
+    status: "loading",
+  });
 
   useEffect(() => {
     let active = true;
@@ -21,10 +20,10 @@ export function useMilestones(): MilestoneState {
     async function loadMilestones(): Promise<void> {
       try {
         const rows = await database.getAllAsync<unknown>(MILESTONE_QUERY);
-        const collection = milestoneRowsToFeatureCollection(rows);
+        const milestones = milestoneRowsToFeatures(rows);
 
         if (active) {
-          setState({ collection, status: "ready" });
+          setState({ milestones, status: "ready" });
         }
       } catch {
         if (active) {

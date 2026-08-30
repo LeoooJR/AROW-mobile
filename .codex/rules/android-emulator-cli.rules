@@ -119,8 +119,26 @@ prefix_rule(
     ],
 )
 
-# The screen command has no device option, so require ANDROID_SERIAL instead of
-# allowing target-ambiguous bare `android screen capture` invocations.
+# Capturing a screenshot is read-only. Allow the Android CLI to use its active
+# target so the common post-launch inspection workflow does not require an
+# approval round trip.
+prefix_rule(
+    pattern = ["android", "screen", "capture"],
+    decision = "allow",
+    justification = "Capturing the active Android target's screen is a non-destructive inspection operation.",
+    match = [
+        "android screen capture",
+        "android screen capture -o .maestro/artifacts/arow-screen.png",
+        "android screen capture --annotate -o .maestro/artifacts/arow-annotated.png",
+    ],
+    not_match = [
+        "android screen record",
+        "android screen tap 100 200",
+    ],
+)
+
+# Explicit emulator selection remains available when multiple Android targets
+# are connected.
 prefix_rule(
     pattern = [
         "env",
@@ -145,7 +163,6 @@ prefix_rule(
         "env ANDROID_SERIAL=emulator-5554 android screen capture -o .maestro/artifacts/arow-mocked-fast.png",
     ],
     not_match = [
-        "android screen capture -o .maestro/artifacts/arow-screen.png",
         "env ANDROID_SERIAL=R5CT123456A android screen capture -o .maestro/artifacts/arow-screen.png",
     ],
 )

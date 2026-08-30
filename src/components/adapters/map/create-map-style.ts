@@ -1,5 +1,7 @@
 import type { StyleSpecification } from "@maplibre/maplibre-react-native";
 
+import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
+
 interface MapStylePalette {
   readonly border: string;
   readonly borderStrong: string;
@@ -33,14 +35,14 @@ export function createMapStyle(
     },
     layers: [
       {
-        id: "background",
+        id: MAP_LAYER_IDS.base.background,
         type: "background",
         paint: {
           "background-color": palette.canvas,
         },
       },
       {
-        id: "landuse-residential",
+        id: MAP_LAYER_IDS.base.landuseResidential,
         type: "fill",
         source: "openmaptiles",
         "source-layer": "landuse",
@@ -60,7 +62,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "landuse-industrial",
+        id: MAP_LAYER_IDS.base.landuseIndustrial,
         type: "fill",
         source: "openmaptiles",
         "source-layer": "landuse",
@@ -78,7 +80,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "landcover",
+        id: MAP_LAYER_IDS.base.landcover,
         type: "fill",
         source: "openmaptiles",
         "source-layer": "landcover",
@@ -104,7 +106,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "park",
+        id: MAP_LAYER_IDS.base.park,
         type: "fill",
         source: "openmaptiles",
         "source-layer": "park",
@@ -114,7 +116,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "water",
+        id: MAP_LAYER_IDS.base.water,
         type: "fill",
         source: "openmaptiles",
         "source-layer": "water",
@@ -125,7 +127,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "waterway",
+        id: MAP_LAYER_IDS.base.waterway,
         type: "line",
         source: "openmaptiles",
         "source-layer": "waterway",
@@ -136,7 +138,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "boundary-region",
+        id: MAP_LAYER_IDS.base.boundaryRegion,
         type: "line",
         source: "openmaptiles",
         "source-layer": "boundary",
@@ -150,7 +152,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "boundary-country",
+        id: MAP_LAYER_IDS.base.boundaryCountry,
         type: "line",
         source: "openmaptiles",
         "source-layer": "boundary",
@@ -162,7 +164,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "building",
+        id: MAP_LAYER_IDS.base.building,
         type: "fill",
         source: "openmaptiles",
         "source-layer": "building",
@@ -174,7 +176,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "road-tunnel-casing",
+        id: MAP_LAYER_IDS.base.roadTunnelCasing,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -218,7 +220,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "road-tunnel-inner",
+        id: MAP_LAYER_IDS.base.roadTunnelInner,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -262,7 +264,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "road-path",
+        id: MAP_LAYER_IDS.base.roadPath,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -280,7 +282,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "road-minor-casing",
+        id: MAP_LAYER_IDS.base.roadMinorCasing,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -314,7 +316,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "road-minor-inner",
+        id: MAP_LAYER_IDS.base.roadMinorInner,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -348,7 +350,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "road-major-casing",
+        id: MAP_LAYER_IDS.base.roadMajorCasing,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -382,7 +384,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "road-major-inner",
+        id: MAP_LAYER_IDS.base.roadMajorInner,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -416,7 +418,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "railway-tunnel",
+        id: MAP_LAYER_IDS.base.railwayTunnel,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -438,7 +440,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "railway-service-bed",
+        id: MAP_LAYER_IDS.base.railwayServiceBed,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -459,7 +461,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "railway-service",
+        id: MAP_LAYER_IDS.base.railwayService,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -481,7 +483,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "railway-main-bed",
+        id: MAP_LAYER_IDS.base.railwayMainBed,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -512,7 +514,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "railway-main-ties",
+        id: MAP_LAYER_IDS.base.railwayMainTies,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -545,7 +547,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "railway-main",
+        id: MAP_LAYER_IDS.base.railwayMain,
         type: "line",
         source: "openmaptiles",
         "source-layer": "transportation",
@@ -576,7 +578,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "label-country",
+        id: MAP_LAYER_IDS.base.labelCountry,
         type: "symbol",
         source: "openmaptiles",
         "source-layer": "place",
@@ -596,7 +598,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "label-state",
+        id: MAP_LAYER_IDS.base.labelState,
         type: "symbol",
         source: "openmaptiles",
         "source-layer": "place",
@@ -617,7 +619,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "label-city",
+        id: MAP_LAYER_IDS.base.labelCity,
         type: "symbol",
         source: "openmaptiles",
         "source-layer": "place",
@@ -636,7 +638,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "label-settlement",
+        id: MAP_LAYER_IDS.base.labelSettlement,
         type: "symbol",
         source: "openmaptiles",
         "source-layer": "place",
@@ -655,7 +657,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "label-neighbourhood",
+        id: MAP_LAYER_IDS.base.labelNeighbourhood,
         type: "symbol",
         source: "openmaptiles",
         "source-layer": "place",
@@ -681,7 +683,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "label-water",
+        id: MAP_LAYER_IDS.base.labelWater,
         type: "symbol",
         source: "openmaptiles",
         "source-layer": "water_name",
@@ -699,7 +701,7 @@ export function createMapStyle(
         },
       },
       {
-        id: "label-road",
+        id: MAP_LAYER_IDS.base.labelRoad,
         type: "symbol",
         source: "openmaptiles",
         "source-layer": "transportation_name",

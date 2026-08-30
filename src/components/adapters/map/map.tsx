@@ -15,22 +15,21 @@ import { LIGHT_MAP_STYLE } from "@/components/adapters/map/map-style-light";
 import MilestoneLayer from "@/components/adapters/map/milestone-layer";
 import RailwayLinesSource from "@/components/adapters/map/railway-lines-source";
 import UserLocationMarker from "@/components/adapters/map/user-location-marker";
-import { type MilestoneFeatureCollection } from "@/features/milestones/milestones";
-import type { RailwayLineKey, RailwayLineMetadata } from "@/types/railway-line";
+import type { MapFeature } from "@/features/map-features/map-feature";
+import type { Milestone } from "@/features/milestones/milestone";
+import type { GeographicCoordinates } from "@/types/geographic-coordinates";
 
-export interface MapLocation {
+export interface MapLocation extends GeographicCoordinates {
   readonly heading: number | null;
-  readonly latitude: number;
-  readonly longitude: number;
 }
 
 export interface MapProps {
   readonly location?: MapLocation;
-  readonly milestones?: MilestoneFeatureCollection;
-  readonly onRailwayPress?: (railway: RailwayLineMetadata) => void;
+  readonly milestones?: readonly Milestone[];
+  readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly railwayData?: string;
   readonly recenterRequest?: number;
-  readonly selectedRailway?: RailwayLineKey;
+  readonly selectedFeature?: MapFeature;
 }
 
 const styles = StyleSheet.create({
@@ -39,16 +38,22 @@ const styles = StyleSheet.create({
   },
 });
 
+const EMPTY_MILESTONES = Object.freeze([]) satisfies readonly Milestone[];
+
 export default function Map({
   location,
   milestones,
-  onRailwayPress,
+  onFeaturePress,
   railwayData,
   recenterRequest,
-  selectedRailway,
+  selectedFeature,
 }: MapProps): ReactElement {
   const colorScheme = useColorScheme();
   const [bearing, setBearing] = useState(0);
+  const selectedSection =
+    selectedFeature === undefined ? undefined : selectedFeature.key;
+  const selectedMilestone =
+    selectedFeature?.kind === "milestone" ? selectedFeature : undefined;
 
   const onRegionDidChange = useCallback(
     (event: NativeSyntheticEvent<ViewStateChangeEvent>) => {
@@ -66,15 +71,17 @@ export default function Map({
       testID="arow-map"
     >
       <MapCamera location={location} recenterRequest={recenterRequest} />
+      <MilestoneLayer
+        milestones={milestones ?? EMPTY_MILESTONES}
+        onFeaturePress={onFeaturePress}
+        selectedMilestone={selectedMilestone}
+      />
       {railwayData === undefined ? null : (
         <RailwayLinesSource
           data={railwayData}
-          onRailwayPress={onRailwayPress}
-          selectedRailway={selectedRailway}
+          onFeaturePress={onFeaturePress}
+          selectedSection={selectedSection}
         />
-      )}
-      {milestones === undefined ? null : (
-        <MilestoneLayer milestones={milestones} />
       )}
       {location === undefined ? null : (
         <UserLocationMarker bearing={bearing} location={location} />

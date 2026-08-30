@@ -1,16 +1,20 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
-import { type MilestoneFeatureCollection } from "@/features/milestones/milestones";
+import { Milestone } from "@/features/milestones/milestone";
 
 import { DARK_MAP_STYLE } from "./map-style-dark";
 import { LIGHT_MAP_STYLE } from "./map-style-light";
 import Map from "./map";
 
-const MILESTONES: MilestoneFeatureCollection = {
-  features: [],
-  type: "FeatureCollection",
-};
+const MILESTONE = new Milestone({
+  coordinates: { latitude: 45.74, longitude: 4.86 },
+  kilometer: 241,
+  label: "241+000",
+  lineCode: "001000",
+  sectionRank: 1,
+});
+const MILESTONES = [MILESTONE] as const;
 
 jest.mock("@maplibre/maplibre-react-native", () => {
   const { View: MockView } =
@@ -79,7 +83,7 @@ describe("Map", () => {
     jest.restoreAllMocks();
   });
 
-  test("uses the light map style and omits the marker without a location", async () => {
+  test("uses the light map style and keeps an empty milestone anchor", async () => {
     jest.spyOn(ReactNative, "useColorScheme").mockReturnValue("light");
 
     await render(<Map recenterRequest={3} />);
@@ -97,7 +101,10 @@ describe("Map", () => {
       3,
     );
     expect(screen.queryByTestId("mock-user-location-marker")).toBeNull();
-    expect(screen.queryByTestId("mock-milestone-layer")).toBeNull();
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+      "milestones",
+      [],
+    );
     expect(screen.queryByTestId("mock-railway-lines-source")).toBeNull();
   });
 
@@ -155,15 +162,15 @@ describe("Map", () => {
     );
   });
 
-  test("forwards the railway source, selection, and press callback", async () => {
-    const onRailwayPress = jest.fn();
-    const selectedRailway = { codeLigne: "340311", rangTroncon: 1 };
+  test("forwards a shared callback and derives linked milestone selection", async () => {
+    const onFeaturePress = jest.fn();
 
     await render(
       <Map
-        onRailwayPress={onRailwayPress}
+        milestones={MILESTONES}
+        onFeaturePress={onFeaturePress}
         railwayData="file:///railways.geojson"
-        selectedRailway={selectedRailway}
+        selectedFeature={MILESTONE}
       />,
     );
 
@@ -172,12 +179,20 @@ describe("Map", () => {
       "file:///railways.geojson",
     );
     expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
-      "onRailwayPress",
-      onRailwayPress,
+      "onFeaturePress",
+      onFeaturePress,
     );
     expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
-      "selectedRailway",
-      selectedRailway,
+      "selectedSection",
+      MILESTONE.key,
+    );
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+      "onFeaturePress",
+      onFeaturePress,
+    );
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+      "selectedMilestone",
+      MILESTONE,
     );
   });
 });

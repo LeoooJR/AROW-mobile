@@ -1,26 +1,10 @@
-import type { Feature, FeatureCollection, Point } from "geojson";
+import { Milestone } from "@/features/milestones/milestone";
 
-export interface MilestoneProperties {
-  readonly codeLigne: number;
-  readonly kilometer: number;
-  readonly label: string;
-  readonly latitude: number;
-  readonly ligne: string;
-  readonly longitude: number;
-  readonly sectionRank: number;
-}
-
-export type MilestoneFeature = Feature<Point, MilestoneProperties>;
-export type MilestoneFeatureCollection = FeatureCollection<
-  Point,
-  MilestoneProperties
->;
-
-export type MilestoneState =
+export type MilestoneLoadState =
   | { readonly status: "unavailable" }
   | { readonly status: "loading" }
   | {
-      readonly collection: MilestoneFeatureCollection;
+      readonly milestones: readonly Milestone[];
       readonly status: "ready";
     }
   | { readonly status: "error" };
@@ -47,6 +31,14 @@ function isInteger(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value);
 }
 
+function isNonNegativeInteger(value: unknown): value is number {
+  return isInteger(value) && value >= 0;
+}
+
+function isPositiveInteger(value: unknown): value is number {
+  return isInteger(value) && value > 0;
+}
+
 function isCoordinate(
   value: unknown,
   minimum: number,
@@ -67,10 +59,11 @@ function parseMilestoneDatabaseRow(
   if (
     !isRecord(value) ||
     !isNonEmptyString(value.ligne) ||
-    !isInteger(value.code_ligne) ||
-    !isInteger(value.km) ||
+    !isNonNegativeInteger(value.code_ligne) ||
+    value.code_ligne > 999_999 ||
+    !isNonNegativeInteger(value.km) ||
     !isNonEmptyString(value.label) ||
-    !isInteger(value.rg_troncon) ||
+    !isPositiveInteger(value.rg_troncon) ||
     !isCoordinate(value.latitude, -90, 90) ||
     !isCoordinate(value.longitude, -180, 180)
   ) {
@@ -88,31 +81,26 @@ function parseMilestoneDatabaseRow(
   };
 }
 
-export function milestoneRowsToFeatureCollection(
+export function milestoneRowsToFeatures(
   rows: readonly unknown[],
-): MilestoneFeatureCollection {
-  return {
-    features: rows.map((value, index) => {
-      const row = parseMilestoneDatabaseRow(value, index);
+): readonly Milestone[] {
+  return rows.map((value, index) => {
+    const row = parseMilestoneDatabaseRow(value, index);
+    const milestone = new Milestone({
+      coordinates: {
+        latitude: row.latitude,
+        longitude: row.longitude,
+      },
+      kilometer: row.km,
+      label: row.label,
+      lineCode: row.code_ligne,
+      sectionRank: row.rg_troncon,
+    });
 
-      return {
-        geometry: {
-          coordinates: [row.longitude, row.latitude],
-          type: "Point",
-        },
-        id: `${row.code_ligne}:${row.rg_troncon}:${row.km}`,
-        properties: {
-          codeLigne: row.code_ligne,
-          kilometer: row.km,
-          label: row.label,
-          latitude: row.latitude,
-          ligne: row.ligne,
-          longitude: row.longitude,
-          sectionRank: row.rg_troncon,
-        },
-        type: "Feature",
-      } satisfies MilestoneFeature;
-    }),
-    type: "FeatureCollection",
-  };
+    if (row.ligne !== `${milestone.lineCode}-${milestone.sectionRank}`) {
+      throw new Error(`Invalid milestone railway section at row ${index}`);
+    }
+
+    return milestone;
+  });
 }

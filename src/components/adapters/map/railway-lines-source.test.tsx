@@ -1,6 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
+import { RailwaySectionKey } from "@/features/map-features/railway-section-key";
+import { Railway } from "@/features/railways/railway";
+
+import { MAP_LAYER_IDS } from "./map-layer-ids";
 import RailwayLinesSource from "./railway-lines-source";
 
 jest.mock("@maplibre/maplibre-react-native", () => {
@@ -58,6 +62,10 @@ describe("RailwayLinesSource", () => {
       7,
     );
     expect(screen.getByTestId("railway-lines-passive-layer")).toHaveProp(
+      "beforeId",
+      MAP_LAYER_IDS.milestone.dots,
+    );
+    expect(screen.getByTestId("railway-lines-passive-layer")).toHaveProp(
       "paint",
       expect.objectContaining({
         "line-color": "#0A0A0A",
@@ -73,7 +81,7 @@ describe("RailwayLinesSource", () => {
     await render(
       <RailwayLinesSource
         data="file:///railways.geojson"
-        selectedRailway={{ codeLigne: "340311", rangTroncon: 1 }}
+        selectedSection={new RailwaySectionKey("340311", 1)}
       />,
     );
 
@@ -82,18 +90,22 @@ describe("RailwayLinesSource", () => {
       ["==", ["id"], "340311:1"],
     );
     expect(screen.getByTestId("railway-lines-selected-layer")).toHaveProp(
+      "beforeId",
+      MAP_LAYER_IDS.milestone.dots,
+    );
+    expect(screen.getByTestId("railway-lines-selected-layer")).toHaveProp(
       "paint",
       expect.objectContaining({ "line-color": "#FF7A1A" }),
     );
   });
 
   test("emits validated railway metadata and stops press propagation", async () => {
-    const onRailwayPress = jest.fn();
+    const onFeaturePress = jest.fn();
     const stopPropagation = jest.fn();
     await render(
       <RailwayLinesSource
         data="file:///railways.geojson"
-        onRailwayPress={onRailwayPress}
+        onFeaturePress={onFeaturePress}
       />,
     );
 
@@ -103,24 +115,19 @@ describe("RailwayLinesSource", () => {
     });
 
     expect(stopPropagation).toHaveBeenCalledTimes(1);
-    expect(onRailwayPress).toHaveBeenCalledWith({
-      codeLigne: "340311",
-      gaiaId: "4718490e-6665-11e3-afff-01f464e0362d",
-      name: "Raccordement de Rouen-Martainville",
-      pkDebut: "136+772",
-      pkFin: "137+980",
-      rangTroncon: 1,
-      type: "Raccordement",
-    });
+    expect(onFeaturePress).toHaveBeenCalledWith(expect.any(Railway));
+    const pressedRailway = onFeaturePress.mock.calls[0]?.[0];
+    expect(pressedRailway?.id).toBe("340311:1");
+    expect(pressedRailway?.name).toBe("Raccordement de Rouen-Martainville");
   });
 
   test("ignores malformed or incorrectly identified features", async () => {
-    const onRailwayPress = jest.fn();
+    const onFeaturePress = jest.fn();
     const stopPropagation = jest.fn();
     await render(
       <RailwayLinesSource
         data="file:///railways.geojson"
-        onRailwayPress={onRailwayPress}
+        onFeaturePress={onFeaturePress}
       />,
     );
 
@@ -132,6 +139,6 @@ describe("RailwayLinesSource", () => {
     });
 
     expect(stopPropagation).not.toHaveBeenCalled();
-    expect(onRailwayPress).not.toHaveBeenCalled();
+    expect(onFeaturePress).not.toHaveBeenCalled();
   });
 });

@@ -1,7 +1,8 @@
 import { renderHook, waitFor } from "@testing-library/react-native";
 import { useSQLiteContext } from "expo-sqlite";
 
-import { milestoneRowsToFeatureCollection } from "./milestones";
+import { Milestone } from "./milestone";
+import { milestoneRowsToFeatures } from "./milestones";
 import { useMilestones } from "./use-milestones";
 
 jest.mock("expo-sqlite", () => ({
@@ -31,37 +32,23 @@ function deferred<T>() {
   return { promise, reject, resolve };
 }
 
-describe("milestoneRowsToFeatureCollection", () => {
-  test("converts a database row to a stable GeoJSON point", () => {
-    expect(milestoneRowsToFeatureCollection([VALID_ROW])).toEqual({
-      features: [
-        {
-          geometry: {
-            coordinates: [4.86234, 45.74491],
-            type: "Point",
-          },
-          id: "1000:1:241",
-          properties: {
-            codeLigne: 1000,
-            kilometer: 241,
-            label: "241+000",
-            latitude: 45.74491,
-            ligne: "001000-1",
-            longitude: 4.86234,
-            sectionRank: 1,
-          },
-          type: "Feature",
-        },
-      ],
-      type: "FeatureCollection",
+describe("milestoneRowsToFeatures", () => {
+  test("converts a database row to a normalized domain milestone", () => {
+    const milestones = milestoneRowsToFeatures([VALID_ROW]);
+    const milestone = milestones[0];
+
+    expect(milestones).toHaveLength(1);
+    expect(milestone).toBeInstanceOf(Milestone);
+    expect(milestone?.coordinates).toEqual({
+      latitude: 45.74491,
+      longitude: 4.86234,
     });
+    expect(milestone?.id).toBe("001000:1:241");
+    expect(milestone?.label).toBe("241+000");
   });
 
-  test("returns an empty collection for an empty result", () => {
-    expect(milestoneRowsToFeatureCollection([])).toEqual({
-      features: [],
-      type: "FeatureCollection",
-    });
+  test("returns an empty list for an empty result", () => {
+    expect(milestoneRowsToFeatures([])).toEqual([]);
   });
 
   test.each([
@@ -70,9 +57,15 @@ describe("milestoneRowsToFeatureCollection", () => {
     ["an invalid latitude", { ...VALID_ROW, latitude: 91 }],
     ["an invalid longitude", { ...VALID_ROW, longitude: -181 }],
   ])("rejects %s", (_description, row) => {
-    expect(() => milestoneRowsToFeatureCollection([row])).toThrow(
+    expect(() => milestoneRowsToFeatures([row])).toThrow(
       "Invalid milestone at row 0",
     );
+  });
+
+  test("rejects a row whose stored railway section disagrees with its keys", () => {
+    expect(() =>
+      milestoneRowsToFeatures([{ ...VALID_ROW, ligne: "001000-2" }]),
+    ).toThrow("Invalid milestone railway section at row 0");
   });
 });
 
@@ -96,11 +89,15 @@ describe("useMilestones", () => {
     const view = await renderHook(() => useMilestones());
 
     await waitFor(() => {
-      expect(view.result.current).toEqual({
-        collection: milestoneRowsToFeatureCollection([VALID_ROW]),
-        status: "ready",
-      });
+      expect(view.result.current.status).toBe("ready");
     });
+    const state = view.result.current;
+    expect(state.status).toBe("ready");
+    if (state.status !== "ready") {
+      throw new Error("Expected ready milestone state");
+    }
+    expect(state.milestones[0]).toBeInstanceOf(Milestone);
+    expect(state.milestones[0]?.id).toBe("001000:1:241");
     expect(getAllAsync).toHaveBeenCalledWith(
       expect.stringContaining("FROM kilometric_points"),
     );
