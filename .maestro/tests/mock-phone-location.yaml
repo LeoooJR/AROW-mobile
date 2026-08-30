@@ -41,6 +41,24 @@ tags:
 - extendedWaitUntil:
     visible: "(Connectée|Active)"
     timeout: 30000
+- assertVisible:
+    id: "open-point-search"
+- assertVisible:
+    id: "map-layers-button"
+- assertVisible:
+    id: "map-focus-button"
+- tapOn:
+    id: "open-point-search"
+- assertVisible:
+    id: "location-status"
+- tapOn:
+    id: "map-layers-button"
+- assertVisible:
+    id: "location-status"
+- tapOn:
+    id: "map-focus-button"
+- assertVisible:
+    id: "location-status"
 - waitForAnimationToEnd
 # The 509+000 milestone is visible northwest of the centered fix after the
 # fresh-start status bar settles.

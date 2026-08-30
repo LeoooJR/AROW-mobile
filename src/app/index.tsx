@@ -5,6 +5,7 @@ import { View } from "react-native";
 import Map from "@/components/adapters/map/map";
 import LocationBar from "@/components/composites/location-bar";
 import MapFeatureDetailsCard from "@/components/composites/map-feature-details-card";
+import MapToolbar from "@/components/composites/map-toolbar";
 import type { MapFeature } from "@/features/map-features/map-feature";
 import { useMilestones } from "@/features/milestones/use-milestones";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
@@ -74,6 +75,7 @@ export default function Index() {
         recenterRequest={recenterRequest}
         selectedFeature={selectedFeature}
       />
+      {process.env.EXPO_OS !== "web" ? <MapToolbar /> : null}
       {process.env.EXPO_OS !== "web" && selectedFeature !== undefined ? (
         <MapFeatureDetailsCard
           feature={selectedFeature}
