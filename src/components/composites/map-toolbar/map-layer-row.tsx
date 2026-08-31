@@ -34,7 +34,7 @@ export default function MapLayerRow({
         >
           <View
             className="size-5 rounded-full border border-text-primary bg-canvas"
-            style={{ transform: [{ translateX: checked ? 23 : 3 }] }}
+            style={{ transform: [{ translateX: checked ? 20 : 3 }] }}
           />
         </View>
       </Pressable>
