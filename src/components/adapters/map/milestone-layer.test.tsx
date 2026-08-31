@@ -178,6 +178,31 @@ describe("MilestoneLayer", () => {
     );
   });
 
+  test("keeps the ordering anchor mounted while every milestone layer is hidden", async () => {
+    await render(
+      <MilestoneLayer
+        milestones={MILESTONES}
+        onFeaturePress={jest.fn()}
+        selectedMilestone={MILESTONE}
+        visible={false}
+      />,
+    );
+
+    expect(screen.getByTestId("mock-milestone-source")).not.toHaveProp(
+      "onPress",
+    );
+    for (const layerId of [
+      MAP_LAYER_IDS.milestone.dots,
+      MAP_LAYER_IDS.milestone.selected,
+      MAP_LAYER_IDS.milestone.labels,
+    ]) {
+      expect(screen.getByTestId(`mock-${layerId}`)).toHaveProp(
+        "layout",
+        expect.objectContaining({ visibility: "none" }),
+      );
+    }
+  });
+
   test("uses the dark prototype palette", async () => {
     jest.spyOn(ReactNative, "useColorScheme").mockReturnValue("dark");
 

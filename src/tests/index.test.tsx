@@ -38,6 +38,18 @@ jest.mock("@/components/composites/location-bar", () => {
   };
 });
 
+jest.mock("@/components/composites/map-toolbar", () => {
+  const { View: MockView } =
+    jest.requireActual<typeof import("react-native")>("react-native");
+
+  return {
+    __esModule: true,
+    default: (props: Record<string, unknown>) => (
+      <MockView {...props} testID="mock-map-toolbar" />
+    ),
+  };
+});
+
 const useMilestonesMock = jest.mocked(useMilestones);
 const useRealLocationMock = jest.mocked(useRealLocation);
 const MILESTONES = [] satisfies readonly Milestone[];

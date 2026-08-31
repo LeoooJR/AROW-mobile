@@ -1,0 +1,176 @@
+import { render, screen, userEvent } from "@testing-library/react-native";
+
+import { Milestone } from "@/features/milestones/milestone";
+import { Railway } from "@/features/railways/railway";
+
+import Index from "@/app/index";
+
+const mockMilestone = new Milestone({
+  coordinates: { latitude: 45.74744, longitude: 4.85933 },
+  kilometer: 509,
+  label: "509+000",
+  lineCode: "893000",
+  sectionRank: 1,
+});
+const mockRailway = new Railway({
+  endMilestone: "511+605",
+  gaiaId: "railway-gaia-id",
+  lineCode: "893000",
+  name: "Ligne test",
+  railwayType: "Ligne",
+  sectionRank: 1,
+  startMilestone: "499+752",
+});
+
+jest.mock("expo-asset", () => ({
+  useAssets: () => [[{ localUri: "file:///railways.geojson" }]],
+}));
+
+jest.mock("@/statics/lignes-par-type.geojson", () => "railway-asset");
+
+jest.mock("@/hooks/platform/use-real-location", () => ({
+  useRealLocation: () => ({
+    openSettings: jest.fn(),
+    requestAccess: jest.fn(),
+    retry: jest.fn(),
+    state: {
+      position: { heading: null, latitude: 45.74491, longitude: 4.86234 },
+      status: "connected",
+    },
+  }),
+}));
+
+jest.mock("@/features/milestones/use-milestones", () => ({
+  useMilestones: () => ({ milestones: [mockMilestone], status: "ready" }),
+}));
+
+jest.mock("@/components/adapters/map/map", () => {
+  const {
+    Pressable: MockPressable,
+    Text: MockText,
+    View: MockView,
+  } = jest.requireActual<typeof import("react-native")>("react-native");
+
+  return {
+    __esModule: true,
+    default: ({
+      layerVisibility,
+      onFeaturePress,
+    }: {
+      readonly layerVisibility: { milestone: boolean; railway: boolean };
+      readonly onFeaturePress: (feature: { readonly kind: string }) => void;
+    }) => (
+      <MockView testID="mock-map" {...layerVisibility}>
+        <MockPressable
+          onPress={() => {
+            onFeaturePress(mockRailway);
+          }}
+          role="button"
+        >
+          <MockText>Select railway</MockText>
+        </MockPressable>
+        <MockPressable
+          onPress={() => {
+            onFeaturePress(mockMilestone);
+          }}
+          role="button"
+        >
+          <MockText>Select milestone</MockText>
+        </MockPressable>
+      </MockView>
+    ),
+  };
+});
+
+jest.mock("@/components/composites/map-toolbar", () => {
+  const {
+    Pressable: MockPressable,
+    Text: MockText,
+    View: MockView,
+  } = jest.requireActual<typeof import("react-native")>("react-native");
+
+  return {
+    __esModule: true,
+    default: ({
+      onVisibilityChange,
+    }: {
+      readonly onVisibilityChange: (
+        layer: "milestone" | "railway",
+        visible: boolean,
+      ) => void;
+    }) => (
+      <MockView>
+        <MockPressable
+          onPress={() => {
+            onVisibilityChange("railway", false);
+          }}
+          role="button"
+        >
+          <MockText>Hide railway</MockText>
+        </MockPressable>
+        <MockPressable
+          onPress={() => {
+            onVisibilityChange("milestone", false);
+          }}
+          role="button"
+        >
+          <MockText>Hide milestone</MockText>
+        </MockPressable>
+      </MockView>
+    ),
+  };
+});
+
+jest.mock("@/components/composites/map-feature-details-card", () => {
+  const { Text: MockText } =
+    jest.requireActual<typeof import("react-native")>("react-native");
+
+  return {
+    __esModule: true,
+    default: ({ feature }: { readonly feature: { readonly kind: string } }) => (
+      <MockText testID="mock-details">{feature.kind}</MockText>
+    ),
+  };
+});
+
+jest.mock("@/components/composites/location-bar", () => {
+  const { View: MockView } =
+    jest.requireActual<typeof import("react-native")>("react-native");
+
+  return {
+    __esModule: true,
+    default: () => <MockView testID="mock-location-bar" />,
+  };
+});
+
+describe("map screen layer visibility", () => {
+  test("starts with both optional layers visible", async () => {
+    await render(<Index />);
+
+    expect(screen.getByTestId("mock-map")).toHaveProp("railway", true);
+    expect(screen.getByTestId("mock-map")).toHaveProp("milestone", true);
+  });
+
+  test("clears only a selection owned by the layer being hidden", async () => {
+    const user = userEvent.setup();
+    await render(<Index />);
+
+    await user.press(screen.getByRole("button", { name: "Select railway" }));
+    expect(screen.getByTestId("mock-details")).toHaveTextContent("railway");
+    await user.press(screen.getByRole("button", { name: "Hide milestone" }));
+    expect(screen.getByTestId("mock-details")).toHaveTextContent("railway");
+    await user.press(screen.getByRole("button", { name: "Hide railway" }));
+    expect(screen.queryByTestId("mock-details")).not.toBeOnTheScreen();
+  });
+
+  test("clears an open milestone card when milestones are hidden", async () => {
+    const user = userEvent.setup();
+    await render(<Index />);
+
+    await user.press(screen.getByRole("button", { name: "Select milestone" }));
+    expect(screen.getByTestId("mock-details")).toHaveTextContent("milestone");
+    await user.press(screen.getByRole("button", { name: "Hide milestone" }));
+
+    expect(screen.queryByTestId("mock-details")).not.toBeOnTheScreen();
+  });
+});

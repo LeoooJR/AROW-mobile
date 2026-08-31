@@ -22,6 +22,7 @@ export interface RailwayLinesSourceProps {
   readonly data: string;
   readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly selectedSection?: RailwaySectionKey;
+  readonly visible?: boolean;
 }
 
 interface RailwayLineProperties {
@@ -127,6 +128,7 @@ export default function RailwayLinesSource({
   data,
   onFeaturePress,
   selectedSection,
+  visible = true,
 }: RailwayLinesSourceProps): ReactElement {
   const colorScheme = useColorScheme();
   const colors =
@@ -151,7 +153,7 @@ export default function RailwayLinesSource({
     <GeoJSONSource
       data={data}
       id="arow-railway-lines"
-      onPress={onPress}
+      onPress={visible ? onPress : undefined}
       testID="railway-lines-source"
     >
       <Layer
@@ -161,6 +163,7 @@ export default function RailwayLinesSource({
         layout={{
           "line-cap": "round",
           "line-join": "round",
+          visibility: visible ? "visible" : "none",
         }}
         minzoom={7}
         paint={{
@@ -180,6 +183,7 @@ export default function RailwayLinesSource({
           layout={{
             "line-cap": "round",
             "line-join": "round",
+            visibility: visible ? "visible" : "none",
           }}
           minzoom={7}
           paint={{

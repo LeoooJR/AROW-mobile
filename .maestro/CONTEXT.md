@@ -22,11 +22,17 @@ suite must pass before recording. Run these commands from the repository root,
 with `maestro` and `adb` available on `PATH`; project rules must not encode a
 coworker's home directory or local Android SDK installation path.
 
-Use Maestro's local recorder first. The output name is intentionally generic so
-it remains valid as the journey evolves:
+Use Maestro's local recorder first. Give each recorded feature flow a stable,
+dedicated review artifact:
 
 ```bash
 maestro --device emulator-5554 record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4
+```
+
+For the standalone map-layer feature flow:
+
+```bash
+maestro --device emulator-5554 record --local .maestro/tests/manage-map-layers.yaml .maestro/artifacts/map-layers-e2e-recording.mp4
 ```
 
 Present the video only when the recorded flow passes. If Maestro's local

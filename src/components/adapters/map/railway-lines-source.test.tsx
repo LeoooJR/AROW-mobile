@@ -99,6 +99,33 @@ describe("RailwayLinesSource", () => {
     );
   });
 
+  test("keeps layers mounted but hides and disables the source", async () => {
+    await render(
+      <RailwayLinesSource
+        data="file:///railways.geojson"
+        onFeaturePress={jest.fn()}
+        selectedSection={new RailwaySectionKey("340311", 1)}
+        visible={false}
+      />,
+    );
+
+    expect(screen.getByTestId("railway-lines-source")).not.toHaveProp(
+      "onPress",
+    );
+    expect(screen.getByTestId("railway-lines-passive-layer")).toHaveProp(
+      "layout",
+      expect.objectContaining({ visibility: "none" }),
+    );
+    expect(screen.getByTestId("railway-lines-selected-layer")).toHaveProp(
+      "layout",
+      expect.objectContaining({ visibility: "none" }),
+    );
+    expect(screen.getByTestId("railway-lines-passive-layer")).toHaveProp(
+      "beforeId",
+      MAP_LAYER_IDS.milestone.dots,
+    );
+  });
+
   test("emits validated railway metadata and stops press propagation", async () => {
     const onFeaturePress = jest.fn();
     const stopPropagation = jest.fn();

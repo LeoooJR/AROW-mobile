@@ -2,4 +2,5 @@ executionOrder:
   continueOnFailure: false
   flowsOrder:
     - mock-phone-location
+    - manage-map-layers
 flows: "tests/**"

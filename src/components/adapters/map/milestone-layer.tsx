@@ -24,6 +24,7 @@ export interface MilestoneLayerProps {
   readonly milestones: readonly Milestone[];
   readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly selectedMilestone?: Milestone;
+  readonly visible?: boolean;
 }
 
 interface MilestoneGeoJSONProperties {
@@ -153,6 +154,7 @@ export default function MilestoneLayer({
   milestones,
   onFeaturePress,
   selectedMilestone,
+  visible = true,
 }: MilestoneLayerProps): ReactElement {
   const colorScheme = useColorScheme();
   const palette =
@@ -181,11 +183,12 @@ export default function MilestoneLayer({
     <GeoJSONSource
       data={collection}
       id="railway-milestones-source"
-      onPress={onPress}
+      onPress={visible ? onPress : undefined}
     >
       <Layer
         id={MAP_LAYER_IDS.milestone.dots}
         key={MAP_LAYER_IDS.milestone.dots}
+        layout={{ visibility: visible ? "visible" : "none" }}
         minzoom={10}
         paint={{
           "circle-color": palette.label,
@@ -200,6 +203,7 @@ export default function MilestoneLayer({
           filter={["==", ["id"], selectedMilestone.id]}
           id={MAP_LAYER_IDS.milestone.selected}
           key={MAP_LAYER_IDS.milestone.selected}
+          layout={{ visibility: visible ? "visible" : "none" }}
           minzoom={10}
           paint={{
             "circle-color": palette.selected,
@@ -213,7 +217,10 @@ export default function MilestoneLayer({
       <Layer
         id={MAP_LAYER_IDS.milestone.labels}
         key={MAP_LAYER_IDS.milestone.labels}
-        layout={LABEL_LAYOUT}
+        layout={{
+          ...LABEL_LAYOUT,
+          visibility: visible ? "visible" : "none",
+        }}
         minzoom={13}
         paint={{
           "text-color": palette.label,

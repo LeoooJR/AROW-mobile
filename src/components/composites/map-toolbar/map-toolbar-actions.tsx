@@ -8,80 +8,34 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Svg, { Circle, Path } from "react-native-svg";
 
-const ICON_COLORS = {
-  dark: "#FAF9F6",
-  light: "#0A0A0A",
-} as const;
+import LayersIcon from "@/components/composites/map-toolbar/layers-icon";
+import MapFocusIcon from "@/components/composites/map-toolbar/map-focus-icon";
+import {
+  MAP_TOOLBAR_PALETTES,
+  mapToolbarTheme,
+} from "@/components/composites/map-toolbar/map-toolbar-theme";
+import SearchIcon from "@/components/composites/map-toolbar/search-icon";
 
-const SHADOW_COLORS = {
-  dark: "#10100F",
-  light: "#E7E7E2",
-} as const;
+interface MapToolbarActionsProps {
+  readonly layersOpen: boolean;
+  readonly onOpenLayers: () => void;
+}
 
 function noOp(): void {}
 
-function SearchIcon({ color }: { readonly color: string }): ReactElement {
-  return (
-    <Svg height={22} viewBox="0 0 24 24" width={22}>
-      <Circle
-        cx={11}
-        cy={11}
-        fill="none"
-        r={6}
-        stroke={color}
-        strokeWidth={2}
-      />
-      <Path
-        d="M16 16l4 4"
-        fill="none"
-        stroke={color}
-        strokeLinecap="round"
-        strokeWidth={2}
-      />
-    </Svg>
-  );
-}
-
-function LayersIcon({ color }: { readonly color: string }): ReactElement {
-  return (
-    <Svg height={22} viewBox="0 0 24 24" width={22}>
-      <Path
-        d="M12 4l8 4-8 4-8-4 8-4Zm-8 9 8 4 8-4M4 17l8 4 8-4"
-        fill="none"
-        stroke={color}
-        strokeLinejoin="round"
-        strokeWidth={1.8}
-      />
-    </Svg>
-  );
-}
-
-function MapFocusIcon({ color }: { readonly color: string }): ReactElement {
-  return (
-    <Svg height={22} viewBox="0 0 24 24" width={22}>
-      <Path
-        d="M9 4H4v5M15 4h5v5M9 20H4v-5m11 5h5v-5"
-        fill="none"
-        stroke={color}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={1.8}
-      />
-    </Svg>
-  );
-}
-
-export default function MapToolbar(): ReactElement {
+export default function MapToolbarActions({
+  layersOpen,
+  onOpenLayers,
+}: MapToolbarActionsProps): ReactElement {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const theme = colorScheme === "dark" ? "dark" : "light";
+  const palette = MAP_TOOLBAR_PALETTES[mapToolbarTheme(colorScheme)];
   const compact = width <= 380;
   const buttonStyle = {
     borderCurve: "continuous",
-    boxShadow: `0 4px 12px ${SHADOW_COLORS[theme]}`,
+    boxShadow: `0 4px 12px ${palette.shadow}`,
   } satisfies ViewStyle;
 
   return (
@@ -99,7 +53,7 @@ export default function MapToolbar(): ReactElement {
         style={buttonStyle}
         testID="open-point-search"
       >
-        <SearchIcon color={ICON_COLORS[theme]} />
+        <SearchIcon color={palette.icon} />
         <Text
           className={`${compact ? "text-sm" : "text-[15px]"} font-semibold leading-5 text-text-primary`}
         >
@@ -108,13 +62,14 @@ export default function MapToolbar(): ReactElement {
       </Pressable>
       <Pressable
         aria-label="Afficher les couches de la carte"
+        aria-expanded={layersOpen}
         className="size-14 items-center justify-center rounded-lg border border-border-subtle bg-canvas active:bg-surface-muted"
-        onPress={noOp}
+        onPress={onOpenLayers}
         role="button"
         style={buttonStyle}
         testID="map-layers-button"
       >
-        <LayersIcon color={ICON_COLORS[theme]} />
+        <LayersIcon color={palette.icon} />
       </Pressable>
       <Pressable
         aria-label="Activer le mode carte seule"
@@ -125,7 +80,7 @@ export default function MapToolbar(): ReactElement {
         style={buttonStyle}
         testID="map-focus-button"
       >
-        <MapFocusIcon color={ICON_COLORS[theme]} />
+        <MapFocusIcon color={palette.icon} />
       </Pressable>
     </View>
   );

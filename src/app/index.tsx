@@ -3,6 +3,11 @@ import { useState } from "react";
 import { View } from "react-native";
 
 import Map from "@/components/adapters/map/map";
+import {
+  DEFAULT_MAP_LAYER_VISIBILITY,
+  type MapLayerVisibility,
+  type ToggleableMapLayer,
+} from "@/components/adapters/map/map-layer-visibility";
 import LocationBar from "@/components/composites/location-bar";
 import MapFeatureDetailsCard from "@/components/composites/map-feature-details-card";
 import MapToolbar from "@/components/composites/map-toolbar";
@@ -19,6 +24,9 @@ export default function Index() {
   const [selectedFeature, setSelectedFeature] = useState<
     MapFeature | undefined
   >();
+  const [layerVisibility, setLayerVisibility] = useState<MapLayerVisibility>(
+    DEFAULT_MAP_LAYER_VISIBILITY,
+  );
   const railwayData = railwayAssets?.[0]?.localUri ?? railwayAssets?.[0]?.uri;
   const currentLocation =
     state.status === "connected" ||
@@ -60,10 +68,22 @@ export default function Index() {
         return undefined;
     }
   })();
+  const onLayerVisibilityChange = (
+    layer: ToggleableMapLayer,
+    visible: boolean,
+  ): void => {
+    setLayerVisibility((current) => ({ ...current, [layer]: visible }));
+    if (!visible) {
+      setSelectedFeature((current) =>
+        current?.kind === layer ? undefined : current,
+      );
+    }
+  };
 
   return (
     <View className="flex-1 bg-surface">
       <Map
+        layerVisibility={layerVisibility}
         location={currentLocation}
         milestones={
           milestoneState.status === "ready"
@@ -75,7 +95,12 @@ export default function Index() {
         recenterRequest={recenterRequest}
         selectedFeature={selectedFeature}
       />
-      {process.env.EXPO_OS !== "web" ? <MapToolbar /> : null}
+      {process.env.EXPO_OS !== "web" ? (
+        <MapToolbar
+          onVisibilityChange={onLayerVisibilityChange}
+          visibility={layerVisibility}
+        />
+      ) : null}
       {process.env.EXPO_OS !== "web" && selectedFeature !== undefined ? (
         <MapFeatureDetailsCard
           feature={selectedFeature}

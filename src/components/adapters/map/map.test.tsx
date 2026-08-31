@@ -160,6 +160,29 @@ describe("Map", () => {
       "milestones",
       MILESTONES,
     );
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+      "visible",
+      true,
+    );
+  });
+
+  test("forwards controlled railway and milestone visibility", async () => {
+    await render(
+      <Map
+        layerVisibility={{ milestone: false, railway: false }}
+        milestones={MILESTONES}
+        railwayData="file:///railways.geojson"
+      />,
+    );
+
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+      "visible",
+      false,
+    );
+    expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
+      "visible",
+      false,
+    );
   });
 
   test("forwards a shared callback and derives linked milestone selection", async () => {

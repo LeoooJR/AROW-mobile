@@ -94,6 +94,12 @@ All railway layers are explicitly inserted below the milestone-dot anchor.
 Consequently milestone dots, selected points, and labels retain visual and press
 priority over passive and selected railways regardless of source loading order.
 
+The owning screen controls visibility for exactly the railway and milestone
+feature families. Both are visible by default. Visibility applies to passive,
+selected, and label layers and disables source press handling while hidden, but
+sources and the milestone-dot ordering anchor remain mounted. The base-map style
+is permanent and is not part of this visibility contract.
+
 Do not add other GeoJSON, markers, annotations, location tracking, or map event
 handling without extending this context for that feature first.
 
