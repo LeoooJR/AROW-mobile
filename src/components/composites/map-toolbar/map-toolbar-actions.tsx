@@ -1,7 +1,5 @@
 import { type ReactElement } from "react";
 import {
-  Pressable,
-  Text,
   useColorScheme,
   useWindowDimensions,
   type ViewStyle,
@@ -9,13 +7,13 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import LayersIcon from "@/components/composites/map-toolbar/layers-icon";
-import MapFocusIcon from "@/components/composites/map-toolbar/map-focus-icon";
+import MapFocusButton from "@/components/composites/map-toolbar/map-focus-button";
+import MapLayersButton from "@/components/composites/map-toolbar/map-layers-button";
 import {
   MAP_TOOLBAR_PALETTES,
   mapToolbarTheme,
 } from "@/components/composites/map-toolbar/map-toolbar-theme";
-import SearchIcon from "@/components/composites/map-toolbar/search-icon";
+import PointSearchButton from "@/components/composites/map-toolbar/point-search-button";
 
 interface MapToolbarActionsProps {
   readonly layersOpen: boolean;
@@ -46,42 +44,23 @@ export default function MapToolbarActions({
       style={{ top: Math.max(16, insets.top) }}
       testID="map-toolbar"
     >
-      <Pressable
-        className={`h-14 min-w-0 flex-1 flex-row items-center justify-center rounded-lg border border-border-subtle bg-canvas active:bg-surface-muted ${compact ? "gap-2.5 px-2.5" : "gap-2.5 px-4"}`}
+      <PointSearchButton
+        buttonStyle={buttonStyle}
+        compact={compact}
+        iconColor={palette.icon}
         onPress={noOp}
-        role="button"
-        style={buttonStyle}
-        testID="open-point-search"
-      >
-        <SearchIcon color={palette.icon} />
-        <Text
-          className={`${compact ? "text-sm" : "text-[15px]"} font-semibold leading-5 text-text-primary`}
-        >
-          Rechercher un point
-        </Text>
-      </Pressable>
-      <Pressable
-        aria-label="Afficher les couches de la carte"
-        aria-expanded={layersOpen}
-        className="size-14 items-center justify-center rounded-lg border border-border-subtle bg-canvas active:bg-surface-muted"
+      />
+      <MapLayersButton
+        buttonStyle={buttonStyle}
+        expanded={layersOpen}
+        iconColor={palette.icon}
         onPress={onOpenLayers}
-        role="button"
-        style={buttonStyle}
-        testID="map-layers-button"
-      >
-        <LayersIcon color={palette.icon} />
-      </Pressable>
-      <Pressable
-        aria-label="Activer le mode carte seule"
-        aria-pressed={false}
-        className="size-14 items-center justify-center rounded-lg border border-border-subtle bg-canvas active:bg-surface-muted"
+      />
+      <MapFocusButton
+        buttonStyle={buttonStyle}
+        iconColor={palette.icon}
         onPress={noOp}
-        role="button"
-        style={buttonStyle}
-        testID="map-focus-button"
-      >
-        <MapFocusIcon color={palette.icon} />
-      </Pressable>
+      />
     </View>
   );
 }
