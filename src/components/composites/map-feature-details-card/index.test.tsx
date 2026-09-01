@@ -3,7 +3,7 @@ import { render, screen, userEvent } from "@testing-library/react-native";
 import { Milestone } from "@/features/milestones/milestone";
 import { Railway } from "@/features/railways/railway";
 
-import MapFeatureDetailsCard from "./map-feature-details-card";
+import MapFeatureDetailsCard from "./index";
 
 jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ bottom: 24, left: 0, right: 0, top: 0 }),

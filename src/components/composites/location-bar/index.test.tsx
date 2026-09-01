@@ -5,7 +5,7 @@ import type {
   RealLocationState,
 } from "@/hooks/platform/use-real-location";
 
-import LocationBar from "./location-bar";
+import LocationBar from "./index";
 
 let mockSafeAreaBottom = 0;
 let mockColorScheme: "dark" | "light" | null = "light";
