@@ -84,6 +84,30 @@ describe("MapCamera", () => {
     });
   });
 
+  test("focuses the same searched milestone for every changed request", async () => {
+    const focusLocation = { latitude: 45.74744, longitude: 4.85933 };
+    const view = await render(
+      <MapCamera focusLocation={focusLocation} focusRequest={0} />,
+    );
+
+    await view.rerender(
+      <MapCamera focusLocation={focusLocation} focusRequest={1} />,
+    );
+    await view.rerender(
+      <MapCamera focusLocation={focusLocation} focusRequest={2} />,
+    );
+
+    expect(mockEaseTo).toHaveBeenCalledTimes(2);
+    expect(mockEaseTo).toHaveBeenLastCalledWith({
+      bearing: 0,
+      center: [4.85933, 45.74744],
+      duration: 700,
+      easing: "ease",
+      pitch: 0,
+      zoom: 15,
+    });
+  });
+
   test("does not recenter without a location or a changed request", async () => {
     const view = await render(<MapCamera recenterRequest={0} />);
 

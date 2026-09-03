@@ -54,13 +54,21 @@ jest.mock("@/components/adapters/map/map", () => {
   return {
     __esModule: true,
     default: ({
+      focusLocation,
+      focusRequest,
       layerVisibility,
       onFeaturePress,
     }: {
+      readonly focusLocation?: { latitude: number; longitude: number };
+      readonly focusRequest?: number;
       readonly layerVisibility: { milestone: boolean; railway: boolean };
       readonly onFeaturePress: (feature: { readonly kind: string }) => void;
     }) => (
-      <MockView testID="mock-map" {...layerVisibility}>
+      <MockView
+        testID="mock-map"
+        {...{ focusLocation, focusRequest }}
+        {...layerVisibility}
+      >
         <MockPressable
           onPress={() => {
             onFeaturePress(mockRailway);
@@ -92,8 +100,10 @@ jest.mock("@/components/composites/map-toolbar", () => {
   return {
     __esModule: true,
     default: ({
+      onMilestoneSelect,
       onVisibilityChange,
     }: {
+      readonly onMilestoneSelect: (milestone: Milestone) => void;
       readonly onVisibilityChange: (
         layer: "milestone" | "railway",
         visible: boolean,
@@ -107,6 +117,14 @@ jest.mock("@/components/composites/map-toolbar", () => {
           role="button"
         >
           <MockText>Hide railway</MockText>
+        </MockPressable>
+        <MockPressable
+          onPress={() => {
+            onMilestoneSelect(mockMilestone);
+          }}
+          role="button"
+        >
+          <MockText>Use searched milestone</MockText>
         </MockPressable>
         <MockPressable
           onPress={() => {
@@ -172,5 +190,24 @@ describe("map screen layer visibility", () => {
     await user.press(screen.getByRole("button", { name: "Hide milestone" }));
 
     expect(screen.queryByTestId("mock-details")).not.toBeOnTheScreen();
+  });
+
+  test("restores, selects, and focuses a searched milestone", async () => {
+    const user = userEvent.setup();
+    await render(<Index />);
+
+    await user.press(screen.getByRole("button", { name: "Hide milestone" }));
+    expect(screen.getByTestId("mock-map")).toHaveProp("milestone", false);
+    await user.press(
+      screen.getByRole("button", { name: "Use searched milestone" }),
+    );
+
+    expect(screen.getByTestId("mock-map")).toHaveProp("milestone", true);
+    expect(screen.getByTestId("mock-map")).toHaveProp(
+      "focusLocation",
+      mockMilestone.coordinates,
+    );
+    expect(screen.getByTestId("mock-map")).toHaveProp("focusRequest", 1);
+    expect(screen.getByTestId("mock-details")).toHaveTextContent("milestone");
   });
 });

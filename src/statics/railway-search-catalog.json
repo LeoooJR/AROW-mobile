@@ -1,0 +1,5217 @@
+[
+  {
+    "lineCode": "001000",
+    "name": "Ligne de Paris-Est à Mulhouse-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "001306",
+    "name": "Raccordement de l'Évangile",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "001306",
+    "name": "Raccordement de l'Évangile",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "001379",
+    "name": "Raccordement de la ligne EOLE à la ligne Paris-Mulhouse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "001391",
+    "name": "Raccordement court de Mulhouse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "001606",
+    "name": "Voie-mère d'Émerainville-Pontault-Combault",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "002000",
+    "name": "Ligne de Gretz-Armainvilliers à Sézanne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "003000",
+    "name": "Ligne de Longueville à Esternay",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "004000",
+    "name": "Ligne de Mézy à Romilly-sur-Seine",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "005000",
+    "name": "Ligne de Paris à Strasbourg (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "005300",
+    "name": "Raccordement de Troyes-Preize",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "005315",
+    "name": "Raccordement des Trois Puits",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "005317",
+    "name": "Voie navette",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "005329",
+    "name": "Raccordement de Châlons Nord",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "005330",
+    "name": "Raccordement de Châlons Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "005340",
+    "name": "Raccordement de Vandières",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "005341",
+    "name": "Raccordement de Pagny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "005343",
+    "name": "Raccordement de Baudrecourt",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "005345",
+    "name": "Raccordement de Herny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "005390",
+    "name": "Raccordement de Vendenheim",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "006000",
+    "name": "Ligne de Coolus à Sens",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "006000",
+    "name": "Ligne de Coolus à Sens",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "006000",
+    "name": "Ligne de Coolus à Sens",
+    "sectionRank": 3
+  },
+  {
+    "lineCode": "006511",
+    "name": "Voie de port de Sens-St-Clément",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "007000",
+    "name": "Ligne de Fère-Champenoise à Vitry-le-François",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "010000",
+    "name": "Ligne de Oiry-Mareuil à Romilly-sur-Seine",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "012000",
+    "name": "Ligne de Troyes à Brienne-le-Château",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "013000",
+    "name": "Ligne de Vallentigny à Vitry-le-François",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "014000",
+    "name": "Ligne Rhin-Rhône (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "014300",
+    "name": "RaccordementOuest Besançon TGV",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "014330",
+    "name": "Raccordement de PETIT - CROIX",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "015000",
+    "name": "Ligne de Jessains à Sorcy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "016000",
+    "name": "Ligne de Montier-en-Der à Éclaron",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "018000",
+    "name": "Ligne de St-Dizier à Doulevant-le-Château",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "019000",
+    "name": "Ligne de Revigny à St-Dizier",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "020000",
+    "name": "Ligne de Blesme-Haussignémont à Chaumont",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "022300",
+    "name": "Raccordement direct de Blesme-Haussignémont",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "026000",
+    "name": "Ligne de Bologne à Pagny-sur-Meuse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "027000",
+    "name": "Ligne de Nançois-Tronville à Neufchâteau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "030000",
+    "name": "Ligne de Neufchâteau à Épinal",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "031950",
+    "name": "Saut-de-mouton de Chaudenay",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "032000",
+    "name": "Ligne de Culmont-Chalindrey à Toul",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "033000",
+    "name": "Ligne de Langres à Andilly-en-Bassigny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "035000",
+    "name": "Ligne de Merrey à Hymont-Mattaincourt",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "035306",
+    "name": "Raccordement d'Hymont-Mattaincourt",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "039000",
+    "name": "Ligne de Toul à Rosières-aux-Salines",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "039306",
+    "name": "Raccordement de Neuves-Maisons n° 1",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "040000",
+    "name": "Ligne de Jarville-la-Malgrange à Mirecourt",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "040306",
+    "name": "Raccordement de Neuves-Maisons n° 2",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "041000",
+    "name": "Ligne de Barisey-la-Côte à Frenelle-la-Grande-Puzieux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "042000",
+    "name": "Ligne de Blainville-Damelevières à Lure",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "051000",
+    "name": "Ligne de Jussey à Darnieulles-Uxegney",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "054000",
+    "name": "Ligne de Corbenay à Faymont",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "055000",
+    "name": "Ligne de Bas-Évette à Giromagny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "057000",
+    "name": "Ligne d'Aillevillers à Port-d'Atelier-Amance",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "057306",
+    "name": "Raccordement de Port-d'Atelier-Amance",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "059910",
+    "name": "Boucle de Bertramenil",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "060000",
+    "name": "Ligne d'Épinal à Bussang",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "062000",
+    "name": "Ligne d'Arches à St-Dié",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "063000",
+    "name": "Ligne de Laveline-devant-Bruyères à Gérardmer",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "064000",
+    "name": "Ligne de St-Léonard à Fraize",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "065000",
+    "name": "Ligne de Mont-sur-Meurthe à Bruyères",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "067000",
+    "name": "Ligne de Lunéville à St-Dié",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "070000",
+    "name": "Ligne de Noisy-le-Sec à Strasbourg-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "070331",
+    "name": "Raccordement de Toul n° 1",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "070336",
+    "name": "Raccordement direct de Frouard",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "070346",
+    "name": "Raccordement de Strasbourg-Cronenbourg à Strasbourg-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "070908",
+    "name": "Boucle de Vaires",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "070953",
+    "name": "Saut-de-mouton de Toul",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "071000",
+    "name": "Ligne d'Esbly à Crécy-la-Chapelle",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "072000",
+    "name": "Ligne du Trilport à Bazoches",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "072311",
+    "name": "Raccordement d'Ocquerre",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "074000",
+    "name": "Ligne d'Épernay à Reims",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "074306",
+    "name": "Raccordement d'Épernay",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "076000",
+    "name": "Ligne d'Aulnay-sous-Bois à Roissy 2-RER",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "078000",
+    "name": "Ligne de Champigneulles à Houdemont",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "081000",
+    "name": "Ligne de Châlons-en-Champagne à Reims-Cérès",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "081311",
+    "name": "Raccordement de Reims n° 3",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "081316",
+    "name": "Raccordement de Reims n° 1",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "081321",
+    "name": "Raccordement de Reims n° 2",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "081606",
+    "name": "Voie-mère nord de Reims-St-Léonard-Garage",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "082000",
+    "name": "Ligne de Reims à Laon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "082606",
+    "name": "Voie-mère de Guignicourt n° 1",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "082611",
+    "name": "Voie-mère de Guignicourt n° 2",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "085000",
+    "name": "Ligne de St-Hilaire-au-Temple à Hagondange",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "085306",
+    "name": "Raccordement de Mondelange",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "086000",
+    "name": "Ligne de Conflans-Jarny à Metz-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "088000",
+    "name": "Ligne de Lérouville à Pont-Maugis",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "089000",
+    "name": "Ligne de Lérouville à Metz-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "089306",
+    "name": "Raccordement de Lérouville n° 2",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "090000",
+    "name": "Ligne de Frouard à Novéant",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "094300",
+    "name": "Raccordement de Waville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "095000",
+    "name": "Ligne de Longuyon à Onville et Pagny-sur-Moselle",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "097000",
+    "name": "Ligne de Champigneulles à Sarralbe",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "099000",
+    "name": "Ligne de Metz-Ville à Château-Salins",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "100000",
+    "name": "Ligne de Nouvel-Avricourt à Bénestroff",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "106000",
+    "name": "Ligne de Sarrebourg à Abreschviller",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "110000",
+    "name": "Ligne de Strasbourg-Ville à St-Dié",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "110306",
+    "name": "Raccordement de Strasbourg à Koenigshoffen-Nord",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "110311",
+    "name": "Raccordement de Strasbourg à Koenigshoffen-Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "111000",
+    "name": "Ligne de Sélestat à Saverne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "114300",
+    "name": "Raccordement de Sarrebourg à Sarraltroff",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "115000",
+    "name": "Ligne de Strasbourg-Ville à St-Louis",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "115306",
+    "name": "Raccordement de Mulhouse-Dornach à Mulhouse-Nord",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "116000",
+    "name": "Ligne de Sélestat à Lesseux-Frapelle",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "119000",
+    "name": "Ligne de Colmar-Central à Metzeral",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "120000",
+    "name": "Ligne de Colmar-Central à Neuf-Brisach",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "121000",
+    "name": "Ligne de Colmar-Sud à Bollwiller",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "122000",
+    "name": "Ligne de Bollwiller à Lautenbach",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "123000",
+    "name": "Ligne de Neuf-Brisach à Bantzenheim",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "124000",
+    "name": "Ligne de Mulhouse-Ville à Chalampé",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "125000",
+    "name": "Ligne de Lutterbach à Rixheim",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "125306",
+    "name": "Raccordement de la bifurcation de Wanne à Mulhouse-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "129000",
+    "name": "Ligne de Colmar-Central à Marckolsheim",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "130000",
+    "name": "Ligne de Lutterbach à Kruth",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "131000",
+    "name": "Ligne de Cernay à Sewen",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "132000",
+    "name": "Ligne de Lutterbach à Rond point Stricker",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "134000",
+    "name": "Ligne d'Altkirch à Ferrette",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "135000",
+    "name": "Ligne de Waldighoffen à St-Louis-La Chaussée",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "136000",
+    "name": "Ligne de St-Louis à Huningue",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "138000",
+    "name": "Ligne de Graffenstaden à Hausbergen",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "139300",
+    "name": "Raccordement de Hausbergen à Strasbourg-CronenbourgV1C",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "139301",
+    "name": "Raccordement de Hausbergen à Strasbourg-Cronenbourg Voie H",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "139302",
+    "name": "Raccordement de Strasbourg-Cronenbourg à Strasbourg-Koenigshoffen VK",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "140000",
+    "name": "Ligne de Réding à Metz-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "140370",
+    "name": "Raccordement de Lucy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "141000",
+    "name": "Ligne de Graffenstaden à Strasbourg-Neudorf",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "141306",
+    "name": "Raccordement de Strasbourg-Neudorf à Strasbourg-Koenigshoffen",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "142000",
+    "name": "Ligne de Strasbourg-Ville à Strasbourg-Port-du-Rhin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "143000",
+    "name": "Voies du port de Strasbourg",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "145000",
+    "name": "Ligne de Strasbourg à Lauterbourg",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "145306",
+    "name": "Raccordement de Bischheim",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "146000",
+    "name": "Ligne de Vendenheim à Wissembourg",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "146000",
+    "name": "Ligne de Vendenheim à Wissembourg",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "150000",
+    "name": "Ligne de Haguenau à Roeschwoog et frontière",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "159000",
+    "name": "Ligne de Haguenau à Hargarten-Falck",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "160000",
+    "name": "Ligne de Steinbourg à Schweighouse-sur-Moder",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "161000",
+    "name": "Ligne de Mommenheim à Sarreguemines",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "163000",
+    "name": "Ligne de Sarreguemines vers Sarrebruck",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "167000",
+    "name": "Ligne de Réding à Diemeringen",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "167320",
+    "name": "Raccordement de Reding",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "168000",
+    "name": "Ligne de Berthelming à Sarreguemines",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "169000",
+    "name": "Ligne de Kalhausen à Sarralbe",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "169306",
+    "name": "Raccordement de Kalhausen",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "170000",
+    "name": "Ligne de Sarreguemines à Bliesbruck",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "172000",
+    "name": "Ligne de Rémilly à Stiring-Wendel",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "174000",
+    "name": "Ligne de Metz-Ville à la frontière allemande vers Ueberherrn",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "176000",
+    "name": "Ligne de Bouzonville à Guerstling",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "177000",
+    "name": "Ligne de Thionville à Anzeling",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "178000",
+    "name": "Ligne de Thionville à Apach",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "180000",
+    "name": "Ligne de Metz-Ville à Zoufftgen",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "180000",
+    "name": "Ligne de Metz-Ville à Zoufftgen",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "180606",
+    "name": "Voie-mère de Woippy n° 1",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "180611",
+    "name": "Voie-mère de Woippy n° 2",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "186000",
+    "name": "Ligne de Bettembourg à Audun-le-Tiche",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "191300",
+    "name": "Raccordement de Metz-Ville à Metz-Marchandises",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "192000",
+    "name": "Ceinture de Metz",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "194000",
+    "name": "Ligne de Knutange-Nilvange à Algrange-Rochonvillers",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "195000",
+    "name": "Ligne de Fontoy à Audun-le-Tiche",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "198300",
+    "name": "Raccordement d'Uckange",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "200000",
+    "name": "Ligne de Vireux-Molhain à la frontière belge vers Mariembourg",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "202000",
+    "name": "Ligne de Longuyon à Mont-St-Martin (vers Athus)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "202100",
+    "name": "Ligne de Longuyon à Mont-St-Martin (vers Luxembourg)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "203000",
+    "name": "Ligne de Longwy à Villerupt-Micheville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "204000",
+    "name": "Ligne de Mohon à Thionville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "204000",
+    "name": "Ligne de Mohon à Thionville",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "205000",
+    "name": "Ligne de Soissons à Givet",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "205311",
+    "name": "Raccordement de Mohon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "205316",
+    "name": "Raccordement de Charleville-Mézières",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "206950",
+    "name": "Saut-de-mouton de Bazancourt",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "207000",
+    "name": "Ligne de Bazancourt à Challerange",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "208000",
+    "name": "Ligne de Challerange à Apremont",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "209000",
+    "name": "Ligne de Givet à la frontière belge vers Morialme",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "210000",
+    "name": "Ligne d'Amagne-Lucquy à Revigny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "212000",
+    "name": "Ligne d'Hirson à Amagne-Lucquy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "214000",
+    "name": "Ligne de Carignan à Messempré",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "215000",
+    "name": "Ligne de Vrigne-Meuse à Vrigne-aux-Bois",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "216000",
+    "name": "Ligne de Fretin à Fréthun (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "216302",
+    "name": "Raccordement de Fretin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "216308",
+    "name": "Raccordement de Cassel",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "216310",
+    "name": "Raccordement sud de Fréthun",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "216312",
+    "name": "Raccordement nord de Fréthun",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "218000",
+    "name": "Ligne de Baroncourt à Audun-le-Roman",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "220000",
+    "name": "Ligne de Valleroy-Moineville à Villerupt-Micheville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "222000",
+    "name": "Ligne de Liart à Tournes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "223000",
+    "name": "Ligne de Charleville-Mézières à Hirson",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "226000",
+    "name": "Ligne de Gonesse à Lille-Frontière (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "226301",
+    "name": "Raccordement de Vémars",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "226305",
+    "name": "Raccordement d'Hattencourt",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "226306",
+    "name": "Raccordement d'Arras-Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "226309",
+    "name": "Raccordement d'Arras-Nord",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "226310",
+    "name": "Raccordement d'interconnexion nord-sud (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "226318",
+    "name": "Raccordement  de Tournan",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "226320",
+    "name": "Raccordement d'Annet",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "226321",
+    "name": "Raccordement de Messy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "227000",
+    "name": "Ligne d'Ormoy-Villers à Mareuil-sur-Ourcq",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "228000",
+    "name": "Ligne de Laon à Liart",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "229000",
+    "name": "Ligne de La Plaine à Hirson et Anor (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "229306",
+    "name": "Raccordement du Bourget",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "229606",
+    "name": "Voie-mère du Bourget (Garonor)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "229611",
+    "name": "Voie-mère de Marle",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "231000",
+    "name": "Ligne de Chantilly-Gouvieux à Crépy-en-Valois",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "232000",
+    "name": "Ligne d'Ormoy-Villers à Boves",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "233000",
+    "name": "Ligne de Rethondes à La Ferté-Milon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "234000",
+    "name": "Ligne d'Anizy-Pinon à Chauny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "235100",
+    "name": "Embranchement de Crouy à Soissons-St-Médard",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "236000",
+    "name": "Ligne de Laon au Cateau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "238000",
+    "name": "Ligne de Busigny à Hirson",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "239000",
+    "name": "Ligne d'Avesnes à Sars-Poteries",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "240000",
+    "name": "Ligne de Maubeuge à Fourmies",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "241000",
+    "name": "Ligne de Ferrière-la-Grande à Cousolre",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "242000",
+    "name": "Ligne de Creil à Jeumont",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "242316",
+    "name": "Raccordement militaire de Busigny-Nord",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "242360",
+    "name": "Raccordement d'Honnechy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "242370",
+    "name": "Raccordement d'Aulnoye-Aymeries",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "242616",
+    "name": "Voie-mère de St-Quentin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "242626",
+    "name": "Voie-mère de St-Quentin (Origny-Ste-Benoite)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "242910",
+    "name": "Voie de desserte de la ZI de Nogent-sur-Oise-Villers-St-Paul",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "243300",
+    "name": "Raccordement de Rivecourt-Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "243301",
+    "name": "Raccordement des Ageux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "245300",
+    "name": "Raccordement de Rivecourt-Nord",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "246300",
+    "name": "Raccordement militaire de Jussy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "247000",
+    "name": "Ligne d'Hautmont à Feignies (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "247306",
+    "name": "Raccordement de Sous-le-Bois",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "248000",
+    "name": "Ligne de Compiègne à Roye-Faubourg-St-Gilles",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "249000",
+    "name": "Ligne de Marcoing à Masnières",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "250000",
+    "name": "Ligne de Busigny à Somain",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "250306",
+    "name": "Raccordement de Cambrai-Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "250311",
+    "name": "Raccordement de Cambrai-Nord",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "251000",
+    "name": "Ligne d'Escaudoeuvres à Gussignies",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "252000",
+    "name": "Ligne de Prouvy-Thiant au Cateau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "253000",
+    "name": "Ligne de Valenciennes-Faubourg-de-Paris à Hautmont",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "254000",
+    "name": "Ligne de Lourches à Valenciennes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "254610",
+    "name": "Voie-mère de la ZI de Valenciennes-Aéroport n° 2",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "255000",
+    "name": "Ligne de St-Amand-les-Eaux à Blanc-Misseron",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "256000",
+    "name": "Ligne de Denain à St-Amand-les-Eaux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "257000",
+    "name": "Ligne de St-Amand-les-Eaux à Maulde-Mortagne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "258000",
+    "name": "Ligne d'Aubigny-au-Bac à Somain",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "259000",
+    "name": "Ligne de St-Just-en-Chaussée à Douai",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "261000",
+    "name": "Ligne d'Amiens à Laon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "261306",
+    "name": "Raccordement de Lamotte-Brebière",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "262000",
+    "name": "Ligne de Douai à Blanc-Misseron",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "263300",
+    "name": "Raccordement de Beuvrages",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "264000",
+    "name": "Ligne de Pont-de-la-Deûle à Bachy-Mouchin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "265029",
+    "name": "Ligne de Seclin à Seclin-Annexe",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "266300",
+    "name": "Raccordement de Lezennes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "267000",
+    "name": "Ligne de Fives à Hirson",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "267000",
+    "name": "Ligne de Fives à Hirson",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "267306",
+    "name": "Raccordement militaire d'Aulnoye",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "268000",
+    "name": "Ligne de Somain à Halluin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "269000",
+    "name": "Ligne de Fives à Baisieux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "271000",
+    "name": "Ligne de Roubaix-Wattrelos à Wattrelos",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "272000",
+    "name": "Ligne de Paris-Nord à Lille",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "272301",
+    "name": "Raccordement de Blangy-les-Arras",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "272306",
+    "name": "Raccordement de La Chapelle-St-Denis",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "272311",
+    "name": "Raccordement de La Chapelle-Charbons",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "272316",
+    "name": "Raccordement de La Plaine",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "272321",
+    "name": "Raccordement de Pierrefitte",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "272326",
+    "name": "Raccordement de Douai",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "272606",
+    "name": "Voie-mère de Survilliers (ZI de Moimont I)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "272608",
+    "name": "Voie-mère de Survilliers (ZI de Moimont II)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "272646",
+    "name": "Voie-mère de Pont-de-la-Deûle à Thumeries",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "272953",
+    "name": "Saut-de-mouton de St-Denis",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "273300",
+    "name": "Raccordement de Ronchin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "273308",
+    "name": "Raccordement voie RV de Lille",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "277100",
+    "name": "Raccordement de St-Sauveur",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "278000",
+    "name": "Ligne de Fives à Mouscron (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "278306",
+    "name": "Raccordement de Rougebarre",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "281000",
+    "name": "Ligne de Lens à Corbehem",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "284000",
+    "name": "Ligne de Lens à Ostricourt",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "284000",
+    "name": "Ligne de Lens à Ostricourt",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "284306",
+    "name": "Raccordement de Sallaumines",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "284311",
+    "name": "Raccordement de Libercourt",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "284620",
+    "name": "Voie-mère de Lens",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "284621",
+    "name": "Voie-mère d'Ostricourt",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "285000",
+    "name": "Ligne d'Hénin-Beaumont à Bauvin-Provin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "286000",
+    "name": "Ligne de Lens à Don-Sainghin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "286610",
+    "name": "Voie-mère de Pont-à-Vendin à Violaines",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "286612",
+    "name": "Voie-mère de Pont-à-Vendin n° 2",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "286614",
+    "name": "Voie-mère de Pont-à-Vendin n° 3",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "287100",
+    "name": "Embranchement de la gare d'eau de Pont-à-Vendin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "288000",
+    "name": "Ligne de Bully-Grenay à La Bassée-Violaines",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "289000",
+    "name": "Ligne de Fives à Abbeville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "289306",
+    "name": "Raccordement de Santes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "290000",
+    "name": "Ligne de Beuvry à Béthune-Rivage",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "292000",
+    "name": "Ligne d'Haubourdin à St-André",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "292306",
+    "name": "Raccordement de St-André",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "293000",
+    "name": "Ligne de Wavrin à Armentières",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "294000",
+    "name": "Ligne d'Armentières à Arques",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "295000",
+    "name": "Ligne de Lille aux Fontinettes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "296000",
+    "name": "Ligne de La Madeleine à Comines-France",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "300000",
+    "name": "Ligne de Dunkerque-Locale à Bray-Dunes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "301000",
+    "name": "Ligne d'Arras à Dunkerque-Locale",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "301301",
+    "name": "Raccordement d'Avion",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "301306",
+    "name": "Raccordement de l'Yser",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "302506",
+    "name": "Raccordement de Dunkerque-Ouest",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "302511",
+    "name": "Voie du port rapide (Dunkerque)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "302516",
+    "name": "Voie du secteur de Mardyck (Dunkerque)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "302521",
+    "name": "Voie des quais à pondéreux (ouest)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "302526",
+    "name": "Boucle de Dunkerque",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "302531",
+    "name": "Raccordement de Dunkerque-Est",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "304000",
+    "name": "Ligne de Coudekerque-Branche aux Fontinettes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "304300",
+    "name": "Raccordement ferroviaire sud de Dunkerque",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "305000",
+    "name": "Ligne de St-Roch à Frévent",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "306000",
+    "name": "Ligne de Doullens à Arras",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "307000",
+    "name": "Ligne d'Arras à St-Pol-sur-Ternoise",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "308000",
+    "name": "Ligne de St-Pol-sur-Ternoise à Étaples",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "309000",
+    "name": "Ligne de Bully-Grenay à Brias",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "310000",
+    "name": "Ligne de St-Omer à Hesdigneul",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "311000",
+    "name": "Ligne de Longueau à Boulogne-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "311306",
+    "name": "Raccordement du Touquet",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "312300",
+    "name": "Raccordement de Outreau-Poste 1 à l'hoverport",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "312311",
+    "name": "Raccordement de Boulogne-Maritime",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "312502",
+    "name": "Voies du port de Boulogne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "312504",
+    "name": "Voies du port de Boulogne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "314000",
+    "name": "Ligne de Boulogne-Ville à Calais-Maritime",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "314306",
+    "name": "Raccordement des Fontinettes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "314506",
+    "name": "Voies de port de Calais",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "314611",
+    "name": "Voie-mère de Calais",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "315000",
+    "name": "Ligne de Montsoult-Maffliers à Luzarches",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "316000",
+    "name": "Ligne de Creil à Beauvais",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "317000",
+    "name": "Ligne de Rochy-Condé à Soissons",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "319000",
+    "name": "Ligne de Breteuil-Embranchement à Breteuil-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "320000",
+    "name": "Ligne de St-Omer-en-Chaussée à Vers",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "321000",
+    "name": "Ligne de St-Roch à Darnétal-Bifurcation",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "322000",
+    "name": "Ligne de Canaples à Longroy-Gamaches",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "323000",
+    "name": "Ligne d'Abbeville à Eu",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "324000",
+    "name": "Ligne de Noyelles-sur-Mer à St-Valery-Canal",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "325000",
+    "name": "Ligne d'Épinay-Villetaneuse au Tréport-Mers",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "325000",
+    "name": "Ligne d'Épinay-Villetaneuse au Tréport-Mers",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "325000",
+    "name": "Ligne d'Épinay-Villetaneuse au Tréport-Mers",
+    "sectionRank": 3
+  },
+  {
+    "lineCode": "326000",
+    "name": "Ligne de la bifurcation de Neuville à Cergy-Préfecture",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "328000",
+    "name": "Ligne d'Ermont-Eaubonne à Valmondois",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "329000",
+    "name": "Ligne de Pierrelaye à Creil",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "330000",
+    "name": "Ligne de St-Denis à Dieppe",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "330000",
+    "name": "Ligne de St-Denis à Dieppe",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "330306",
+    "name": "Raccordement de Cernay",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "331300",
+    "name": "Raccordement d'Épluches",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "332000",
+    "name": "Ligne de Beauvais à Gisors-Embranchement",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "333000",
+    "name": "Ligne de Goincourt à Gournay-Ferrières",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "334000",
+    "name": "Ligne de Paris-St-Lazare à Mantes-Station par Conflans-Ste-Honorine",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "334301",
+    "name": "Raccordement de Soulezard",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "334302",
+    "name": "Raccordement de Val-Notre-Dame",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "334900",
+    "name": "Ligne de Paris-St-Lazare à Ermont-Eaubonne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "335300",
+    "name": "Raccordement 2J des Ambassadeurs",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "335301",
+    "name": "Raccordement 2R des Ambassadeurs",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "335302",
+    "name": "Raccordement 1J des Ambassadeurs",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "335303",
+    "name": "Raccordement d'Achères Voie 1A",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "335304",
+    "name": "Raccordement d'Achères Voie 2A",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "336000",
+    "name": "Ligne de Conflans-Ste-Honorine à Éragny-Neuville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "336306",
+    "name": "Raccordement de Fin-d'Oise",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "337300",
+    "name": "Raccordement d'Éragny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "338000",
+    "name": "Ligne d'Achères à Pontoise",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "339000",
+    "name": "Ligne de Gisors-Boisgeloup à Pacy-sur-Eure",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "340000",
+    "name": "Ligne de Paris-St-Lazare au Havre",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "340306",
+    "name": "Raccordement de Bezons",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "340309",
+    "name": "Raccordement du dépôt de Sotteville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "340311",
+    "name": "Raccordement de Rouen-Martainville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "340506",
+    "name": "Voies du port de Rouen-Rive-Droite",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "341116",
+    "name": "Embranchement maritime est du port du Havre",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "341300",
+    "name": "Raccordement maritime du Havre",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "341306",
+    "name": "Raccordement de Graville (ouest)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "341306",
+    "name": "Raccordement de Graville (ouest)",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "341311",
+    "name": "Raccordement de Graville (est)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "341315",
+    "name": "Raccordement du Pont-Rouge",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "341320",
+    "name": "Raccordement de l'Europe",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "341500",
+    "name": "Voies du port du Havre",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "341606",
+    "name": "Voie-mère du Havre n° 2 (J. Durand)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "342000",
+    "name": "Ligne de Gisors-Embranchement à Pont-de-l'Arche",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "347000",
+    "name": "Ligne de Chars à Magny-en-Vexin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "350000",
+    "name": "Ligne de Malaunay-Le Houlme à Dieppe",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "350306",
+    "name": "Raccordement de St-Pierre",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "351000",
+    "name": "Ligne de Barentin à Caudebec-en-Caux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "353300",
+    "name": "Raccordement de Clères",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "354000",
+    "name": "Ligne de Montérolier-Buchy à Motteville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "356000",
+    "name": "Ligne de Rouxmesnil à Eu",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "357000",
+    "name": "Ligne de Dieppe à Fécamp",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "358000",
+    "name": "Ligne de Motteville à St-Valery-en-Caux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "359000",
+    "name": "Ligne de Bréauté-Beuzeville à Fecamp",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "360000",
+    "name": "Ligne des Ifs à Étretat",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "361000",
+    "name": "Ligne du Havre-Graville à Tourville-les-Ifs",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "362000",
+    "name": "Ligne de Bréauté-Beuzeville à Gravenchon-Port-Jérôme",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "362506",
+    "name": "Raccordement maritime de Gravenchon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "365000",
+    "name": "Ligne de Rouen-Gauche à Petit-Couronne (voies des quais)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "365501",
+    "name": "Voies du port de Rouen-Rive-Gauche",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "365502",
+    "name": "Raccordement du Petit-Quevilly",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "366000",
+    "name": "Ligne de Mantes-la-Jolie à Cherbourg",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "366106",
+    "name": "Embranchement de Cherbourg-Maritime",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "366306",
+    "name": "Raccordement des Piquettes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "366311",
+    "name": "Raccordement de Mézidon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "366536",
+    "name": "Raccordement maritime de Homet",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "367300",
+    "name": "Raccordement d'Eauplet",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "368300",
+    "name": "Raccordement de Sotteville à Darnétal",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "368301",
+    "name": "Raccordement de Darnétal à Rouen-Rive-Droite",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "369000",
+    "name": "Ligne de Sotteville à Rouen-Rive-Gauche",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "370000",
+    "name": "Ligne de St-Georges-Motel à Grand-Quevilly",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "371000",
+    "name": "Ligne d'Évreux-Embranchement à Acquigny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "372000",
+    "name": "Ligne de Serquigny à Oissel",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "374300",
+    "name": "Raccordement de Serquigny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "375000",
+    "name": "Ligne d'Évreux-Embranchement à Quetteville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "376000",
+    "name": "Ligne de St-Pierre-du-Vauvray à Louviers",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "377000",
+    "name": "Ligne de Lisieux à Honfleur",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "378000",
+    "name": "Ligne de Pont-l'Évêque à Trouville-Deauville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "379000",
+    "name": "Ligne de Mézidon à Trouville-Deauville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "380000",
+    "name": "Ligne de Caen à Dozulé-Putot",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "382100",
+    "name": "Embranchement d'Évreux-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "390000",
+    "name": "Ligne de Lisieux à Trouville-Deauville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "395000",
+    "name": "Ligne de St-Cyr à Surdon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "395306",
+    "name": "Raccordement de St-Cyr",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "396000",
+    "name": "Ligne de Plaisir-Grignon à Épône-Mézières",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "396306",
+    "name": "Raccordement d'Épône",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "397000",
+    "name": "Ligne de Dreux à St-Aubin-du-Vieil-Évreux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "403300",
+    "name": "Raccordement de Surdon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "405000",
+    "name": "Ligne d'Argentan à Granville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "405536",
+    "name": "Raccordement maritime de Granville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "408000",
+    "name": "Ligne de Connerré à Rennes (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "408305",
+    "name": "Raccordement de Connérré Fret",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "408315",
+    "name": "Raccordement de la Milesse Fret",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "408320",
+    "name": "Raccordement de la Milesse-Voyageurs V1",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "408340",
+    "name": "Raccordement de Sablé-sur-Sarthe",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "408345",
+    "name": "Raccordement de la virgule de Sablé-sur-Sarthe",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "408360",
+    "name": "Raccordement de Laval-Est",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "408370",
+    "name": "Raccordement de Laval-Ouest",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "409000",
+    "name": "Ligne de Chartres à Dreux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "411000",
+    "name": "Ligne de Falaise à Berjou",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "412000",
+    "name": "Ligne de Caen à Cerisy-Belle-Étoile",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "414000",
+    "name": "Ligne de St-Lô à Guilberville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "415000",
+    "name": "Ligne de Lison à Lamballe",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "415335",
+    "name": "Raccordement de Folligny-Ouest",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "418000",
+    "name": "Ligne de Carentan à Carteret",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "420000",
+    "name": "Ligne de Paris-Montparnasse à Brest",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "420306",
+    "name": "Raccordement de Pontlieue (Le Mans)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "421300",
+    "name": "Raccordement du Rody au port de Brest",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "421500",
+    "name": "Voie du port de Brest",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "421501",
+    "name": "Voie du port de Brest",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "421502",
+    "name": "Voie du port de Brest",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "422000",
+    "name": "Ligne de La Loupe à Prey",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "423000",
+    "name": "Ligne d'Alençon à Condé-sur-Huisne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "427000",
+    "name": "Ligne de La Hutte-Coulombiers à Mamers",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "428000",
+    "name": "Ligne de Sillé-le-Guillaume à La Hutte-Coulombiers",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "429000",
+    "name": "Ligne de Courtalain à Connerré (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "429310",
+    "name": "Raccordement de Connerré-Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "430000",
+    "name": "Ligne du Mans à Mézidon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "431000",
+    "name": "Ligne de Paris-Montparnasse à Monts (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "431300",
+    "name": "Raccordement de Massy (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "431302",
+    "name": "Raccordement d'Auneau (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "431305",
+    "name": "Raccordement de Courtalain (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "431310",
+    "name": "Raccordement de St-Amand-Longpré (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "431315",
+    "name": "Raccordement de St-Pierre-des-Corps (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "431320",
+    "name": "Raccordement de Montlouis (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "432000",
+    "name": "Ligne d'Alençon à Domfront",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "433000",
+    "name": "Ligne de Couterne à La Ferté-Macé",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "434000",
+    "name": "Ligne de Briouze à La Ferté-Macé",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "435000",
+    "name": "Ligne de Pré-en-Pail à Mayenne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "436000",
+    "name": "Ligne de La Chapelle-Anthenaise à Flers",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "437000",
+    "name": "Ligne de Domfront à Pontaubault",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "439000",
+    "name": "Ligne de Vitré à Pontorson",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "440000",
+    "name": "Ligne de Vire à Romagny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "441000",
+    "name": "Ligne de Rennes à St-Malo-St-Servan",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "442500",
+    "name": "Voie du port de St-Malo",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "442502",
+    "name": "Voie du port de St-Malo",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "442503",
+    "name": "Voie du port de St-Malo",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "442504",
+    "name": "Voie du port de St-Malo",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "445000",
+    "name": "Ligne de St-Brieuc au Légué",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "445506",
+    "name": "Voie du port du Légué",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "446000",
+    "name": "Ligne de Plouaret à Lannion",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "447000",
+    "name": "Ligne de Morlaix à Roscoff",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "448000",
+    "name": "Ligne de St-Hilaire-du-Harcouët à Fougères",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "450000",
+    "name": "Ligne du Mans à Angers-Maître-École",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "450306",
+    "name": "Raccordement de La Plumasserie (Le Mans)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "451300",
+    "name": "Raccordement de La Duboisière (Le Mans)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "451311",
+    "name": "Raccordement de St-Georges (Le Mans)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "457000",
+    "name": "Ligne de Segré à Nantes-État",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "457306",
+    "name": "Raccordement des Américains (Nantes)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "458000",
+    "name": "Ligne de Laval à Gennes-Longuefuye",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "459300",
+    "name": "Raccordement de Besné-Pontchâteau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "460000",
+    "name": "Ligne de Sablé à Montoir-de-Bretagne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "462000",
+    "name": "Ligne de Laval à Pouancé",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "463000",
+    "name": "Ligne de Châteaubriant à Ploërmel",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "466000",
+    "name": "Ligne de Châteaubriant à Rennes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "467000",
+    "name": "Ligne de Martigné-Ferchaud à Vitré",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "468000",
+    "name": "Ligne de Rennes à Redon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "468306",
+    "name": "Raccordement de Redon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "470000",
+    "name": "Ligne de Savenay à Landerneau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "470606",
+    "name": "Voie-mère de Kerpont de Lorient",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "471000",
+    "name": "Ligne de Questembert à Ploërmel",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "472000",
+    "name": "Ligne de Ploërmel à La Brohinière",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "473000",
+    "name": "Ligne d'Auray à Quiberon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "474000",
+    "name": "Ligne d'Auray à Pontivy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "475000",
+    "name": "Ligne de St-Brieuc à Pontivy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "475606",
+    "name": "Voie-mère des Châtelets de St-Brieuc",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "476000",
+    "name": "Ligne de Rosporden à Concarneau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "477000",
+    "name": "Ligne de Quimper à Pont-l'Abbé",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "485000",
+    "name": "Ligne de Guingamp à Carhaix",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "486000",
+    "name": "Ligne de Guingamp à Paimpol",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "486506",
+    "name": "Voie du port de Paimpol",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "487000",
+    "name": "Ligne de Carhaix à Loudéac",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "499500",
+    "name": "Voie du port de Lorient",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "499501",
+    "name": "Voie du port de Lorient (ZI de Kergroise)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "499503",
+    "name": "Voie du port de Lorient (port de pêche)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "500000",
+    "name": "Ligne de Chartres à Bordeaux-St-Jean",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "500000",
+    "name": "Ligne de Chartres à Bordeaux-St-Jean",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "500306",
+    "name": "Raccordement de Beillant",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "500650",
+    "name": "Voie Mère de la ZI de MERON",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "503300",
+    "name": "Raccordement circulaire de Bordeaux-Bastide à Bordeaux-Bénauge",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "508000",
+    "name": "Ligne d'Aubigné-Racan à Sablé",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "509000",
+    "name": "Ligne de L'Aubinière à La Suze",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "510000",
+    "name": "Ligne de La Flèche à Vivy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "511000",
+    "name": "Ligne d'Angers-St-Laud à La Flèche",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "514300",
+    "name": "Raccordement des deux gares",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "514316",
+    "name": "Raccordement direct de Nantes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "515000",
+    "name": "Ligne de Tours à St-Nazaire",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "516000",
+    "name": "Ligne de St-Nazaire au Croisic",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "517000",
+    "name": "Ligne de La Baule-Escoublac à Guérande",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "518000",
+    "name": "Ligne de Segré à Angers-St-Serge",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "519000",
+    "name": "Ligne de Nantes-Orléans à Châteaubriant",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "521000",
+    "name": "Ligne de Loudun à Angers-Maître-École",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "523000",
+    "name": "Ligne de La Possonnière à Niort",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "524000",
+    "name": "Ligne de Neuville-de-Poitou à Bressuire",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "525000",
+    "name": "Ligne des Sables-d'Olonne à Tours",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "525000",
+    "name": "Ligne des Sables-d'Olonne à Tours",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "526000",
+    "name": "Ligne de Vouvant-Cezais à St-Christophe-du-Bois",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "527000",
+    "name": "Ligne de Clisson à Cholet",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "528000",
+    "name": "Ligne de Breuil-Barret à Velluire",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "529000",
+    "name": "Ligne de Fontenay-le-Comte à Benet",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "530000",
+    "name": "Ligne de Nantes-Orléans à Saintes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "531000",
+    "name": "Ligne de Nantilly à Saumur-Rive-Gauche",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "534000",
+    "name": "Ligne de Nantes-État à La Roche-sur-Yon par Ste-Pazanne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "534311",
+    "name": "Raccordement de Commequiers",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "534611",
+    "name": "Voie-mère de Rezé-Pont-Rousseau D2 à Nantes-Atlantique",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "535000",
+    "name": "Ligne de Commequiers à St-Gilles-Croix-de-Vie",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "536000",
+    "name": "Ligne de Ste-Pazanne à Pornic",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "537000",
+    "name": "Ligne de St-Hilaire-de-Chaléons à Paimboeuf",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "538000",
+    "name": "Ligne de St-Benoît à La Rochelle-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "538310",
+    "name": "Raccordement R2FS de Fontaine-Le Comte Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "538311",
+    "name": "Raccordement R1FS de Fontaine-Le Comte Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "538315",
+    "name": "Raccordement de Fontaine-Le Comte Nord",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "539000",
+    "name": "Ligne de La Rochelle-Ville à La Rochelle-Pallice",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "539507",
+    "name": "Voie de port de La Rochelle-Pallice (quai nord)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "544000",
+    "name": "Ligne de Saintes à Royan",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "545000",
+    "name": "Ligne de Saujon à La Grève",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "546000",
+    "name": "Ligne de Pons à Saujon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "547000",
+    "name": "Ligne de St-Mariens-St-Yzan à Blaye",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "547506",
+    "name": "Voie de port de Blaye",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "550000",
+    "name": "Ligne de Brétigny à La Membrolle-sur-Choisille",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "552000",
+    "name": "Ligne de Paris-Luxembourg à Limours",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "553000",
+    "name": "Ligne d'Ouest-Ceinture à Chartres",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "555000",
+    "name": "Ligne de Beaulieu-le-Coudray à Auneau-Embranchement",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "556000",
+    "name": "Ligne de Chartres à Orléans",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "556606",
+    "name": "Voie-mère de Chartres-Lucé",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "557000",
+    "name": "Ligne de Voves à Toury",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "558000",
+    "name": "Ligne de Courtalain-St-Pellerin à Patay",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "559000",
+    "name": "Ligne de Pont-de-Braye à Blois",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "561000",
+    "name": "Ligne de Tours au Mans",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "561311",
+    "name": "Raccordement des Fontaines (Le Mans)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "561316",
+    "name": "Raccordement de La Clarté (Le Mans)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "562300",
+    "name": "Raccordement de St-Pierre-des-Corps vers Nantes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "563300",
+    "name": "Raccordement de St-Pierre-des-Corps à Tours",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "564300",
+    "name": "Raccordement de Tours à Monts (bifurcation de Bordeaux)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "566000",
+    "name": "Ligne SEA-Atlantique (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "568000",
+    "name": "Ligne de Lormont à Bordeaux-Bastide",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "569000",
+    "name": "Ligne des Aubrais-Orléans à Orléans",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "569300",
+    "name": "Raccordement d'Orléans vers Tours",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "569301",
+    "name": "Raccordement d'Orléans vers Vierzon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570000",
+    "name": "Ligne de Paris-Austerlitz à Bordeaux-St-Jean",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570000",
+    "name": "Ligne de Paris-Austerlitz à Bordeaux-St-Jean",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "570000",
+    "name": "Ligne de Paris-Austerlitz à Bordeaux-St-Jean",
+    "sectionRank": 3
+  },
+  {
+    "lineCode": "570306",
+    "name": "Raccordement de Paris-Tolbiac",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570306",
+    "name": "Raccordement de Paris-Tolbiac",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "570316",
+    "name": "Raccordement circulaire de Brétigny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570321",
+    "name": "Raccordement d'Ambarès-et-Lagrave",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570345",
+    "name": "Raccordement de Monts-Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570350",
+    "name": "Raccordement de La Celle Saint-Avant",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570360",
+    "name": "Raccordement de Migne-Auxances",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570380",
+    "name": "Raccordement de Juillé",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570385",
+    "name": "Raccordement de Villognon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570390",
+    "name": "Raccordement de La Couronne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570506",
+    "name": "Voie de port d'Ivry-sur-Seine",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570511",
+    "name": "Voies du port de Bassens",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570606",
+    "name": "Voie-mère de Choisy-le-Roi",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "570906",
+    "name": "Voie de desserte de la ZI d'Étampes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "571000",
+    "name": "Ligne de Port-Boulet à Port-de-Piles",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "572000",
+    "name": "Ligne de Ligré-Rivière à Richelieu",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "573000",
+    "name": "Ligne de Loudun à Châtellerault",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "574000",
+    "name": "Ligne de Poitiers à Arçay",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "578000",
+    "name": "Ligne d'Aiffres à Ruffec",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "579000",
+    "name": "Ligne de Beillant à Angoulême",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "580000",
+    "name": "Ligne de Châteauneuf-sur-Charente à St-Mariens-St-Yzan",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "581000",
+    "name": "Ligne de Cavignac à Coutras",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "583000",
+    "name": "Ligne de Bassens au Bec-d'Ambès",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "584000",
+    "name": "Ligne de Ravezies à Pointe-de-Grave",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "585500",
+    "name": "Voies des quais rive gauche (Bordeaux)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "585506",
+    "name": "Voies des bassins à flot de Bordeaux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "586000",
+    "name": "Ceinture de Bordeaux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "587300",
+    "name": "Raccordement de Bonnaous à Beyreman",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "588506",
+    "name": "Voies du port de Trompeloup",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "589500",
+    "name": "Raccordement de l'avant-port du Verdon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "590000",
+    "name": "Ligne des Aubrais-Orléans à Montauban-Ville-Bourbon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "590000",
+    "name": "Ligne des Aubrais-Orléans à Montauban-Ville-Bourbon",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "590306",
+    "name": "Raccordement de Limoges-Puy-Imbert à Limoges-Montjovis",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "591000",
+    "name": "Ligne de Villefranche-sur-Cher à Blois",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "593000",
+    "name": "Ligne de Vierzon à St-Pierre-des-Corps",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "594000",
+    "name": "Ligne de Joué-lès-Tours à Châteauroux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "598000",
+    "name": "Ligne de Port-de-Piles à Argenton-sur-Creuse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "600000",
+    "name": "Ligne de Salbris au Blanc",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "601000",
+    "name": "Ligne de St-Benoît au Blanc",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "603000",
+    "name": "Ligne de Montmorillon à St-Aigny-Le Blanc",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "604000",
+    "name": "Ligne de Mignaloux-Nouaillé à Bersac",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "606000",
+    "name": "Ligne du Dorat à Limoges-Bénédictins",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "606606",
+    "name": "Voie-mère de la ZI de Limoges",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "607000",
+    "name": "Ligne de Lussac-les-Châteaux à St-Saviol",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "608000",
+    "name": "Ligne de Roumazières-Loubert au Vigeant",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "610000",
+    "name": "Ligne de Limoges-Bénédictins à Angoulême",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "610000",
+    "name": "Ligne de Limoges-Bénédictins à Angoulême",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "611000",
+    "name": "Ligne de Limoges-Bénédictins à Périgueux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "613000",
+    "name": "Ligne de Nexon à Brive-la-Gaillarde",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "615000",
+    "name": "Ligne de Saillat-sur-Vienne à Bussière-Galant",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "616000",
+    "name": "Ligne de Thiviers à St-Aulaire",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "617000",
+    "name": "Ligne du Quéroy-Pranzac à Thiviers",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "621000",
+    "name": "Ligne de Coutras à Tulle",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "628000",
+    "name": "Ligne de Siorac-en-Périgord à Cazoulès",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "629000",
+    "name": "Ligne de Libourne au Buisson",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "631000",
+    "name": "Ligne de Niversac à Agen",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "632000",
+    "name": "Ligne de Monsempron-Libos à Cahors",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "634000",
+    "name": "Ligne de Penne-d'Agenais à Tonneins",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "637000",
+    "name": "Ligne de Bordeaux-Bénauge à La Sauvetat-du-Dropt",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "637100",
+    "name": "Embranchement de Bordeaux-Passerelle",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "637506",
+    "name": "Voies des quais rive droite - port de Bordeaux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "640000",
+    "name": "Ligne de Bordeaux-St-Jean à Sète-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "640100",
+    "name": "Ligne de Colombiers à Cazouls-lès-Béziers",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "640306",
+    "name": "Raccordement circulaire de Bordeaux-St-Jean",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "640311",
+    "name": "Raccordement de Toulouse à Montredon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "640640",
+    "name": "Voie-mère de la ZI de Béziers n° 1",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "641000",
+    "name": "Ligne de Langon à Gabarret",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "642000",
+    "name": "Ligne de Marmande à Mont-de-Marsan",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "643000",
+    "name": "Ligne de Port-Ste-Marie à Riscle",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "644000",
+    "name": "Ligne de Nérac à Mont-de-Marsan",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "647000",
+    "name": "Ligne de Bon-Encontre à Vic-en-Bigorre",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "648000",
+    "name": "Ligne de St-Agne à Auch",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "649000",
+    "name": "Ligne de Castelsarrasin à Beaumont-de-Lomagne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "650000",
+    "name": "Ligne de Toulouse à Bayonne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "652000",
+    "name": "Ligne de Morcenx à Bagnères-de-Bigorre",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "653000",
+    "name": "Ligne de St-Sever à Hagetmau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "654000",
+    "name": "Ligne de Dax à Mont-de-Marsan",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "655000",
+    "name": "Ligne de Bordeaux-St-Jean à Irun",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "656000",
+    "name": "Ligne de Puyoô à Dax",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "657000",
+    "name": "Ligne de Lamothe à Arcachon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "658000",
+    "name": "Ligne de Bayonne à Allées-Marines",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "660000",
+    "name": "Ligne de Bayonne à St-Jean-Pied-de-Port",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "661000",
+    "name": "Ligne d'Ossès-St-Martin-d'Arrossa à St-Étienne-de-Baïgorry",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "662000",
+    "name": "Ligne de Puyoô à Mauléon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "664000",
+    "name": "Ligne de Pau à Canfranc (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "665000",
+    "name": "Ligne de Buzy à Laruns-Eaux-Bonnes-Les Eaux-Chaudes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "666000",
+    "name": "Ligne de Lourdes à Pierrefitte-Nestalas",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "667000",
+    "name": "Ligne de Lannemezan à Arreau-Cadéac",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "668000",
+    "name": "Ligne de Montréjeau-Gourdan-Polignan à Luchon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "669000",
+    "name": "Ligne de Villefranche-Vernet-les-Bains à Latour-de-Carol",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "670000",
+    "name": "Ligne de Boussens à St-Girons",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "672000",
+    "name": "Ligne de Portet-St-Simon à Puigcerda (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "676000",
+    "name": "Ligne de Carcassonne à Rivesaltes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "677000",
+    "name": "Ligne de Narbonne à Port-Bou (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "677306",
+    "name": "Raccordement de Narbonne-Triangle",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "677306",
+    "name": "Raccordement de Narbonne-Triangle",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "677506",
+    "name": "Voies de port de Port-la-Nouvelle",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "678300",
+    "name": "Raccordement de Port-Vendres-Ville à Port-Vendres-Quais",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "678500",
+    "name": "Voies de port de Port-Vendres-Quais",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "679000",
+    "name": "Ligne de Perpignan à Villefranche-Vernet-les-Bains",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "679305",
+    "name": "Raccordement TGV du SOLER",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "680000",
+    "name": "Ligne d'Elne à Arles-sur-Tech",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "681000",
+    "name": "Ligne de La Guerche-sur-l'Aubois à Marseille-lès-Aubigny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "682000",
+    "name": "Ligne d'Auxy-Juranville à Bourges",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "683000",
+    "name": "Ligne des Aubrais-Orléans à Malesherbes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "684000",
+    "name": "Ligne d'Étampes à Beaune-la-Rolande",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "685000",
+    "name": "Ligne de Gien à Argent",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "686000",
+    "name": "Ligne des Aubrais-Orléans à Montargis",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "687000",
+    "name": "Ligne d'Orléans à Gien",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "688100",
+    "name": "Embranchement de la gare d'eau de Montargis",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "689000",
+    "name": "Ligne de St-Germain-du-Puy à Cosne-Cours-sur-Loire",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "690000",
+    "name": "Ligne de Vierzon à Saincaize",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "690306",
+    "name": "Raccordement de Bourges au poste C de Pont-Vert",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "691000",
+    "name": "Ligne de St-Florent-sur-Cher à Issoudun",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "694000",
+    "name": "Ligne de Paulhan à Montpellier",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "695000",
+    "name": "Ligne de Bourges à Miécaze",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "695606",
+    "name": "Voie-mère de la gare de Montluçon-Eau n° 2",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "696000",
+    "name": "Ligne de Châteauroux à La Ville-Gozet",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "698000",
+    "name": "Ligne de La Châtre à Guéret",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "699000",
+    "name": "Ligne de Champillet-Urciers à Lavaufranche",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "701000",
+    "name": "Ligne de Capdenac à Rodez",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "702000",
+    "name": "Ligne de Montluçon à St-Sulpice-Laurière",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "703000",
+    "name": "Ligne de Vieilleville à Bourganeuf",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "704000",
+    "name": "Ligne de St-Sébastien à Guéret",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "705000",
+    "name": "Ligne de Montluçon à Moulins",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "707000",
+    "name": "Ligne de Commentry à Gannat",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "709000",
+    "name": "Ligne de Lapeyrouse à Volvic",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "710000",
+    "name": "Ligne de Laqueuille au Mont-Dore",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "711000",
+    "name": "Ligne d'Eygurande-Merlines à Clermont-Ferrand",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "712000",
+    "name": "Ligne de Busseau-sur-Creuse à Ussel",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "713000",
+    "name": "Ligne du Palais à Eygurande-Merlines",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "716000",
+    "name": "Ligne de Tulle à Meymac",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "718000",
+    "name": "Ligne de Brive-la-Gaillarde à Toulouse-Matabiau via Capdenac",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "719000",
+    "name": "Ligne de Souillac à Viescamp-sous-Jallès",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "720000",
+    "name": "Ligne de Figeac à Arvant",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "721000",
+    "name": "Ligne de Bort-les-Orgues à Neussargues",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "722000",
+    "name": "Ligne de Béziers à Neussargues",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "723000",
+    "name": "Ligne du Monastier à La Bastide-St-Laurent-les-Bains",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "724000",
+    "name": "Ligne de Cahors à Capdenac",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "725000",
+    "name": "Ligne de Sévérac-le-Château à Rodez",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "727000",
+    "name": "Ligne de Tournemire-Roquefort au Vigan",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "728000",
+    "name": "Ligne de Tournemire-Roquefort à St-Affrique",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "731000",
+    "name": "Ligne de Sète-Ville à Montbazin-Gigean",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "732000",
+    "name": "Ligne de Vias à Lodève",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "732000",
+    "name": "Ligne de Vias à Lodève",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "733000",
+    "name": "Ligne de Colombiers à Quarante-Cruzy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "734000",
+    "name": "Ligne de Narbonne à Bize",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "736000",
+    "name": "Ligne de Castelnaudary à Rodez",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "737000",
+    "name": "Ligne de Castres à Bédarieux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "738000",
+    "name": "Ligne de Montauban-Ville-Bourbon à La Crémade",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "741000",
+    "name": "Ligne de Tessonnières à Albi",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "742000",
+    "name": "Ligne d'Albi à St-Juéry",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "745000",
+    "name": "Ligne de Villeneuve-St-Georges à Montargis",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "745306",
+    "name": "Raccordement de Vigneux-sur-Seine voie 2M/voie 2 bis C",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "746000",
+    "name": "Ligne de Corbeil-Essonnes à Montereau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "747000",
+    "name": "Ligne de Bourron-Marlotte-Grez à Malesherbes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "747306",
+    "name": "Raccordement de Filay",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "748000",
+    "name": "Ligne de Montargis à Sens",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "749000",
+    "name": "Ligne de Triguères à Surgy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "750000",
+    "name": "Ligne de Moret-Veneux-les-Sablons à Lyon-Perrache",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "750306",
+    "name": "Raccordement militaire de Saincaize",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "750311",
+    "name": "Raccordement de Montrond-les-Bains",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "750316",
+    "name": "Raccordement de Badan (poste 1) à Chasse-sur-Rhône (poste 3)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "750521",
+    "name": "Embranchement du port de Roanne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "750670",
+    "name": "Voie mère ZI de La Plaine",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "750672",
+    "name": "Voie mère n° 2 d'Andrézieux-Bouthéon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "750674",
+    "name": "Voie mère n° 1 d'Andrézieux-Bouthéon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "751000",
+    "name": "Ligne d'Auxerre-St-Gervais à Gien",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752000",
+    "name": "Ligne de Combs-la-Ville à St-Louis (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752100",
+    "name": "Ligne de Villeneuve-St-Georges à la bifurcation de Moisenay (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752305",
+    "name": "Raccordement de Valenton (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752308",
+    "name": "Raccordement de Coubert (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752321",
+    "name": "Raccordement Nord de Montereau LGV",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752323",
+    "name": "Raccordement Sud de Montereau LGV",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752330",
+    "name": "Raccordement de Lyon-St-Clair (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752340",
+    "name": "Raccordement de Grenay (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752342",
+    "name": "Raccordement de St-Marcel-lès-Valence",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752350",
+    "name": "Raccordement d'Heyrieux (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752352",
+    "name": "Raccordement de Crest (base d'Eurre)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752354",
+    "name": "Raccordement nord de Bollène-Lamotte-du-Rhône",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752356",
+    "name": "Raccordement sud de Bollène-Lamotte-du-Rhône",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "752358",
+    "name": "Raccordement de Cheval-Blanc",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "753000",
+    "name": "Ligne de Laroche-Migennes à Cosne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "753306",
+    "name": "Raccordement militaire de Laroche-Migennes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "754000",
+    "name": "Ligne de Clamecy à Nevers",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "755000",
+    "name": "Ligne de Cravant-Bazarnes à Dracy-St-Loup",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "757000",
+    "name": "Ligne de Maison-Dieu aux Laumes-Alésia",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "760000",
+    "name": "Ligne de Nevers à Chagny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "760306",
+    "name": "Raccordement des lignes de Chagny à Dole et de Paris-Lyon à Marseille-St-Charles",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "760311",
+    "name": "Raccordement des lignes de Nevers à Chagny et de Chagny à Dole",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "761000",
+    "name": "Ligne d'Étang à Santenay (via Autun)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "762000",
+    "name": "Ligne de Clamecy à Gilly-sur-Loire",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "763000",
+    "name": "Ligne de Tamnay-Châtillon à Château-Chinon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "764000",
+    "name": "Ligne de St-Florentin-Vergigny à Moneteau-Gurgy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "767300",
+    "name": "Raccordement de Montchanin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "768300",
+    "name": "Raccordement de Pasilly à Aisy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "769000",
+    "name": "Ligne du Coteau à Montchanin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "770000",
+    "name": "Ligne de Moulins à Mâcon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "770606",
+    "name": "Voie-mère de la ZI de Moulins n° 1",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "772000",
+    "name": "Ligne de Cluny à Chalon-sur-Saône",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "774000",
+    "name": "Ligne de Pouilly-sous-Charlieu à Clermain",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "775000",
+    "name": "Ligne de Paray-le-Monial à Givors-Canal",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "775311",
+    "name": "Raccordement de Badan (poste 3) à Badan (poste 1)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "776000",
+    "name": "Ligne de Belleville à Beaujeu",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "777300",
+    "name": "Raccordement de Pont-de-Veyle",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "778300",
+    "name": "Raccordement de Mâcon-Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "779300",
+    "name": "Raccordement de Mâcon-Nord",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "780000",
+    "name": "Ligne de St-Étienne-La Terrasse à St-Étienne-Pont-de-l'Âne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "782000",
+    "name": "Ligne de Lyon-St-Paul à Montbrison",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "782310",
+    "name": "Raccordement de Tassin (SHUNT-TT)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "783000",
+    "name": "Ligne du Coteau à St-Germain-au-Mont-d'Or",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "784000",
+    "name": "Ligne de Clermont-Ferrand à St-Just-sur-Loire",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "785000",
+    "name": "Ligne de St-Germain-des-Fossés à Darsac",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "786000",
+    "name": "Ligne de Vichy à Cusset",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "787000",
+    "name": "Ligne de Vichy à Riom",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "789000",
+    "name": "Ligne de La Ferté-Hauterive à Gannat",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "790000",
+    "name": "Ligne de St-Germain-des-Fossés à Nîmes-CRB1",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "790305",
+    "name": "Raccordement de St Germain des Fossès",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "790611",
+    "name": "Voie-mère de la ZI de Ladoux à Gerzat",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "792000",
+    "name": "Ligne du Puy à Langogne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "793606",
+    "name": "Voie-mère de la ZI de Volvic à Riom",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "795000",
+    "name": "Ligne de Bonson à Sembadel",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "796000",
+    "name": "Ligne de St-Just-sur-Loire à St-Just-St-Rambert",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "797000",
+    "name": "Ligne de Firminy à St-Rambert-d'Albon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "797306",
+    "name": "Raccordement de St-Rambert-d'Albon (bifurcation nord)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "797311",
+    "name": "Raccordement sud de Peyraud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "798000",
+    "name": "Ligne de St-Georges-d'Aurac à St-Étienne-Châteaucreux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "800000",
+    "name": "Ligne de Givors-Canal à Grezan",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "800306",
+    "name": "Raccordement de Peyraud (bifurcation nord)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "800311",
+    "name": "Raccordement nord de La Voulte (bifurcation nord)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "800316",
+    "name": "Raccordement sud de La Voulte (bifurcation sud)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "800390",
+    "name": "Raccordement de Saint-Gervasy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "800395",
+    "name": "Raccordement de la Virgulette",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "804000",
+    "name": "Ligne du Pouzin à Privas",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "805000",
+    "name": "Ligne du Teil à Alès",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "808000",
+    "name": "Ligne de Bessèges à Robiac",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "810000",
+    "name": "Ligne de Tarascon à Sète-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "810310",
+    "name": "Raccordement de Jonquières",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "810315",
+    "name": "Raccordement de Nimes-Alès",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "810506",
+    "name": "Voies de port de Sète-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "810611",
+    "name": "Voie-mère du Lantissargues",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "811000",
+    "name": "Ligne de La Peyrade-Bifurcation à Sète-Méditerranée",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "811505",
+    "name": "Voie de port de Sète-Méditerranée (darse 1)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "812000",
+    "name": "Ligne d'Alès à Port-L'Ardoise",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "812306",
+    "name": "Raccordement de L'Ardoise à Port-L'Ardoise",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "813000",
+    "name": "Ligne du Martinet à Beaucaire",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "814000",
+    "name": "Ligne de Mas-des-Gardies aux Mazes-le-Crès",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "815000",
+    "name": "Ligne de Lézan à St-Jean-du-Gard",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "819000",
+    "name": "Ligne de St-Césaire au Grau-du-Roi",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "820000",
+    "name": "Ligne d'Arles à Lunel",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "821000",
+    "name": "Ligne d'Arles au canal",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "824000",
+    "name": "Ligne de Villeneuve-lès-Avignon à Avignon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "824301",
+    "name": "Raccordement sud de Villeneuve-lès-Avignon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "824306",
+    "name": "Raccordement de Villeneuve-lès-Avignon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830000",
+    "name": "Ligne de Paris-Lyon à Marseille-St-Charles",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830311",
+    "name": "Raccordement de Bercy-Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830316",
+    "name": "Raccordement militaire de Moret",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830321",
+    "name": "Raccordement militaire de St-Florentin-Vergigny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830331",
+    "name": "Raccordement de St-Fons",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830336",
+    "name": "Raccordement de Chasse-sur-Rhône",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830346",
+    "name": "Raccordement de Livron-Sud (bifurcation sud)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830346",
+    "name": "Raccordement de Livron-Sud (bifurcation sud)",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "830351",
+    "name": "Raccordement nord de Tarascon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830356",
+    "name": "Raccordement sud de Tarascon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830359",
+    "name": "Virgule d'Avignon Courtine",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830361",
+    "name": "Raccordement sud de Miramas",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830366",
+    "name": "Raccordement de Lyon-Guillotière à Lyon-Part-Dieu",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830646",
+    "name": "Voie-mère de Pierrelatte",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830649",
+    "name": "Voie-mère du centre des transports terrestres de Vitrolles",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830900",
+    "name": "Voies de liaison de Dijon à Gevrey-Chambertin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "830900",
+    "name": "Voies de liaison de Dijon à Gevrey-Chambertin",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "831000",
+    "name": "Ligne de Flamboin-Gouaix à Montereau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "831606",
+    "name": "Voie-mère de Montereau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "832000",
+    "name": "Ligne de St-Julien (Troyes) à St-Florentin-Vergigny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "832306",
+    "name": "Raccordement de St-Julien n° 2 (Troyes)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "832311",
+    "name": "Raccordement de St-Julien n° 1 (Troyes)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "832511",
+    "name": "Voie de port de St-Florentin-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "833300",
+    "name": "Raccordement de St-Florentin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "834000",
+    "name": "Ligne des Angles à Lattes (LGV )",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "834100",
+    "name": "Raccordement branche grand-sud du triangle des Angles (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "834310",
+    "name": "Raccordement R2N de Redessan-Manduel",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "834311",
+    "name": "Raccordement R1N de Redessan-Manduel",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "834340",
+    "name": "Raccordement de Lattes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "837000",
+    "name": "Ligne de Perpignan à Figueras (LGV)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "838000",
+    "name": "Ligne de St-Julien (Troyes) à Gray",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "838000",
+    "name": "Ligne de St-Julien (Troyes) à Gray",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "839000",
+    "name": "Ligne de Nuits-sous-Ravières à Châtillon-sur-Seine",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "840000",
+    "name": "Ligne de Bricon à Châtillon-sur-Seine",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "843000",
+    "name": "Ligne d'Is-sur-Tille à Culmont-Chalindrey",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "844300",
+    "name": "Raccordement de Culmont-Chalindrey",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "845950",
+    "name": "Saut-de-mouton de Culmont-Chalindrey",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "846000",
+    "name": "Ligne de Culmont-Chalindrey à Gray",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "847000",
+    "name": "Ligne de Vaivre à Gray",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "849000",
+    "name": "Ligne de Dijon-Ville à Is-sur-Tille",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "850000",
+    "name": "Ligne de Dijon-Ville à Vallorbe (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "851000",
+    "name": "Ligne de Gray à St-Jean-de-Losne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "852000",
+    "name": "Ligne de Dole-Ville à Belfort",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "852306",
+    "name": "Raccordement de Belfort",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "854000",
+    "name": "Ligne de Belfort à Delle",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "855000",
+    "name": "Ligne de Montagney à Miserey",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "856000",
+    "name": "Ligne de Besançon-Viotte à Vesoul",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "856350",
+    "name": "Raccordement EST de Besançon TGV",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "857000",
+    "name": "Ligne de Montbozon à Lure",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "858000",
+    "name": "Ligne de Montbéliard à Morvillars",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "859000",
+    "name": "Ligne de Voujeaucourt à St-Hippolyte",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "860000",
+    "name": "Ligne de Dijon-Ville à St-Amour",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "861300",
+    "name": "Raccordement de Lyon (Dijon-Perrigny)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "861301",
+    "name": "Raccordement évite-Perrigny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "862300",
+    "name": "Raccordement supérieur de Longvic",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "862301",
+    "name": "Raccordement à niveau de Longvic",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "862310",
+    "name": "Raccordement TGV de Perrigny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "863300",
+    "name": "Raccordement de St-Amour (à Gevrey-Chambertin)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "865000",
+    "name": "Ligne de Chagny à Dole-Ville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "866300",
+    "name": "Raccordement de St-Bonnet-en-Bresse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "867000",
+    "name": "Ligne de Seurre à Chalon-sur-Saône",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "867606",
+    "name": "Voie-mère de Chalon-sur-Saône n° 1",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "867612",
+    "name": "Voie-mère de Chalon-sur-Saône n° 1C",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "867616",
+    "name": "Voie-mère de Chalon-sur-Saône n° 2",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "868000",
+    "name": "Ligne de Chaugey à Lons-le-Saunier",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "869000",
+    "name": "Ligne de Dole-Ville à Poligny",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "871000",
+    "name": "Ligne de Franois à Arc-et-Senans",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "872000",
+    "name": "Ligne de Besançon-Viotte au Locle-Col-des-Roches",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "874000",
+    "name": "Ligne de Pontarlier à Gilley",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "875000",
+    "name": "Ligne de Frasne à Verrières-de-Joux (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "877300",
+    "name": "Raccordement de Villers-les-Pots n° 2",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "877301",
+    "name": "Raccordement de Villers-les-Pots n° 1",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "878000",
+    "name": "Ligne d'Andelot-en-Montagne à La Cluse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "878301",
+    "name": "Raccordement de La Cluse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "880000",
+    "name": "Ligne de Mouchard à Bourg-en-Bresse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "882000",
+    "name": "Ligne de Chalon-sur-Saône à Bourg-en-Bresse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "883000",
+    "name": "Ligne de Mâcon à Ambérieu",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "883306",
+    "name": "Raccordement d'Ambérieu",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "884000",
+    "name": "Ligne de Bourg-en-Bresse à Bellegarde",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "886000",
+    "name": "Ligne de Lyon-St-Clair à Bourg-en-Bresse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "887000",
+    "name": "Ligne de Lyon-Croix-Rousse à Trévoux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "887621",
+    "name": "Voie-mère de la ZI de Genay-Neuville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "888000",
+    "name": "Ligne de Lyon-Gorge-de-Loup à Lyon-Vaise",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "889000",
+    "name": "Ligne d'Ambérieu à Montalieu-Vercieu",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "890000",
+    "name": "Ligne de Lyon-Perrache à Genève (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "890000",
+    "name": "Ligne de Lyon-Perrache à Genève (frontière)",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "890306",
+    "name": "Raccordement de Culoz",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "890605",
+    "name": "Voie-mère de l'embranchement particulier de la ZI d'Ambérieu",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "891000",
+    "name": "Ligne de Collonges-Fort-l'Écluse à Divonne-les-Bains (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "892000",
+    "name": "Ligne de Longeray-Léaz au Bouveret",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "893000",
+    "name": "Ligne de Collonges-Fontaines à Lyon-Guillotière",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "893306",
+    "name": "Raccordement de Lyon-Guillotière",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "894000",
+    "name": "Ligne de Lausanne à Annemasse (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "895000",
+    "name": "Ligne de La Roche-sur-Foron à St-Gervais-les-Bains-Le Fayet",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "896000",
+    "name": "Ligne de St-Gervais-les-Bains-Le Fayet à Vallorcine (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "897000",
+    "name": "Ligne d'Aix-les-Bains-Le Revard à Annemasse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "898000",
+    "name": "Ligne d'Annecy à Albertville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "899000",
+    "name": "Ligne de St-Pierre-d'Albigny à Bourg-St-Maurice",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "900000",
+    "name": "Ligne de Culoz à Modane (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "900903",
+    "name": "Évitement de Pontamafrey",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "901000",
+    "name": "Ligne de Lyon-Part-Dieu à Montalieu-Vercieu",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "903000",
+    "name": "Ligne de St-André-le-Gaz à Chambéry",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "903606",
+    "name": "Voie-mère A de la ZI de Chambéry-Bissy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "903608",
+    "name": "Voie-mère B de la ZI de Chambéry-Bissy",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "904000",
+    "name": "Ligne de Pressins à Virieu-le-Grand",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "905000",
+    "name": "Ligne de Lyon-Perrache P1 à Marseille-St-Charles (via Grenoble)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "905000",
+    "name": "Ligne de Lyon-Perrache P1 à Marseille-St-Charles (via Grenoble)",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "905306",
+    "name": "Raccordement de Pertuis",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "905606",
+    "name": "Voie-mère de Vénissieux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "905621",
+    "name": "Voie-mère de St-Quentin-Fallavier",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "905626",
+    "name": "Voie-mère de la ZI de Chesnes-Ouest",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "906000",
+    "name": "Ligne de Givors-Canal à Chasse-sur-Rhône",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "906606",
+    "name": "Voie-mère de Givors-Canal",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "907000",
+    "name": "Ligne de St-Rambert-d'Albon à Rives",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "908000",
+    "name": "Ligne de Valence à Moirans",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "908320",
+    "name": "Raccordement de Châteauneuf sur Isère",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "909000",
+    "name": "Ligne de Grenoble à Montmélian",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "909306",
+    "name": "Raccordement de Montmélian",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "909903",
+    "name": "Déviation de la ligne de Grenoble à Montmélian",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "912000",
+    "name": "Ligne de Livron à Aspres-sur-Buëch",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "913000",
+    "name": "Ligne de Livron à La Voulte",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "915000",
+    "name": "Ligne de Veynes à Briançon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "915000",
+    "name": "Ligne de Veynes à Briançon",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "920000",
+    "name": "Ligne de St-Auban à Digne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "922000",
+    "name": "Ligne de Cavaillon à St-Maime-Dauphin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "923000",
+    "name": "Ligne de Cheval-Blanc à Pertuis",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "925000",
+    "name": "Ligne d'Avignon à Miramas",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "926000",
+    "name": "Ligne d'Orange à L'Isle-Fontaine-de-Vaucluse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "927000",
+    "name": "Ligne de Sorgues-Châteauneuf-du-Pape à Carpentras",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "928000",
+    "name": "Ligne de Rognac à Aix-en-Provence",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "928106",
+    "name": "Embranchement d'Aix-en-Provence-Marchandises",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "928616",
+    "name": "Voie-mère sud-ouest des Milles",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "929300",
+    "name": "Raccordement d'Avignon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "930000",
+    "name": "Ligne de Marseille-St-Charles à Vintimille (frontière)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "930333",
+    "name": "Raccordement de Calandre",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "930506",
+    "name": "Voie de desserte du port de Brégaillon",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "934100",
+    "name": "Voie de desserte de Moureplane",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "935000",
+    "name": "Ligne de Miramas à L'Estaque",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "935111",
+    "name": "Ligne de Port-de-Bouc à Caronte-la-Gafette",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "935306",
+    "name": "Raccordement sud de Lavalduc",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "935311",
+    "name": "Raccordement sud de Fos-Graveleau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "935606",
+    "name": "Voie-mère de Martigues à Lavera",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "935901",
+    "name": "Ligne de Lavalduc à Fos-Coussoul (dépôts pétroliers)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "935902",
+    "name": "Voie de desserte du môle minéralier de Fos",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "935903",
+    "name": "Voie de desserte de Port-St-Louis-du-Rhône",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "935904",
+    "name": "Voie de desserte de Fos-Graveleau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "935905",
+    "name": "Voie de desserte du terminal voitures-colis lourds de Fos",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "935906",
+    "name": "Voie des quais nord-est de Port-St-Louis-du-Rhône",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "935907",
+    "name": "Voie des quais sud de Port-St-Louis-du-Rhône",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "936300",
+    "name": "Raccordement des Chartreux",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "937000",
+    "name": "Ligne de Marseille-Blancarde à Marseille-Prado",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "938000",
+    "name": "Ligne de Marseille-St-Charles à Marseille-Joliette",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "939000",
+    "name": "Ligne de L'Estaque à Marseille-Joliette",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "939001",
+    "name": "L'Estaque à Marseille St-Charles",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "939306",
+    "name": "Raccordement de L'Estaque-Joliette à Marseille-Canet",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "940100",
+    "name": "Ligne de Marseille-Arenc à Marseille-Canet",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "942000",
+    "name": "Ligne de La Pauline-Hyères aux Salins-d'Hyères",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "943000",
+    "name": "Ligne des Arcs à Draguignan",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "944000",
+    "name": "Ligne de Cannes-la-Bocca à Grasse",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "945000",
+    "name": "Ligne de Nice à Breil-sur-Roya",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "946000",
+    "name": "Ligne de Coni à Vintimille",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "947000",
+    "name": "Ligne de Carnoules à Gardanne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "948000",
+    "name": "Ligne d'Aubagne à La Barque",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "952000",
+    "name": "Ligne de La Plaine à Pantin",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "955000",
+    "name": "Ligne de La Râpée à Batignolles (petite ceinture de Paris)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "955000",
+    "name": "Ligne de La Râpée à Batignolles (petite ceinture de Paris)",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "955306",
+    "name": "Raccordement de Bel-Air",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "956000",
+    "name": "Ligne de Paris-Bastille à Marles-en-Brie",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "956306",
+    "name": "Raccordement de Sucy-Bonneuil (voie M)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "957000",
+    "name": "Ligne de Bobigny à Sucy-Bonneuil",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "957306",
+    "name": "Raccordement de Noisy-le-Sec-Nord",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "957311",
+    "name": "Raccordement de Noisy-le-Sec-Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "957316",
+    "name": "Raccordement de Sucy-Bonneuil n° 3",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "958000",
+    "name": "Ligne de Bondy à Aulnay-sous-Bois",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "958000",
+    "name": "Ligne de Bondy à Aulnay-sous-Bois",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "959300",
+    "name": "Raccordement nord de Villiers-sur-Marne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "959301",
+    "name": "Raccordement est de Villiers-sur-Marne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "960000",
+    "name": "Ligne de Sartrouville à Noisy-le-Sec (Tangentielle Légère Nord)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "962000",
+    "name": "Ligne d'Ermont-Eaubonne à Champ-de-Mars (VMI)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "963000",
+    "name": "Ligne de La Plaine à Ermont-Eaubonne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "963306",
+    "name": "Raccordement d'Épinay-sur-Seine",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "963506",
+    "name": "Desserte du port de Gennevilliers",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "965300",
+    "name": "Raccordement de Sannois",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "967300",
+    "name": "Raccordement de La Folie (La Garenne-Bezons)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "968300",
+    "name": "Raccordement des Vallées (La Garenne-Bezons)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "968301",
+    "name": "Raccordement de Courbevoie à Colombes et à La Garenne-Bezons",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "971000",
+    "name": "Ligne de Pont-Cardinet à Auteuil-Boulogne",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "972000",
+    "name": "Ligne de Puteaux à Issy-Plaine",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "973000",
+    "name": "Ligne de Paris-St-Lazare à Versailles-Rive-Droite",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "973306",
+    "name": "Raccordement de La Défense",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "974000",
+    "name": "Ligne de St-Cloud à St-Nom-la-Bretèche-Forêt-de-Marly",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "975000",
+    "name": "Ligne de Paris-St-Lazare à St-Germain-en-Laye",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "975900",
+    "name": "Ligne de Nanterre-Université à Sartrouville",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "975900",
+    "name": "Ligne de Nanterre-Université à Sartrouville",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "977000",
+    "name": "Ligne des Invalides à Versailles-Rive-Gauche",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "978300",
+    "name": "Raccordement de Viroflay",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "979000",
+    "name": "Ligne de Paris-Est à Pont-Cardinet (EOLE)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "980000",
+    "name": "Ligne d'Auteuil-Boulogne à La Râpée (petite ceinture de Paris)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "980106",
+    "name": "Embranchement de Paris-Gobelins",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "981000",
+    "name": "Ligne de Paris-Nord à Paris-Gare-de-Lyon (RER ligne D)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "981000",
+    "name": "Ligne de Paris-Nord à Paris-Gare-de-Lyon (RER ligne D)",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "983000",
+    "name": "Ligne des Invalides à Quai-d'Orsay",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "984000",
+    "name": "Ligne de Quai-d'Orsay à Paris-Austerlitz",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "985000",
+    "name": "Ligne de Choisy-le-Roi à Massy-Verrières",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "988000",
+    "name": "Ligne de Grigny à Corbeil-Essonnes",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "990000",
+    "name": "Ligne de la grande ceinture de Paris",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "990000",
+    "name": "Ligne de la grande ceinture de Paris",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "990000",
+    "name": "Ligne de la grande ceinture de Paris",
+    "sectionRank": 3
+  },
+  {
+    "lineCode": "990000",
+    "name": "Ligne de la grande ceinture de Paris",
+    "sectionRank": 4
+  },
+  {
+    "lineCode": "990306",
+    "name": "Raccordement de Versailles-Matelots",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "990306",
+    "name": "Raccordement de Versailles-Matelots",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "990311",
+    "name": "Raccordement de Noisy-le-Sec",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "990316",
+    "name": "Raccordement de Valenton",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "990316",
+    "name": "Raccordement de Valenton",
+    "sectionRank": 2
+  },
+  {
+    "lineCode": "990321",
+    "name": "Raccordement nord de Villeneuve-Triage",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "990331",
+    "name": "Raccordement marché gare de Rungis voie MG",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "991300",
+    "name": "Raccordement de Gagny-Tronc-Commun",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "991301",
+    "name": "Raccordement de Gagny-Nord",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "991302",
+    "name": "Raccordement de Gagny-Sud",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "992300",
+    "name": "Raccordement du Bas-Martineau",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "995000",
+    "name": "Ligne de Bastia à Ajaccio (ligne centrale)",
+    "sectionRank": 1
+  },
+  {
+    "lineCode": "996000",
+    "name": "Ligne de Ponte-Leccia à Calvi (ligne de la Balagne)",
+    "sectionRank": 1
+  }
+]

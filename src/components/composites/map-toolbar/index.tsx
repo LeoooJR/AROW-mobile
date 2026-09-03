@@ -6,8 +6,13 @@ import type {
 } from "@/components/adapters/map/map-layer-visibility";
 import MapLayersSheet from "@/components/composites/map-toolbar/map-layers-sheet";
 import MapToolbarActions from "@/components/composites/map-toolbar/map-toolbar-actions";
+import PointSearchSheet from "@/components/composites/map-toolbar/point-search-sheet";
+import type { Milestone } from "@/features/milestones/milestone";
+import type { MilestoneSearchState } from "@/features/milestones/milestone-search";
 
 export interface MapToolbarProps {
+  readonly milestoneSearch: MilestoneSearchState;
+  readonly onMilestoneSelect: (milestone: Milestone) => void;
   readonly onVisibilityChange: (
     layer: ToggleableMapLayer,
     visible: boolean,
@@ -16,23 +21,40 @@ export interface MapToolbarProps {
 }
 
 export default function MapToolbar({
+  milestoneSearch,
+  onMilestoneSelect,
   onVisibilityChange,
   visibility,
 }: MapToolbarProps): ReactElement {
-  const [layersOpen, setLayersOpen] = useState(false);
+  const [openSheet, setOpenSheet] = useState<"layers" | "pointSearch">();
 
   return (
     <>
       <MapToolbarActions
-        layersOpen={layersOpen}
+        layersOpen={openSheet === "layers"}
         onOpenLayers={() => {
-          setLayersOpen(true);
+          setOpenSheet("layers");
         }}
+        onOpenPointSearch={() => {
+          setOpenSheet("pointSearch");
+        }}
+        pointSearchOpen={openSheet === "pointSearch"}
+      />
+      <PointSearchSheet
+        isOpen={openSheet === "pointSearch"}
+        onDismiss={() => {
+          setOpenSheet(undefined);
+        }}
+        onMilestoneSelect={(milestone) => {
+          onMilestoneSelect(milestone);
+          setOpenSheet(undefined);
+        }}
+        searchState={milestoneSearch}
       />
       <MapLayersSheet
-        isOpen={layersOpen}
+        isOpen={openSheet === "layers"}
         onDismiss={() => {
-          setLayersOpen(false);
+          setOpenSheet(undefined);
         }}
         onVisibilityChange={onVisibilityChange}
         visibility={visibility}

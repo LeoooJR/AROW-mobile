@@ -1,4 +1,11 @@
 import { Milestone } from "@/features/milestones/milestone";
+import {
+  isFiniteNumberInRange,
+  isNonEmptyString,
+  isNonNegativeInteger,
+  isPositiveInteger,
+  isRecord,
+} from "@/types/value-validation";
 
 export type MilestoneLoadState =
   | { readonly status: "unavailable" }
@@ -19,39 +26,6 @@ interface MilestoneDatabaseRow {
   readonly rg_troncon: number;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function isNonEmptyString(value: unknown): value is string {
-  return typeof value === "string" && value.length > 0;
-}
-
-function isInteger(value: unknown): value is number {
-  return typeof value === "number" && Number.isInteger(value);
-}
-
-function isNonNegativeInteger(value: unknown): value is number {
-  return isInteger(value) && value >= 0;
-}
-
-function isPositiveInteger(value: unknown): value is number {
-  return isInteger(value) && value > 0;
-}
-
-function isCoordinate(
-  value: unknown,
-  minimum: number,
-  maximum: number,
-): value is number {
-  return (
-    typeof value === "number" &&
-    Number.isFinite(value) &&
-    value >= minimum &&
-    value <= maximum
-  );
-}
-
 function parseMilestoneDatabaseRow(
   value: unknown,
   index: number,
@@ -64,8 +38,8 @@ function parseMilestoneDatabaseRow(
     !isNonNegativeInteger(value.km) ||
     !isNonEmptyString(value.label) ||
     !isPositiveInteger(value.rg_troncon) ||
-    !isCoordinate(value.latitude, -90, 90) ||
-    !isCoordinate(value.longitude, -180, 180)
+    !isFiniteNumberInRange(value.latitude, -90, 90) ||
+    !isFiniteNumberInRange(value.longitude, -180, 180)
   ) {
     throw new Error(`Invalid milestone at row ${index}`);
   }

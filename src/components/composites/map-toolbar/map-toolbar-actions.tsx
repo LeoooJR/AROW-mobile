@@ -18,6 +18,8 @@ import PointSearchButton from "@/components/composites/map-toolbar/point-search-
 interface MapToolbarActionsProps {
   readonly layersOpen: boolean;
   readonly onOpenLayers: () => void;
+  readonly onOpenPointSearch: () => void;
+  readonly pointSearchOpen: boolean;
 }
 
 function noOp(): void {}
@@ -25,6 +27,8 @@ function noOp(): void {}
 export default function MapToolbarActions({
   layersOpen,
   onOpenLayers,
+  onOpenPointSearch,
+  pointSearchOpen,
 }: MapToolbarActionsProps): ReactElement {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
@@ -47,8 +51,9 @@ export default function MapToolbarActions({
       <PointSearchButton
         buttonStyle={buttonStyle}
         compact={compact}
+        expanded={pointSearchOpen}
         iconColor={palette.icon}
-        onPress={noOp}
+        onPress={onOpenPointSearch}
       />
       <MapLayersButton
         buttonStyle={buttonStyle}

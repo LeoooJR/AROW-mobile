@@ -10,11 +10,37 @@ import {
   DEFAULT_MAP_LAYER_VISIBILITY,
   type MapLayerVisibility,
 } from "@/components/adapters/map/map-layer-visibility";
+import { Milestone } from "@/features/milestones/milestone";
+import type { MilestoneSearchState } from "@/features/milestones/milestone-search";
 
 import MapToolbar from "./index";
 
 let mockSafeAreaTop = 0;
 let mockWindowWidth = 412;
+const milestone = new Milestone({
+  coordinates: { latitude: 45.74744, longitude: 4.85933 },
+  kilometer: 509,
+  label: "509+000",
+  lineCode: "893000",
+  sectionRank: 1,
+});
+const milestoneSearch = {
+  lines: [
+    {
+      code: "893000",
+      name: "Ligne de Collonges-Fontaines à Lyon-Guillotière",
+      sections: [
+        {
+          maximumLabel: "509+000",
+          milestones: [milestone],
+          minimumLabel: "509+000",
+          rank: 1,
+        },
+      ],
+    },
+  ],
+  status: "ready",
+} satisfies MilestoneSearchState;
 
 jest.mock("react-native", () => {
   const actual =
@@ -76,9 +102,13 @@ jest.mock("@/components/adapters/native-bottom-sheet", () => {
 });
 
 function ControlledToolbar({
+  searchState = milestoneSearch,
+  onMilestoneSelect = jest.fn(),
   onVisibilityChange = jest.fn(),
 }: {
+  readonly onMilestoneSelect?: jest.Mock;
   readonly onVisibilityChange?: jest.Mock;
+  readonly searchState?: MilestoneSearchState;
 }) {
   const [visibility, setVisibility] = useState<MapLayerVisibility>(
     DEFAULT_MAP_LAYER_VISIBILITY,
@@ -86,6 +116,8 @@ function ControlledToolbar({
 
   return (
     <MapToolbar
+      milestoneSearch={searchState}
+      onMilestoneSelect={onMilestoneSelect}
       onVisibilityChange={(layer, visible) => {
         onVisibilityChange(layer, visible);
         setVisibility((current) => ({ ...current, [layer]: visible }));
@@ -120,12 +152,19 @@ describe("MapToolbar", () => {
     expect(screen.getByTestId("map-focus-button")).toBeOnTheScreen();
   });
 
-  test("keeps search and focus actions intentionally inert", async () => {
+  test("opens point search while keeping focus intentionally inert", async () => {
     const user = userEvent.setup();
     await render(<ControlledToolbar />);
 
     await user.press(
       screen.getByRole("button", { name: "Rechercher un point" }),
+    );
+    expect(screen.getByTestId("point-search-sheet")).toBeOnTheScreen();
+    expect(
+      screen.getByRole("button", { name: "Rechercher un point" }),
+    ).toBeExpanded();
+    await user.press(
+      screen.getByRole("button", { name: "Fermer la recherche" }),
     );
     await user.press(
       screen.getByRole("button", { name: "Activer le mode carte seule" }),
@@ -136,6 +175,121 @@ describe("MapToolbar", () => {
     expect(
       screen.getByRole("button", { name: "Activer le mode carte seule" }),
     ).toHaveProp("aria-pressed", false);
+  });
+
+  test("centers the milestone separator in an input-height container", async () => {
+    const user = userEvent.setup();
+    await render(<ControlledToolbar />);
+
+    await user.press(screen.getByTestId("open-point-search"));
+
+    expect(
+      screen.getByTestId("milestone-input-separator", {
+        includeHiddenElements: true,
+      }),
+    ).toHaveStyle({
+      alignItems: "center",
+      height: 52,
+      justifyContent: "center",
+    });
+  });
+
+  test("resolves and emits an exact production milestone", async () => {
+    const user = userEvent.setup();
+    const onMilestoneSelect = jest.fn();
+    await render(<ControlledToolbar onMilestoneSelect={onMilestoneSelect} />);
+
+    await user.press(screen.getByTestId("open-point-search"));
+    const usePoint = screen.getByRole("button", { name: "Utiliser ce point" });
+    expect(usePoint).toBeDisabled();
+    expect(
+      screen.getByText(
+        "Recherchez une ligne pour afficher les correspondances.",
+      ),
+    ).toBeOnTheScreen();
+
+    await user.type(
+      screen.getByRole("searchbox", {
+        name: "Nom de ligne ou code unique",
+      }),
+      "893000",
+    );
+    await user.press(screen.getByTestId("line-result-893000"));
+    expect(screen.getByTestId("section-choice-1")).toHaveProp(
+      "aria-pressed",
+      true,
+    );
+
+    await user.type(screen.getByLabelText("Kilomètre"), "509");
+    await user.type(screen.getByLabelText("Partie métrique"), "000");
+
+    expect(screen.getByTestId("resolved-point-summary")).toHaveTextContent(
+      /509\+000/,
+    );
+    expect(usePoint).toBeEnabled();
+    await user.press(usePoint);
+
+    expect(onMilestoneSelect).toHaveBeenCalledWith(milestone);
+    expect(screen.queryByTestId("point-search-sheet")).not.toBeOnTheScreen();
+  });
+
+  test("keeps search state when the native sheet is dismissed", async () => {
+    const user = userEvent.setup();
+    await render(<ControlledToolbar />);
+    await user.press(screen.getByTestId("open-point-search"));
+    await user.type(
+      screen.getByLabelText("Nom de ligne ou code unique"),
+      "893000",
+    );
+    await fireEvent.press(
+      screen.getByTestId("mock-native-sheet-dismiss", {
+        includeHiddenElements: true,
+      }),
+    );
+    await user.press(screen.getByTestId("open-point-search"));
+
+    expect(
+      screen.getByLabelText("Nom de ligne ou code unique"),
+    ).toHaveDisplayValue("893000");
+  });
+
+  test("parses a complete pasted production milestone", async () => {
+    const user = userEvent.setup();
+    await render(<ControlledToolbar />);
+    await user.press(screen.getByTestId("open-point-search"));
+    await user.type(
+      screen.getByLabelText("Nom de ligne ou code unique"),
+      "893000",
+    );
+    await user.press(screen.getByTestId("line-result-893000"));
+    await user.paste(screen.getByLabelText("Kilomètre"), "PK 509+000");
+
+    expect(screen.getByLabelText("Kilomètre")).toHaveDisplayValue("509");
+    expect(screen.getByLabelText("Partie métrique")).toHaveDisplayValue("000");
+    expect(
+      screen.getByRole("button", { name: "Utiliser ce point" }),
+    ).toBeEnabled();
+  });
+
+  test("keeps point search and layers sheets mutually exclusive", async () => {
+    const user = userEvent.setup();
+    await render(<ControlledToolbar />);
+    await user.press(screen.getByTestId("open-point-search"));
+    await user.press(screen.getByTestId("map-layers-button"));
+
+    expect(screen.queryByTestId("point-search-sheet")).not.toBeOnTheScreen();
+    expect(screen.getByTestId("map-layers-sheet")).toBeOnTheScreen();
+  });
+
+  test.each([
+    ["loading", "Chargement du référentiel ferroviaire…"],
+    ["error", "Référentiel ferroviaire indisponible."],
+  ] as const)("announces the %s search state", async (status, message) => {
+    const user = userEvent.setup();
+    await render(<ControlledToolbar searchState={{ status }} />);
+    await user.press(screen.getByTestId("open-point-search"));
+
+    expect(screen.getByText(message)).toBeOnTheScreen();
   });
 
   test("opens and dismisses the two-option railway layer sheet", async () => {

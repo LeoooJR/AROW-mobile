@@ -7,16 +7,18 @@ import {
 import { type ReactElement } from "react";
 import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 
+import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
+import type { MapFeature } from "@/features/map-features/map-feature";
 import {
   isCanonicalRailwayLineCode,
+  RailwaySectionKey,
+} from "@/features/map-features/railway-section-key";
+import { Railway } from "@/features/railways/railway";
+import {
   isNonEmptyString,
   isPositiveInteger,
   isRecord,
-} from "@/components/adapters/map/geojson-validation";
-import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
-import type { MapFeature } from "@/features/map-features/map-feature";
-import { RailwaySectionKey } from "@/features/map-features/railway-section-key";
-import { Railway } from "@/features/railways/railway";
+} from "@/types/value-validation";
 
 export interface RailwayLinesSourceProps {
   readonly data: string;

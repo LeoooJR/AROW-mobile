@@ -1,9 +1,13 @@
 const LINE_CODE_LENGTH = 6;
 const MAX_NUMERIC_LINE_CODE = 10 ** LINE_CODE_LENGTH - 1;
 
+export function isCanonicalRailwayLineCode(value: unknown): value is string {
+  return typeof value === "string" && /^\d{6}$/.test(value);
+}
+
 function canonicalLineCode(value: string | number): string {
   if (typeof value === "string") {
-    if (/^\d{6}$/.test(value)) {
+    if (isCanonicalRailwayLineCode(value)) {
       return value;
     }
 

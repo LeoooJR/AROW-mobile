@@ -166,6 +166,18 @@ describe("Map", () => {
     );
   });
 
+  test("forwards searched milestone focus independently from location recentering", async () => {
+    await render(
+      <Map focusLocation={MILESTONE.coordinates} focusRequest={4} />,
+    );
+
+    expect(screen.getByTestId("mock-map-camera")).toHaveProp(
+      "focusLocation",
+      MILESTONE.coordinates,
+    );
+    expect(screen.getByTestId("mock-map-camera")).toHaveProp("focusRequest", 4);
+  });
+
   test("forwards controlled railway and milestone visibility", async () => {
     await render(
       <Map

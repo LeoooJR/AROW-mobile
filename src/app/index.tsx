@@ -1,5 +1,5 @@
 import { useAssets } from "expo-asset";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { View } from "react-native";
 
 import Map from "@/components/adapters/map/map";
@@ -12,15 +12,19 @@ import LocationBar from "@/components/composites/location-bar";
 import MapFeatureDetailsCard from "@/components/composites/map-feature-details-card";
 import MapToolbar from "@/components/composites/map-toolbar";
 import type { MapFeature } from "@/features/map-features/map-feature";
+import type { Milestone } from "@/features/milestones/milestone";
+import { createMilestoneSearchState } from "@/features/milestones/milestone-search";
 import { useMilestones } from "@/features/milestones/use-milestones";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 import railwayLinesAsset from "@/statics/lignes-par-type.geojson";
+import railwaySearchCatalog from "@/statics/railway-search-catalog.json";
 
 export default function Index() {
   const [railwayAssets] = useAssets(railwayLinesAsset);
   const { openSettings, requestAccess, retry, state } = useRealLocation();
   const milestoneState = useMilestones();
   const [recenterRequest, setRecenterRequest] = useState(0);
+  const [milestoneFocusRequest, setMilestoneFocusRequest] = useState(0);
   const [selectedFeature, setSelectedFeature] = useState<
     MapFeature | undefined
   >();
@@ -28,6 +32,10 @@ export default function Index() {
     DEFAULT_MAP_LAYER_VISIBILITY,
   );
   const railwayData = railwayAssets?.[0]?.localUri ?? railwayAssets?.[0]?.uri;
+  const milestoneSearch = useMemo(
+    () => createMilestoneSearchState(milestoneState, railwaySearchCatalog),
+    [milestoneState],
+  );
   const currentLocation =
     state.status === "connected" ||
     state.status === "mocked" ||
@@ -79,10 +87,21 @@ export default function Index() {
       );
     }
   };
+  const onMilestoneSelect = (milestone: Milestone): void => {
+    setLayerVisibility((current) => ({ ...current, milestone: true }));
+    setSelectedFeature(milestone);
+    setMilestoneFocusRequest((request) => request + 1);
+  };
 
   return (
     <View className="flex-1 bg-surface">
       <Map
+        focusLocation={
+          selectedFeature?.kind === "milestone"
+            ? selectedFeature.coordinates
+            : undefined
+        }
+        focusRequest={milestoneFocusRequest}
         layerVisibility={layerVisibility}
         location={currentLocation}
         milestones={
@@ -97,6 +116,8 @@ export default function Index() {
       />
       {process.env.EXPO_OS !== "web" ? (
         <MapToolbar
+          milestoneSearch={milestoneSearch}
+          onMilestoneSelect={onMilestoneSelect}
           onVisibilityChange={onLayerVisibilityChange}
           visibility={layerVisibility}
         />

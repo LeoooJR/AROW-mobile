@@ -8,17 +8,17 @@ import type { Feature, FeatureCollection, Point } from "geojson";
 import { type ReactElement, useMemo } from "react";
 import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 
+import { geographicCoordinatesFromPosition } from "@/components/adapters/map/geojson-validation";
+import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
+import { type MapFeature } from "@/features/map-features/map-feature";
+import { isCanonicalRailwayLineCode } from "@/features/map-features/railway-section-key";
+import { Milestone } from "@/features/milestones/milestone";
 import {
-  geographicCoordinatesFromPosition,
-  isCanonicalRailwayLineCode,
   isNonEmptyString,
   isNonNegativeInteger,
   isPositiveInteger,
   isRecord,
-} from "@/components/adapters/map/geojson-validation";
-import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
-import { type MapFeature } from "@/features/map-features/map-feature";
-import { Milestone } from "@/features/milestones/milestone";
+} from "@/types/value-validation";
 
 export interface MilestoneLayerProps {
   readonly milestones: readonly Milestone[];

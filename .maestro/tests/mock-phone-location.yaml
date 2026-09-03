@@ -80,3 +80,32 @@ tags:
 - tapOn:
     id: "close-map-feature-details"
 - assertNotVisible: "PK 509\\+000"
+
+# Resolve the same production milestone through the route-owned point search.
+- tapOn:
+    id: "open-point-search"
+- assertVisible: "Rechercher un point"
+- assertVisible: "Ligne, section, puis repère kilométrique."
+- tapOn:
+    id: "line-search-input"
+- inputText: "893000"
+- assertVisible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
+- tapOn:
+    id: "line-result-893000"
+- assertVisible: "Section 1"
+- tapOn:
+    id: "milestone-kilometer-input"
+- inputText: "509"
+- tapOn:
+    id: "milestone-metric-input"
+- inputText: "000"
+- pressKey: Enter
+- assertVisible: "Point résolu"
+- tapOn:
+    id: "use-selected-point"
+- assertNotVisible:
+    id: "point-search-sheet"
+- extendedWaitUntil:
+    visible: "PK 509\\+000"
+    timeout: 10000
+- assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"

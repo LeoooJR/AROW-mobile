@@ -12,6 +12,8 @@ interface MapCameraLocation {
 }
 
 export interface MapCameraProps {
+  readonly focusLocation?: MapCameraLocation;
+  readonly focusRequest?: number;
   readonly location?: MapCameraLocation;
   readonly recenterRequest?: number;
 }
@@ -51,6 +53,8 @@ function locationCameraTarget(location: MapCameraLocation): CameraTarget {
 }
 
 export default function MapCamera({
+  focusLocation,
+  focusRequest,
   location,
   recenterRequest,
 }: MapCameraProps): ReactElement {
@@ -58,6 +62,7 @@ export default function MapCamera({
   const cameraRef = useRef<CameraRef>(null);
   const hadLocationRef = useRef(location !== undefined);
   const lastRecenterRequestRef = useRef(recenterRequest);
+  const lastFocusRequestRef = useRef(focusRequest);
   const [cameraTarget, setCameraTarget] = useState<CameraTarget>(() =>
     location === undefined
       ? DEFAULT_MAP_CAMERA_SETTINGS.worldTarget
@@ -98,6 +103,28 @@ export default function MapCamera({
       zoom: DEFAULT_MAP_CAMERA_SETTINGS.locationZoom,
     });
   }, [location, recenterRequest, reduceMotion]);
+
+  useEffect(() => {
+    if (lastFocusRequestRef.current === focusRequest) {
+      return;
+    }
+
+    lastFocusRequestRef.current = focusRequest;
+    if (focusLocation === undefined) {
+      return;
+    }
+
+    cameraRef.current?.easeTo({
+      bearing: 0,
+      center: [focusLocation.longitude, focusLocation.latitude],
+      duration: reduceMotion
+        ? 0
+        : DEFAULT_MAP_CAMERA_SETTINGS.transitionDurationMs,
+      easing: "ease",
+      pitch: 0,
+      zoom: DEFAULT_MAP_CAMERA_SETTINGS.locationZoom,
+    });
+  }, [focusLocation, focusRequest, reduceMotion]);
 
   return (
     <Camera

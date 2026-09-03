@@ -6,6 +6,7 @@ import SearchIcon from "@/components/composites/map-toolbar/search-icon";
 interface PointSearchButtonProps {
   readonly buttonStyle: ViewStyle;
   readonly compact: boolean;
+  readonly expanded: boolean;
   readonly iconColor: string;
   readonly onPress: () => void;
 }
@@ -13,11 +14,13 @@ interface PointSearchButtonProps {
 export default function PointSearchButton({
   buttonStyle,
   compact,
+  expanded,
   iconColor,
   onPress,
 }: PointSearchButtonProps): ReactElement {
   return (
     <Pressable
+      aria-expanded={expanded}
       className={`h-14 min-w-0 flex-1 flex-row items-center justify-center rounded-lg border border-border-subtle bg-canvas active:bg-surface-muted ${compact ? "gap-2.5 px-2.5" : "gap-2.5 px-4"}`}
       onPress={onPress}
       role="button"

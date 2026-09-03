@@ -28,6 +28,8 @@ export interface MapLocation extends GeographicCoordinates {
 }
 
 export interface MapProps {
+  readonly focusLocation?: GeographicCoordinates;
+  readonly focusRequest?: number;
   readonly layerVisibility?: MapLayerVisibility;
   readonly location?: MapLocation;
   readonly milestones?: readonly Milestone[];
@@ -46,6 +48,8 @@ const styles = StyleSheet.create({
 const EMPTY_MILESTONES = Object.freeze([]) satisfies readonly Milestone[];
 
 export default function Map({
+  focusLocation,
+  focusRequest,
   layerVisibility = DEFAULT_MAP_LAYER_VISIBILITY,
   location,
   milestones,
@@ -76,7 +80,12 @@ export default function Map({
       style={styles.map}
       testID="arow-map"
     >
-      <MapCamera location={location} recenterRequest={recenterRequest} />
+      <MapCamera
+        focusLocation={focusLocation}
+        focusRequest={focusRequest}
+        location={location}
+        recenterRequest={recenterRequest}
+      />
       <MilestoneLayer
         milestones={milestones ?? EMPTY_MILESTONES}
         onFeaturePress={onFeaturePress}

@@ -11,6 +11,8 @@ export interface MapLocation extends GeographicCoordinates {
 }
 
 export interface MapProps {
+  readonly focusLocation?: GeographicCoordinates;
+  readonly focusRequest?: number;
   readonly layerVisibility?: MapLayerVisibility;
   readonly location?: MapLocation;
   readonly milestones?: readonly Milestone[];

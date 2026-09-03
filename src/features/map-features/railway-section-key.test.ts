@@ -1,6 +1,18 @@
-import { RailwaySectionKey } from "./railway-section-key";
+import {
+  isCanonicalRailwayLineCode,
+  RailwaySectionKey,
+} from "./railway-section-key";
 
 describe("RailwaySectionKey", () => {
+  test.each([
+    ["001000", true],
+    ["1000", false],
+    [1000, false],
+    ["ABC000", false],
+  ] as const)("validates canonical railway code %p", (lineCode, expected) => {
+    expect(isCanonicalRailwayLineCode(lineCode)).toBe(expected);
+  });
+
   test("normalizes numeric line codes and exposes the section identity", () => {
     const key = new RailwaySectionKey(1000, 2);
 
