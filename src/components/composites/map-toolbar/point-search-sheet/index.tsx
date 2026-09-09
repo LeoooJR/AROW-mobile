@@ -1,6 +1,6 @@
 import { type ReactElement } from "react";
 import {
-  FlatList,
+  ScrollView,
   useColorScheme,
   useWindowDimensions,
   View,
@@ -18,23 +18,12 @@ import PointSearchSheetHeader from "@/components/composites/map-toolbar/point-se
 import usePointSearchForm from "@/components/composites/map-toolbar/point-search-sheet/use-point-search-form";
 import type { Milestone } from "@/features/milestones/milestone";
 import type { MilestoneSearchModel } from "@/features/milestones/milestone-search";
-import type { Railway } from "@/features/railways/railway";
 
 interface PointSearchSheetProps {
   readonly isOpen: boolean;
   readonly onDismiss: () => void;
   readonly onMilestoneSelect: (milestone: Milestone) => void;
   readonly search: MilestoneSearchModel;
-}
-
-const EMPTY_LINES: readonly Railway[] = [];
-
-function lineKey(line: Railway): string {
-  return line.code;
-}
-
-function renderEmptyLine(): null {
-  return null;
 }
 
 export default function PointSearchSheet({
@@ -72,25 +61,21 @@ export default function PointSearchSheet({
           iconColor={palette.icon}
           onClose={onDismiss}
         />
-        <FlatList
+        <ScrollView
           contentContainerStyle={{
             paddingBottom: Math.max(90, 76 + insets.bottom),
           }}
-          data={EMPTY_LINES}
           keyboardShouldPersistTaps="handled"
-          keyExtractor={lineKey}
-          ListHeaderComponent={
-            <PointSearchForm
-              compact={compact}
-              form={form}
-              placeholderColor={placeholderColor}
-              searchState={search.state}
-            />
-          }
-          renderItem={renderEmptyLine}
           style={{ flex: 1 }}
           testID="line-search-results"
-        />
+        >
+          <PointSearchForm
+            compact={compact}
+            form={form}
+            placeholderColor={placeholderColor}
+            searchState={search.state}
+          />
+        </ScrollView>
         <PointSearchFooter
           bottomInset={insets.bottom}
           compact={compact}

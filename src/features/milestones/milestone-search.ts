@@ -1,4 +1,5 @@
 import type { Milestone } from "@/features/milestones/milestone";
+import { outOfRangeMilestoneResolution } from "@/features/milestones/milestone-search-messages";
 import type { Railway } from "@/features/railways/railway";
 import type { RailwaySection } from "@/features/railways/railway-section";
 
@@ -140,19 +141,6 @@ function milestoneInputMeters(
   return Number(kilometerInput) * 1000 + Number(metricInput);
 }
 
-function outOfRangeResolution(
-  section: RailwaySection,
-): MilestoneInputResolution {
-  const range = section.milestoneRange;
-  if (range === undefined) {
-    return { status: "incomplete" };
-  }
-  return {
-    message: `Repère hors section. Saisissez une valeur entre ${range.minimumLabel} et ${range.maximumLabel}.`,
-    status: "error",
-  };
-}
-
 export function validateMilestoneInput(
   section: RailwaySection | undefined,
   kilometerInput: string,
@@ -176,25 +164,8 @@ export function validateMilestoneInput(
     positionMeters < range.minimumPositionMeters ||
     positionMeters > range.maximumPositionMeters
   ) {
-    return outOfRangeResolution(section);
+    return outOfRangeMilestoneResolution(range);
   }
 
   return { positionMeters, status: "ready" };
-}
-
-export function unavailableMilestoneResolution(
-  kilometerInput: string,
-  metricInput: string,
-): MilestoneResolution {
-  return {
-    message: `Le repère ${kilometerInput}+${metricInput} n’est pas disponible dans cette section.`,
-    status: "error",
-  };
-}
-
-export function milestoneLookupErrorResolution(): MilestoneResolution {
-  return {
-    message: "La recherche de ce repère est momentanément indisponible.",
-    status: "error",
-  };
 }

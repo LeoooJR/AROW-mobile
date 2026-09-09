@@ -2,12 +2,14 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { Milestone } from "@/features/milestones/milestone";
 import {
-  milestoneLookupErrorResolution,
   type MilestoneLookupInput,
   type MilestoneResolution,
-  unavailableMilestoneResolution,
   validateMilestoneInput,
 } from "@/features/milestones/milestone-search";
+import {
+  milestoneLookupErrorResolution,
+  unavailableMilestoneResolution,
+} from "@/features/milestones/milestone-search-messages";
 import type { Railway } from "@/features/railways/railway";
 import type { RailwaySection } from "@/features/railways/railway-section";
 

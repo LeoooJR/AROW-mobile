@@ -4,9 +4,9 @@ import {
   isMilestoneLineQueryReady,
   parsePastedMilestone,
   searchRailways,
-  unavailableMilestoneResolution,
   validateMilestoneInput,
 } from "./milestone-search";
+import { unavailableMilestoneResolution } from "./milestone-search-messages";
 
 function createRailway(
   code: string,

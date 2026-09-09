@@ -1,24 +1,26 @@
 import type { SQLiteDatabase } from "expo-sqlite";
 
 import type { Milestone } from "@/features/milestones/milestone";
-import {
-  milestoneRecordToFeature,
-  milestoneRecordsToFeatures,
-} from "@/features/milestones/milestone-record";
+import { MilestoneRecord } from "@/features/milestones/milestone-query-record";
 import type { MilestoneLookupInput } from "@/features/milestones/milestone-search";
 import {
   FIND_MILESTONE_QUERY,
   LOAD_MILESTONES_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
 } from "@/features/milestones/railway-reference-queries";
-import { railwaySectionRecordsToRailways } from "@/features/milestones/railway-section-record";
+import {
+  SearchableRailwaySectionRecord,
+  searchableRailwaySectionRecordsToRailways,
+} from "@/features/milestones/searchable-railway-section-record";
 import type { Railway } from "@/features/railways/railway";
 
 export async function loadMilestones(
   database: Pick<SQLiteDatabase, "getAllAsync">,
 ): Promise<readonly Milestone[]> {
   const records = await database.getAllAsync<unknown>(LOAD_MILESTONES_QUERY);
-  return milestoneRecordsToFeatures(records);
+  return records.map((record, index) =>
+    MilestoneRecord.fromUnknown(record, `at row ${index}`).toMilestone(),
+  );
 }
 
 export async function loadSearchableRailways(
@@ -27,7 +29,11 @@ export async function loadSearchableRailways(
   const records = await database.getAllAsync<unknown>(
     LOAD_SEARCHABLE_RAILWAYS_QUERY,
   );
-  return railwaySectionRecordsToRailways(records);
+  return searchableRailwaySectionRecordsToRailways(
+    records.map((record, index) =>
+      SearchableRailwaySectionRecord.fromUnknown(record, `at row ${index}`),
+    ),
+  );
 }
 
 export async function findMilestone(
@@ -42,5 +48,5 @@ export async function findMilestone(
   );
   return record === null
     ? undefined
-    : milestoneRecordToFeature(record, "lookup result");
+    : MilestoneRecord.fromUnknown(record, "lookup result").toMilestone();
 }
