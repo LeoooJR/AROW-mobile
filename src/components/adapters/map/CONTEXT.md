@@ -81,14 +81,15 @@ the operating system's reduced-motion preference.
 
 The bundled AROW railway reference is supplied by the owning screen as a local
 GeoJSON URI. The adapter renders it from regional zoom onward as a restrained
-interactive line layer and translates validated source properties to the shared
-domain `Railway` class when a feature is pressed. Milestone presses produce
-`Milestone` instances, and their shared railway-section key drives parent-line
-highlighting. The generic map-feature abstraction itself carries no railway or
-geometry fields. The owning screen remains responsible for the single selected
-feature and passes it back for orange highlighting. A selected milestone
-highlights both its point and parent railway section. The adapter does not load
-files, query persistence, or own selection state.
+interactive line layer and translates validated source properties to a
+`Railway` aggregate and its selectable `RailwaySection` child when a feature is
+pressed. Milestone presses produce `Milestone` instances, and their shared
+railway-section key drives parent-line highlighting. The generic map-feature
+abstraction itself carries no railway or geometry fields. The owning screen
+remains responsible for the single selected feature and passes it back for
+orange highlighting. A selected milestone highlights both its point and parent
+railway section. The adapter does not load files, query persistence, or own
+selection state.
 
 All railway layers are explicitly inserted below the milestone-dot anchor.
 Consequently milestone dots, selected points, and labels retain visual and press

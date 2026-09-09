@@ -1,13 +1,13 @@
 import { render, screen } from "@testing-library/react-native";
 
 import { Milestone } from "@/features/milestones/milestone";
-import { useMilestones } from "@/features/milestones/use-milestones";
+import { useRailwayReference } from "@/features/milestones/railway-reference-context";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 
 import Index from "@/app/index";
 
-jest.mock("@/features/milestones/use-milestones", () => ({
-  useMilestones: jest.fn(),
+jest.mock("@/features/milestones/railway-reference-context", () => ({
+  useRailwayReference: jest.fn(),
 }));
 
 jest.mock("@/hooks/platform/use-real-location", () => ({
@@ -50,7 +50,7 @@ jest.mock("@/components/composites/map-toolbar", () => {
   };
 });
 
-const useMilestonesMock = jest.mocked(useMilestones);
+const useRailwayReferenceMock = jest.mocked(useRailwayReference);
 const useRealLocationMock = jest.mocked(useRealLocation);
 const MILESTONES = [] satisfies readonly Milestone[];
 
@@ -73,9 +73,12 @@ describe("Index", () => {
   });
 
   test("passes ready milestone and location data to the map", async () => {
-    useMilestonesMock.mockReturnValue({
-      milestones: MILESTONES,
-      status: "ready",
+    useRailwayReferenceMock.mockReturnValue({
+      milestoneSearch: {
+        findMilestone: jest.fn(),
+        state: { status: "unavailable" },
+      },
+      milestoneState: { milestones: MILESTONES, status: "ready" },
     });
 
     await render(<Index />);
@@ -88,7 +91,13 @@ describe("Index", () => {
   });
 
   test("keeps the base map available when milestone loading fails", async () => {
-    useMilestonesMock.mockReturnValue({ status: "error" });
+    useRailwayReferenceMock.mockReturnValue({
+      milestoneSearch: {
+        findMilestone: jest.fn(),
+        state: { status: "unavailable" },
+      },
+      milestoneState: { status: "error" },
+    });
 
     await render(<Index />);
 

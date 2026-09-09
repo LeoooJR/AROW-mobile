@@ -5,21 +5,19 @@ import LineSearchFeedback from "@/components/composites/map-toolbar/point-search
 import LineStep from "@/components/composites/map-toolbar/point-search-sheet/line-step";
 import PointSearchStepHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-step-header";
 import RailwayLineResult from "@/components/composites/map-toolbar/point-search-sheet/railway-line-result";
-import type {
-  MilestoneSearchLine,
-  MilestoneSearchState,
-} from "@/features/milestones/milestone-search";
+import type { MilestoneSearchState } from "@/features/milestones/milestone-search";
+import type { Railway } from "@/features/railways/railway";
 
 interface RailwayLineStepProps {
   readonly onQueryChange: (query: string) => void;
   readonly onReset: () => void;
-  readonly onSelect: (line: MilestoneSearchLine) => void;
+  readonly onSelect: (line: Railway) => void;
   readonly placeholderColor: string;
   readonly query: string;
   readonly queryReady: boolean;
-  readonly results: readonly MilestoneSearchLine[];
+  readonly results: readonly Railway[];
   readonly searchState: MilestoneSearchState;
-  readonly selectedLine?: MilestoneSearchLine;
+  readonly selectedLine?: Railway;
 }
 
 export default function RailwayLineStep({

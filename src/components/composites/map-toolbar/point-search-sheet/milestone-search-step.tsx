@@ -4,11 +4,9 @@ import { Keyboard, Text, TextInput, View } from "react-native";
 import MilestoneResolutionFeedback from "@/components/composites/map-toolbar/point-search-sheet/milestone-resolution-feedback";
 import MilestoneStep from "@/components/composites/map-toolbar/point-search-sheet/milestone-step";
 import PointSearchStepHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-step-header";
-import type {
-  MilestoneResolution,
-  MilestoneSearchLine,
-  MilestoneSearchSection,
-} from "@/features/milestones/milestone-search";
+import type { MilestoneResolution } from "@/features/milestones/milestone-search";
+import type { Railway } from "@/features/railways/railway";
+import type { RailwaySection } from "@/features/railways/railway-section";
 
 interface MilestoneSearchStepProps {
   readonly kilometer: string;
@@ -17,8 +15,8 @@ interface MilestoneSearchStepProps {
   readonly onMetricChange: (value: string) => void;
   readonly placeholderColor: string;
   readonly resolution: MilestoneResolution;
-  readonly selectedLine?: MilestoneSearchLine;
-  readonly selectedSection?: MilestoneSearchSection;
+  readonly selectedLine?: Railway;
+  readonly selectedSection?: RailwaySection;
 }
 
 export default function MilestoneSearchStep({
@@ -37,6 +35,7 @@ export default function MilestoneSearchStep({
 
   return (
     <View
+      aria-busy={resolution.status === "loading"}
       aria-disabled={disabled}
       className={`border-t border-border-subtle py-3 ${disabled ? "opacity-50" : ""}`}
       testID="search-step-milestone"

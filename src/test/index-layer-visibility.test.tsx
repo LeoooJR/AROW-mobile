@@ -7,20 +7,28 @@ import Index from "@/app/index";
 
 const mockMilestone = new Milestone({
   coordinates: { latitude: 45.74744, longitude: 4.85933 },
-  kilometer: 509,
   label: "509+000",
   lineCode: "893000",
+  positionMeters: 509_000,
   sectionRank: 1,
 });
-const mockRailway = new Railway({
-  endMilestone: "511+605",
-  gaiaId: "railway-gaia-id",
-  lineCode: "893000",
+const mockRailwayLine = new Railway({
+  code: "893000",
   name: "Ligne test",
-  railwayType: "Ligne",
-  sectionRank: 1,
-  startMilestone: "499+752",
+  sections: [
+    {
+      geometry: {
+        endMilestone: "511+605",
+        gaiaId: "railway-gaia-id",
+        railwayType: "Ligne",
+        startMilestone: "499+752",
+        status: "present",
+      },
+      sectionRank: 1,
+    },
+  ],
 });
+const mockRailway = mockRailwayLine.sections[0];
 
 jest.mock("expo-asset", () => ({
   useAssets: () => [[{ localUri: "file:///railways.geojson" }]],
@@ -40,8 +48,14 @@ jest.mock("@/hooks/platform/use-real-location", () => ({
   }),
 }));
 
-jest.mock("@/features/milestones/use-milestones", () => ({
-  useMilestones: () => ({ milestones: [mockMilestone], status: "ready" }),
+jest.mock("@/features/milestones/railway-reference-context", () => ({
+  useRailwayReference: () => ({
+    milestoneSearch: {
+      findMilestone: jest.fn(),
+      state: { status: "unavailable" },
+    },
+    milestoneState: { milestones: [mockMilestone], status: "ready" },
+  }),
 }));
 
 jest.mock("@/components/adapters/map/map", () => {

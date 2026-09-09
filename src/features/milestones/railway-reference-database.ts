@@ -1,0 +1,46 @@
+import type { SQLiteDatabase } from "expo-sqlite";
+
+import type { Milestone } from "@/features/milestones/milestone";
+import {
+  milestoneRecordToFeature,
+  milestoneRecordsToFeatures,
+} from "@/features/milestones/milestone-record";
+import type { MilestoneLookupInput } from "@/features/milestones/milestone-search";
+import {
+  FIND_MILESTONE_QUERY,
+  LOAD_MILESTONES_QUERY,
+  LOAD_SEARCHABLE_RAILWAYS_QUERY,
+} from "@/features/milestones/railway-reference-queries";
+import { railwaySectionRecordsToRailways } from "@/features/milestones/railway-section-record";
+import type { Railway } from "@/features/railways/railway";
+
+export async function loadMilestones(
+  database: Pick<SQLiteDatabase, "getAllAsync">,
+): Promise<readonly Milestone[]> {
+  const records = await database.getAllAsync<unknown>(LOAD_MILESTONES_QUERY);
+  return milestoneRecordsToFeatures(records);
+}
+
+export async function loadSearchableRailways(
+  database: Pick<SQLiteDatabase, "getAllAsync">,
+): Promise<readonly Railway[]> {
+  const records = await database.getAllAsync<unknown>(
+    LOAD_SEARCHABLE_RAILWAYS_QUERY,
+  );
+  return railwaySectionRecordsToRailways(records);
+}
+
+export async function findMilestone(
+  database: Pick<SQLiteDatabase, "getFirstAsync">,
+  input: MilestoneLookupInput,
+): Promise<Milestone | undefined> {
+  const record = await database.getFirstAsync<unknown>(
+    FIND_MILESTONE_QUERY,
+    input.lineCode,
+    input.sectionRank,
+    input.positionMeters,
+  );
+  return record === null
+    ? undefined
+    : milestoneRecordToFeature(record, "lookup result");
+}

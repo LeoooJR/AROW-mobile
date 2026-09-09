@@ -14,7 +14,7 @@ export function isInteger(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value);
 }
 
-export function isNonNegativeInteger(value: unknown): value is number {
+export function isUnsignedInteger(value: unknown): value is number {
   return isInteger(value) && value >= 0;
 }
 
@@ -33,4 +33,12 @@ export function isFiniteNumberInRange(
     value >= minimum &&
     value <= maximum
   );
+}
+
+export function isLatitude(value: unknown): value is number {
+  return isFiniteNumberInRange(value, -90, 90);
+}
+
+export function isLongitude(value: unknown): value is number {
+  return isFiniteNumberInRange(value, -180, 180);
 }

@@ -5,7 +5,7 @@ export function isCanonicalRailwayLineCode(value: unknown): value is string {
   return typeof value === "string" && /^\d{6}$/.test(value);
 }
 
-function canonicalLineCode(value: string | number): string {
+export function canonicalRailwayLineCode(value: string | number): string {
   if (typeof value === "string") {
     if (isCanonicalRailwayLineCode(value)) {
       return value;
@@ -30,7 +30,7 @@ export class RailwaySectionKey {
       throw new Error("Railway section rank must be a positive integer");
     }
 
-    this.#lineCode = canonicalLineCode(lineCode);
+    this.#lineCode = canonicalRailwayLineCode(lineCode);
     this.#sectionRank = sectionRank;
   }
 

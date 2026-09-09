@@ -25,9 +25,16 @@ export default function getMapFeatureDetailsPresentation(
   feature: MapFeature,
 ): MapFeatureDetailsPresentation {
   if (feature.kind === "railway") {
+    if (feature.geometry.status === "absent") {
+      return {
+        eyebrow: "Ligne ferroviaire",
+        milestone: "Non renseigné",
+        title: feature.name,
+      };
+    }
     return {
-      eyebrow: feature.railwayType,
-      milestone: `${feature.startMilestone} → ${feature.endMilestone}`,
+      eyebrow: feature.geometry.railwayType,
+      milestone: `${feature.geometry.startMilestone} → ${feature.geometry.endMilestone}`,
       title: feature.name,
     };
   }

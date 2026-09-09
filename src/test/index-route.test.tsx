@@ -21,8 +21,14 @@ jest.mock("expo-asset", () => ({
   ],
 }));
 
-jest.mock("@/features/milestones/use-milestones", () => ({
-  useMilestones: () => ({ status: "unavailable" }),
+jest.mock("@/features/milestones/railway-reference-context", () => ({
+  useRailwayReference: () => ({
+    milestoneSearch: {
+      findMilestone: jest.fn(),
+      state: { status: "unavailable" },
+    },
+    milestoneState: { status: "unavailable" },
+  }),
 }));
 
 jest.mock("react-native-safe-area-context", () => ({
@@ -60,20 +66,28 @@ jest.mock("@/components/adapters/map/map", () => {
       readonly onFeaturePress?: (value: MapFeature) => void;
       readonly selectedFeature?: MapFeature;
     }) => {
-      const railway = new MockRailway({
-        endMilestone: "137+980",
-        gaiaId: "4718490e-6665-11e3-afff-01f464e0362d",
-        lineCode: "340311",
+      const railwayLine = new MockRailway({
+        code: "340311",
         name: "Raccordement de Rouen-Martainville",
-        railwayType: "Raccordement",
-        sectionRank: 1,
-        startMilestone: "136+772",
+        sections: [
+          {
+            geometry: {
+              endMilestone: "137+980",
+              gaiaId: "4718490e-6665-11e3-afff-01f464e0362d",
+              railwayType: "Raccordement",
+              startMilestone: "136+772",
+              status: "present",
+            },
+            sectionRank: 1,
+          },
+        ],
       });
+      const railway = railwayLine.sections[0];
       const milestone = new MockMilestone({
         coordinates: { latitude: 45.74491, longitude: 4.86234 },
-        kilometer: 241,
         label: "241+000",
         lineCode: "001000",
+        positionMeters: 241_000,
         sectionRank: 1,
       });
 

@@ -1,5 +1,5 @@
 import { useAssets } from "expo-asset";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { View } from "react-native";
 
 import Map from "@/components/adapters/map/map";
@@ -13,16 +13,14 @@ import MapFeatureDetailsCard from "@/components/composites/map-feature-details-c
 import MapToolbar from "@/components/composites/map-toolbar";
 import type { MapFeature } from "@/features/map-features/map-feature";
 import type { Milestone } from "@/features/milestones/milestone";
-import { createMilestoneSearchState } from "@/features/milestones/milestone-search";
-import { useMilestones } from "@/features/milestones/use-milestones";
+import { useRailwayReference } from "@/features/milestones/railway-reference-context";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 import railwayLinesAsset from "@/statics/lignes-par-type.geojson";
-import railwaySearchCatalog from "@/statics/railway-search-catalog.json";
 
 export default function Index() {
   const [railwayAssets] = useAssets(railwayLinesAsset);
   const { openSettings, requestAccess, retry, state } = useRealLocation();
-  const milestoneState = useMilestones();
+  const { milestoneSearch, milestoneState } = useRailwayReference();
   const [recenterRequest, setRecenterRequest] = useState(0);
   const [milestoneFocusRequest, setMilestoneFocusRequest] = useState(0);
   const [selectedFeature, setSelectedFeature] = useState<
@@ -32,10 +30,6 @@ export default function Index() {
     DEFAULT_MAP_LAYER_VISIBILITY,
   );
   const railwayData = railwayAssets?.[0]?.localUri ?? railwayAssets?.[0]?.uri;
-  const milestoneSearch = useMemo(
-    () => createMilestoneSearchState(milestoneState, railwaySearchCatalog),
-    [milestoneState],
-  );
   const currentLocation =
     state.status === "connected" ||
     state.status === "mocked" ||

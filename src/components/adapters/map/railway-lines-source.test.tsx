@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
 import { RailwaySectionKey } from "@/features/map-features/railway-section-key";
-import { Railway } from "@/features/railways/railway";
+import { RailwaySection } from "@/features/railways/railway-section";
 
 import { MAP_LAYER_IDS } from "./map-layer-ids";
 import RailwayLinesSource from "./railway-lines-source";
@@ -142,10 +142,14 @@ describe("RailwayLinesSource", () => {
     });
 
     expect(stopPropagation).toHaveBeenCalledTimes(1);
-    expect(onFeaturePress).toHaveBeenCalledWith(expect.any(Railway));
+    expect(onFeaturePress).toHaveBeenCalledWith(expect.any(RailwaySection));
     const pressedRailway = onFeaturePress.mock.calls[0]?.[0];
     expect(pressedRailway?.id).toBe("340311:1");
     expect(pressedRailway?.name).toBe("Raccordement de Rouen-Martainville");
+    expect(pressedRailway?.geometry).toMatchObject({
+      railwayType: "Raccordement",
+      status: "present",
+    });
   });
 
   test("ignores malformed or incorrectly identified features", async () => {

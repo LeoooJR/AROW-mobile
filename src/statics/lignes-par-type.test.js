@@ -62,32 +62,4 @@ describe("lignes-par-type GeoJSON", () => {
 
     expect(ids.size).toBe(data.features.length);
   });
-
-  test("keeps the compact railway search catalog synchronized", () => {
-    const geojson = JSON.parse(
-      readFileSync(
-        join(process.cwd(), "src/statics/lignes-par-type.geojson"),
-        "utf8",
-      ),
-    );
-    const catalog = JSON.parse(
-      readFileSync(
-        join(process.cwd(), "src/statics/railway-search-catalog.json"),
-        "utf8",
-      ),
-    );
-    const expected = geojson.features
-      .map(({ properties }) => ({
-        lineCode: properties.code_ligne,
-        name: properties.lib_ligne,
-        sectionRank: properties.rg_troncon,
-      }))
-      .sort((left, right) =>
-        `${left.lineCode}:${left.sectionRank}`.localeCompare(
-          `${right.lineCode}:${right.sectionRank}`,
-        ),
-      );
-
-    expect(catalog).toEqual(expected);
-  });
 });

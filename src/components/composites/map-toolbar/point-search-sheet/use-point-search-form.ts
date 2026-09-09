@@ -7,18 +7,18 @@ import pointSearchFormReducer, {
   selectedLine,
   selectedSection,
 } from "@/components/composites/map-toolbar/point-search-sheet/point-search-form-reducer";
+import useMilestoneResolution from "@/components/composites/map-toolbar/point-search-sheet/use-milestone-resolution";
 import {
   isMilestoneLineQueryReady,
-  resolveMilestone,
-  searchMilestoneLines,
-  type MilestoneSearchLine,
-  type MilestoneSearchState,
+  searchRailways,
+  type MilestoneSearchModel,
 } from "@/features/milestones/milestone-search";
+import type { Railway } from "@/features/railways/railway";
 
-const EMPTY_LINES: readonly MilestoneSearchLine[] = [];
+const EMPTY_RAILWAYS: readonly Railway[] = [];
 
 export default function usePointSearchForm(
-  searchState: MilestoneSearchState,
+  search: MilestoneSearchModel,
 ): PointSearchFormModel {
   const [state, dispatch] = useReducer(
     pointSearchFormReducer,
@@ -32,19 +32,21 @@ export default function usePointSearchForm(
     selectLine: selectSearchLine,
     selectSection: selectSearchSection,
   } = useMemo(() => createPointSearchFormActions(dispatch), [dispatch]);
-  const lines =
-    searchState.status === "ready" ? searchState.lines : EMPTY_LINES;
+  const railways =
+    search.state.status === "ready" ? search.state.railways : EMPTY_RAILWAYS;
   const results = useMemo(
-    () => searchMilestoneLines(lines, state.query),
-    [lines, state.query],
+    () => searchRailways(railways, state.query),
+    [railways, state.query],
   );
   const line = selectedLine(state.selection);
   const section = selectedSection(state.selection);
-  const resolution = resolveMilestone(
+  const resolution = useMilestoneResolution({
+    findMilestone: search.findMilestone,
+    kilometer: state.input.kilometer,
+    line,
+    metric: state.input.metric,
     section,
-    state.input.kilometer,
-    state.input.metric,
-  );
+  });
 
   return {
     line: {

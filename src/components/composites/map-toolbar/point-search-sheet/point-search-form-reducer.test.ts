@@ -4,37 +4,32 @@ import pointSearchFormReducer, {
   selectedSection,
   type PointSearchFormState,
 } from "@/components/composites/map-toolbar/point-search-sheet/point-search-form-reducer";
-import { Milestone } from "@/features/milestones/milestone";
-import type {
-  MilestoneSearchLine,
-  MilestoneSearchSection,
-} from "@/features/milestones/milestone-search";
+import { Railway } from "@/features/railways/railway";
+import type { RailwaySection } from "@/features/railways/railway-section";
 
-function createSection(rank: number): MilestoneSearchSection {
-  const milestone = new Milestone({
-    coordinates: { latitude: 45.74744, longitude: 4.85933 },
-    kilometer: 509,
-    label: "509+000",
-    lineCode: "893000",
-    sectionRank: rank,
-  });
-
-  return {
-    maximumLabel: milestone.label,
-    milestones: [milestone],
-    minimumLabel: milestone.label,
-    rank,
-  };
-}
-
-function createLine(
-  sections: readonly MilestoneSearchSection[],
-): MilestoneSearchLine {
-  return {
+function createLine(ranks: readonly number[]): Railway {
+  return new Railway({
     code: "893000",
     name: "Ligne de Collonges-Fontaines à Lyon-Guillotière",
-    sections,
-  };
+    sections: ranks.map((sectionRank) => ({
+      geometry: { status: "absent" },
+      milestoneRange: {
+        maximumLabel: "509+000",
+        maximumPositionMeters: 509_000,
+        minimumLabel: "509+000",
+        minimumPositionMeters: 509_000,
+      },
+      sectionRank,
+    })),
+  });
+}
+
+function firstSection(line: Railway): RailwaySection {
+  const section = line.sections[0];
+  if (section === undefined) {
+    throw new Error("Expected railway section fixture");
+  }
+  return section;
 }
 
 function changeInput(
@@ -63,8 +58,8 @@ describe("point search form reducer", () => {
   });
 
   test("auto-selects a sole section and clears milestone input", () => {
-    const section = createSection(1);
-    const line = createLine([section]);
+    const line = createLine([1]);
+    const section = firstSection(line);
     const stateWithInput = changeInput(
       INITIAL_POINT_SEARCH_FORM_STATE,
       "kilometer",
@@ -86,7 +81,7 @@ describe("point search form reducer", () => {
   });
 
   test("requires an explicit choice when a line has multiple sections", () => {
-    const line = createLine([createSection(1), createSection(2)]);
+    const line = createLine([1, 2]);
     const state = pointSearchFormReducer(INITIAL_POINT_SEARCH_FORM_STATE, {
       line,
       type: "line-selected",
@@ -97,8 +92,8 @@ describe("point search form reducer", () => {
   });
 
   test("selects a section and clears existing milestone input", () => {
-    const sections = [createSection(1), createSection(2)] as const;
-    const line = createLine(sections);
+    const line = createLine([1, 2]);
+    const sections = line.sections;
     const lineState = pointSearchFormReducer(INITIAL_POINT_SEARCH_FORM_STATE, {
       line,
       type: "line-selected",
@@ -119,7 +114,7 @@ describe("point search form reducer", () => {
 
   test("ignores section selection before a line is selected", () => {
     const state = pointSearchFormReducer(INITIAL_POINT_SEARCH_FORM_STATE, {
-      section: createSection(1),
+      section: firstSection(createLine([1])),
       type: "section-selected",
     });
 
@@ -127,8 +122,7 @@ describe("point search form reducer", () => {
   });
 
   test("resets selections and inputs while preserving the query", () => {
-    const section = createSection(1);
-    const line = createLine([section]);
+    const line = createLine([1]);
     let state = pointSearchFormReducer(INITIAL_POINT_SEARCH_FORM_STATE, {
       query: "893000",
       type: "query-changed",

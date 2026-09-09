@@ -1,16 +1,14 @@
 import Step from "@/components/composites/map-toolbar/point-search-sheet/step";
-import type {
-  MilestoneSearchLine,
-  MilestoneSearchSection,
-} from "@/features/milestones/milestone-search";
+import type { Railway } from "@/features/railways/railway";
+import type { RailwaySection } from "@/features/railways/railway-section";
 
 export default class SectionStep extends Step {
-  readonly #selectedLine: MilestoneSearchLine | undefined;
-  readonly #selectedSection: MilestoneSearchSection | undefined;
+  readonly #selectedLine: Railway | undefined;
+  readonly #selectedSection: RailwaySection | undefined;
 
   public constructor(
-    selectedLine: MilestoneSearchLine | undefined,
-    selectedSection: MilestoneSearchSection | undefined,
+    selectedLine: Railway | undefined,
+    selectedSection: RailwaySection | undefined,
   ) {
     super(2, "Section");
     this.#selectedLine = selectedLine;
@@ -26,6 +24,6 @@ export default class SectionStep extends Step {
       return "À choisir";
     }
 
-    return `Section ${this.#selectedSection.rank}`;
+    return `Section ${this.#selectedSection.sectionRank}`;
   }
 }

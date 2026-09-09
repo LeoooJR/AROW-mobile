@@ -1,10 +1,10 @@
 import { type ReactElement } from "react";
 import { Pressable, Text, View } from "react-native";
 
-import type { MilestoneSearchLine } from "@/features/milestones/milestone-search";
+import type { Railway } from "@/features/railways/railway";
 
 interface RailwayLineResultProps {
-  readonly line: MilestoneSearchLine;
+  readonly line: Railway;
   readonly onPress: () => void;
 }
 

@@ -1,20 +1,29 @@
 import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
-import type {
-  MilestoneResolution,
-  MilestoneSearchLine,
-} from "@/features/milestones/milestone-search";
+import type { MilestoneResolution } from "@/features/milestones/milestone-search";
+import type { Railway } from "@/features/railways/railway";
 
 interface MilestoneResolutionFeedbackProps {
   readonly resolution: MilestoneResolution;
-  readonly selectedLine?: MilestoneSearchLine;
+  readonly selectedLine?: Railway;
 }
 
 export default function MilestoneResolutionFeedback({
   resolution,
   selectedLine,
 }: MilestoneResolutionFeedbackProps): ReactElement | null {
+  if (resolution.status === "loading") {
+    return (
+      <Text
+        className="mt-2 text-[11px] font-semibold leading-4 text-text-muted"
+        role="status"
+      >
+        Recherche du repère…
+      </Text>
+    );
+  }
+
   if (resolution.status === "error") {
     return (
       <Text

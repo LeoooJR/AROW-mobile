@@ -14,6 +14,7 @@ import {
   RailwaySectionKey,
 } from "@/features/map-features/railway-section-key";
 import { Railway } from "@/features/railways/railway";
+import type { RailwaySection } from "@/features/railways/railway-section";
 import {
   isNonEmptyString,
   isPositiveInteger,
@@ -101,7 +102,9 @@ function hasRailwayMetadata(properties: Record<string, unknown>): boolean {
   );
 }
 
-function railwayFromFeature(feature: GeoJSON.Feature): Railway | undefined {
+function railwayFromFeature(
+  feature: GeoJSON.Feature,
+): RailwaySection | undefined {
   if (
     feature.geometry.type !== "LineString" &&
     feature.geometry.type !== "MultiLineString"
@@ -114,16 +117,26 @@ function railwayFromFeature(feature: GeoJSON.Feature): Railway | undefined {
   }
 
   const railway = new Railway({
-    endMilestone: feature.properties.pkf,
-    gaiaId: feature.properties.idgaia,
-    lineCode: feature.properties.code_ligne,
+    code: feature.properties.code_ligne,
     name: feature.properties.lib_ligne,
-    railwayType: feature.properties.type_ligne,
-    sectionRank: feature.properties.rg_troncon,
-    startMilestone: feature.properties.pkd,
+    sections: [
+      {
+        geometry: {
+          endMilestone: feature.properties.pkf,
+          gaiaId: feature.properties.idgaia,
+          railwayType: feature.properties.type_ligne,
+          startMilestone: feature.properties.pkd,
+          status: "present",
+        },
+        sectionRank: feature.properties.rg_troncon,
+      },
+    ],
   });
+  const section = railway.sections[0];
 
-  return feature.id === railway.id ? railway : undefined;
+  return section !== undefined && feature.id === section.id
+    ? section
+    : undefined;
 }
 
 export default function RailwayLinesSource({

@@ -8,10 +8,10 @@ import MapLayersSheet from "@/components/composites/map-toolbar/map-layers-sheet
 import MapToolbarActions from "@/components/composites/map-toolbar/map-toolbar-actions";
 import PointSearchSheet from "@/components/composites/map-toolbar/point-search-sheet";
 import type { Milestone } from "@/features/milestones/milestone";
-import type { MilestoneSearchState } from "@/features/milestones/milestone-search";
+import type { MilestoneSearchModel } from "@/features/milestones/milestone-search";
 
 export interface MapToolbarProps {
-  readonly milestoneSearch: MilestoneSearchState;
+  readonly milestoneSearch: MilestoneSearchModel;
   readonly onMilestoneSelect: (milestone: Milestone) => void;
   readonly onVisibilityChange: (
     layer: ToggleableMapLayer,
@@ -49,7 +49,7 @@ export default function MapToolbar({
           onMilestoneSelect(milestone);
           setOpenSheet(undefined);
         }}
-        searchState={milestoneSearch}
+        search={milestoneSearch}
       />
       <MapLayersSheet
         isOpen={openSheet === "layers"}

@@ -1,37 +1,36 @@
-import { Milestone } from "@/features/milestones/milestone";
+import { Railway } from "@/features/railways/railway";
 
 import {
-  createMilestoneSearchState,
   isMilestoneLineQueryReady,
   parsePastedMilestone,
-  resolveMilestone,
-  searchMilestoneLines,
+  searchRailways,
+  unavailableMilestoneResolution,
+  validateMilestoneInput,
 } from "./milestone-search";
 
-function createMilestone(
-  kilometer: number,
-  lineCode = "893000",
-  sectionRank = 1,
-): Milestone {
-  return new Milestone({
-    coordinates: {
-      latitude: 45.7 + kilometer / 100_000,
-      longitude: 4.8,
-    },
-    kilometer,
-    label: `${String(kilometer).padStart(3, "0")}+000`,
-    lineCode,
-    sectionRank,
+function createRailway(
+  code: string,
+  name: string,
+  minimumPositionMeters = 508_000,
+  maximumPositionMeters = 509_000,
+): Railway {
+  return new Railway({
+    code,
+    name,
+    sections: [
+      {
+        geometry: { status: "absent" },
+        milestoneRange: {
+          maximumLabel: "509+000",
+          maximumPositionMeters,
+          minimumLabel: "508+000",
+          minimumPositionMeters,
+        },
+        sectionRank: 1,
+      },
+    ],
   });
 }
-
-const catalog = [
-  {
-    lineCode: "893000",
-    name: "Ligne de Collonges-Fontaines à Lyon-Guillotière",
-    sectionRank: 1,
-  },
-] as const;
 
 describe("milestone search", () => {
   test.each([
@@ -45,64 +44,29 @@ describe("milestone search", () => {
     expect(isMilestoneLineQueryReady(query)).toBe(ready);
   });
 
-  test("merges searchable sections with railway names and sorted milestones", () => {
-    const state = createMilestoneSearchState(
-      {
-        milestones: [createMilestone(509), createMilestone(508)],
-        status: "ready",
-      },
-      catalog,
-    );
-
-    expect(state.status).toBe("ready");
-    if (state.status !== "ready") {
-      throw new Error("Expected ready search state");
-    }
-    expect(state.lines[0]).toMatchObject({
-      code: "893000",
-      name: "Ligne de Collonges-Fontaines à Lyon-Guillotière",
-      sections: [{ maximumLabel: "509+000", minimumLabel: "508+000" }],
-    });
-  });
-
-  test("keeps catalog-missing milestones searchable by canonical code", () => {
-    const state = createMilestoneSearchState(
-      {
-        milestones: [createMilestone(1, "008000")],
-        status: "ready",
-      },
-      catalog,
-    );
-
-    expect(state).toMatchObject({
-      lines: [{ code: "008000", name: "Ligne 008000" }],
-      status: "ready",
-    });
-  });
-
-  test.each([
-    [{ lineCode: "89300", name: "Invalid code", sectionRank: 1 }],
-    [{ lineCode: "893000", name: "", sectionRank: 1 }],
-    [{ lineCode: "893000", name: "Invalid section", sectionRank: 0 }],
-  ])("rejects a malformed railway catalog entry", (entry) => {
-    expect(() =>
-      createMilestoneSearchState(
-        { milestones: [createMilestone(509)], status: "ready" },
-        [entry],
-      ),
-    ).toThrow("Invalid railway search catalog");
-  });
-
   test("searches accent-insensitive names and code prefixes with a result cap", () => {
-    const lines = Array.from({ length: 25 }, (_, index) => ({
-      code: `893${String(index).padStart(3, "0")}`,
-      name: `Ligne de Lyon numéro ${index}`,
-      sections: [],
-    }));
+    const railways = Array.from({ length: 25 }, (_, index) =>
+      createRailway(
+        `893${String(index).padStart(3, "0")}`,
+        `Ligne de Lyón numéro ${index}`,
+      ),
+    );
 
-    expect(searchMilestoneLines(lines, "l")).toEqual([]);
-    expect(searchMilestoneLines(lines, "LYON")).toHaveLength(20);
-    expect(searchMilestoneLines(lines, "8930", 3)).toHaveLength(3);
+    expect(searchRailways(railways, "l")).toEqual([]);
+    expect(searchRailways(railways, "LYON")).toHaveLength(20);
+    expect(searchRailways(railways, "8930", 3)).toHaveLength(3);
+  });
+
+  test("ranks name prefixes before substrings", () => {
+    const railways = [
+      createRailway("001000", "Grande ligne de Lyon"),
+      createRailway("002000", "Lyon à Grenoble"),
+    ];
+
+    expect(searchRailways(railways, "lyon").map((line) => line.code)).toEqual([
+      "002000",
+      "001000",
+    ]);
   });
 
   test("parses pasted production PK values", () => {
@@ -113,36 +77,40 @@ describe("milestone search", () => {
     expect(parsePastedMilestone("509+00")).toBeUndefined();
   });
 
-  test("resolves only exact milestones and reports range and availability errors", () => {
-    const milestones = [createMilestone(508), createMilestone(509)];
-    const section = {
-      maximumLabel: "509+000",
-      milestones,
-      minimumLabel: "508+000",
-      rank: 1,
-    };
-
-    expect(resolveMilestone(section, "509", "000")).toEqual({
-      milestone: milestones[1],
+  test("validates complete inputs against section bounds", () => {
+    const section = createRailway("893000", "Ligne test").sections[0];
+    expect(section).toBeDefined();
+    expect(validateMilestoneInput(section, "509", "000")).toEqual({
+      positionMeters: 509_000,
       status: "ready",
     });
-    expect(resolveMilestone(section, "507", "000")).toMatchObject({
+    expect(validateMilestoneInput(section, "507", "000")).toMatchObject({
       status: "error",
     });
-    expect(resolveMilestone(section, "508", "500")).toEqual({
-      message: "Le repère 508+500 n’est pas disponible dans cette section.",
-      status: "error",
+    expect(validateMilestoneInput(section, "508", "500")).toEqual({
+      positionMeters: 508_500,
+      status: "ready",
     });
-    expect(resolveMilestone(section, "509", "00")).toEqual({
+    expect(validateMilestoneInput(section, "509", "00")).toEqual({
       status: "incomplete",
     });
   });
 
-  test("preserves non-ready database states", () => {
-    expect(createMilestoneSearchState({ status: "loading" }, catalog)).toEqual({
-      status: "loading",
+  test("does not resolve sections without milestone availability", () => {
+    const section = new Railway({
+      code: "008000",
+      name: "Ligne 008000",
+      sections: [{ geometry: { status: "absent" }, sectionRank: 1 }],
+    }).sections[0];
+
+    expect(validateMilestoneInput(section, "1", "000")).toEqual({
+      status: "incomplete",
     });
-    expect(createMilestoneSearchState({ status: "error" }, catalog)).toEqual({
+  });
+
+  test("formats the exact-point unavailable error", () => {
+    expect(unavailableMilestoneResolution("508", "500")).toEqual({
+      message: "Le repère 508+500 n’est pas disponible dans cette section.",
       status: "error",
     });
   });

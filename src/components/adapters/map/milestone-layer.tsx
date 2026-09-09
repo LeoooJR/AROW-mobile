@@ -15,9 +15,9 @@ import { isCanonicalRailwayLineCode } from "@/features/map-features/railway-sect
 import { Milestone } from "@/features/milestones/milestone";
 import {
   isNonEmptyString,
-  isNonNegativeInteger,
   isPositiveInteger,
   isRecord,
+  isUnsignedInteger,
 } from "@/types/value-validation";
 
 export interface MilestoneLayerProps {
@@ -28,10 +28,10 @@ export interface MilestoneLayerProps {
 }
 
 interface MilestoneGeoJSONProperties {
-  readonly kilometer: number;
   readonly kind: "milestone";
   readonly label: string;
   readonly lineCode: string;
+  readonly positionMeters: number;
   readonly sectionRank: number;
 }
 
@@ -89,10 +89,10 @@ export function milestonesToFeatureCollection(
       },
       id: milestone.id,
       properties: {
-        kilometer: milestone.kilometer,
         kind: milestone.kind,
         label: milestone.label,
         lineCode: milestone.lineCode,
+        positionMeters: milestone.positionMeters,
         sectionRank: milestone.sectionRank,
       },
       type: "Feature",
@@ -116,7 +116,7 @@ function hasMilestoneIdentity(properties: Record<string, unknown>): boolean {
     properties.kind === "milestone" &&
     isCanonicalRailwayLineCode(properties.lineCode) &&
     isPositiveInteger(properties.sectionRank) &&
-    isNonNegativeInteger(properties.kilometer)
+    isUnsignedInteger(properties.positionMeters)
   );
 }
 
@@ -141,9 +141,9 @@ function milestoneFromFeature(feature: GeoJSON.Feature): Milestone | undefined {
 
   const milestone = new Milestone({
     coordinates,
-    kilometer: feature.properties.kilometer,
     label: feature.properties.label,
     lineCode: feature.properties.lineCode,
+    positionMeters: feature.properties.positionMeters,
     sectionRank: feature.properties.sectionRank,
   });
 

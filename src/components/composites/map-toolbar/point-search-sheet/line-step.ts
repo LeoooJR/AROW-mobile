@@ -1,10 +1,10 @@
 import Step from "@/components/composites/map-toolbar/point-search-sheet/step";
-import type { MilestoneSearchLine } from "@/features/milestones/milestone-search";
+import type { Railway } from "@/features/railways/railway";
 
 export default class LineStep extends Step {
-  readonly #selectedLine: MilestoneSearchLine | undefined;
+  readonly #selectedLine: Railway | undefined;
 
-  public constructor(selectedLine: MilestoneSearchLine | undefined) {
+  public constructor(selectedLine: Railway | undefined) {
     super(1, "Ligne");
     this.#selectedLine = selectedLine;
   }

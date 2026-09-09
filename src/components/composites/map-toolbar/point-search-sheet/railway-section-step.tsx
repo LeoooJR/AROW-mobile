@@ -3,15 +3,13 @@ import { Pressable, Text, View } from "react-native";
 
 import PointSearchStepHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-step-header";
 import SectionStep from "@/components/composites/map-toolbar/point-search-sheet/section-step";
-import type {
-  MilestoneSearchLine,
-  MilestoneSearchSection,
-} from "@/features/milestones/milestone-search";
+import type { Railway } from "@/features/railways/railway";
+import type { RailwaySection } from "@/features/railways/railway-section";
 
 interface RailwaySectionStepProps {
-  readonly onSelect: (section: MilestoneSearchSection) => void;
-  readonly selectedLine?: MilestoneSearchLine;
-  readonly selectedSection?: MilestoneSearchSection;
+  readonly onSelect: (section: RailwaySection) => void;
+  readonly selectedLine?: Railway;
+  readonly selectedSection?: RailwaySection;
 }
 
 export default function RailwaySectionStep({
@@ -37,17 +35,17 @@ export default function RailwaySectionStep({
               <Pressable
                 aria-pressed={selected}
                 className={`h-12 min-w-[62px] items-center justify-center rounded-lg border px-3.5 ${selected ? "border-text-primary bg-text-primary" : "border-border-subtle bg-surface active:bg-surface-muted"}`}
-                key={section.rank}
+                key={section.sectionRank}
                 onPress={() => {
                   onSelect(section);
                 }}
                 role="button"
-                testID={`section-choice-${section.rank}`}
+                testID={`section-choice-${section.sectionRank}`}
               >
                 <Text
                   className={`font-mono text-[13px] font-semibold ${selected ? "text-canvas" : "text-text-primary"}`}
                 >
-                  Section {section.rank}
+                  Section {section.sectionRank}
                 </Text>
               </Pressable>
             );

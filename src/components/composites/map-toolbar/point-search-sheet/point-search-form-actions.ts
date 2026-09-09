@@ -1,18 +1,16 @@
 import type { Dispatch } from "react";
 
 import type { PointSearchFormAction } from "@/components/composites/map-toolbar/point-search-sheet/point-search-form-reducer";
-import type {
-  MilestoneSearchLine,
-  MilestoneSearchSection,
-} from "@/features/milestones/milestone-search";
+import type { Railway } from "@/features/railways/railway";
+import type { RailwaySection } from "@/features/railways/railway-section";
 
 export interface PointSearchFormActions {
   readonly changeKilometer: (value: string) => void;
   readonly changeMetric: (value: string) => void;
   readonly changeQuery: (query: string) => void;
   readonly resetLine: () => void;
-  readonly selectLine: (line: MilestoneSearchLine) => void;
-  readonly selectSection: (section: MilestoneSearchSection) => void;
+  readonly selectLine: (line: Railway) => void;
+  readonly selectSection: (section: RailwaySection) => void;
 }
 
 export default function createPointSearchFormActions(
@@ -31,10 +29,10 @@ export default function createPointSearchFormActions(
     resetLine(): void {
       dispatch({ type: "line-reset" });
     },
-    selectLine(line: MilestoneSearchLine): void {
+    selectLine(line: Railway): void {
       dispatch({ line, type: "line-selected" });
     },
-    selectSection(section: MilestoneSearchSection): void {
+    selectSection(section: RailwaySection): void {
       dispatch({ section, type: "section-selected" });
     },
   };

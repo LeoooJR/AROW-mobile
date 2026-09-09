@@ -11,7 +11,11 @@ import {
   type MapLayerVisibility,
 } from "@/components/adapters/map/map-layer-visibility";
 import { Milestone } from "@/features/milestones/milestone";
-import type { MilestoneSearchState } from "@/features/milestones/milestone-search";
+import type {
+  MilestoneSearchModel,
+  MilestoneSearchState,
+} from "@/features/milestones/milestone-search";
+import { Railway } from "@/features/railways/railway";
 
 import MapToolbar from "./index";
 
@@ -19,28 +23,40 @@ let mockSafeAreaTop = 0;
 let mockWindowWidth = 412;
 const milestone = new Milestone({
   coordinates: { latitude: 45.74744, longitude: 4.85933 },
-  kilometer: 509,
   label: "509+000",
   lineCode: "893000",
+  positionMeters: 509_000,
   sectionRank: 1,
 });
 const milestoneSearch = {
-  lines: [
-    {
+  railways: [
+    new Railway({
       code: "893000",
       name: "Ligne de Collonges-Fontaines à Lyon-Guillotière",
       sections: [
         {
-          maximumLabel: "509+000",
-          milestones: [milestone],
-          minimumLabel: "509+000",
-          rank: 1,
+          geometry: { status: "absent" },
+          milestoneRange: {
+            maximumLabel: "509+000",
+            maximumPositionMeters: 509_000,
+            minimumLabel: "509+000",
+            minimumPositionMeters: 509_000,
+          },
+          sectionRank: 1,
         },
       ],
-    },
+    }),
   ],
   status: "ready",
 } satisfies MilestoneSearchState;
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((promiseResolve) => {
+    resolve = promiseResolve;
+  });
+  return { promise, resolve };
+}
 
 jest.mock("react-native", () => {
   const actual =
@@ -102,10 +118,12 @@ jest.mock("@/components/adapters/native-bottom-sheet", () => {
 });
 
 function ControlledToolbar({
+  findMilestone = async () => milestone,
   searchState = milestoneSearch,
   onMilestoneSelect = jest.fn(),
   onVisibilityChange = jest.fn(),
 }: {
+  readonly findMilestone?: MilestoneSearchModel["findMilestone"];
   readonly onMilestoneSelect?: jest.Mock;
   readonly onVisibilityChange?: jest.Mock;
   readonly searchState?: MilestoneSearchState;
@@ -116,7 +134,7 @@ function ControlledToolbar({
 
   return (
     <MapToolbar
-      milestoneSearch={searchState}
+      milestoneSearch={{ findMilestone, state: searchState }}
       onMilestoneSelect={onMilestoneSelect}
       onVisibilityChange={(layer, visible) => {
         onVisibilityChange(layer, visible);
@@ -223,14 +241,64 @@ describe("MapToolbar", () => {
     await user.type(screen.getByLabelText("Kilomètre"), "509");
     await user.type(screen.getByLabelText("Partie métrique"), "000");
 
-    expect(screen.getByTestId("resolved-point-summary")).toHaveTextContent(
-      /509\+000/,
-    );
+    expect(
+      await screen.findByTestId("resolved-point-summary"),
+    ).toHaveTextContent(/509\+000/);
     expect(usePoint).toBeEnabled();
     await user.press(usePoint);
 
     expect(onMilestoneSelect).toHaveBeenCalledWith(milestone);
     expect(screen.queryByTestId("point-search-sheet")).not.toBeOnTheScreen();
+  });
+
+  test("announces and disables submission during exact lookup", async () => {
+    const lookup = deferred<Milestone | undefined>();
+    const user = userEvent.setup();
+    await render(<ControlledToolbar findMilestone={() => lookup.promise} />);
+
+    await user.press(screen.getByTestId("open-point-search"));
+    await user.type(
+      screen.getByLabelText("Nom de ligne ou code unique"),
+      "893000",
+    );
+    await user.press(screen.getByTestId("line-result-893000"));
+    await user.type(screen.getByLabelText("Kilomètre"), "509");
+    await user.type(screen.getByLabelText("Partie métrique"), "000");
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Recherche du repère…",
+    );
+    expect(screen.getByTestId("search-step-milestone")).toBeBusy();
+    expect(
+      screen.getByRole("button", { name: "Utiliser ce point" }),
+    ).toBeDisabled();
+
+    lookup.resolve(milestone);
+    expect(
+      await screen.findByTestId("resolved-point-summary"),
+    ).toBeOnTheScreen();
+  });
+
+  test("reports an exact lookup failure", async () => {
+    const user = userEvent.setup();
+    await render(
+      <ControlledToolbar
+        findMilestone={jest.fn().mockRejectedValue(new Error("unavailable"))}
+      />,
+    );
+
+    await user.press(screen.getByTestId("open-point-search"));
+    await user.type(
+      screen.getByLabelText("Nom de ligne ou code unique"),
+      "893000",
+    );
+    await user.press(screen.getByTestId("line-result-893000"));
+    await user.type(screen.getByLabelText("Kilomètre"), "509");
+    await user.type(screen.getByLabelText("Partie métrique"), "000");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "La recherche de ce repère est momentanément indisponible.",
+    );
   });
 
   test("keeps search state when the native sheet is dismissed", async () => {
@@ -266,6 +334,9 @@ describe("MapToolbar", () => {
 
     expect(screen.getByLabelText("Kilomètre")).toHaveDisplayValue("509");
     expect(screen.getByLabelText("Partie métrique")).toHaveDisplayValue("000");
+    expect(
+      await screen.findByTestId("resolved-point-summary"),
+    ).toBeOnTheScreen();
     expect(
       screen.getByRole("button", { name: "Utiliser ce point" }),
     ).toBeEnabled();

@@ -1,9 +1,9 @@
 import {
   parsePastedMilestone,
   sanitizeMilestonePart,
-  type MilestoneSearchLine,
-  type MilestoneSearchSection,
 } from "@/features/milestones/milestone-search";
+import type { Railway } from "@/features/railways/railway";
+import type { RailwaySection } from "@/features/railways/railway-section";
 
 export interface MilestoneInput {
   readonly kilometer: string;
@@ -13,12 +13,12 @@ export interface MilestoneInput {
 export type PointSearchSelection =
   | { readonly stage: "line" }
   | {
-      readonly line: MilestoneSearchLine;
+      readonly line: Railway;
       readonly stage: "section";
     }
   | {
-      readonly line: MilestoneSearchLine;
-      readonly section: MilestoneSearchSection;
+      readonly line: Railway;
+      readonly section: RailwaySection;
       readonly stage: "milestone";
     };
 
@@ -30,10 +30,10 @@ export interface PointSearchFormState {
 
 export type PointSearchFormAction =
   | { readonly query: string; readonly type: "query-changed" }
-  | { readonly line: MilestoneSearchLine; readonly type: "line-selected" }
+  | { readonly line: Railway; readonly type: "line-selected" }
   | { readonly type: "line-reset" }
   | {
-      readonly section: MilestoneSearchSection;
+      readonly section: RailwaySection;
       readonly type: "section-selected";
     }
   | {
@@ -53,7 +53,7 @@ export const INITIAL_POINT_SEARCH_FORM_STATE: PointSearchFormState = {
   selection: { stage: "line" },
 };
 
-function selectionForLine(line: MilestoneSearchLine): PointSearchSelection {
+function selectionForLine(line: Railway): PointSearchSelection {
   const section = line.sections.length === 1 ? line.sections[0] : undefined;
   if (section === undefined) {
     return { line, stage: "section" };
@@ -64,7 +64,7 @@ function selectionForLine(line: MilestoneSearchLine): PointSearchSelection {
 
 function selectSection(
   state: PointSearchFormState,
-  section: MilestoneSearchSection,
+  section: RailwaySection,
 ): PointSearchFormState {
   if (state.selection.stage === "line") {
     return state;
@@ -129,12 +129,12 @@ export default function pointSearchFormReducer(
 
 export function selectedLine(
   selection: PointSearchSelection,
-): MilestoneSearchLine | undefined {
+): Railway | undefined {
   return selection.stage === "line" ? undefined : selection.line;
 }
 
 export function selectedSection(
   selection: PointSearchSelection,
-): MilestoneSearchSection | undefined {
+): RailwaySection | undefined {
   return selection.stage === "milestone" ? selection.section : undefined;
 }

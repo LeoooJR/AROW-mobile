@@ -9,21 +9,29 @@ jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ bottom: 24, left: 0, right: 0, top: 0 }),
 }));
 
-const railway = new Railway({
-  endMilestone: "137+980",
-  gaiaId: "4718490e-6665-11e3-afff-01f464e0362d",
-  lineCode: "340311",
+const railwayLine = new Railway({
+  code: "340311",
   name: "Raccordement de Rouen-Martainville",
-  railwayType: "Raccordement",
-  sectionRank: 1,
-  startMilestone: "136+772",
+  sections: [
+    {
+      geometry: {
+        endMilestone: "137+980",
+        gaiaId: "4718490e-6665-11e3-afff-01f464e0362d",
+        railwayType: "Raccordement",
+        startMilestone: "136+772",
+        status: "present",
+      },
+      sectionRank: 1,
+    },
+  ],
 });
+const railway = railwayLine.sections[0];
 
 const milestone = new Milestone({
   coordinates: { latitude: 45.74491, longitude: 4.86234 },
-  kilometer: 241,
   label: "241+000",
   lineCode: "001000",
+  positionMeters: 241_000,
   sectionRank: 1,
 });
 
@@ -62,9 +70,9 @@ describe("MapFeatureDetailsCard", () => {
         feature={
           new Milestone({
             coordinates: { latitude: -12.5, longitude: -3.25 },
-            kilometer: milestone.kilometer,
             label: milestone.label,
             lineCode: milestone.lineCode,
+            positionMeters: milestone.positionMeters,
             sectionRank: milestone.sectionRank,
           })
         }

@@ -9,9 +9,9 @@ import Map from "./map";
 
 const MILESTONE = new Milestone({
   coordinates: { latitude: 45.74, longitude: 4.86 },
-  kilometer: 241,
   label: "241+000",
   lineCode: "001000",
+  positionMeters: 241_000,
   sectionRank: 1,
 });
 const MILESTONES = [MILESTONE] as const;

@@ -2,32 +2,35 @@ import LineStep from "@/components/composites/map-toolbar/point-search-sheet/lin
 import MilestoneStep from "@/components/composites/map-toolbar/point-search-sheet/milestone-step";
 import SectionStep from "@/components/composites/map-toolbar/point-search-sheet/section-step";
 import { Milestone } from "@/features/milestones/milestone";
-import type {
-  MilestoneResolution,
-  MilestoneSearchLine,
-  MilestoneSearchSection,
-} from "@/features/milestones/milestone-search";
+import type { MilestoneResolution } from "@/features/milestones/milestone-search";
+import { Railway } from "@/features/railways/railway";
+import type { RailwaySection } from "@/features/railways/railway-section";
 
 const milestone = new Milestone({
   coordinates: { latitude: 45.74744, longitude: 4.85933 },
-  kilometer: 509,
   label: "509+000",
   lineCode: "893000",
+  positionMeters: 509_000,
   sectionRank: 1,
 });
 
-const section: MilestoneSearchSection = {
-  maximumLabel: milestone.label,
-  milestones: [milestone],
-  minimumLabel: milestone.label,
-  rank: milestone.sectionRank,
-};
-
-const line: MilestoneSearchLine = {
+const line = new Railway({
   code: milestone.lineCode,
   name: "Ligne de Collonges-Fontaines à Lyon-Guillotière",
-  sections: [section],
-};
+  sections: [
+    {
+      geometry: { status: "absent" },
+      milestoneRange: {
+        maximumLabel: milestone.label,
+        maximumPositionMeters: milestone.positionMeters,
+        minimumLabel: milestone.label,
+        minimumPositionMeters: milestone.positionMeters,
+      },
+      sectionRank: milestone.sectionRank,
+    },
+  ],
+});
+const section = line.sections[0];
 
 describe("point search steps", () => {
   test.each([
@@ -55,10 +58,11 @@ describe("point search steps", () => {
   test.each([
     [undefined, { status: "incomplete" }, "Section requise"],
     [section, { status: "incomplete" }, "À renseigner"],
+    [section, { status: "loading" }, "Recherche…"],
     [section, { message: "Invalid", status: "error" }, "À corriger"],
     [section, { milestone, status: "ready" }, "Point résolu"],
   ] satisfies readonly (readonly [
-    MilestoneSearchSection | undefined,
+    RailwaySection | undefined,
     MilestoneResolution,
     string,
   ])[])(

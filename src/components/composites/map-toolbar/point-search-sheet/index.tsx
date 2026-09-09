@@ -17,21 +17,19 @@ import PointSearchForm from "@/components/composites/map-toolbar/point-search-sh
 import PointSearchSheetHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-sheet-header";
 import usePointSearchForm from "@/components/composites/map-toolbar/point-search-sheet/use-point-search-form";
 import type { Milestone } from "@/features/milestones/milestone";
-import type {
-  MilestoneSearchLine,
-  MilestoneSearchState,
-} from "@/features/milestones/milestone-search";
+import type { MilestoneSearchModel } from "@/features/milestones/milestone-search";
+import type { Railway } from "@/features/railways/railway";
 
 interface PointSearchSheetProps {
   readonly isOpen: boolean;
   readonly onDismiss: () => void;
   readonly onMilestoneSelect: (milestone: Milestone) => void;
-  readonly searchState: MilestoneSearchState;
+  readonly search: MilestoneSearchModel;
 }
 
-const EMPTY_LINES: readonly MilestoneSearchLine[] = [];
+const EMPTY_LINES: readonly Railway[] = [];
 
-function lineKey(line: MilestoneSearchLine): string {
+function lineKey(line: Railway): string {
   return line.code;
 }
 
@@ -43,7 +41,7 @@ export default function PointSearchSheet({
   isOpen,
   onDismiss,
   onMilestoneSelect,
-  searchState,
+  search,
 }: PointSearchSheetProps): ReactElement {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
@@ -52,7 +50,7 @@ export default function PointSearchSheet({
   const theme = mapToolbarTheme(colorScheme);
   const palette = MAP_TOOLBAR_PALETTES[theme];
   const placeholderColor = theme === "dark" ? "#A7A49D" : "#7A7A74";
-  const form = usePointSearchForm(searchState);
+  const form = usePointSearchForm(search);
 
   return (
     <NativeBottomSheet
@@ -86,7 +84,7 @@ export default function PointSearchSheet({
               compact={compact}
               form={form}
               placeholderColor={placeholderColor}
-              searchState={searchState}
+              searchState={search.state}
             />
           }
           renderItem={renderEmptyLine}
