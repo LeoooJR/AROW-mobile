@@ -1,7 +1,8 @@
 import { type ReactElement } from "react";
-import { Pressable, type ViewStyle } from "react-native";
+import { type ViewStyle } from "react-native";
 
-import LayersIcon from "@/components/composites/map-toolbar/layers-icon";
+import LayersIcon from "@/components/primitives/icons/layers-icon";
+import IconButton from "@/components/primitives/icon-button";
 
 interface MapLayersButtonProps {
   readonly buttonStyle: ViewStyle;
@@ -17,16 +18,17 @@ export default function MapLayersButton({
   onPress,
 }: MapLayersButtonProps): ReactElement {
   return (
-    <Pressable
+    <IconButton
       aria-label="Afficher les couches de la carte"
       aria-expanded={expanded}
-      className="size-14 items-center justify-center rounded-lg border border-border-subtle bg-canvas active:bg-surface-muted"
       onPress={onPress}
       role="button"
+      size="toolbar"
       style={buttonStyle}
       testID="map-layers-button"
+      variant="surface"
     >
       <LayersIcon color={iconColor} />
-    </Pressable>
+    </IconButton>
   );
 }

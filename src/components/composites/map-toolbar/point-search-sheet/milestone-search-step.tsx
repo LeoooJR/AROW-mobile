@@ -1,9 +1,10 @@
 import { type ReactElement } from "react";
-import { Keyboard, Text, TextInput, View } from "react-native";
+import { Keyboard, Text, View } from "react-native";
 
 import MilestoneResolutionFeedback from "@/components/composites/map-toolbar/point-search-sheet/milestone-resolution-feedback";
 import MilestoneStep from "@/components/composites/map-toolbar/point-search-sheet/milestone-step";
 import PointSearchStepHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-step-header";
+import TextField from "@/components/primitives/text-field";
 import type { MilestoneResolution } from "@/features/milestones/milestone-search";
 import type { Railway } from "@/features/railways/railway";
 import type { RailwaySection } from "@/features/railways/railway-section";
@@ -46,18 +47,17 @@ export default function MilestoneSearchStep({
           <Text className="mb-1.5 text-xs font-semibold text-text-primary">
             Kilomètre
           </Text>
-          <TextInput
+          <TextField
             aria-invalid={invalid}
             aria-label="Kilomètre"
-            className="h-[52px] rounded-lg border border-border-subtle bg-surface px-2.5 font-mono text-[22px] font-bold text-text-primary"
             editable={!disabled}
             inputMode="numeric"
             onChangeText={onKilometerChange}
             placeholder="509"
             placeholderTextColor={placeholderColor}
-            style={{ textAlign: "center" }}
             testID="milestone-kilometer-input"
             value={kilometer}
+            variant="numeric"
           />
         </View>
         <View
@@ -73,10 +73,9 @@ export default function MilestoneSearchStep({
           <Text className="mb-1.5 text-xs font-semibold text-text-primary">
             Partie métrique
           </Text>
-          <TextInput
+          <TextField
             aria-invalid={invalid}
             aria-label="Partie métrique"
-            className="h-[52px] rounded-lg border border-border-subtle bg-surface px-2.5 font-mono text-[22px] font-bold text-text-primary"
             editable={!disabled}
             inputMode="numeric"
             maxLength={3}
@@ -85,9 +84,9 @@ export default function MilestoneSearchStep({
             placeholder="000"
             placeholderTextColor={placeholderColor}
             returnKeyType="done"
-            style={{ textAlign: "center" }}
             testID="milestone-metric-input"
             value={metric}
+            variant="numeric"
           />
         </View>
       </View>

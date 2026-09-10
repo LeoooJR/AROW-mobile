@@ -1,1 +1,0 @@
-export const SIMULATION_ACTION_OFFSET = 67;

@@ -1,5 +1,5 @@
 import { type ReactElement } from "react";
-import { Pressable, Text, useColorScheme, View } from "react-native";
+import { Text, useColorScheme, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type {
@@ -7,12 +7,13 @@ import type {
   ToggleableMapLayer,
 } from "@/components/adapters/map/map-layer-visibility";
 import NativeBottomSheet from "@/components/adapters/native-bottom-sheet";
-import CloseIcon from "@/components/composites/map-toolbar/close-icon";
 import MapLayerRow from "@/components/composites/map-toolbar/map-layer-row";
 import {
   MAP_TOOLBAR_PALETTES,
   mapToolbarTheme,
 } from "@/components/composites/map-toolbar/map-toolbar-theme";
+import CloseIcon from "@/components/primitives/icons/close-icon";
+import IconButton from "@/components/primitives/icon-button";
 
 interface MapLayersSheetProps {
   readonly isOpen: boolean;
@@ -34,10 +35,6 @@ export default function MapLayersSheet({
   const insets = useSafeAreaInsets();
   const palette = MAP_TOOLBAR_PALETTES[mapToolbarTheme(colorScheme)];
 
-  const setLayerVisibility = (layer: ToggleableMapLayer): void => {
-    onVisibilityChange(layer, !visibility[layer]);
-  };
-
   return (
     <NativeBottomSheet
       backgroundColor={palette.sheet}
@@ -57,22 +54,22 @@ export default function MapLayersSheet({
           <Text className="text-xl font-semibold leading-[25px] text-text-primary">
             Couches ferroviaires
           </Text>
-          <Pressable
+          <IconButton
             aria-label="Fermer les couches"
-            className="size-12 items-center justify-center rounded-lg bg-transparent active:bg-surface-muted"
             onPress={onDismiss}
             role="button"
             testID="close-layers-button"
+            variant="ghost"
           >
             <CloseIcon color={palette.icon} />
-          </Pressable>
+          </IconButton>
         </View>
         <MapLayerRow
           accessibilityNoun="les voies ferrées"
           checked={visibility.railway}
           label="Voies ferrées"
-          onPress={() => {
-            setLayerVisibility("railway");
+          onValueChange={(visible) => {
+            onVisibilityChange("railway", visible);
           }}
           testID="railways-layer-switch"
         />
@@ -80,8 +77,8 @@ export default function MapLayersSheet({
           accessibilityNoun="les points kilométriques"
           checked={visibility.milestone}
           label="Points kilométriques"
-          onPress={() => {
-            setLayerVisibility("milestone");
+          onValueChange={(visible) => {
+            onVisibilityChange("milestone", visible);
           }}
           testID="milestones-layer-switch"
         />

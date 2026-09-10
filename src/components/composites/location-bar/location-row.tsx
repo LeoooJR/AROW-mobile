@@ -1,5 +1,7 @@
 import { type ReactElement, type ReactNode } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
+
+import Button from "@/components/primitives/button";
 
 interface LocationRowProps {
   readonly action?: ReactNode;
@@ -34,15 +36,16 @@ export default function LocationRow({
   }
 
   return (
-    <Pressable
+    <Button
       accessibilityLabel={accessibilityLabel}
       accessibilityLiveRegion="polite"
       accessibilityRole="button"
-      className={`${className} bg-canvas active:bg-surface-muted`}
+      className={`${className} bg-canvas`}
       onPress={onAction}
       testID="location-status"
+      variant="ghost"
     >
       {children}
-    </Pressable>
+    </Button>
   );
 }

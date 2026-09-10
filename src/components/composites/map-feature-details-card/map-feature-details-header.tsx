@@ -1,7 +1,8 @@
 import { type ReactElement } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
-import CloseIcon from "@/components/composites/map-feature-details-card/close-icon";
+import IconButton from "@/components/primitives/icon-button";
+import CloseIcon from "@/components/primitives/icons/close-icon";
 
 interface MapFeatureDetailsHeaderProps {
   readonly eyebrow: string;
@@ -32,16 +33,17 @@ export default function MapFeatureDetailsHeader({
           {title}
         </Text>
       </View>
-      <Pressable
+      <IconButton
         accessibilityLabel="Fermer les informations de l’élément cartographique"
         accessibilityRole="button"
-        className="-mr-2.5 -mt-2.5 size-12 items-center justify-center rounded-lg bg-transparent active:bg-surface-muted"
+        className="-mr-2.5 -mt-2.5"
         hitSlop={4}
         onPress={onClose}
         testID="close-map-feature-details"
+        variant="ghost"
       >
         <CloseIcon color={iconColor} />
-      </Pressable>
+      </IconButton>
     </View>
   );
 }

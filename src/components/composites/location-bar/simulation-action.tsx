@@ -1,8 +1,11 @@
 import { type ReactElement } from "react";
-import { Pressable, Text, useColorScheme, View } from "react-native";
+import { Text, useColorScheme, View } from "react-native";
 
-import PlayIcon from "@/components/composites/location-bar/play-icon";
 import { simulationActionPalette } from "@/components/composites/location-bar/simulation-action-theme";
+import Button from "@/components/primitives/button";
+import PlayIcon from "@/components/primitives/icons/play-icon";
+
+export const SIMULATION_ACTION_OCCUPIED_HEIGHT = 67;
 
 function ignoreSimulationStart(): void {
   return undefined;
@@ -16,14 +19,16 @@ export default function SimulationAction(): ReactElement {
       className="border-t border-border-subtle pt-2.5"
       testID="simulation-primary-action"
     >
-      <Pressable
+      <Button
         aria-busy={false}
         aria-label="Démarrer la simulation"
         aria-pressed={false}
-        className="h-14 flex-row items-center justify-center gap-2.5 rounded-lg border-2 border-text-primary bg-primary active:bg-text-primary"
+        className="flex-row gap-2.5"
         onPress={ignoreSimulationStart}
         role="button"
+        size="toolbar"
         testID="simulation-play-pause"
+        variant="accent"
       >
         {({ pressed }) => {
           const foreground = pressed
@@ -41,7 +46,7 @@ export default function SimulationAction(): ReactElement {
             </>
           );
         }}
-      </Pressable>
+      </Button>
     </View>
   );
 }

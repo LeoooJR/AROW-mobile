@@ -1,6 +1,7 @@
 import { type ReactElement } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
+import Button from "@/components/primitives/button";
 import type { Railway } from "@/features/railways/railway";
 
 interface RailwayLineResultProps {
@@ -13,12 +14,13 @@ export default function RailwayLineResult({
   onPress,
 }: RailwayLineResultProps): ReactElement {
   return (
-    <Pressable
+    <Button
       aria-label={`${line.name}, code ${line.code}`}
-      className="min-h-[58px] flex-row items-center gap-3 border-b border-border-subtle bg-canvas px-3 py-2 active:bg-surface-muted"
+      className="min-h-[58px] flex-row justify-start gap-3 rounded-none border-0 border-b border-border-subtle px-3 py-2"
       onPress={onPress}
       role="button"
       testID={`line-result-${line.code}`}
+      variant="surface"
     >
       <View className="min-w-0 flex-1">
         <Text className="text-sm font-semibold leading-5 text-text-primary">
@@ -31,6 +33,6 @@ export default function RailwayLineResult({
       <Text aria-hidden className="text-lg text-text-primary">
         ›
       </Text>
-    </Pressable>
+    </Button>
   );
 }

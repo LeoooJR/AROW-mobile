@@ -1,12 +1,8 @@
 import { type ReactElement } from "react";
-import {
-  Pressable,
-  Text,
-  useColorScheme,
-  useWindowDimensions,
-} from "react-native";
+import { Text, useColorScheme, useWindowDimensions } from "react-native";
 
-import CenterLocationIcon from "@/components/composites/location-bar/center-location-icon";
+import Button from "@/components/primitives/button";
+import LocationTargetIcon from "@/components/primitives/icons/location-target-icon";
 
 interface CenterLocationButtonProps {
   readonly locationKind: "réelle" | "simulée";
@@ -27,15 +23,17 @@ export default function CenterLocationButton({
   const compact = width <= 380;
 
   return (
-    <Pressable
+    <Button
       accessibilityLabel={`Centrer la carte sur la position ${locationKind}`}
       accessibilityRole="button"
-      className={`h-12 flex-row items-center justify-center gap-[5px] rounded-lg bg-transparent active:bg-surface-muted ${compact ? "min-w-12 px-0" : "min-w-16 px-2"}`}
+      className={`flex-row gap-[5px] ${compact ? "min-w-12 px-0" : "min-w-16 px-2"}`}
       hitSlop={4}
       onPress={onPress}
+      size="control"
       testID="center-location"
+      variant="ghost"
     >
-      <CenterLocationIcon
+      <LocationTargetIcon
         color={
           colorScheme === "dark"
             ? CENTER_ICON_COLORS.dark
@@ -47,6 +45,6 @@ export default function CenterLocationButton({
           Centrer
         </Text>
       )}
-    </Pressable>
+    </Button>
   );
 }

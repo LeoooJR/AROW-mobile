@@ -1,8 +1,9 @@
 import { type ReactElement } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 import PointSearchStepHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-step-header";
 import SectionStep from "@/components/composites/map-toolbar/point-search-sheet/section-step";
+import Button from "@/components/primitives/button";
 import type { Railway } from "@/features/railways/railway";
 import type { RailwaySection } from "@/features/railways/railway-section";
 
@@ -32,22 +33,24 @@ export default function RailwaySectionStep({
           {selectedLine.sections.map((section) => {
             const selected = section === selectedSection;
             return (
-              <Pressable
+              <Button
                 aria-pressed={selected}
-                className={`h-12 min-w-[62px] items-center justify-center rounded-lg border px-3.5 ${selected ? "border-text-primary bg-text-primary" : "border-border-subtle bg-surface active:bg-surface-muted"}`}
+                className={`min-w-[62px] px-3.5 ${selected ? "border-text-primary bg-text-primary" : ""}`}
                 key={section.sectionRank}
                 onPress={() => {
                   onSelect(section);
                 }}
                 role="button"
+                size="control"
                 testID={`section-choice-${section.sectionRank}`}
+                variant="selectable"
               >
                 <Text
                   className={`font-mono text-[13px] font-semibold ${selected ? "text-canvas" : "text-text-primary"}`}
                 >
                   Section {section.sectionRank}
                 </Text>
-              </Pressable>
+              </Button>
             );
           })}
         </View>

@@ -1,11 +1,11 @@
 import { type ReactElement } from "react";
 import Svg, { Path } from "react-native-svg";
 
-export default function CloseIcon({
-  color,
-}: {
+export interface CloseIconProps {
   readonly color: string;
-}): ReactElement {
+}
+
+export default function CloseIcon({ color }: CloseIconProps): ReactElement {
   return (
     <Svg height={22} viewBox="0 0 24 24" width={22}>
       <Path

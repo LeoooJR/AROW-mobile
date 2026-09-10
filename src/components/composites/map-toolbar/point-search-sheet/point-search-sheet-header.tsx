@@ -1,7 +1,8 @@
 import { type ReactElement } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
-import CloseIcon from "@/components/composites/map-toolbar/close-icon";
+import CloseIcon from "@/components/primitives/icons/close-icon";
+import IconButton from "@/components/primitives/icon-button";
 
 interface PointSearchSheetHeaderProps {
   readonly compact: boolean;
@@ -28,15 +29,16 @@ export default function PointSearchSheetHeader({
             Ligne, section, puis repère kilométrique.
           </Text>
         </View>
-        <Pressable
+        <IconButton
           aria-label="Fermer la recherche"
-          className="-mt-1.5 size-12 items-center justify-center rounded-lg active:bg-surface-muted"
+          className="-mt-1.5"
           onPress={onClose}
           role="button"
           testID="close-point-search"
+          variant="ghost"
         >
           <CloseIcon color={iconColor} />
-        </Pressable>
+        </IconButton>
       </View>
     </>
   );

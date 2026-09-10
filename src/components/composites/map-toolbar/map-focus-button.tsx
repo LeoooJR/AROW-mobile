@@ -1,7 +1,8 @@
 import { type ReactElement } from "react";
-import { Pressable, type ViewStyle } from "react-native";
+import { type ViewStyle } from "react-native";
 
-import MapFocusIcon from "@/components/composites/map-toolbar/map-focus-icon";
+import FocusIcon from "@/components/primitives/icons/focus-icon";
+import IconButton from "@/components/primitives/icon-button";
 
 interface MapFocusButtonProps {
   readonly buttonStyle: ViewStyle;
@@ -15,16 +16,17 @@ export default function MapFocusButton({
   onPress,
 }: MapFocusButtonProps): ReactElement {
   return (
-    <Pressable
+    <IconButton
       aria-label="Activer le mode carte seule"
       aria-pressed={false}
-      className="size-14 items-center justify-center rounded-lg border border-border-subtle bg-canvas active:bg-surface-muted"
       onPress={onPress}
       role="button"
+      size="toolbar"
       style={buttonStyle}
       testID="map-focus-button"
+      variant="surface"
     >
-      <MapFocusIcon color={iconColor} />
-    </Pressable>
+      <FocusIcon color={iconColor} />
+    </IconButton>
   );
 }

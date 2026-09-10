@@ -1,13 +1,13 @@
 import { type ReactElement } from "react";
 import Svg, { Circle, Path } from "react-native-svg";
 
-interface CenterLocationIconProps {
+export interface LocationTargetIconProps {
   readonly color: string;
 }
 
-export default function CenterLocationIcon({
+export default function LocationTargetIcon({
   color,
-}: CenterLocationIconProps): ReactElement {
+}: LocationTargetIconProps): ReactElement {
   return (
     <Svg height={18} viewBox="0 0 24 24" width={18}>
       <Circle

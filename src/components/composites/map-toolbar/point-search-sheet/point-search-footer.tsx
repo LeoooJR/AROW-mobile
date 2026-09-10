@@ -1,6 +1,7 @@
 import { type ReactElement } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
+import Button from "@/components/primitives/button";
 import type { Milestone } from "@/features/milestones/milestone";
 import type { MilestoneResolution } from "@/features/milestones/milestone-search";
 
@@ -24,9 +25,9 @@ export default function PointSearchFooter({
       className={`border-t border-border-subtle bg-canvas pt-2.5 ${compact ? "px-3" : "px-4"}`}
       style={{ paddingBottom: Math.max(14, bottomInset) }}
     >
-      <Pressable
+      <Button
         aria-disabled={!ready}
-        className={`h-[52px] items-center justify-center rounded-lg ${ready ? "bg-text-primary active:bg-surface-muted" : "bg-surface-muted"}`}
+        className={ready ? undefined : "bg-surface-muted"}
         disabled={!ready}
         onPress={() => {
           if (resolution.status === "ready") {
@@ -34,14 +35,16 @@ export default function PointSearchFooter({
           }
         }}
         role="button"
+        size="form"
         testID="use-selected-point"
+        variant="foreground"
       >
         <Text
           className={`text-sm font-bold ${ready ? "text-canvas" : "text-text-muted"}`}
         >
           Utiliser ce point
         </Text>
-      </Pressable>
+      </Button>
     </View>
   );
 }

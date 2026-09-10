@@ -1,10 +1,12 @@
 import { type ReactElement } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Text, View } from "react-native";
 
 import LineSearchFeedback from "@/components/composites/map-toolbar/point-search-sheet/line-search-feedback";
 import LineStep from "@/components/composites/map-toolbar/point-search-sheet/line-step";
 import PointSearchStepHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-step-header";
 import RailwayLineResult from "@/components/composites/map-toolbar/point-search-sheet/railway-line-result";
+import Button from "@/components/primitives/button";
+import TextField from "@/components/primitives/text-field";
 import type { MilestoneSearchState } from "@/features/milestones/milestone-search";
 import type { Railway } from "@/features/railways/railway";
 
@@ -44,11 +46,10 @@ export default function RailwayLineStep({
           <Text className="mb-1.5 text-xs font-semibold text-text-primary">
             Nom de ligne ou code unique
           </Text>
-          <TextInput
+          <TextField
             aria-label="Nom de ligne ou code unique"
             autoCapitalize="none"
             autoCorrect={false}
-            className="h-12 rounded-lg border border-border-subtle bg-surface px-3 text-base text-text-primary"
             onChangeText={onQueryChange}
             placeholder="Ex. Paris–Marseille"
             placeholderTextColor={placeholderColor}
@@ -56,6 +57,7 @@ export default function RailwayLineStep({
             role="searchbox"
             testID="line-search-input"
             value={query}
+            variant="search"
           />
           <Text className="mt-1.5 text-[11px] leading-4 text-text-muted">
             Saisissez au moins deux lettres, ou le début du code ligne.
@@ -89,16 +91,18 @@ export default function RailwayLineStep({
               Code ligne · {selectedLine.code}
             </Text>
           </View>
-          <Pressable
-            className="h-12 justify-center rounded-lg px-2.5 active:bg-surface-muted"
+          <Button
+            className="px-2.5"
             onPress={onReset}
             role="button"
+            size="control"
             testID="change-line"
+            variant="ghost"
           >
             <Text className="text-xs font-semibold text-text-primary">
               Modifier
             </Text>
-          </Pressable>
+          </Button>
         </View>
       )}
     </View>

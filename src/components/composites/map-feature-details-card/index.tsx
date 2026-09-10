@@ -2,6 +2,7 @@ import { type ReactElement } from "react";
 import { useColorScheme, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { SIMULATION_ACTION_OCCUPIED_HEIGHT } from "@/components/composites/location-bar/simulation-action";
 import MapFeatureDetailsFact from "@/components/composites/map-feature-details-card/map-feature-details-fact";
 import MapFeatureDetailsHeader from "@/components/composites/map-feature-details-card/map-feature-details-header";
 import getMapFeatureDetailsPresentation from "@/components/composites/map-feature-details-card/map-feature-details-presentation";
@@ -9,7 +10,6 @@ import {
   MAP_FEATURE_DETAILS_PALETTES,
   mapFeatureDetailsTheme,
 } from "@/components/composites/map-feature-details-card/map-feature-details-theme";
-import { SIMULATION_ACTION_OFFSET } from "@/components/composites/location-bar/location-bar-layout";
 import Card from "@/components/primitives/card";
 import Divider from "@/components/primitives/divider";
 import type { MapFeature } from "@/features/map-features/map-feature";
@@ -41,7 +41,7 @@ export default function MapFeatureDetailsCard({
         bottom:
           86 +
           Math.max(10, insets.bottom) +
-          (showSimulationAction ? SIMULATION_ACTION_OFFSET : 0),
+          (showSimulationAction ? SIMULATION_ACTION_OCCUPIED_HEIGHT : 0),
         boxShadow: palette.shadow,
       }}
       testID="map-feature-details-card"

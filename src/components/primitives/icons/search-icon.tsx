@@ -1,11 +1,11 @@
 import { type ReactElement } from "react";
 import Svg, { Circle, Path } from "react-native-svg";
 
-export default function SearchIcon({
-  color,
-}: {
+export interface SearchIconProps {
   readonly color: string;
-}): ReactElement {
+}
+
+export default function SearchIcon({ color }: SearchIconProps): ReactElement {
   return (
     <Svg height={22} viewBox="0 0 24 24" width={22}>
       <Circle
