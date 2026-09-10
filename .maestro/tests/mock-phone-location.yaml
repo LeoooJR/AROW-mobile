@@ -77,6 +77,8 @@ tags:
 - assertNotVisible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
 - assertVisible: "POINT KILOMÉTRIQUE"
 - assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
+- assertNotVisible:
+    id: "simulation-play-pause"
 - tapOn:
     id: "close-map-feature-details"
 - assertNotVisible: "PK 509\\+000"
@@ -109,3 +111,18 @@ tags:
     visible: "PK 509\\+000"
     timeout: 10000
 - assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
+- assertVisible:
+    id: "simulation-primary-action"
+- assertVisible:
+    id: "simulation-play-pause"
+- tapOn:
+    id: "simulation-play-pause"
+# Starting the simulation is intentionally inert in this delivery.
+- assertVisible:
+    id: "simulation-play-pause"
+- assertVisible: "PK 509\\+000"
+- assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
+- tapOn:
+    id: "close-map-feature-details"
+- assertNotVisible:
+    id: "simulation-play-pause"

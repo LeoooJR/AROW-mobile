@@ -96,4 +96,26 @@ describe("MapFeatureDetailsCard", () => {
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  test("moves above an expanded simulation control bar", async () => {
+    const { rerender } = await render(
+      <MapFeatureDetailsCard feature={milestone} onClose={jest.fn()} />,
+    );
+
+    expect(screen.getByTestId("map-feature-details-card")).toHaveStyle({
+      bottom: 110,
+    });
+
+    await rerender(
+      <MapFeatureDetailsCard
+        feature={milestone}
+        onClose={jest.fn()}
+        showSimulationAction
+      />,
+    );
+
+    expect(screen.getByTestId("map-feature-details-card")).toHaveStyle({
+      bottom: 177,
+    });
+  });
 });

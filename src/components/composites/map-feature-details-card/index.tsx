@@ -9,6 +9,7 @@ import {
   MAP_FEATURE_DETAILS_PALETTES,
   mapFeatureDetailsTheme,
 } from "@/components/composites/map-feature-details-card/map-feature-details-theme";
+import { SIMULATION_ACTION_OFFSET } from "@/components/composites/location-bar/location-bar-layout";
 import Card from "@/components/primitives/card";
 import Divider from "@/components/primitives/divider";
 import type { MapFeature } from "@/features/map-features/map-feature";
@@ -16,11 +17,13 @@ import type { MapFeature } from "@/features/map-features/map-feature";
 export interface MapFeatureDetailsCardProps {
   readonly feature: MapFeature;
   readonly onClose: () => void;
+  readonly showSimulationAction?: boolean;
 }
 
 export default function MapFeatureDetailsCard({
   feature,
   onClose,
+  showSimulationAction = false,
 }: MapFeatureDetailsCardProps): ReactElement {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
@@ -35,7 +38,10 @@ export default function MapFeatureDetailsCard({
       size="sm"
       style={{
         borderCurve: "continuous",
-        bottom: 86 + Math.max(10, insets.bottom),
+        bottom:
+          86 +
+          Math.max(10, insets.bottom) +
+          (showSimulationAction ? SIMULATION_ACTION_OFFSET : 0),
         boxShadow: palette.shadow,
       }}
       testID="map-feature-details-card"

@@ -6,6 +6,7 @@ import type {
 } from "@/hooks/platform/use-real-location";
 
 import LocationBar from "./index";
+import { simulationActionPalette } from "./simulation-action-theme";
 
 let mockSafeAreaBottom = 0;
 let mockColorScheme: "dark" | "light" | null = "light";
@@ -257,5 +258,75 @@ describe("LocationBar", () => {
       screen.getByLabelText("Position réelle, vérification en cours").parent
         ?.parent,
     ).toHaveStyle({ paddingBottom: 24 });
+  });
+
+  test("shows a no-op simulation action with accessible idle state", async () => {
+    await render(
+      <LocationBar
+        showSimulationAction
+        state={{
+          position: {
+            accuracy: 3,
+            heading: null,
+            latitude: 48,
+            longitude: 2,
+          },
+          status: "connected",
+        }}
+      />,
+    );
+
+    const action = screen.getByRole("button", {
+      name: "Démarrer la simulation",
+    });
+    expect(screen.getByTestId("simulation-primary-action")).toBeOnTheScreen();
+    expect(action).toHaveProp("aria-pressed", false);
+    expect(action).not.toBeBusy();
+    expect(action).toHaveProp(
+      "className",
+      expect.stringContaining("border-text-primary bg-primary"),
+    );
+
+    await fireEvent.press(action);
+
+    expect(screen.getByText("Position réelle")).toBeOnTheScreen();
+    expect(action).toHaveProp("aria-pressed", false);
+    expect(action).not.toBeBusy();
+  });
+
+  test("uses the dark primary-action palette", async () => {
+    mockColorScheme = "dark";
+    await render(
+      <LocationBar showSimulationAction state={{ status: "checking" }} />,
+    );
+    const darkAction = screen.getByRole("button", {
+      name: "Démarrer la simulation",
+    });
+    expect(darkAction).toHaveProp(
+      "className",
+      expect.stringContaining("active:bg-text-primary"),
+    );
+  });
+
+  test("defines inverted pressed feedback for both themes", () => {
+    expect(simulationActionPalette("light")).toMatchObject({
+      foreground: "#0A0A0A",
+      pressedForeground: "#FFFFFF",
+    });
+    expect(simulationActionPalette("dark")).toMatchObject({
+      foreground: "#FAF9F6",
+      pressedForeground: "#10100F",
+    });
+  });
+
+  test("keeps the simulation action inside the safe-area-aware bar", async () => {
+    mockSafeAreaBottom = 24;
+    await render(
+      <LocationBar showSimulationAction state={{ status: "checking" }} />,
+    );
+
+    expect(screen.getByTestId("simulation-primary-action").parent).toHaveStyle({
+      paddingBottom: 24,
+    });
   });
 });

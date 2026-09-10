@@ -6,6 +6,7 @@ import CenterLocationButton from "@/components/composites/location-bar/center-lo
 import LocationContent from "@/components/composites/location-bar/location-content";
 import getLocationPresentation from "@/components/composites/location-bar/location-presentation";
 import LocationRow from "@/components/composites/location-bar/location-row";
+import SimulationAction from "@/components/composites/location-bar/simulation-action";
 import type {
   MockedLocationState,
   RealLocationState,
@@ -14,12 +15,14 @@ import type {
 export interface LocationBarProps {
   readonly onAction?: () => void;
   readonly onCenter?: () => void;
+  readonly showSimulationAction?: boolean;
   readonly state: RealLocationState | MockedLocationState;
 }
 
 export default function LocationBar({
   onAction,
   onCenter,
+  showSimulationAction = false,
   state,
 }: LocationBarProps): ReactElement {
   const insets = useSafeAreaInsets();
@@ -45,6 +48,7 @@ export default function LocationBar({
       >
         <LocationContent presentation={presentation} />
       </LocationRow>
+      {showSimulationAction ? <SimulationAction /> : null}
     </View>
   );
 }

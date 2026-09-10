@@ -17,19 +17,23 @@ import { useRailwayReference } from "@/features/milestones/railway-reference-con
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 import railwayLinesAsset from "@/statics/lignes-par-type.geojson";
 
+type FeatureSelection =
+  | { readonly feature: MapFeature; readonly origin: "map" }
+  | { readonly feature: Milestone; readonly origin: "search" };
+
 export default function Index() {
   const [railwayAssets] = useAssets(railwayLinesAsset);
   const { openSettings, requestAccess, retry, state } = useRealLocation();
   const { milestoneSearch, milestoneState } = useRailwayReference();
   const [recenterRequest, setRecenterRequest] = useState(0);
   const [milestoneFocusRequest, setMilestoneFocusRequest] = useState(0);
-  const [selectedFeature, setSelectedFeature] = useState<
-    MapFeature | undefined
-  >();
+  const [selection, setSelection] = useState<FeatureSelection>();
   const [layerVisibility, setLayerVisibility] = useState<MapLayerVisibility>(
     DEFAULT_MAP_LAYER_VISIBILITY,
   );
   const railwayData = railwayAssets?.[0]?.localUri ?? railwayAssets?.[0]?.uri;
+  const selectedFeature = selection?.feature;
+  const showSimulationAction = selection?.origin === "search";
   const currentLocation =
     state.status === "connected" ||
     state.status === "mocked" ||
@@ -76,14 +80,14 @@ export default function Index() {
   ): void => {
     setLayerVisibility((current) => ({ ...current, [layer]: visible }));
     if (!visible) {
-      setSelectedFeature((current) =>
-        current?.kind === layer ? undefined : current,
+      setSelection((current) =>
+        current?.feature.kind === layer ? undefined : current,
       );
     }
   };
   const onMilestoneSelect = (milestone: Milestone): void => {
     setLayerVisibility((current) => ({ ...current, milestone: true }));
-    setSelectedFeature(milestone);
+    setSelection({ feature: milestone, origin: "search" });
     setMilestoneFocusRequest((request) => request + 1);
   };
 
@@ -103,7 +107,9 @@ export default function Index() {
             ? milestoneState.milestones
             : undefined
         }
-        onFeaturePress={setSelectedFeature}
+        onFeaturePress={(feature) => {
+          setSelection({ feature, origin: "map" });
+        }}
         railwayData={railwayData}
         recenterRequest={recenterRequest}
         selectedFeature={selectedFeature}
@@ -121,14 +127,16 @@ export default function Index() {
           feature={selectedFeature}
           key={selectedFeature.kind}
           onClose={() => {
-            setSelectedFeature(undefined);
+            setSelection(undefined);
           }}
+          showSimulationAction={showSimulationAction}
         />
       ) : null}
       {process.env.EXPO_OS !== "web" ? (
         <LocationBar
           onAction={onLocationAction}
           onCenter={onCenter}
+          showSimulationAction={showSimulationAction}
           state={state}
         />
       ) : null}

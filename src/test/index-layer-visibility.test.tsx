@@ -154,24 +154,51 @@ jest.mock("@/components/composites/map-toolbar", () => {
 });
 
 jest.mock("@/components/composites/map-feature-details-card", () => {
-  const { Text: MockText } =
-    jest.requireActual<typeof import("react-native")>("react-native");
+  const {
+    Pressable: MockPressable,
+    Text: MockText,
+    View: MockView,
+  } = jest.requireActual<typeof import("react-native")>("react-native");
 
   return {
     __esModule: true,
-    default: ({ feature }: { readonly feature: { readonly kind: string } }) => (
-      <MockText testID="mock-details">{feature.kind}</MockText>
+    default: ({
+      feature,
+      onClose,
+      showSimulationAction,
+    }: {
+      readonly feature: { readonly kind: string };
+      readonly onClose: () => void;
+      readonly showSimulationAction?: boolean;
+    }) => (
+      <MockView>
+        <MockText testID="mock-details">{feature.kind}</MockText>
+        {showSimulationAction ? (
+          <MockText>Raised for simulation action</MockText>
+        ) : null}
+        <MockPressable onPress={onClose} role="button">
+          <MockText>Close details</MockText>
+        </MockPressable>
+      </MockView>
     ),
   };
 });
 
 jest.mock("@/components/composites/location-bar", () => {
-  const { View: MockView } =
+  const { Text: MockText, View: MockView } =
     jest.requireActual<typeof import("react-native")>("react-native");
 
   return {
     __esModule: true,
-    default: () => <MockView testID="mock-location-bar" />,
+    default: ({
+      showSimulationAction,
+    }: {
+      readonly showSimulationAction?: boolean;
+    }) => (
+      <MockView testID="mock-location-bar">
+        {showSimulationAction ? <MockText>Simulation action</MockText> : null}
+      </MockView>
+    ),
   };
 });
 
@@ -223,5 +250,35 @@ describe("map screen layer visibility", () => {
     );
     expect(screen.getByTestId("mock-map")).toHaveProp("focusRequest", 1);
     expect(screen.getByTestId("mock-details")).toHaveTextContent("milestone");
+    expect(screen.getByText("Simulation action")).toBeOnTheScreen();
+    expect(screen.getByText("Raised for simulation action")).toBeOnTheScreen();
+  });
+
+  test("shows the simulation action only while a searched result is selected", async () => {
+    const user = userEvent.setup();
+    await render(<Index />);
+
+    await user.press(screen.getByRole("button", { name: "Select milestone" }));
+    expect(screen.queryByText("Simulation action")).not.toBeOnTheScreen();
+
+    await user.press(
+      screen.getByRole("button", { name: "Use searched milestone" }),
+    );
+    expect(screen.getByText("Simulation action")).toBeOnTheScreen();
+
+    await user.press(screen.getByRole("button", { name: "Select railway" }));
+    expect(screen.queryByText("Simulation action")).not.toBeOnTheScreen();
+
+    await user.press(
+      screen.getByRole("button", { name: "Use searched milestone" }),
+    );
+    await user.press(screen.getByRole("button", { name: "Close details" }));
+    expect(screen.queryByText("Simulation action")).not.toBeOnTheScreen();
+
+    await user.press(
+      screen.getByRole("button", { name: "Use searched milestone" }),
+    );
+    await user.press(screen.getByRole("button", { name: "Hide milestone" }));
+    expect(screen.queryByText("Simulation action")).not.toBeOnTheScreen();
   });
 });
