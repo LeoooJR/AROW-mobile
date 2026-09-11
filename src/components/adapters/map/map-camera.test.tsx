@@ -82,6 +82,10 @@ describe("MapCamera", () => {
       pitch: 0,
       zoom: 15,
     });
+    expect(screen.getByTestId("arow-map-camera")).toHaveProp(
+      "center",
+      [-1.5536, 47.2184],
+    );
   });
 
   test("focuses the same searched milestone for every changed request", async () => {
@@ -106,6 +110,100 @@ describe("MapCamera", () => {
       pitch: 0,
       zoom: 15,
     });
+    expect(screen.getByTestId("arow-map-camera")).toHaveProp(
+      "center",
+      [4.85933, 45.74744],
+    );
+  });
+
+  test("keeps searched milestone focus when location later becomes available", async () => {
+    const focusLocation = { latitude: -12.5, longitude: -3.25 };
+    const location = { latitude: 45.764, longitude: 4.8357 };
+    const view = await render(
+      <MapCamera focusLocation={focusLocation} focusRequest={0} />,
+    );
+
+    await view.rerender(
+      <MapCamera focusLocation={focusLocation} focusRequest={1} />,
+    );
+    await view.rerender(
+      <MapCamera
+        focusLocation={focusLocation}
+        focusRequest={1}
+        location={location}
+      />,
+    );
+
+    expect(screen.getByTestId("arow-map-camera")).toHaveProp(
+      "center",
+      [-3.25, -12.5],
+    );
+  });
+
+  test("keeps searched milestone focus when location becomes unavailable", async () => {
+    const focusLocation = { latitude: 45.74744, longitude: 4.85933 };
+    const location = { latitude: 45.764, longitude: 4.8357 };
+    const view = await render(
+      <MapCamera
+        focusLocation={focusLocation}
+        focusRequest={0}
+        location={location}
+      />,
+    );
+
+    await view.rerender(
+      <MapCamera
+        focusLocation={focusLocation}
+        focusRequest={1}
+        location={location}
+      />,
+    );
+    await view.rerender(
+      <MapCamera focusLocation={focusLocation} focusRequest={1} />,
+    );
+
+    expect(screen.getByTestId("arow-map-camera")).toHaveProp(
+      "center",
+      [4.85933, 45.74744],
+    );
+  });
+
+  test("lets explicit recentering reclaim the target after milestone focus", async () => {
+    const focusLocation = { latitude: 45.74744, longitude: 4.85933 };
+    const location = { latitude: 47.2184, longitude: -1.5536 };
+    const view = await render(
+      <MapCamera
+        focusLocation={focusLocation}
+        focusRequest={0}
+        location={location}
+        recenterRequest={0}
+      />,
+    );
+
+    await view.rerender(
+      <MapCamera
+        focusLocation={focusLocation}
+        focusRequest={1}
+        location={location}
+        recenterRequest={0}
+      />,
+    );
+    await view.rerender(
+      <MapCamera
+        focusLocation={focusLocation}
+        focusRequest={1}
+        location={location}
+        recenterRequest={1}
+      />,
+    );
+
+    expect(screen.getByTestId("arow-map-camera")).toHaveProp(
+      "center",
+      [-1.5536, 47.2184],
+    );
+    expect(mockEaseTo).toHaveBeenLastCalledWith(
+      expect.objectContaining({ center: [-1.5536, 47.2184] }),
+    );
   });
 
   test("does not recenter without a location or a changed request", async () => {

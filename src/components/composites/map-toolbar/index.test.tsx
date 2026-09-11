@@ -320,6 +320,35 @@ describe("MapToolbar", () => {
     expect(screen.queryByTestId("point-search-sheet")).not.toBeOnTheScreen();
   });
 
+  test("formats resolved coordinates with their actual hemispheres", async () => {
+    const southernWesternMilestone = new Milestone({
+      coordinates: { latitude: -12.5, longitude: -3.25 },
+      label: milestone.label,
+      lineCode: milestone.lineCode,
+      positionMeters: milestone.positionMeters,
+      sectionRank: milestone.sectionRank,
+    });
+    const user = userEvent.setup();
+    await render(
+      <ControlledToolbar
+        findMilestone={async () => southernWesternMilestone}
+      />,
+    );
+
+    await user.press(screen.getByTestId("open-point-search"));
+    await user.type(
+      screen.getByRole("searchbox", {
+        name: "Nom de ligne ou code unique",
+      }),
+      "893000",
+    );
+    await user.press(screen.getByTestId("line-result-893000"));
+    await user.type(screen.getByLabelText("Kilomètre"), "509");
+    await user.type(screen.getByLabelText("Partie métrique"), "000");
+
+    expect(await screen.findByText("12.50000 S · 3.25000 W")).toBeOnTheScreen();
+  });
+
   test("announces and disables submission during exact lookup", async () => {
     const lookup = deferred<Milestone | undefined>();
     const user = userEvent.setup();

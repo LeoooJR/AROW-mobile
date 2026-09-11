@@ -1,6 +1,7 @@
 import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
+import formatMapFeatureCoordinates from "@/features/map-features/map-feature-coordinate-presentation";
 import type { MilestoneResolution } from "@/features/milestones/milestone-search";
 import type { Railway } from "@/features/railways/railway";
 
@@ -49,8 +50,7 @@ export default function MilestoneResolutionFeedback({
         {resolution.milestone.label}
       </Text>
       <Text className="mt-0.5 font-mono text-[10px] leading-4 text-text-muted">
-        {resolution.milestone.coordinates.latitude.toFixed(5)} N ·{" "}
-        {resolution.milestone.coordinates.longitude.toFixed(5)} E
+        {formatMapFeatureCoordinates(resolution.milestone.coordinates)}
       </Text>
     </View>
   );
