@@ -1,6 +1,6 @@
 import { useAssets } from "expo-asset";
-import { useState } from "react";
-import { View } from "react-native";
+import { useEffect, useState } from "react";
+import { BackHandler, View } from "react-native";
 
 import Map from "@/components/adapters/map/map";
 import {
@@ -27,6 +27,7 @@ export default function Index() {
   const { milestoneSearch, milestoneState } = useRailwayReference();
   const [recenterRequest, setRecenterRequest] = useState(0);
   const [milestoneFocusRequest, setMilestoneFocusRequest] = useState(0);
+  const [mapFocused, setMapFocused] = useState(false);
   const [selection, setSelection] = useState<FeatureSelection>();
   const [layerVisibility, setLayerVisibility] = useState<MapLayerVisibility>(
     DEFAULT_MAP_LAYER_VISIBILITY,
@@ -91,6 +92,23 @@ export default function Index() {
     setMilestoneFocusRequest((request) => request + 1);
   };
 
+  useEffect(() => {
+    if (!mapFocused) {
+      return;
+    }
+
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        setMapFocused(false);
+        return true;
+      },
+    );
+    return () => {
+      subscription.remove();
+    };
+  }, [mapFocused]);
+
   return (
     <View className="flex-1 bg-surface">
       <Map
@@ -108,6 +126,7 @@ export default function Index() {
             : undefined
         }
         onFeaturePress={(feature) => {
+          setMapFocused(false);
           setSelection({ feature, origin: "map" });
         }}
         railwayData={railwayData}
@@ -116,13 +135,17 @@ export default function Index() {
       />
       {process.env.EXPO_OS !== "web" ? (
         <MapToolbar
+          mapFocused={mapFocused}
           milestoneSearch={milestoneSearch}
+          onMapFocusChange={setMapFocused}
           onMilestoneSelect={onMilestoneSelect}
           onVisibilityChange={onLayerVisibilityChange}
           visibility={layerVisibility}
         />
       ) : null}
-      {process.env.EXPO_OS !== "web" && selectedFeature !== undefined ? (
+      {process.env.EXPO_OS !== "web" &&
+      !mapFocused &&
+      selectedFeature !== undefined ? (
         <MapFeatureDetailsCard
           feature={selectedFeature}
           key={selectedFeature.kind}
@@ -132,7 +155,7 @@ export default function Index() {
           showSimulationAction={showSimulationAction}
         />
       ) : null}
-      {process.env.EXPO_OS !== "web" ? (
+      {process.env.EXPO_OS !== "web" && !mapFocused ? (
         <LocationBar
           onAction={onLocationAction}
           onCenter={onCenter}

@@ -17,15 +17,17 @@ import PointSearchButton from "@/components/composites/map-toolbar/point-search-
 
 interface MapToolbarActionsProps {
   readonly layersOpen: boolean;
+  readonly mapFocused: boolean;
+  readonly onMapFocusChange: (focused: boolean) => void;
   readonly onOpenLayers: () => void;
   readonly onOpenPointSearch: () => void;
   readonly pointSearchOpen: boolean;
 }
 
-function noOp(): void {}
-
 export default function MapToolbarActions({
   layersOpen,
+  mapFocused,
+  onMapFocusChange,
   onOpenLayers,
   onOpenPointSearch,
   pointSearchOpen,
@@ -43,28 +45,35 @@ export default function MapToolbarActions({
   return (
     <View
       aria-label="Recherche cartographique"
-      className={`absolute z-20 flex-row items-start ${compact ? "inset-x-3 gap-2" : "inset-x-4 gap-2.5"}`}
+      className={`absolute z-20 flex-row items-start ${mapFocused ? (compact ? "right-3 w-14" : "right-4 w-14") : compact ? "inset-x-3 gap-2" : "inset-x-4 gap-2.5"}`}
       pointerEvents="box-none"
       style={{ top: Math.max(16, insets.top) }}
       testID="map-toolbar"
     >
-      <PointSearchButton
-        buttonStyle={buttonStyle}
-        compact={compact}
-        expanded={pointSearchOpen}
-        iconColor={palette.icon}
-        onPress={onOpenPointSearch}
-      />
-      <MapLayersButton
-        buttonStyle={buttonStyle}
-        expanded={layersOpen}
-        iconColor={palette.icon}
-        onPress={onOpenLayers}
-      />
+      {!mapFocused ? (
+        <>
+          <PointSearchButton
+            buttonStyle={buttonStyle}
+            compact={compact}
+            expanded={pointSearchOpen}
+            iconColor={palette.icon}
+            onPress={onOpenPointSearch}
+          />
+          <MapLayersButton
+            buttonStyle={buttonStyle}
+            expanded={layersOpen}
+            iconColor={palette.icon}
+            onPress={onOpenLayers}
+          />
+        </>
+      ) : null}
       <MapFocusButton
         buttonStyle={buttonStyle}
+        focused={mapFocused}
         iconColor={palette.icon}
-        onPress={noOp}
+        onPress={() => {
+          onMapFocusChange(!mapFocused);
+        }}
       />
     </View>
   );

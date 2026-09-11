@@ -119,22 +119,32 @@ jest.mock("@/components/adapters/native-bottom-sheet", () => {
 
 function ControlledToolbar({
   findMilestone = async () => milestone,
+  initiallyFocused = false,
+  onMapFocusChange = jest.fn(),
   searchState = milestoneSearch,
   onMilestoneSelect = jest.fn(),
   onVisibilityChange = jest.fn(),
 }: {
   readonly findMilestone?: MilestoneSearchModel["findMilestone"];
+  readonly initiallyFocused?: boolean;
+  readonly onMapFocusChange?: jest.Mock;
   readonly onMilestoneSelect?: jest.Mock;
   readonly onVisibilityChange?: jest.Mock;
   readonly searchState?: MilestoneSearchState;
 }) {
+  const [mapFocused, setMapFocused] = useState(initiallyFocused);
   const [visibility, setVisibility] = useState<MapLayerVisibility>(
     DEFAULT_MAP_LAYER_VISIBILITY,
   );
 
   return (
     <MapToolbar
+      mapFocused={mapFocused}
       milestoneSearch={{ findMilestone, state: searchState }}
+      onMapFocusChange={(focused) => {
+        onMapFocusChange(focused);
+        setMapFocused(focused);
+      }}
       onMilestoneSelect={onMilestoneSelect}
       onVisibilityChange={(layer, visible) => {
         onVisibilityChange(layer, visible);
@@ -170,29 +180,88 @@ describe("MapToolbar", () => {
     expect(screen.getByTestId("map-focus-button")).toBeOnTheScreen();
   });
 
-  test("opens point search while keeping focus intentionally inert", async () => {
+  test("enters map-only mode, closes search, and restores retained form state", async () => {
     const user = userEvent.setup();
-    await render(<ControlledToolbar />);
+    const onMapFocusChange = jest.fn();
+    await render(<ControlledToolbar onMapFocusChange={onMapFocusChange} />);
 
-    await user.press(
-      screen.getByRole("button", { name: "Rechercher un point" }),
+    await user.press(screen.getByTestId("open-point-search"));
+    await user.type(
+      screen.getByLabelText("Nom de ligne ou code unique"),
+      "893000",
     );
     expect(screen.getByTestId("point-search-sheet")).toBeOnTheScreen();
-    expect(
-      screen.getByRole("button", { name: "Rechercher un point" }),
-    ).toBeExpanded();
-    await user.press(
-      screen.getByRole("button", { name: "Fermer la recherche" }),
-    );
     await user.press(
       screen.getByRole("button", { name: "Activer le mode carte seule" }),
     );
 
+    expect(onMapFocusChange).toHaveBeenCalledWith(true);
     expect(screen.getByTestId("map-toolbar")).toBeOnTheScreen();
     expect(screen.queryByRole("dialog")).not.toBeOnTheScreen();
+    expect(screen.queryByTestId("open-point-search")).not.toBeOnTheScreen();
+    expect(screen.queryByTestId("map-layers-button")).not.toBeOnTheScreen();
+    expect(screen.queryByTestId("focus-enter-icon")).not.toBeOnTheScreen();
+    expect(screen.getByTestId("focus-exit-icon")).toBeOnTheScreen();
     expect(
-      screen.getByRole("button", { name: "Activer le mode carte seule" }),
-    ).toHaveProp("aria-pressed", false);
+      screen.getByRole("button", { name: "Quitter le mode carte seule" }),
+    ).toHaveProp("aria-pressed", true);
+    expect(screen.getByTestId("map-toolbar")).toHaveProp(
+      "className",
+      expect.stringContaining("right-4 w-14"),
+    );
+
+    await user.press(
+      screen.getByRole("button", { name: "Quitter le mode carte seule" }),
+    );
+
+    expect(onMapFocusChange).toHaveBeenLastCalledWith(false);
+    expect(screen.getByTestId("focus-enter-icon")).toBeOnTheScreen();
+    expect(screen.queryByTestId("focus-exit-icon")).not.toBeOnTheScreen();
+    expect(screen.getByTestId("open-point-search")).toBeOnTheScreen();
+    expect(screen.getByTestId("map-layers-button")).toBeOnTheScreen();
+
+    await user.press(screen.getByTestId("open-point-search"));
+    expect(
+      screen.getByLabelText("Nom de ligne ou code unique"),
+    ).toHaveDisplayValue("893000");
+  });
+
+  test("hides the layers sheet when map-only mode is controlled externally", async () => {
+    const user = userEvent.setup();
+    const { rerender } = await render(
+      <MapToolbar
+        mapFocused={false}
+        milestoneSearch={{
+          findMilestone: async () => milestone,
+          state: milestoneSearch,
+        }}
+        onMapFocusChange={jest.fn()}
+        onMilestoneSelect={jest.fn()}
+        onVisibilityChange={jest.fn()}
+        visibility={DEFAULT_MAP_LAYER_VISIBILITY}
+      />,
+    );
+    await user.press(screen.getByTestId("map-layers-button"));
+    expect(screen.getByTestId("map-layers-sheet")).toBeOnTheScreen();
+
+    await rerender(
+      <MapToolbar
+        mapFocused
+        milestoneSearch={{
+          findMilestone: async () => milestone,
+          state: milestoneSearch,
+        }}
+        onMapFocusChange={jest.fn()}
+        onMilestoneSelect={jest.fn()}
+        onVisibilityChange={jest.fn()}
+        visibility={DEFAULT_MAP_LAYER_VISIBILITY}
+      />,
+    );
+
+    expect(screen.queryByTestId("map-layers-sheet")).not.toBeOnTheScreen();
+    expect(
+      screen.getByRole("button", { name: "Quitter le mode carte seule" }),
+    ).toBeOnTheScreen();
   });
 
   test("centers the milestone separator in an input-height container", async () => {

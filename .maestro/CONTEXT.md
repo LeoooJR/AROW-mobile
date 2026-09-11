@@ -35,6 +35,12 @@ For the standalone map-layer feature flow:
 maestro --device emulator-5554 record --local .maestro/tests/manage-map-layers.yaml .maestro/artifacts/map-layers-e2e-recording.mp4
 ```
 
+For the standalone map-focus feature flow:
+
+```bash
+maestro --device emulator-5554 record --local .maestro/tests/manage-map-focus.yaml .maestro/artifacts/map-focus-e2e-recording.mp4
+```
+
 Present the video only when the recorded flow passes. If Maestro's local
 recorder fails or cannot render a usable video, use ADB as the fallback. Start
 the emulator recording, run the same Maestro flow in another terminal, and stop

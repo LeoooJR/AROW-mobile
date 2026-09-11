@@ -11,7 +11,9 @@ import type { Milestone } from "@/features/milestones/milestone";
 import type { MilestoneSearchModel } from "@/features/milestones/milestone-search";
 
 export interface MapToolbarProps {
+  readonly mapFocused: boolean;
   readonly milestoneSearch: MilestoneSearchModel;
+  readonly onMapFocusChange: (focused: boolean) => void;
   readonly onMilestoneSelect: (milestone: Milestone) => void;
   readonly onVisibilityChange: (
     layer: ToggleableMapLayer,
@@ -21,7 +23,9 @@ export interface MapToolbarProps {
 }
 
 export default function MapToolbar({
+  mapFocused,
   milestoneSearch,
+  onMapFocusChange,
   onMilestoneSelect,
   onVisibilityChange,
   visibility,
@@ -32,6 +36,13 @@ export default function MapToolbar({
     <>
       <MapToolbarActions
         layersOpen={openSheet === "layers"}
+        mapFocused={mapFocused}
+        onMapFocusChange={(focused) => {
+          if (focused) {
+            setOpenSheet(undefined);
+          }
+          onMapFocusChange(focused);
+        }}
         onOpenLayers={() => {
           setOpenSheet("layers");
         }}
@@ -41,7 +52,7 @@ export default function MapToolbar({
         pointSearchOpen={openSheet === "pointSearch"}
       />
       <PointSearchSheet
-        isOpen={openSheet === "pointSearch"}
+        isOpen={!mapFocused && openSheet === "pointSearch"}
         onDismiss={() => {
           setOpenSheet(undefined);
         }}
@@ -52,7 +63,7 @@ export default function MapToolbar({
         search={milestoneSearch}
       />
       <MapLayersSheet
-        isOpen={openSheet === "layers"}
+        isOpen={!mapFocused && openSheet === "layers"}
         onDismiss={() => {
           setOpenSheet(undefined);
         }}
