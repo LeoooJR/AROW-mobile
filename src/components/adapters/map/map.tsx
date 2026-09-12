@@ -10,6 +10,10 @@ import {
 } from "react-native";
 
 import MapCamera from "@/components/adapters/map/map-camera";
+import {
+  DEFAULT_MAP_LAYER_VISIBILITY,
+  type MapLayerVisibility,
+} from "@/components/adapters/map/map-layer-visibility";
 import { DARK_MAP_STYLE } from "@/components/adapters/map/map-style-dark";
 import { LIGHT_MAP_STYLE } from "@/components/adapters/map/map-style-light";
 import MilestoneLayer from "@/components/adapters/map/milestone-layer";
@@ -24,6 +28,9 @@ export interface MapLocation extends GeographicCoordinates {
 }
 
 export interface MapProps {
+  readonly focusLocation?: GeographicCoordinates;
+  readonly focusRequest?: number;
+  readonly layerVisibility?: MapLayerVisibility;
   readonly location?: MapLocation;
   readonly milestones?: readonly Milestone[];
   readonly onFeaturePress?: (feature: MapFeature) => void;
@@ -41,6 +48,9 @@ const styles = StyleSheet.create({
 const EMPTY_MILESTONES = Object.freeze([]) satisfies readonly Milestone[];
 
 export default function Map({
+  focusLocation,
+  focusRequest,
+  layerVisibility = DEFAULT_MAP_LAYER_VISIBILITY,
   location,
   milestones,
   onFeaturePress,
@@ -70,17 +80,24 @@ export default function Map({
       style={styles.map}
       testID="arow-map"
     >
-      <MapCamera location={location} recenterRequest={recenterRequest} />
+      <MapCamera
+        focusLocation={focusLocation}
+        focusRequest={focusRequest}
+        location={location}
+        recenterRequest={recenterRequest}
+      />
       <MilestoneLayer
         milestones={milestones ?? EMPTY_MILESTONES}
         onFeaturePress={onFeaturePress}
         selectedMilestone={selectedMilestone}
+        visible={layerVisibility.milestone}
       />
       {railwayData === undefined ? null : (
         <RailwayLinesSource
           data={railwayData}
           onFeaturePress={onFeaturePress}
           selectedSection={selectedSection}
+          visible={layerVisibility.railway}
         />
       )}
       {location === undefined ? null : (

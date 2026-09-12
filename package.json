@@ -2,6 +2,9 @@
   "name": "arow-mobile",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=24"
+  },
   "dependencies": {
     "@expo/html-elements": "^0.12.5",
     "@expo/ui": "~57.0.8",
@@ -67,6 +70,7 @@
     "typescript-eslint": "^8.66.0"
   },
   "scripts": {
+    "database:update": "node ./script/update-railway-database.mjs",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",

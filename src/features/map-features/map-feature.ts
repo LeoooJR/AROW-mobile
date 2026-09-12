@@ -1,4 +1,4 @@
 import type { Milestone } from "@/features/milestones/milestone";
-import type { Railway } from "@/features/railways/railway";
+import type { RailwaySection } from "@/features/railways/railway-section";
 
-export type MapFeature = Railway | Milestone;
+export type MapFeature = RailwaySection | Milestone;

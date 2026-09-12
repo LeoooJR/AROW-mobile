@@ -1,9 +1,13 @@
 const LINE_CODE_LENGTH = 6;
 const MAX_NUMERIC_LINE_CODE = 10 ** LINE_CODE_LENGTH - 1;
 
-function canonicalLineCode(value: string | number): string {
+export function isCanonicalRailwayLineCode(value: unknown): value is string {
+  return typeof value === "string" && /^\d{6}$/.test(value);
+}
+
+export function canonicalRailwayLineCode(value: string | number): string {
   if (typeof value === "string") {
-    if (/^\d{6}$/.test(value)) {
+    if (isCanonicalRailwayLineCode(value)) {
       return value;
     }
 
@@ -26,7 +30,7 @@ export class RailwaySectionKey {
       throw new Error("Railway section rank must be a positive integer");
     }
 
-    this.#lineCode = canonicalLineCode(lineCode);
+    this.#lineCode = canonicalRailwayLineCode(lineCode);
     this.#sectionRank = sectionRank;
   }
 

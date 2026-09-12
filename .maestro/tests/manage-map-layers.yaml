@@ -1,0 +1,90 @@
+appId: com.leooojrrr.AROWmobile
+name: Manage railway map layer visibility
+tags:
+  - feature
+  - layers
+  - map
+  - milestone
+  - railway
+---
+# Initialize permission and location explicitly so this feature scenario does
+# not depend on the first-use location journey.
+- stopApp
+- setPermissions:
+    permissions:
+      location: allow
+- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+- extendedWaitUntil:
+    visible:
+      id: "arow-map"
+    timeout: 60000
+- setLocation:
+    latitude: 45.74491
+    longitude: 4.86234
+- extendedWaitUntil:
+    visible: ".*45\\.74491 N.*"
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "(Connectée|Active)"
+    timeout: 30000
+
+# Only the two application-owned railway overlays are configurable.
+- tapOn:
+    id: "map-layers-button"
+- assertVisible: "Couches ferroviaires"
+- assertVisible: "Voies ferrées"
+- assertVisible: "Points kilométriques"
+- assertNotVisible: "Gares et haltes"
+- assertVisible: "Masquer les voies ferrées"
+- assertVisible: "Masquer les points kilométriques"
+
+# Hide both overlays and verify their known map targets are no longer pressable.
+- tapOn:
+    id: "railways-layer-switch"
+- assertVisible: "Afficher les voies ferrées"
+- tapOn:
+    id: "milestones-layer-switch"
+- assertVisible: "Afficher les points kilométriques"
+- tapOn:
+    id: "close-layers-button"
+- assertNotVisible: "Couches ferroviaires"
+- waitForAnimationToEnd
+- tapOn:
+    point: "172,810"
+- assertNotVisible:
+    id: "map-feature-details-card"
+- tapOn:
+    point: "260,300"
+- assertNotVisible:
+    id: "map-feature-details-card"
+
+# Restore both overlays and exercise the same milestone and railway targets.
+- tapOn:
+    id: "map-layers-button"
+- assertVisible: "Afficher les voies ferrées"
+- assertVisible: "Afficher les points kilométriques"
+- tapOn:
+    id: "railways-layer-switch"
+- assertVisible: "Masquer les voies ferrées"
+- tapOn:
+    id: "milestones-layer-switch"
+- assertVisible: "Masquer les points kilométriques"
+- tapOn:
+    id: "close-layers-button"
+- waitForAnimationToEnd
+- tapOn:
+    point: "172,810"
+    retryTapIfNoChange: true
+- extendedWaitUntil:
+    visible: "PK 509\\+000"
+    timeout: 10000
+- tapOn:
+    id: "close-map-feature-details"
+- tapOn:
+    point: "260,300"
+    retryTapIfNoChange: true
+- extendedWaitUntil:
+    visible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
+    timeout: 10000
+- tapOn:
+    id: "close-map-feature-details"

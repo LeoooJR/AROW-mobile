@@ -29,9 +29,9 @@ jest.mock("@maplibre/maplibre-react-native", () => {
 
 const MILESTONE = new Milestone({
   coordinates: { latitude: 45.74, longitude: 4.86 },
-  kilometer: 241,
   label: "241+000",
   lineCode: "001000",
+  positionMeters: 241_000,
   sectionRank: 1,
 });
 
@@ -47,12 +47,12 @@ describe("MilestoneLayer", () => {
       features: [
         {
           geometry: { coordinates: [4.86, 45.74], type: "Point" },
-          id: "001000:1:241",
+          id: "001000:1:241000",
           properties: {
-            kilometer: 241,
             kind: "milestone",
             label: "241+000",
             lineCode: "001000",
+            positionMeters: 241_000,
             sectionRank: 1,
           },
           type: "Feature",
@@ -169,13 +169,38 @@ describe("MilestoneLayer", () => {
 
     expect(
       screen.getByTestId(`mock-${MAP_LAYER_IDS.milestone.selected}`),
-    ).toHaveProp("filter", ["==", ["id"], "001000:1:241"]);
+    ).toHaveProp("filter", ["==", ["id"], "001000:1:241000"]);
     expect(
       screen.getByTestId(`mock-${MAP_LAYER_IDS.milestone.selected}`),
     ).toHaveProp(
       "paint",
       expect.objectContaining({ "circle-color": "#FF6A00" }),
     );
+  });
+
+  test("keeps the ordering anchor mounted while every milestone layer is hidden", async () => {
+    await render(
+      <MilestoneLayer
+        milestones={MILESTONES}
+        onFeaturePress={jest.fn()}
+        selectedMilestone={MILESTONE}
+        visible={false}
+      />,
+    );
+
+    expect(screen.getByTestId("mock-milestone-source")).not.toHaveProp(
+      "onPress",
+    );
+    for (const layerId of [
+      MAP_LAYER_IDS.milestone.dots,
+      MAP_LAYER_IDS.milestone.selected,
+      MAP_LAYER_IDS.milestone.labels,
+    ]) {
+      expect(screen.getByTestId(`mock-${layerId}`)).toHaveProp(
+        "layout",
+        expect.objectContaining({ visibility: "none" }),
+      );
+    }
   });
 
   test("uses the dark prototype palette", async () => {

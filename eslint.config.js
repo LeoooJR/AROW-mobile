@@ -34,6 +34,29 @@ module.exports = defineConfig([
     },
   },
   {
+    files: ["src/components/composites/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              importNames: ["Pressable", "Switch", "TextInput"],
+              message:
+                "Import the application-owned control from @/components/primitives instead.",
+              name: "react-native",
+            },
+            {
+              message:
+                "Declare reusable SVG components under @/components/primitives/icons instead.",
+              name: "react-native-svg",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     ignores: ["dist/*", "node_modules/*", "/.expo"],
   },
 ]);

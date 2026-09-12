@@ -1,0 +1,75 @@
+import { type ReactElement, useState } from "react";
+
+import type {
+  MapLayerVisibility,
+  ToggleableMapLayer,
+} from "@/components/adapters/map/map-layer-visibility";
+import MapLayersSheet from "@/components/composites/map-toolbar/map-layers-sheet";
+import MapToolbarActions from "@/components/composites/map-toolbar/map-toolbar-actions";
+import PointSearchSheet from "@/components/composites/map-toolbar/point-search-sheet";
+import type { Milestone } from "@/features/milestones/milestone";
+import type { MilestoneSearchModel } from "@/features/milestones/milestone-search";
+
+export interface MapToolbarProps {
+  readonly mapFocused: boolean;
+  readonly milestoneSearch: MilestoneSearchModel;
+  readonly onMapFocusChange: (focused: boolean) => void;
+  readonly onMilestoneSelect: (milestone: Milestone) => void;
+  readonly onVisibilityChange: (
+    layer: ToggleableMapLayer,
+    visible: boolean,
+  ) => void;
+  readonly visibility: MapLayerVisibility;
+}
+
+export default function MapToolbar({
+  mapFocused,
+  milestoneSearch,
+  onMapFocusChange,
+  onMilestoneSelect,
+  onVisibilityChange,
+  visibility,
+}: MapToolbarProps): ReactElement {
+  const [openSheet, setOpenSheet] = useState<"layers" | "pointSearch">();
+
+  return (
+    <>
+      <MapToolbarActions
+        layersOpen={openSheet === "layers"}
+        mapFocused={mapFocused}
+        onMapFocusChange={(focused) => {
+          if (focused) {
+            setOpenSheet(undefined);
+          }
+          onMapFocusChange(focused);
+        }}
+        onOpenLayers={() => {
+          setOpenSheet("layers");
+        }}
+        onOpenPointSearch={() => {
+          setOpenSheet("pointSearch");
+        }}
+        pointSearchOpen={openSheet === "pointSearch"}
+      />
+      <PointSearchSheet
+        isOpen={!mapFocused && openSheet === "pointSearch"}
+        onDismiss={() => {
+          setOpenSheet(undefined);
+        }}
+        onMilestoneSelect={(milestone) => {
+          onMilestoneSelect(milestone);
+          setOpenSheet(undefined);
+        }}
+        search={milestoneSearch}
+      />
+      <MapLayersSheet
+        isOpen={!mapFocused && openSheet === "layers"}
+        onDismiss={() => {
+          setOpenSheet(undefined);
+        }}
+        onVisibilityChange={onVisibilityChange}
+        visibility={visibility}
+      />
+    </>
+  );
+}

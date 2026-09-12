@@ -1,5 +1,7 @@
 executionOrder:
   continueOnFailure: false
   flowsOrder:
-    - mock-phone-location
+    - Inspect railway and milestone map features after granting location access
+    - Manage railway map layer visibility
+    - Use the distraction-free map-only mode
 flows: "tests/**"

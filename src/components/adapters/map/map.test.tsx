@@ -9,9 +9,9 @@ import Map from "./map";
 
 const MILESTONE = new Milestone({
   coordinates: { latitude: 45.74, longitude: 4.86 },
-  kilometer: 241,
   label: "241+000",
   lineCode: "001000",
+  positionMeters: 241_000,
   sectionRank: 1,
 });
 const MILESTONES = [MILESTONE] as const;
@@ -159,6 +159,41 @@ describe("Map", () => {
     expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
       "milestones",
       MILESTONES,
+    );
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+      "visible",
+      true,
+    );
+  });
+
+  test("forwards searched milestone focus independently from location recentering", async () => {
+    await render(
+      <Map focusLocation={MILESTONE.coordinates} focusRequest={4} />,
+    );
+
+    expect(screen.getByTestId("mock-map-camera")).toHaveProp(
+      "focusLocation",
+      MILESTONE.coordinates,
+    );
+    expect(screen.getByTestId("mock-map-camera")).toHaveProp("focusRequest", 4);
+  });
+
+  test("forwards controlled railway and milestone visibility", async () => {
+    await render(
+      <Map
+        layerVisibility={{ milestone: false, railway: false }}
+        milestones={MILESTONES}
+        railwayData="file:///railways.geojson"
+      />,
+    );
+
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+      "visible",
+      false,
+    );
+    expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
+      "visible",
+      false,
     );
   });
 

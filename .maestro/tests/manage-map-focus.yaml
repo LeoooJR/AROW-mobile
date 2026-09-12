@@ -1,0 +1,111 @@
+appId: com.leooojrrr.AROWmobile
+name: Use the distraction-free map-only mode
+tags:
+  - feature
+  - focus
+  - map
+  - milestone
+---
+# Initialize this feature independently from the location and layer journeys.
+- stopApp
+- setPermissions:
+    permissions:
+      location: allow
+- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+# Re-deliver the development-client URL after a cold stop. Android can consume
+# the first intent while the client process is still being recreated.
+- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+- extendedWaitUntil:
+    visible:
+      id: "arow-map"
+    timeout: 60000
+- setLocation:
+    latitude: 45.74491
+    longitude: 4.86234
+- extendedWaitUntil:
+    visible: ".*45\\.74491 N.*"
+    timeout: 30000
+- extendedWaitUntil:
+    visible: "(Connectée|Active)"
+    timeout: 30000
+
+# Create a simulation-ready selection so focus mode can prove that all
+# workflow overlays are preserved rather than cleared.
+- tapOn:
+    id: "open-point-search"
+- tapOn:
+    id: "line-search-input"
+- inputText: "893000"
+- tapOn:
+    id: "line-result-893000"
+- tapOn:
+    id: "milestone-kilometer-input"
+- inputText: "509"
+- tapOn:
+    id: "milestone-metric-input"
+- inputText: "000"
+- pressKey: Enter
+- assertVisible: "Point résolu"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn:
+          id: "use-selected-point"
+      - assertNotVisible:
+          id: "point-search-sheet"
+- extendedWaitUntil:
+    visible: "PK 509\\+000"
+    timeout: 10000
+- waitForAnimationToEnd
+- assertVisible:
+    id: "simulation-primary-action"
+
+# Enter map-only mode. The map and exit action remain; every other application
+# overlay is absent.
+- tapOn:
+    id: "map-focus-button"
+- assertVisible:
+    id: "arow-map"
+- assertVisible: "Quitter le mode carte seule"
+- assertNotVisible:
+    id: "open-point-search"
+- assertNotVisible:
+    id: "map-layers-button"
+- assertNotVisible:
+    id: "map-feature-details-card"
+- assertNotVisible:
+    id: "location-status"
+- assertNotVisible:
+    id: "simulation-primary-action"
+
+# Leaving through the focus action restores the complete searched-point state.
+- tapOn:
+    id: "map-focus-button"
+- assertVisible: "Activer le mode carte seule"
+- assertVisible:
+    id: "open-point-search"
+- assertVisible:
+    id: "map-layers-button"
+- assertVisible:
+    id: "location-status"
+- assertVisible: "PK 509\\+000"
+- assertVisible:
+    id: "simulation-primary-action"
+
+# A map-feature press also exits focus mode and replaces the selection with a
+# direct map selection, so the simulation CTA is no longer offered.
+- tapOn:
+    id: "map-focus-button"
+- assertVisible: "Quitter le mode carte seule"
+- tapOn:
+    point: "50%,43%"
+    retryTapIfNoChange: true
+- extendedWaitUntil:
+    visible:
+      id: "map-feature-details-card"
+    timeout: 10000
+- assertVisible: "Activer le mode carte seule"
+- assertVisible:
+    id: "location-status"
+- assertNotVisible:
+    id: "simulation-primary-action"
