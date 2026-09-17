@@ -1,5 +1,5 @@
-export const RAILWAY_SCHEMA = `
-  CREATE TABLE railway_sections_next (
+export const RAILWAY_SECTIONS_SCHEMA = `
+  CREATE TABLE railway_sections (
     code_ligne TEXT NOT NULL
       CHECK (length(code_ligne) = 6 AND code_ligne NOT GLOB '*[^0-9]*'),
     rg_troncon INTEGER NOT NULL CHECK (rg_troncon > 0),
@@ -15,8 +15,10 @@ export const RAILWAY_SCHEMA = `
     ),
     PRIMARY KEY (code_ligne, rg_troncon)
   ) STRICT, WITHOUT ROWID;
+`;
 
-  CREATE TABLE kilometric_points_next (
+export const KILOMETRIC_POINTS_SCHEMA = `
+  CREATE TABLE kilometric_points (
     code_ligne TEXT NOT NULL
       CHECK (length(code_ligne) = 6 AND code_ligne NOT GLOB '*[^0-9]*'),
     rg_troncon INTEGER NOT NULL CHECK (rg_troncon > 0),
@@ -26,6 +28,6 @@ export const RAILWAY_SCHEMA = `
     longitude REAL NOT NULL CHECK (longitude BETWEEN -180 AND 180),
     PRIMARY KEY (code_ligne, rg_troncon, position_m),
     FOREIGN KEY (code_ligne, rg_troncon)
-      REFERENCES railway_sections_next(code_ligne, rg_troncon)
+      REFERENCES railway_sections(code_ligne, rg_troncon)
   ) STRICT, WITHOUT ROWID;
 `;

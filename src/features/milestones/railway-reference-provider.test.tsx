@@ -10,7 +10,10 @@ jest.mock("expo-sqlite", () => ({
   useSQLiteContext: jest.fn(),
 }));
 
-jest.mock("@/statics/pk.sqlite", () => "railway-reference-asset");
+jest.mock(
+  "@/statics/railway_reference.sqlite",
+  () => "railway-reference-asset",
+);
 
 const useSQLiteContextMock = jest.mocked(useSQLiteContext);
 

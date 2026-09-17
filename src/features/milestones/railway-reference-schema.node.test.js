@@ -8,7 +8,10 @@ const {
   RAILWAY_SECTIONS_TABLE,
 } = require("./railway-reference-schema");
 
-const databasePath = path.join(__dirname, "../../statics/pk.sqlite");
+const databasePath = path.join(
+  __dirname,
+  "../../statics/railway_reference.sqlite",
+);
 
 function tableInfo(database, table) {
   return database.prepare(`PRAGMA table_info(${table.name})`).all();

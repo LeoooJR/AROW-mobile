@@ -17,7 +17,7 @@ import {
   loadSearchableRailways,
 } from "@/features/milestones/railway-reference-database";
 import useRailwayReferenceLoad from "@/features/milestones/use-railway-reference-load";
-import milestoneDatabaseAsset from "@/statics/pk.sqlite";
+import railwayReferenceDatabaseAsset from "@/statics/railway_reference.sqlite";
 
 export interface RailwayReferenceProviderProps {
   readonly children: ReactNode;
@@ -68,8 +68,8 @@ export default function RailwayReferenceProvider({
 }: RailwayReferenceProviderProps): ReactElement {
   return (
     <SQLiteProvider
-      assetSource={{ assetId: milestoneDatabaseAsset }}
-      databaseName="railway-reference-v1.sqlite"
+      assetSource={{ assetId: railwayReferenceDatabaseAsset }}
+      databaseName="railway_reference.sqlite"
     >
       <RailwayReferenceDataProvider>{children}</RailwayReferenceDataProvider>
     </SQLiteProvider>

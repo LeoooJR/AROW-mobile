@@ -1,0 +1,143 @@
+import {
+  canonicalLineCode,
+  milestonePositionMeters,
+  requireCoordinate,
+  requirePositiveInteger,
+} from "./validation.mjs";
+
+const EXPECTED_HEADER = Object.freeze([
+  "TYPE_REPER",
+  "PK",
+  "LIGNE",
+  "CODE_LIGNE",
+  "RG_TRONCON",
+  "latitude",
+  "longitude",
+]);
+const LINE_REFERENCE = /^(\d{6})-(\d+)$/;
+const SKIPPED_LABELS = new Set(["D+000"]);
+
+function parseDecimal(value, context) {
+  if (!/^-?\d+(?:[.,]\d+)?(?:e[+-]?\d+)?$/i.test(value)) {
+    throw new Error(`${context} must be a decimal number`);
+  }
+  return Number(value.replace(",", "."));
+}
+
+function parseLineReference(value, context) {
+  const match = LINE_REFERENCE.exec(value);
+  if (match === null) {
+    throw new Error(`${context} must use the six-digit-code-rank format`);
+  }
+  return {
+    code: match[1],
+    rank: requirePositiveInteger(Number(match[2]), `${context} rank`),
+  };
+}
+
+function parseMilestone(fields, lineNumber) {
+  const context = `Milestone CSV line ${lineNumber}`;
+  const [
+    ,
+    label,
+    lineReferenceValue,
+    codeValue,
+    rankValue,
+    latitude,
+    longitude,
+  ] = fields;
+  if (!/^\d{1,6}$/.test(codeValue)) {
+    throw new Error(`${context} CODE_LIGNE must contain one to six digits`);
+  }
+
+  const code = canonicalLineCode(Number(codeValue), `${context} CODE_LIGNE`);
+  const lineReference = parseLineReference(
+    lineReferenceValue,
+    `${context} LIGNE`,
+  );
+  if (lineReference.code !== code) {
+    throw new Error(
+      `${context} LIGNE and CODE_LIGNE must identify the same line`,
+    );
+  }
+
+  const rank =
+    rankValue === ""
+      ? lineReference.rank
+      : requirePositiveInteger(Number(rankValue), `${context} RG_TRONCON`);
+  if (rank !== lineReference.rank) {
+    throw new Error(
+      `${context} LIGNE and RG_TRONCON must identify the same rank`,
+    );
+  }
+
+  return Object.freeze({
+    code,
+    label,
+    latitude: requireCoordinate(
+      parseDecimal(latitude, `${context} latitude`),
+      -90,
+      90,
+      `${context} latitude`,
+    ),
+    longitude: requireCoordinate(
+      parseDecimal(longitude, `${context} longitude`),
+      -180,
+      180,
+      `${context} longitude`,
+    ),
+    positionMeters: milestonePositionMeters(label, `${context} PK`),
+    rank,
+  });
+}
+
+export function parseMilestoneCsv(buffer) {
+  const text = Buffer.from(buffer).toString("latin1");
+  const lines = text.split(/\r?\n/);
+  const header = lines.shift()?.split(";");
+  if (JSON.stringify(header) !== JSON.stringify(EXPECTED_HEADER)) {
+    throw new Error("Milestone CSV header does not match the expected format");
+  }
+
+  const milestones = [];
+  const skipped = [];
+  const ids = new Set();
+  for (const [index, line] of lines.entries()) {
+    if (line === "") {
+      continue;
+    }
+    const lineNumber = index + 2;
+    const fields = line.split(";");
+    if (fields.length !== EXPECTED_HEADER.length) {
+      throw new Error(
+        `Milestone CSV line ${lineNumber} must contain ${EXPECTED_HEADER.length} columns`,
+      );
+    }
+    if (fields[0] !== "Kilomètre") {
+      continue;
+    }
+    if (SKIPPED_LABELS.has(fields[1])) {
+      skipped.push(Object.freeze({ label: fields[1], lineNumber }));
+      continue;
+    }
+
+    const milestone = parseMilestone(fields, lineNumber);
+    const id = `${milestone.code}:${milestone.rank}:${milestone.positionMeters}`;
+    if (ids.has(id)) {
+      throw new Error(`Duplicate milestone ${id} at CSV line ${lineNumber}`);
+    }
+    ids.add(id);
+    milestones.push(milestone);
+  }
+
+  milestones.sort(
+    (left, right) =>
+      left.code.localeCompare(right.code) ||
+      left.rank - right.rank ||
+      left.positionMeters - right.positionMeters,
+  );
+  return Object.freeze({
+    milestones: Object.freeze(milestones),
+    skipped: Object.freeze(skipped),
+  });
+}

@@ -1,248 +1,160 @@
-import { readFileSync, renameSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { DatabaseSync } from "node:sqlite";
 
-import { parseRailwaySections } from "./railway-database/geojson.mjs";
-import { RAILWAY_SCHEMA } from "./railway-database/schema.mjs";
+import { parseMilestoneCsv } from "./railway-database/csv.mjs";
 import {
-  canonicalLineCode,
-  isRecord,
-  milestonePositionMeters,
-  requireCanonicalLineCode,
-  requireCoordinate,
-  requireNonEmptyString,
-  requirePositiveInteger,
-} from "./railway-database/validation.mjs";
+  completeRailwaySections,
+  createRailwayDatabase,
+  validateRailwayDatabase,
+} from "./railway-database/database.mjs";
+import { normalizeRailwayGeoJson } from "./railway-database/geojson.mjs";
+import {
+  downloadResource,
+  RAILWAY_RESOURCES,
+} from "./railway-database/resources.mjs";
+import {
+  createStagingWorkspace,
+  promoteStagedOutputs,
+  removeStagingWorkspace,
+} from "./railway-database/staging.mjs";
 
-const DEFAULT_DATABASE_PATH = resolve("src/statics/pk.sqlite");
 const DEFAULT_GEOJSON_PATH = resolve("src/statics/lignes-par-type.geojson");
+const DEFAULT_DATABASE_PATH = resolve("src/statics/railway_reference.sqlite");
+const EXPECTED_SNAPSHOT = Object.freeze({
+  fallbackSectionCount: 2,
+  geometryCount: 1043,
+  geometryWithoutMilestoneCount: 27,
+  milestoneCount: 36812,
+  railwaySectionCount: 1045,
+  skippedMilestoneCount: 1,
+});
 
-function tableColumns(database, table) {
-  return database
-    .prepare(`PRAGMA table_info(${table})`)
-    .all()
-    .map((column) => column.name);
-}
-
-function parseMilestoneRow(value, index, legacy) {
-  const context = `Milestone row ${index}`;
-  if (!isRecord(value)) {
-    throw new Error(`${context} must be a record`);
-  }
-
-  const code = legacy
-    ? canonicalLineCode(value.code_ligne, `${context} code_ligne`)
-    : requireCanonicalLineCode(value.code_ligne, `${context} code_ligne`);
-  const label = requireNonEmptyString(value.label, `${context} label`);
-  const positionMeters = legacy
-    ? milestonePositionMeters(label, `${context} label`)
-    : value.position_m;
-  if (!Number.isInteger(positionMeters) || positionMeters < 0) {
-    throw new Error(`${context} position_m must be a non-negative integer`);
-  }
-
-  return Object.freeze({
-    code,
-    label,
-    latitude: requireCoordinate(value.latitude, -90, 90, `${context} latitude`),
-    longitude: requireCoordinate(
-      value.longitude,
-      -180,
-      180,
-      `${context} longitude`,
+async function downloadRailwaySources(
+  workspace,
+  resources,
+  fetchImplementation,
+) {
+  const results = await Promise.allSettled([
+    downloadResource(
+      resources.geojson,
+      workspace.rawGeojsonPath,
+      fetchImplementation,
     ),
-    positionMeters,
-    rank: requirePositiveInteger(value.rg_troncon, `${context} rg_troncon`),
-  });
-}
-
-function readMilestones(database) {
-  const columns = tableColumns(database, "kilometric_points");
-  const legacy = columns.includes("km");
-  const positionColumn = legacy ? "km" : "position_m";
-  const rows = database
-    .prepare(
-      `SELECT code_ligne, rg_troncon, ${positionColumn}, label, latitude, longitude
-       FROM kilometric_points
-       ORDER BY code_ligne, rg_troncon, ${positionColumn}`,
-    )
-    .all();
-
-  return rows.map((row, index) => parseMilestoneRow(row, index, legacy));
-}
-
-function readSourceMilestones(databasePath) {
-  const database = new DatabaseSync(databasePath, { readOnly: true });
-  try {
-    return readMilestones(database);
-  } finally {
-    database.close();
+    downloadResource(
+      resources.milestones,
+      workspace.rawMilestonesPath,
+      fetchImplementation,
+    ),
+  ]);
+  const failure = results.find((result) => result.status === "rejected");
+  if (failure !== undefined) {
+    throw failure.reason;
   }
 }
 
-function fallbackRailwaySection(milestone) {
+function readRailwaySources(workspace) {
+  const rawGeojson = JSON.parse(readFileSync(workspace.rawGeojsonPath, "utf8"));
+  const { geojson, sections: geojsonSections } =
+    normalizeRailwayGeoJson(rawGeojson);
+  const { milestones, skipped } = parseMilestoneCsv(
+    readFileSync(workspace.rawMilestonesPath),
+  );
+  return Object.freeze({ geojson, geojsonSections, milestones, skipped });
+}
+
+function summarizeRailwayData(geojsonSections, sections, milestones, skipped) {
+  const milestoneSectionIds = new Set(
+    milestones.map((milestone) => `${milestone.code}:${milestone.rank}`),
+  );
   return Object.freeze({
-    code: milestone.code,
-    endMilestone: null,
-    gaiaId: null,
-    hasGeometry: 0,
-    name: `Ligne ${milestone.code}`,
-    railwayType: null,
-    rank: milestone.rank,
-    startMilestone: null,
+    fallbackSectionCount: sections.length - geojsonSections.length,
+    geometryCount: geojsonSections.length,
+    geometryWithoutMilestoneCount: geojsonSections.filter(
+      (section) => !milestoneSectionIds.has(`${section.code}:${section.rank}`),
+    ).length,
+    milestoneCount: milestones.length,
+    railwaySectionCount: sections.length,
+    skippedMilestoneCount: skipped.length,
   });
 }
 
-function completeRailwaySections(geojsonSections, milestones) {
-  const sections = new Map(
-    geojsonSections.map((section) => [
-      `${section.code}:${section.rank}`,
-      section,
-    ]),
-  );
-
-  for (const milestone of milestones) {
-    const id = `${milestone.code}:${milestone.rank}`;
-    if (!sections.has(id)) {
-      sections.set(id, fallbackRailwaySection(milestone));
+function validateExpectedSnapshot(summary, expectedSnapshot) {
+  if (expectedSnapshot === undefined) {
+    return;
+  }
+  for (const [key, expectedValue] of Object.entries(expectedSnapshot)) {
+    if (summary[key] !== expectedValue) {
+      throw new Error(
+        `Generated ${key} does not match the pinned snapshot: expected ${expectedValue}, received ${summary[key]}`,
+      );
     }
   }
+}
 
-  return [...sections.values()].sort((left, right) =>
-    `${left.code}:${left.rank}`.localeCompare(`${right.code}:${right.rank}`),
+function buildStagedAssets(workspace, expectedSnapshot) {
+  const { geojson, geojsonSections, milestones, skipped } =
+    readRailwaySources(workspace);
+  const sections = completeRailwaySections(geojsonSections, milestones);
+  const summary = summarizeRailwayData(
+    geojsonSections,
+    sections,
+    milestones,
+    skipped,
+  );
+  validateExpectedSnapshot(summary, expectedSnapshot);
+
+  writeFileSync(workspace.stagedGeojsonPath, JSON.stringify(geojson));
+  createRailwayDatabase(workspace.stagedDatabasePath, sections, milestones);
+  validateRailwayDatabase(workspace.stagedDatabasePath, summary);
+  return Object.freeze({ skipped, summary });
+}
+
+function reportGeneration({ skipped, summary }, logger) {
+  for (const skippedMilestone of skipped) {
+    logger.warn(
+      `Skipped unsupported milestone ${skippedMilestone.label} at CSV line ${skippedMilestone.lineNumber}`,
+    );
+  }
+  logger.log(
+    `Generated ${summary.railwaySectionCount} railway sections and ${summary.milestoneCount} milestones`,
   );
 }
 
-function insertRailwaySections(database, sections) {
-  const statement = database.prepare(`
-    INSERT INTO railway_sections_next (
-      code_ligne, rg_troncon, idgaia, lib_ligne, type_ligne, pkd, pkf, has_geometry
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-
-  for (const section of sections) {
-    statement.run(
-      section.code,
-      section.rank,
-      section.gaiaId,
-      section.name,
-      section.railwayType,
-      section.startMilestone,
-      section.endMilestone,
-      section.hasGeometry,
-    );
-  }
-}
-
-function insertMilestones(database, milestones) {
-  const statement = database.prepare(`
-    INSERT INTO kilometric_points_next (
-      code_ligne, rg_troncon, position_m, label, latitude, longitude
-    ) VALUES (?, ?, ?, ?, ?, ?)
-  `);
-
-  for (const milestone of milestones) {
-    statement.run(
-      milestone.code,
-      milestone.rank,
-      milestone.positionMeters,
-      milestone.label,
-      milestone.latitude,
-      milestone.longitude,
-    );
-  }
-}
-
-function rebuildSchema(database, sections, milestones) {
-  database.exec("PRAGMA foreign_keys = OFF");
-  database.exec("BEGIN IMMEDIATE");
+export async function setupRailwayDatabase({
+  databasePath = DEFAULT_DATABASE_PATH,
+  expectedSnapshot = EXPECTED_SNAPSHOT,
+  fetchImplementation = fetch,
+  geojsonPath = DEFAULT_GEOJSON_PATH,
+  logger = console,
+  resources = RAILWAY_RESOURCES,
+} = {}) {
+  const workspace = createStagingWorkspace({
+    databasePath,
+    geojsonPath,
+    resources,
+  });
   try {
-    database.exec("DROP TABLE IF EXISTS kilometric_points_next");
-    database.exec("DROP TABLE IF EXISTS railway_sections_next");
-    database.exec(RAILWAY_SCHEMA);
-    insertRailwaySections(database, sections);
-    insertMilestones(database, milestones);
-    database.exec("DROP TABLE IF EXISTS kilometric_points");
-    database.exec("DROP TABLE IF EXISTS railway_sections");
-    database.exec(
-      "ALTER TABLE railway_sections_next RENAME TO railway_sections",
-    );
-    database.exec(
-      "ALTER TABLE kilometric_points_next RENAME TO kilometric_points",
-    );
-    database.exec("PRAGMA user_version = 1");
-    database.exec("COMMIT");
-  } catch (cause) {
-    database.exec("ROLLBACK");
-    throw cause;
-  }
-  database.exec("PRAGMA foreign_keys = ON");
-}
-
-function validateDatabase(database, geojsonCount, milestoneCount) {
-  const integrity = database.prepare("PRAGMA integrity_check").get();
-  if (integrity?.integrity_check !== "ok") {
-    throw new Error("Generated database failed its integrity check");
-  }
-
-  if (database.prepare("PRAGMA foreign_key_check").get() !== undefined) {
-    throw new Error("Generated database contains an invalid foreign key");
-  }
-
-  const counts = database
-    .prepare(
-      `
-      SELECT
-        (SELECT COUNT(*) FROM railway_sections WHERE has_geometry = 1) AS geometry_count,
-        (SELECT COUNT(*) FROM kilometric_points) AS milestone_count
-    `,
-    )
-    .get();
-  if (
-    counts?.geometry_count !== geojsonCount ||
-    counts?.milestone_count !== milestoneCount
-  ) {
-    throw new Error("Generated database row counts do not match their sources");
+    await downloadRailwaySources(workspace, resources, fetchImplementation);
+    const result = buildStagedAssets(workspace, expectedSnapshot);
+    promoteStagedOutputs(workspace);
+    reportGeneration(result, logger);
+    return result.summary;
+  } finally {
+    removeStagingWorkspace(workspace);
   }
 }
 
-export function updateRailwayDatabase({ databasePath, geojsonPath }) {
-  const targetPath = resolve(databasePath);
-  const stagingPath = `${targetPath}.staging-${process.pid}`;
-  const geojson = JSON.parse(readFileSync(resolve(geojsonPath), "utf8"));
-  const geojsonSections = parseRailwaySections(geojson);
-  const milestones = readSourceMilestones(targetPath);
-  const sections = completeRailwaySections(geojsonSections, milestones);
-
-  rmSync(stagingPath, { force: true });
-  let database;
-  try {
-    database = new DatabaseSync(stagingPath);
-    rebuildSchema(database, sections, milestones);
-    validateDatabase(database, geojsonSections.length, milestones.length);
-    database.exec("VACUUM");
-    database.close();
-    database = undefined;
-    renameSync(stagingPath, targetPath);
-  } catch (cause) {
-    database?.close();
-    rmSync(stagingPath, { force: true });
-    throw cause;
-  }
-}
-
-function main() {
-  const [
-    databasePath = DEFAULT_DATABASE_PATH,
-    geojsonPath = DEFAULT_GEOJSON_PATH,
-  ] = process.argv.slice(2);
-  updateRailwayDatabase({ databasePath, geojsonPath });
+async function main() {
+  await setupRailwayDatabase();
 }
 
 if (
   process.argv[1] !== undefined &&
   import.meta.url === pathToFileURL(process.argv[1]).href
 ) {
-  main();
+  main().catch((cause) => {
+    console.error(cause instanceof Error ? cause.message : cause);
+    process.exitCode = 1;
+  });
 }
