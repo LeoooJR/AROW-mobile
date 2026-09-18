@@ -1,6 +1,6 @@
 import { AbstractRailwaySectionFeature } from "@/features/map-features/abstract-railway-section-feature";
 import type { Railway } from "@/features/railways/railway";
-import { isNonEmptyString, isUnsignedInteger } from "@/types/value-validation";
+import { isNonEmptyString, isUnsignedInteger } from "@shared/value-validation";
 
 export type RailwaySectionGeometry =
   | {

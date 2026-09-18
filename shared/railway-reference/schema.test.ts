@@ -1,14 +1,15 @@
 import {
+  columnReference,
+  createTableSql,
   KILOMETRIC_POINTS_TABLE,
-  KilometricPointsTable,
+  primaryKeyColumns,
+  projection,
   RAILWAY_SECTIONS_TABLE,
-  RailwayReferenceColumn,
-  RailwaySectionsTable,
-} from "./railway-reference-schema";
+  tableColumn,
+} from "./schema";
 
 describe("railway reference schema descriptors", () => {
   test("describes railway sections in database order", () => {
-    expect(RAILWAY_SECTIONS_TABLE).toBeInstanceOf(RailwaySectionsTable);
     expect(RAILWAY_SECTIONS_TABLE.name).toBe("railway_sections");
     expect(RAILWAY_SECTIONS_TABLE.strict).toBe(true);
     expect(RAILWAY_SECTIONS_TABLE.withoutRowId).toBe(true);
@@ -70,41 +71,50 @@ describe("railway reference schema descriptors", () => {
       },
     ]);
     expect(
-      RAILWAY_SECTIONS_TABLE.primaryKey.map((column) => column.name),
+      primaryKeyColumns(RAILWAY_SECTIONS_TABLE).map(({ name }) => name),
     ).toEqual(["code_ligne", "rg_troncon"]);
   });
 
   test("describes milestone identity and its section foreign key", () => {
-    expect(KILOMETRIC_POINTS_TABLE).toBeInstanceOf(KilometricPointsTable);
     expect(
-      KILOMETRIC_POINTS_TABLE.primaryKey.map((column) => column.name),
+      primaryKeyColumns(KILOMETRIC_POINTS_TABLE).map(({ name }) => name),
     ).toEqual(["code_ligne", "rg_troncon", "position_m"]);
-
-    const [foreignKey] = KILOMETRIC_POINTS_TABLE.foreignKeys;
-    expect(foreignKey?.columns.map((column) => column.name)).toEqual([
-      "code_ligne",
-      "rg_troncon",
-    ]);
-    expect(foreignKey?.referencedTableName).toBe("railway_sections");
-    expect(foreignKey?.referencedColumns.map((column) => column.name)).toEqual([
-      "code_ligne",
-      "rg_troncon",
+    expect(KILOMETRIC_POINTS_TABLE.foreignKeys).toEqual([
+      {
+        columns: ["code_ligne", "rg_troncon"],
+        referencedColumns: ["code_ligne", "rg_troncon"],
+        referencedTableName: "railway_sections",
+      },
     ]);
   });
 
-  test("builds qualified projections from immutable columns", () => {
-    const code = KILOMETRIC_POINTS_TABLE.column("code_ligne");
-    const label = KILOMETRIC_POINTS_TABLE.column("label");
+  test("builds qualified references and projections", () => {
+    expect(
+      tableColumn(KILOMETRIC_POINTS_TABLE, "code_ligne").description,
+    ).not.toHaveLength(0);
+    expect(
+      columnReference(KILOMETRIC_POINTS_TABLE, "code_ligne", "point"),
+    ).toBe("point.code_ligne");
+    expect(
+      projection(KILOMETRIC_POINTS_TABLE, ["code_ligne", "label"], "point"),
+    ).toBe("point.code_ligne, point.label");
+    expect(() =>
+      tableColumn(KILOMETRIC_POINTS_TABLE, "missing" as "code_ligne"),
+    ).toThrow("Unknown column missing on kilometric_points");
+  });
 
-    expect(code).toBeInstanceOf(RailwayReferenceColumn);
-    expect(code.description).not.toHaveLength(0);
-    expect(code.reference("point")).toBe("point.code_ligne");
-    expect(KILOMETRIC_POINTS_TABLE.projection([code, label], "point")).toBe(
-      "point.code_ligne, point.label",
-    );
-    expect(Object.isFrozen(code)).toBe(true);
+  test("freezes descriptors and deterministically renders the existing DDL", () => {
+    expect(Object.isFrozen(KILOMETRIC_POINTS_TABLE)).toBe(true);
     expect(Object.isFrozen(KILOMETRIC_POINTS_TABLE.columns)).toBe(true);
-    expect(Object.isFrozen(KILOMETRIC_POINTS_TABLE.foreignKeys)).toBe(true);
-    expect(Object.isFrozen(KILOMETRIC_POINTS_TABLE.primaryKey)).toBe(true);
+    expect(Object.isFrozen(KILOMETRIC_POINTS_TABLE.foreignKeys[0])).toBe(true);
+    expect(createTableSql(RAILWAY_SECTIONS_TABLE)).toContain(
+      "CREATE TABLE railway_sections",
+    );
+    expect(createTableSql(KILOMETRIC_POINTS_TABLE)).toContain(
+      "FOREIGN KEY (code_ligne, rg_troncon)",
+    );
+    expect(createTableSql(KILOMETRIC_POINTS_TABLE)).toBe(
+      createTableSql(KILOMETRIC_POINTS_TABLE),
+    );
   });
 });

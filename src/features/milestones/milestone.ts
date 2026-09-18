@@ -4,7 +4,8 @@ import {
   isLatitude,
   isLongitude,
   isUnsignedInteger,
-} from "@/types/value-validation";
+} from "@shared/value-validation";
+import { milestoneId } from "@shared/railway-reference/values";
 
 export interface MilestoneInput {
   readonly coordinates: GeographicCoordinates;
@@ -52,7 +53,11 @@ export class Milestone extends AbstractRailwaySectionFeature<"milestone"> {
   }
 
   public get id(): string {
-    return `${this.key.id}:${this.#positionMeters}`;
+    return milestoneId(
+      this.key.lineCode,
+      this.key.sectionRank,
+      this.#positionMeters,
+    );
   }
 
   public get kilometer(): number {

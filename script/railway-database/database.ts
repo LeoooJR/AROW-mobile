@@ -1,6 +1,17 @@
 import { DatabaseSync } from "node:sqlite";
 import type { SQLOutputValue } from "node:sqlite";
 
+import type {
+  KilometricPointDatabaseRow,
+  RailwaySectionDatabaseRow,
+} from "../../shared/railway-reference/records";
+import {
+  createTableSql,
+  KILOMETRIC_POINTS_TABLE,
+  RAILWAY_SECTIONS_TABLE,
+} from "../../shared/railway-reference/schema";
+import { railwaySectionId } from "../../shared/railway-reference/values";
+
 import {
   BEGIN_TRANSACTION,
   CHECK_DATABASE_INTEGRITY,
@@ -14,7 +25,6 @@ import {
   SET_SCHEMA_VERSION,
   VACUUM_DATABASE,
 } from "./queries";
-import { KILOMETRIC_POINTS_SCHEMA, RAILWAY_SECTIONS_SCHEMA } from "./schema";
 import type {
   GenerationSummary,
   Milestone,
@@ -52,12 +62,12 @@ export function completeRailwaySections(
 ): readonly RailwaySection[] {
   const sections = new Map<string, RailwaySection>(
     geojsonSections.map((section) => [
-      `${section.code}:${section.rank}`,
+      railwaySectionId(section.code, section.rank),
       section,
     ]),
   );
   for (const milestone of milestones) {
-    const id = `${milestone.code}:${milestone.rank}`;
+    const id = railwaySectionId(milestone.code, milestone.rank);
     if (!sections.has(id)) {
       sections.set(id, fallbackRailwaySection(milestone));
     }
@@ -74,15 +84,37 @@ function insertRailwaySections(
 ): void {
   const statement = database.prepare(INSERT_RAILWAY_SECTION);
   for (const section of sections) {
+    const row: RailwaySectionDatabaseRow =
+      section.hasGeometry === 1
+        ? {
+            code_ligne: section.code,
+            has_geometry: 1,
+            idgaia: section.gaiaId,
+            lib_ligne: section.name,
+            pkd: section.startMilestone,
+            pkf: section.endMilestone,
+            rg_troncon: section.rank,
+            type_ligne: section.railwayType,
+          }
+        : {
+            code_ligne: section.code,
+            has_geometry: 0,
+            idgaia: null,
+            lib_ligne: section.name,
+            pkd: null,
+            pkf: null,
+            rg_troncon: section.rank,
+            type_ligne: null,
+          };
     statement.run(
-      section.code,
-      section.rank,
-      section.gaiaId,
-      section.name,
-      section.railwayType,
-      section.startMilestone,
-      section.endMilestone,
-      section.hasGeometry,
+      row.code_ligne,
+      row.rg_troncon,
+      row.idgaia,
+      row.lib_ligne,
+      row.type_ligne,
+      row.pkd,
+      row.pkf,
+      row.has_geometry,
     );
   }
 }
@@ -93,13 +125,21 @@ function insertMilestones(
 ): void {
   const statement = database.prepare(INSERT_KILOMETRIC_POINT);
   for (const milestone of milestones) {
+    const row: KilometricPointDatabaseRow = {
+      code_ligne: milestone.code,
+      label: milestone.label,
+      latitude: milestone.latitude,
+      longitude: milestone.longitude,
+      position_m: milestone.positionMeters,
+      rg_troncon: milestone.rank,
+    };
     statement.run(
-      milestone.code,
-      milestone.rank,
-      milestone.positionMeters,
-      milestone.label,
-      milestone.latitude,
-      milestone.longitude,
+      row.code_ligne,
+      row.rg_troncon,
+      row.position_m,
+      row.label,
+      row.latitude,
+      row.longitude,
     );
   }
 }
@@ -111,8 +151,8 @@ function populateDatabase(
 ): void {
   database.exec(BEGIN_TRANSACTION);
   try {
-    database.exec(RAILWAY_SECTIONS_SCHEMA);
-    database.exec(KILOMETRIC_POINTS_SCHEMA);
+    database.exec(createTableSql(RAILWAY_SECTIONS_TABLE));
+    database.exec(createTableSql(KILOMETRIC_POINTS_TABLE));
     insertRailwaySections(database, sections);
     insertMilestones(database, milestones);
     database.exec(SET_SCHEMA_VERSION);

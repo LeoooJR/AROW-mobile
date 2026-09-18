@@ -75,4 +75,25 @@ describe("railway reference database", () => {
       ),
     ).resolves.toBeUndefined();
   });
+
+  test("rejects malformed query rows with their adapter context", async () => {
+    await expect(
+      loadMilestones({
+        getAllAsync: jest
+          .fn()
+          .mockResolvedValue([{ ...MILESTONE_RECORD, latitude: 91 }]),
+      }),
+    ).rejects.toThrow("Invalid milestone at row 0");
+
+    await expect(
+      findMilestone(
+        {
+          getFirstAsync: jest
+            .fn()
+            .mockResolvedValue({ ...MILESTONE_RECORD, label: null }),
+        },
+        { lineCode: "893000", positionMeters: 509_000, sectionRank: 1 },
+      ),
+    ).rejects.toThrow("Invalid milestone lookup result");
+  });
 });

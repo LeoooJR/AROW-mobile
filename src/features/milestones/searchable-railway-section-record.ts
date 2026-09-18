@@ -1,4 +1,3 @@
-import { isCanonicalRailwayLineCode } from "@/features/map-features/railway-section-key";
 import { Railway } from "@/features/railways/railway";
 import type {
   RailwayMilestoneRange,
@@ -7,10 +6,13 @@ import type {
 } from "@/features/railways/railway-section";
 import {
   isNonEmptyString,
-  isPositiveInteger,
   isRecord,
   isUnsignedInteger,
-} from "@/types/value-validation";
+} from "@shared/value-validation";
+import {
+  decodeRailwaySectionDatabaseRow,
+  type RailwaySectionDatabaseRow,
+} from "@shared/railway-reference/records";
 
 type GeometryRecord =
   | {
@@ -50,9 +52,6 @@ export class SearchableRailwaySectionRecord {
   ): SearchableRailwaySectionRecord {
     if (
       !isRecord(value) ||
-      !isCanonicalRailwayLineCode(value.code_ligne) ||
-      !isNonEmptyString(value.lib_ligne) ||
-      !isPositiveInteger(value.rg_troncon) ||
       !isUnsignedInteger(value.minimum_position_m) ||
       !isNonEmptyString(value.minimum_label) ||
       !isUnsignedInteger(value.maximum_position_m) ||
@@ -62,16 +61,18 @@ export class SearchableRailwaySectionRecord {
       throw new Error(`Invalid searchable railway section ${context}`);
     }
 
-    const geometry = SearchableRailwaySectionRecord.geometryFrom(value);
-    if (geometry === undefined) {
+    let section: RailwaySectionDatabaseRow;
+    try {
+      section = decodeRailwaySectionDatabaseRow(value, context);
+    } catch {
       throw new Error(`Invalid searchable railway section ${context}`);
     }
 
     return new SearchableRailwaySectionRecord(
-      value.code_ligne,
-      value.lib_ligne,
-      value.rg_troncon,
-      geometry,
+      section.code_ligne,
+      section.lib_ligne,
+      section.rg_troncon,
+      SearchableRailwaySectionRecord.geometryFrom(section),
       {
         maximumLabel: value.maximum_label,
         maximumPositionMeters: value.maximum_position_m,
@@ -82,35 +83,19 @@ export class SearchableRailwaySectionRecord {
   }
 
   private static geometryFrom(
-    value: Record<string, unknown>,
-  ): GeometryRecord | undefined {
-    if (
-      value.has_geometry === 0 &&
-      value.idgaia === null &&
-      value.type_ligne === null &&
-      value.pkd === null &&
-      value.pkf === null
-    ) {
+    value: RailwaySectionDatabaseRow,
+  ): GeometryRecord {
+    if (value.has_geometry === 0) {
       return { status: "absent" };
     }
 
-    if (
-      value.has_geometry === 1 &&
-      isNonEmptyString(value.idgaia) &&
-      isNonEmptyString(value.type_ligne) &&
-      isNonEmptyString(value.pkd) &&
-      isNonEmptyString(value.pkf)
-    ) {
-      return {
-        endMilestone: value.pkf,
-        gaiaId: value.idgaia,
-        railwayType: value.type_ligne,
-        startMilestone: value.pkd,
-        status: "present",
-      };
-    }
-
-    return undefined;
+    return {
+      endMilestone: value.pkf,
+      gaiaId: value.idgaia,
+      railwayType: value.type_ligne,
+      startMilestone: value.pkd,
+      status: "present",
+    };
   }
 
   public get geometry(): RailwaySectionGeometry {

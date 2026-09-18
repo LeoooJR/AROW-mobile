@@ -10,8 +10,9 @@ import {
 } from "./value-validation";
 
 describe("value validation", () => {
-  test("distinguishes records and strings", () => {
+  test("distinguishes records, arrays, and strings", () => {
     expect(isRecord({ value: 1 })).toBe(true);
+    expect(isRecord([])).toBe(false);
     expect(isRecord(null)).toBe(false);
     expect(isString("railway")).toBe(true);
     expect(isString(893000)).toBe(false);

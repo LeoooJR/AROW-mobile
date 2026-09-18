@@ -1,10 +1,11 @@
 import {
-  isRecord,
   requireCanonicalLineCode,
   requireCoordinate,
   requireNonEmptyString,
   requirePositiveInteger,
 } from "./validation";
+import { railwaySectionId } from "../../shared/railway-reference/values";
+import { isRecord } from "../../shared/value-validation";
 import type {
   GeoJsonPosition,
   NormalizedRailwayData,
@@ -118,7 +119,7 @@ function railwaySectionFromFeature(
     properties.rg_troncon,
     `${context} rg_troncon`,
   );
-  const id = `${code}:${rank}`;
+  const id = railwaySectionId(code, rank);
   if (value.id !== id) {
     throw new Error(`${context} id must be ${id}`);
   }
@@ -148,10 +149,20 @@ function normalizedFeature(value: unknown, index: number): RailwayFeature {
   if (!isRecord(value) || !isRecord(value.properties)) {
     throw new Error(`${context} must be a GeoJSON feature with properties`);
   }
+  const normalizedId = railwaySectionId(
+    requireCanonicalLineCode(
+      value.properties.code_ligne,
+      `${context} code_ligne`,
+    ),
+    requirePositiveInteger(
+      value.properties.rg_troncon,
+      `${context} rg_troncon`,
+    ),
+  );
   const section = railwaySectionFromFeature(
     {
       ...value,
-      id: `${value.properties.code_ligne}:${value.properties.rg_troncon}`,
+      id: normalizedId,
     },
     index,
   );
@@ -164,10 +175,7 @@ function normalizedFeature(value: unknown, index: number): RailwayFeature {
       throw new Error(`${context} contains unexpected property ${property}`);
     }
   }
-  if (
-    value.id !== undefined &&
-    value.id !== `${section.code}:${section.rank}`
-  ) {
+  if (value.id !== undefined && value.id !== normalizedId) {
     throw new Error(`${context} contains an invalid existing id`);
   }
 
@@ -183,7 +191,7 @@ function normalizedFeature(value: unknown, index: number): RailwayFeature {
       pkd: section.startMilestone,
       pkf: section.endMilestone,
     }),
-    id: `${section.code}:${section.rank}`,
+    id: normalizedId,
   });
 }
 
@@ -204,7 +212,7 @@ function requireUniqueSections(
 ): void {
   const ids = new Set<string>();
   for (const section of sections) {
-    const id = `${section.code}:${section.rank}`;
+    const id = railwaySectionId(section.code, section.rank);
     if (ids.has(id)) {
       throw new Error(`Duplicate railway section ${id}`);
     }

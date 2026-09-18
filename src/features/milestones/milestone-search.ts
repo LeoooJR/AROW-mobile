@@ -2,6 +2,7 @@ import type { Milestone } from "@/features/milestones/milestone";
 import { outOfRangeMilestoneResolution } from "@/features/milestones/milestone-search-messages";
 import type { Railway } from "@/features/railways/railway";
 import type { RailwaySection } from "@/features/railways/railway-section";
+import { parseMilestoneLabel } from "@shared/railway-reference/values";
 
 export type MilestoneSearchState =
   | { readonly status: "loading" }
@@ -126,19 +127,13 @@ export function sanitizeMilestonePart(
 export function parsePastedMilestone(
   value: string,
 ): { readonly kilometer: string; readonly metric: string } | undefined {
-  const match = /^(?:PK\s*)?(\d+)\+(\d{3})$/i.exec(value.trim());
-  if (match === null) {
+  const normalized = value.trim().replace(/^PK\s*/i, "");
+  const parsed = parseMilestoneLabel(normalized);
+  if (parsed === undefined) {
     return undefined;
   }
 
-  return { kilometer: match[1], metric: match[2] };
-}
-
-function milestoneInputMeters(
-  kilometerInput: string,
-  metricInput: string,
-): number {
-  return Number(kilometerInput) * 1000 + Number(metricInput);
+  return { kilometer: parsed.kilometer, metric: parsed.metric };
 }
 
 export function validateMilestoneInput(
@@ -159,7 +154,11 @@ export function validateMilestoneInput(
     return { status: "incomplete" };
   }
 
-  const positionMeters = milestoneInputMeters(kilometerInput, metricInput);
+  const parsed = parseMilestoneLabel(`${kilometerInput}+${metricInput}`);
+  if (parsed === undefined) {
+    return { status: "incomplete" };
+  }
+  const positionMeters = parsed.positionMeters;
   if (
     positionMeters < range.minimumPositionMeters ||
     positionMeters > range.maximumPositionMeters

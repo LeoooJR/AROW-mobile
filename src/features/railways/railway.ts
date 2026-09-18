@@ -1,9 +1,9 @@
-import { canonicalRailwayLineCode } from "@/features/map-features/railway-section-key";
+import { canonicalRailwayLineCode } from "@shared/railway-reference/values";
 import {
   RailwaySection,
   type RailwaySectionInput,
 } from "@/features/railways/railway-section";
-import { isNonEmptyString } from "@/types/value-validation";
+import { isNonEmptyString } from "@shared/value-validation";
 
 export interface RailwayInput {
   readonly code: string | number;

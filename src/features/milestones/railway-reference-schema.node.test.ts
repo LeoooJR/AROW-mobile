@@ -1,23 +1,31 @@
 /** @jest-environment node */
 
-const path = require("node:path");
-const { DatabaseSync } = require("node:sqlite");
+import path from "node:path";
+import { DatabaseSync } from "node:sqlite";
 
-const {
+import {
   KILOMETRIC_POINTS_TABLE,
   RAILWAY_SECTIONS_TABLE,
-} = require("./railway-reference-schema");
+  createTableSql,
+  type RailwayReferenceTableDescriptor,
+} from "@shared/railway-reference/schema";
 
 const databasePath = path.join(
   __dirname,
   "../../statics/railway_reference.sqlite",
 );
 
-function tableInfo(database, table) {
+function tableInfo(
+  database: DatabaseSync,
+  table: RailwayReferenceTableDescriptor,
+) {
   return database.prepare(`PRAGMA table_info(${table.name})`).all();
 }
 
-function tableMetadata(database, table) {
+function tableMetadata(
+  database: DatabaseSync,
+  table: RailwayReferenceTableDescriptor,
+) {
   return database
     .prepare("PRAGMA table_list")
     .all()
@@ -25,7 +33,7 @@ function tableMetadata(database, table) {
 }
 
 describe("railway reference schema synchronization", () => {
-  let database;
+  let database: DatabaseSync;
 
   beforeAll(() => {
     database = new DatabaseSync(databasePath, { readOnly: true });
@@ -55,11 +63,17 @@ describe("railway reference schema synchronization", () => {
         })),
       );
 
-      const metadata = tableMetadata(database, table);
-      expect(metadata).toMatchObject({
+      expect(tableMetadata(database, table)).toMatchObject({
         strict: table.strict ? 1 : 0,
         wr: table.withoutRowId ? 1 : 0,
       });
+
+      const schema = database
+        .prepare(
+          "SELECT sql FROM sqlite_schema WHERE type = 'table' AND name = ?",
+        )
+        .get(table.name);
+      expect(schema?.sql).toBe(createTableSql(table).trim().replace(/;$/, ""));
     },
   );
 
@@ -70,14 +84,17 @@ describe("railway reference schema synchronization", () => {
       .sort((left, right) => Number(left.seq) - Number(right.seq));
     const [foreignKey] = KILOMETRIC_POINTS_TABLE.foreignKeys;
 
-    expect(rows.map((row) => row.from)).toEqual(
-      foreignKey.columns.map((column) => column.name),
-    );
-    expect(rows.map((row) => row.to)).toEqual(
-      foreignKey.referencedColumns.map((column) => column.name),
-    );
+    expect(rows.map((row) => row.from)).toEqual(foreignKey?.columns);
+    expect(rows.map((row) => row.to)).toEqual(foreignKey?.referencedColumns);
     expect(new Set(rows.map((row) => row.table))).toEqual(
-      new Set([foreignKey.referencedTableName]),
+      new Set([foreignKey?.referencedTableName]),
     );
+  });
+
+  test("bundled database passes integrity and foreign-key checks", () => {
+    expect(database.prepare("PRAGMA integrity_check").get()).toEqual({
+      integrity_check: "ok",
+    });
+    expect(database.prepare("PRAGMA foreign_key_check").get()).toBeUndefined();
   });
 });

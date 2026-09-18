@@ -8,14 +8,14 @@ export const CHECK_DATABASE_INTEGRITY = "PRAGMA integrity_check";
 export const CHECK_FOREIGN_KEYS = "PRAGMA foreign_key_check";
 
 export const INSERT_RAILWAY_SECTION = `
-  INSERT INTO railway_sections (
-    code_ligne, rg_troncon, idgaia, lib_ligne, type_ligne, pkd, pkf, has_geometry
+  INSERT INTO ${RAILWAY_SECTIONS_TABLE.name} (
+    ${projection(RAILWAY_SECTIONS_TABLE, ["code_ligne", "rg_troncon", "idgaia", "lib_ligne", "type_ligne", "pkd", "pkf", "has_geometry"])}
   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
 export const INSERT_KILOMETRIC_POINT = `
-  INSERT INTO kilometric_points (
-    code_ligne, rg_troncon, position_m, label, latitude, longitude
+  INSERT INTO ${KILOMETRIC_POINTS_TABLE.name} (
+    ${projection(KILOMETRIC_POINTS_TABLE, ["code_ligne", "rg_troncon", "position_m", "label", "latitude", "longitude"])}
   ) VALUES (?, ?, ?, ?, ?, ?)
 `;
 
@@ -35,3 +35,8 @@ export const SELECT_DATABASE_COUNTS = `
         )) AS geometry_without_milestone_count,
     (SELECT COUNT(*) FROM kilometric_points) AS milestone_count
 `;
+import {
+  KILOMETRIC_POINTS_TABLE,
+  projection,
+  RAILWAY_SECTIONS_TABLE,
+} from "../../shared/railway-reference/schema";
