@@ -3,7 +3,8 @@ import {
   milestonePositionMeters,
   requireCoordinate,
   requirePositiveInteger,
-} from "./validation.mjs";
+} from "./validation";
+import type { Milestone, ParsedMilestones, SkippedMilestone } from "./types";
 
 const EXPECTED_HEADER = Object.freeze([
   "TYPE_REPER",
@@ -17,14 +18,17 @@ const EXPECTED_HEADER = Object.freeze([
 const LINE_REFERENCE = /^(\d{6})-(\d+)$/;
 const SKIPPED_LABELS = new Set(["D+000"]);
 
-function parseDecimal(value, context) {
+function parseDecimal(value: string, context: string): number {
   if (!/^-?\d+(?:[.,]\d+)?(?:e[+-]?\d+)?$/i.test(value)) {
     throw new Error(`${context} must be a decimal number`);
   }
   return Number(value.replace(",", "."));
 }
 
-function parseLineReference(value, context) {
+function parseLineReference(
+  value: string,
+  context: string,
+): Readonly<{ code: string; rank: number }> {
   const match = LINE_REFERENCE.exec(value);
   if (match === null) {
     throw new Error(`${context} must use the six-digit-code-rank format`);
@@ -35,7 +39,10 @@ function parseLineReference(value, context) {
   };
 }
 
-function parseMilestone(fields, lineNumber) {
+function parseMilestone(
+  fields: readonly string[],
+  lineNumber: number,
+): Milestone {
   const context = `Milestone CSV line ${lineNumber}`;
   const [
     ,
@@ -91,7 +98,7 @@ function parseMilestone(fields, lineNumber) {
   });
 }
 
-export function parseMilestoneCsv(buffer) {
+export function parseMilestoneCsv(buffer: Uint8Array): ParsedMilestones {
   const text = Buffer.from(buffer).toString("latin1");
   const lines = text.split(/\r?\n/);
   const header = lines.shift()?.split(";");
@@ -99,9 +106,9 @@ export function parseMilestoneCsv(buffer) {
     throw new Error("Milestone CSV header does not match the expected format");
   }
 
-  const milestones = [];
-  const skipped = [];
-  const ids = new Set();
+  const milestones: Milestone[] = [];
+  const skipped: SkippedMilestone[] = [];
+  const ids = new Set<string>();
   for (const [index, line] of lines.entries()) {
     if (line === "") {
       continue;

@@ -4,7 +4,15 @@ import {
   requireCoordinate,
   requireNonEmptyString,
   requirePositiveInteger,
-} from "./validation.mjs";
+} from "./validation";
+import type {
+  GeoJsonPosition,
+  NormalizedRailwayData,
+  RailwayFeature,
+  RailwayFeatureCollection,
+  RailwayGeometry,
+  RailwaySectionWithGeometry,
+} from "./types";
 
 const RAILWAY_PROPERTIES = Object.freeze([
   "type_ligne",
@@ -29,7 +37,10 @@ const REMOVED_PROPERTIES = new Set([
   "geo_point_2d",
 ]);
 
-function requirePosition(value, context) {
+function requirePosition(
+  value: unknown,
+  context: string,
+): asserts value is GeoJsonPosition {
   if (!Array.isArray(value) || (value.length !== 2 && value.length !== 3)) {
     throw new Error(`${context} must be a GeoJSON position`);
   }
@@ -44,7 +55,10 @@ function requirePosition(value, context) {
   }
 }
 
-function requireLineCoordinates(value, context) {
+function requireLineCoordinates(
+  value: unknown,
+  context: string,
+): asserts value is readonly GeoJsonPosition[] {
   if (!Array.isArray(value) || value.length < 2) {
     throw new Error(`${context} must contain at least two positions`);
   }
@@ -54,7 +68,10 @@ function requireLineCoordinates(value, context) {
   });
 }
 
-function requireGeometry(value, context) {
+function requireGeometry(
+  value: unknown,
+  context: string,
+): asserts value is RailwayGeometry {
   if (!isRecord(value)) {
     throw new Error(`${context} must contain a geometry`);
   }
@@ -78,7 +95,10 @@ function requireGeometry(value, context) {
   throw new Error(`${context} must be a LineString or MultiLineString`);
 }
 
-function railwaySectionFromFeature(value, index) {
+function railwaySectionFromFeature(
+  value: unknown,
+  index: number,
+): RailwaySectionWithGeometry {
   const context = `Railway feature ${index}`;
   if (
     !isRecord(value) ||
@@ -123,15 +143,19 @@ function railwaySectionFromFeature(value, index) {
   });
 }
 
-function normalizedFeature(value, index) {
+function normalizedFeature(value: unknown, index: number): RailwayFeature {
+  const context = `Railway feature ${index}`;
+  if (!isRecord(value) || !isRecord(value.properties)) {
+    throw new Error(`${context} must be a GeoJSON feature with properties`);
+  }
   const section = railwaySectionFromFeature(
     {
       ...value,
-      id: `${value?.properties?.code_ligne}:${value?.properties?.rg_troncon}`,
+      id: `${value.properties.code_ligne}:${value.properties.rg_troncon}`,
     },
     index,
   );
-  const context = `Railway feature ${index}`;
+  requireGeometry(value.geometry, context);
   for (const property of Object.keys(value.properties)) {
     if (
       !RAILWAY_PROPERTIES.includes(property) &&
@@ -150,19 +174,23 @@ function normalizedFeature(value, index) {
   return Object.freeze({
     type: "Feature",
     geometry: value.geometry,
-    properties: Object.freeze(
-      Object.fromEntries(
-        RAILWAY_PROPERTIES.map((property) => [
-          property,
-          value.properties[property],
-        ]),
-      ),
-    ),
+    properties: Object.freeze({
+      type_ligne: section.railwayType,
+      idgaia: section.gaiaId,
+      code_ligne: section.code,
+      lib_ligne: section.name,
+      rg_troncon: section.rank,
+      pkd: section.startMilestone,
+      pkf: section.endMilestone,
+    }),
     id: `${section.code}:${section.rank}`,
   });
 }
 
-function requireFeatureCollection(value) {
+function requireFeatureCollection(value: unknown): asserts value is Readonly<{
+  type: "FeatureCollection";
+  features: readonly unknown[];
+}> {
   if (!isRecord(value) || value.type !== "FeatureCollection") {
     throw new Error("Railway GeoJSON must be a FeatureCollection");
   }
@@ -171,8 +199,10 @@ function requireFeatureCollection(value) {
   }
 }
 
-function requireUniqueSections(sections) {
-  const ids = new Set();
+function requireUniqueSections(
+  sections: readonly RailwaySectionWithGeometry[],
+): void {
+  const ids = new Set<string>();
   for (const section of sections) {
     const id = `${section.code}:${section.rank}`;
     if (ids.has(id)) {
@@ -182,10 +212,10 @@ function requireUniqueSections(sections) {
   }
 }
 
-export function normalizeRailwayGeoJson(value) {
+export function normalizeRailwayGeoJson(value: unknown): NormalizedRailwayData {
   requireFeatureCollection(value);
   const features = value.features.map(normalizedFeature);
-  const geojson = Object.freeze({
+  const geojson: RailwayFeatureCollection = Object.freeze({
     type: "FeatureCollection",
     features: Object.freeze(features),
   });
@@ -197,7 +227,9 @@ export function normalizeRailwayGeoJson(value) {
   });
 }
 
-export function parseRailwaySections(value) {
+export function parseRailwaySections(
+  value: unknown,
+): readonly RailwaySectionWithGeometry[] {
   requireFeatureCollection(value);
 
   const sections = value.features.map(railwaySectionFromFeature);

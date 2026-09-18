@@ -7,11 +7,38 @@ import {
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
+import type { RailwayResources, StagingWorkspace } from "./types";
+
+interface StagingOptions {
+  readonly databasePath: string;
+  readonly geojsonPath: string;
+  readonly resources: RailwayResources;
+}
+
+interface Backup {
+  readonly backupPath: string;
+  readonly targetPath: string;
+}
+
+function restoreBackups(
+  backups: readonly Backup[],
+  promotedPaths: readonly string[],
+): void {
+  for (const targetPath of [...promotedPaths].reverse()) {
+    rmSync(targetPath, { force: true });
+  }
+  for (const backup of [...backups].reverse()) {
+    if (existsSync(backup.backupPath)) {
+      renameSync(backup.backupPath, backup.targetPath);
+    }
+  }
+}
+
 export function createStagingWorkspace({
   databasePath,
   geojsonPath,
   resources,
-}) {
+}: StagingOptions): StagingWorkspace {
   const targetDatabasePath = resolve(databasePath);
   const targetGeojsonPath = resolve(geojsonPath);
   if (dirname(targetDatabasePath) !== dirname(targetGeojsonPath)) {
@@ -32,18 +59,7 @@ export function createStagingWorkspace({
   });
 }
 
-function restoreBackups(backups, promotedPaths) {
-  for (const targetPath of promotedPaths.reverse()) {
-    rmSync(targetPath, { force: true });
-  }
-  for (const backup of backups.reverse()) {
-    if (existsSync(backup.backupPath)) {
-      renameSync(backup.backupPath, backup.targetPath);
-    }
-  }
-}
-
-export function promoteStagedOutputs(workspace) {
+export function promoteStagedOutputs(workspace: StagingWorkspace): void {
   const outputs = [
     {
       stagingPath: workspace.stagedGeojsonPath,
@@ -54,8 +70,8 @@ export function promoteStagedOutputs(workspace) {
       targetPath: workspace.targetDatabasePath,
     },
   ];
-  const backups = [];
-  const promotedPaths = [];
+  const backups: Backup[] = [];
+  const promotedPaths: string[] = [];
   try {
     for (const [index, output] of outputs.entries()) {
       if (existsSync(output.targetPath)) {
@@ -74,6 +90,6 @@ export function promoteStagedOutputs(workspace) {
   }
 }
 
-export function removeStagingWorkspace(workspace) {
+export function removeStagingWorkspace(workspace: StagingWorkspace): void {
   rmSync(workspace.directory, { force: true, recursive: true });
 }

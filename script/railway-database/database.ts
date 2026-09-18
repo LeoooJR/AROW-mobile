@@ -1,4 +1,5 @@
 import { DatabaseSync } from "node:sqlite";
+import type { SQLOutputValue } from "node:sqlite";
 
 import {
   BEGIN_TRANSACTION,
@@ -12,13 +13,27 @@ import {
   SELECT_DATABASE_COUNTS,
   SET_SCHEMA_VERSION,
   VACUUM_DATABASE,
-} from "./queries.mjs";
-import {
-  KILOMETRIC_POINTS_SCHEMA,
-  RAILWAY_SECTIONS_SCHEMA,
-} from "./schema.mjs";
+} from "./queries";
+import { KILOMETRIC_POINTS_SCHEMA, RAILWAY_SECTIONS_SCHEMA } from "./schema";
+import type {
+  GenerationSummary,
+  Milestone,
+  RailwaySection,
+  RailwaySectionWithGeometry,
+  RailwaySectionWithoutGeometry,
+} from "./types";
 
-function fallbackRailwaySection(milestone) {
+interface DatabaseCounts {
+  readonly fallbackSectionCount: number;
+  readonly geometryCount: number;
+  readonly geometryWithoutMilestoneCount: number;
+  readonly milestoneCount: number;
+  readonly railwaySectionCount: number;
+}
+
+function fallbackRailwaySection(
+  milestone: Milestone,
+): RailwaySectionWithoutGeometry {
   return Object.freeze({
     code: milestone.code,
     endMilestone: null,
@@ -31,8 +46,11 @@ function fallbackRailwaySection(milestone) {
   });
 }
 
-export function completeRailwaySections(geojsonSections, milestones) {
-  const sections = new Map(
+export function completeRailwaySections(
+  geojsonSections: readonly RailwaySectionWithGeometry[],
+  milestones: readonly Milestone[],
+): readonly RailwaySection[] {
+  const sections = new Map<string, RailwaySection>(
     geojsonSections.map((section) => [
       `${section.code}:${section.rank}`,
       section,
@@ -50,7 +68,10 @@ export function completeRailwaySections(geojsonSections, milestones) {
   );
 }
 
-function insertRailwaySections(database, sections) {
+function insertRailwaySections(
+  database: DatabaseSync,
+  sections: readonly RailwaySection[],
+): void {
   const statement = database.prepare(INSERT_RAILWAY_SECTION);
   for (const section of sections) {
     statement.run(
@@ -66,7 +87,10 @@ function insertRailwaySections(database, sections) {
   }
 }
 
-function insertMilestones(database, milestones) {
+function insertMilestones(
+  database: DatabaseSync,
+  milestones: readonly Milestone[],
+): void {
   const statement = database.prepare(INSERT_KILOMETRIC_POINT);
   for (const milestone of milestones) {
     statement.run(
@@ -80,7 +104,11 @@ function insertMilestones(database, milestones) {
   }
 }
 
-function populateDatabase(database, sections, milestones) {
+function populateDatabase(
+  database: DatabaseSync,
+  sections: readonly RailwaySection[],
+  milestones: readonly Milestone[],
+): void {
   database.exec(BEGIN_TRANSACTION);
   try {
     database.exec(RAILWAY_SECTIONS_SCHEMA);
@@ -95,7 +123,11 @@ function populateDatabase(database, sections, milestones) {
   }
 }
 
-export function createRailwayDatabase(databasePath, sections, milestones) {
+export function createRailwayDatabase(
+  databasePath: string,
+  sections: readonly RailwaySection[],
+  milestones: readonly Milestone[],
+): void {
   const database = new DatabaseSync(databasePath);
   try {
     database.exec(ENABLE_FOREIGN_KEYS);
@@ -106,7 +138,44 @@ export function createRailwayDatabase(databasePath, sections, milestones) {
   }
 }
 
-export function validateRailwayDatabase(databasePath, expected) {
+function requireCount(
+  value: SQLOutputValue | undefined,
+  column: string,
+): number {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
+    throw new Error(`Generated database returned an invalid ${column}`);
+  }
+  return value;
+}
+
+function databaseCounts(
+  row: Record<string, SQLOutputValue> | undefined,
+): DatabaseCounts {
+  if (row === undefined) {
+    throw new Error("Generated database did not return row counts");
+  }
+  return Object.freeze({
+    fallbackSectionCount: requireCount(
+      row.fallback_section_count,
+      "fallback section count",
+    ),
+    geometryCount: requireCount(row.geometry_count, "geometry count"),
+    geometryWithoutMilestoneCount: requireCount(
+      row.geometry_without_milestone_count,
+      "geometry without milestone count",
+    ),
+    milestoneCount: requireCount(row.milestone_count, "milestone count"),
+    railwaySectionCount: requireCount(
+      row.railway_section_count,
+      "railway section count",
+    ),
+  });
+}
+
+export function validateRailwayDatabase(
+  databasePath: string,
+  expected: GenerationSummary,
+): void {
   const database = new DatabaseSync(databasePath, { readOnly: true });
   try {
     const integrity = database.prepare(CHECK_DATABASE_INTEGRITY).get();
@@ -117,14 +186,16 @@ export function validateRailwayDatabase(databasePath, expected) {
       throw new Error("Generated database contains an invalid foreign key");
     }
 
-    const counts = database.prepare(SELECT_DATABASE_COUNTS).get();
+    const counts = databaseCounts(
+      database.prepare(SELECT_DATABASE_COUNTS).get(),
+    );
     if (
-      counts?.railway_section_count !== expected.railwaySectionCount ||
-      counts?.geometry_count !== expected.geometryCount ||
-      counts?.fallback_section_count !== expected.fallbackSectionCount ||
-      counts?.geometry_without_milestone_count !==
+      counts.railwaySectionCount !== expected.railwaySectionCount ||
+      counts.geometryCount !== expected.geometryCount ||
+      counts.fallbackSectionCount !== expected.fallbackSectionCount ||
+      counts.geometryWithoutMilestoneCount !==
         expected.geometryWithoutMilestoneCount ||
-      counts?.milestone_count !== expected.milestoneCount
+      counts.milestoneCount !== expected.milestoneCount
     ) {
       throw new Error(
         "Generated database row counts do not match their sources",

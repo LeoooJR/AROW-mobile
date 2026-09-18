@@ -1,27 +1,35 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { pathToFileURL } from "node:url";
 
-import { parseMilestoneCsv } from "./railway-database/csv.mjs";
+import { parseMilestoneCsv } from "./csv";
 import {
   completeRailwaySections,
   createRailwayDatabase,
   validateRailwayDatabase,
-} from "./railway-database/database.mjs";
-import { normalizeRailwayGeoJson } from "./railway-database/geojson.mjs";
-import {
-  downloadResource,
-  RAILWAY_RESOURCES,
-} from "./railway-database/resources.mjs";
+} from "./database";
+import { normalizeRailwayGeoJson } from "./geojson";
+import { downloadResource, RAILWAY_RESOURCES } from "./resources";
 import {
   createStagingWorkspace,
   promoteStagedOutputs,
   removeStagingWorkspace,
-} from "./railway-database/staging.mjs";
+} from "./staging";
+import type {
+  GenerationLogger,
+  GenerationSummary,
+  Milestone,
+  RailwayFeatureCollection,
+  RailwayResources,
+  RailwaySection,
+  RailwaySectionWithGeometry,
+  SetupOptions,
+  SkippedMilestone,
+  StagingWorkspace,
+} from "./types";
 
 const DEFAULT_GEOJSON_PATH = resolve("src/statics/lignes-par-type.geojson");
 const DEFAULT_DATABASE_PATH = resolve("src/statics/railway_reference.sqlite");
-const EXPECTED_SNAPSHOT = Object.freeze({
+const EXPECTED_SNAPSHOT: GenerationSummary = Object.freeze({
   fallbackSectionCount: 2,
   geometryCount: 1043,
   geometryWithoutMilestoneCount: 27,
@@ -29,12 +37,32 @@ const EXPECTED_SNAPSHOT = Object.freeze({
   railwaySectionCount: 1045,
   skippedMilestoneCount: 1,
 });
+const SUMMARY_KEYS = [
+  "fallbackSectionCount",
+  "geometryCount",
+  "geometryWithoutMilestoneCount",
+  "milestoneCount",
+  "railwaySectionCount",
+  "skippedMilestoneCount",
+] as const satisfies readonly (keyof GenerationSummary)[];
+
+interface RailwaySources {
+  readonly geojson: RailwayFeatureCollection;
+  readonly geojsonSections: readonly RailwaySectionWithGeometry[];
+  readonly milestones: readonly Milestone[];
+  readonly skipped: readonly SkippedMilestone[];
+}
+
+interface GenerationResult {
+  readonly skipped: readonly SkippedMilestone[];
+  readonly summary: GenerationSummary;
+}
 
 async function downloadRailwaySources(
-  workspace,
-  resources,
-  fetchImplementation,
-) {
+  workspace: StagingWorkspace,
+  resources: RailwayResources,
+  fetchImplementation: NonNullable<SetupOptions["fetchImplementation"]>,
+): Promise<void> {
   const results = await Promise.allSettled([
     downloadResource(
       resources.geojson,
@@ -53,8 +81,10 @@ async function downloadRailwaySources(
   }
 }
 
-function readRailwaySources(workspace) {
-  const rawGeojson = JSON.parse(readFileSync(workspace.rawGeojsonPath, "utf8"));
+function readRailwaySources(workspace: StagingWorkspace): RailwaySources {
+  const rawGeojson: unknown = JSON.parse(
+    readFileSync(workspace.rawGeojsonPath, "utf8"),
+  );
   const { geojson, sections: geojsonSections } =
     normalizeRailwayGeoJson(rawGeojson);
   const { milestones, skipped } = parseMilestoneCsv(
@@ -63,7 +93,12 @@ function readRailwaySources(workspace) {
   return Object.freeze({ geojson, geojsonSections, milestones, skipped });
 }
 
-function summarizeRailwayData(geojsonSections, sections, milestones, skipped) {
+function summarizeRailwayData(
+  geojsonSections: readonly RailwaySectionWithGeometry[],
+  sections: readonly RailwaySection[],
+  milestones: readonly Milestone[],
+  skipped: readonly SkippedMilestone[],
+): GenerationSummary {
   const milestoneSectionIds = new Set(
     milestones.map((milestone) => `${milestone.code}:${milestone.rank}`),
   );
@@ -79,11 +114,15 @@ function summarizeRailwayData(geojsonSections, sections, milestones, skipped) {
   });
 }
 
-function validateExpectedSnapshot(summary, expectedSnapshot) {
+function validateExpectedSnapshot(
+  summary: GenerationSummary,
+  expectedSnapshot: GenerationSummary | undefined,
+): void {
   if (expectedSnapshot === undefined) {
     return;
   }
-  for (const [key, expectedValue] of Object.entries(expectedSnapshot)) {
+  for (const key of SUMMARY_KEYS) {
+    const expectedValue = expectedSnapshot[key];
     if (summary[key] !== expectedValue) {
       throw new Error(
         `Generated ${key} does not match the pinned snapshot: expected ${expectedValue}, received ${summary[key]}`,
@@ -92,7 +131,10 @@ function validateExpectedSnapshot(summary, expectedSnapshot) {
   }
 }
 
-function buildStagedAssets(workspace, expectedSnapshot) {
+function buildStagedAssets(
+  workspace: StagingWorkspace,
+  expectedSnapshot: GenerationSummary | undefined,
+): GenerationResult {
   const { geojson, geojsonSections, milestones, skipped } =
     readRailwaySources(workspace);
   const sections = completeRailwaySections(geojsonSections, milestones);
@@ -110,7 +152,10 @@ function buildStagedAssets(workspace, expectedSnapshot) {
   return Object.freeze({ skipped, summary });
 }
 
-function reportGeneration({ skipped, summary }, logger) {
+function reportGeneration(
+  { skipped, summary }: GenerationResult,
+  logger: GenerationLogger,
+): void {
   for (const skippedMilestone of skipped) {
     logger.warn(
       `Skipped unsupported milestone ${skippedMilestone.label} at CSV line ${skippedMilestone.lineNumber}`,
@@ -128,7 +173,7 @@ export async function setupRailwayDatabase({
   geojsonPath = DEFAULT_GEOJSON_PATH,
   logger = console,
   resources = RAILWAY_RESOURCES,
-} = {}) {
+}: SetupOptions = {}): Promise<GenerationSummary> {
   const workspace = createStagingWorkspace({
     databasePath,
     geojsonPath,
@@ -143,18 +188,4 @@ export async function setupRailwayDatabase({
   } finally {
     removeStagingWorkspace(workspace);
   }
-}
-
-async function main() {
-  await setupRailwayDatabase();
-}
-
-if (
-  process.argv[1] !== undefined &&
-  import.meta.url === pathToFileURL(process.argv[1]).href
-) {
-  main().catch((cause) => {
-    console.error(cause instanceof Error ? cause.message : cause);
-    process.exitCode = 1;
-  });
 }

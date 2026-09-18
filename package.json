@@ -51,6 +51,7 @@
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/react-native": "^14.0.1",
     "@types/jest": "29.5.14",
+    "@types/node": "^24.13.5",
     "@types/react": "~19.2.2",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~57.0.1",
@@ -66,11 +67,12 @@
     "prettier": "^3.9.6",
     "tailwindcss": "^4.3.3",
     "test-renderer": "^1.2.0",
+    "tsx": "^4.23.13",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.66.0"
   },
   "scripts": {
-    "database:setup": "node ./script/update-railway-database.mjs",
+    "database:setup": "tsx ./script/update-railway-database.ts",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",

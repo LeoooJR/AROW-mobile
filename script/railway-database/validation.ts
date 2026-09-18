@@ -1,11 +1,14 @@
 const CANONICAL_LINE_CODE = /^\d{6}$/;
 const MILESTONE_LABEL = /^(\d+)\+(\d{3})$/;
 
-export function isRecord(value) {
+export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export function requireCanonicalLineCode(value, context) {
+export function requireCanonicalLineCode(
+  value: unknown,
+  context: string,
+): string {
   if (typeof value !== "string" || !CANONICAL_LINE_CODE.test(value)) {
     throw new Error(`${context} must contain exactly six digits`);
   }
@@ -13,7 +16,7 @@ export function requireCanonicalLineCode(value, context) {
   return value;
 }
 
-export function requireNonEmptyString(value, context) {
+export function requireNonEmptyString(value: unknown, context: string): string {
   if (typeof value !== "string" || value.length === 0) {
     throw new Error(`${context} must be a non-empty string`);
   }
@@ -21,15 +24,23 @@ export function requireNonEmptyString(value, context) {
   return value;
 }
 
-export function requirePositiveInteger(value, context) {
-  if (!Number.isInteger(value) || value <= 0) {
+export function requirePositiveInteger(
+  value: unknown,
+  context: string,
+): number {
+  if (typeof value !== "number" || !Number.isInteger(value) || value <= 0) {
     throw new Error(`${context} must be a positive integer`);
   }
 
   return value;
 }
 
-export function requireCoordinate(value, minimum, maximum, context) {
+export function requireCoordinate(
+  value: unknown,
+  minimum: number,
+  maximum: number,
+  context: string,
+): number {
   if (
     typeof value !== "number" ||
     !Number.isFinite(value) ||
@@ -42,7 +53,10 @@ export function requireCoordinate(value, minimum, maximum, context) {
   return value;
 }
 
-export function milestonePositionMeters(label, context) {
+export function milestonePositionMeters(
+  label: string,
+  context: string,
+): number {
   const match = MILESTONE_LABEL.exec(label);
   if (match === null) {
     throw new Error(`${context} must use the kilometre+metric format`);
@@ -51,7 +65,7 @@ export function milestonePositionMeters(label, context) {
   return Number(match[1]) * 1000 + Number(match[2]);
 }
 
-export function canonicalLineCode(value, context) {
+export function canonicalLineCode(value: unknown, context: string): string {
   if (
     typeof value !== "number" ||
     !Number.isInteger(value) ||

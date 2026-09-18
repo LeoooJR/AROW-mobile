@@ -3,7 +3,13 @@ import { createWriteStream, rmSync } from "node:fs";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 
-function googleDriveDownloadUrl(fileId) {
+import type {
+  FetchImplementation,
+  RailwayResource,
+  RailwayResources,
+} from "./types";
+
+function googleDriveDownloadUrl(fileId: string): string {
   const url = new URL("https://drive.usercontent.google.com/download");
   url.searchParams.set("id", fileId);
   url.searchParams.set("export", "download");
@@ -11,7 +17,14 @@ function googleDriveDownloadUrl(fileId) {
   return url.href;
 }
 
-export const RAILWAY_RESOURCES = Object.freeze({
+function resourceDownloadUrl(resource: RailwayResource): string {
+  if (resource.url !== undefined) {
+    return resource.url;
+  }
+  return googleDriveDownloadUrl(resource.fileId);
+}
+
+export const RAILWAY_RESOURCES: RailwayResources = Object.freeze({
   geojson: Object.freeze({
     fileId: "14gdtFn97t19Yf-BnU0q8Z9p9Ap5lXhM_",
     name: "lignes-par-type.geojson",
@@ -25,12 +38,12 @@ export const RAILWAY_RESOURCES = Object.freeze({
 });
 
 export async function downloadResource(
-  resource,
-  destinationPath,
-  fetchImplementation = fetch,
-) {
-  const url = resource.url ?? googleDriveDownloadUrl(resource.fileId);
-  let response;
+  resource: RailwayResource,
+  destinationPath: string,
+  fetchImplementation: FetchImplementation = fetch,
+): Promise<void> {
+  const url = resourceDownloadUrl(resource);
+  let response: Response;
   try {
     response = await fetchImplementation(url, { redirect: "follow" });
   } catch (cause) {
@@ -55,7 +68,7 @@ export async function downloadResource(
 
   const hash = createHash("sha256");
   const hashingStream = new Transform({
-    transform(chunk, _encoding, callback) {
+    transform(chunk: Uint8Array, _encoding, callback) {
       hash.update(chunk);
       callback(null, chunk);
     },
@@ -63,7 +76,7 @@ export async function downloadResource(
 
   try {
     await pipeline(
-      Readable.fromWeb(response.body),
+      Readable.from(response.body),
       hashingStream,
       createWriteStream(destinationPath, { flags: "wx" }),
     );

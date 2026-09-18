@@ -1,13 +1,21 @@
 /** @jest-environment node */
 
-const { createHash } = require("node:crypto");
-const { mkdtempSync, readFileSync, rmSync, writeFileSync } = require("node:fs");
-const { tmpdir } = require("node:os");
-const { join } = require("node:path");
-const { pathToFileURL } = require("node:url");
-const { DatabaseSync } = require("node:sqlite");
+import { createHash } from "node:crypto";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { DatabaseSync } from "node:sqlite";
 
-const SCRIPT_DIRECTORY = join(process.cwd(), "script");
+import { parseMilestoneCsv } from "./railway-database/csv";
+import { normalizeRailwayGeoJson } from "./railway-database/geojson";
+import { downloadResource } from "./railway-database/resources";
+import { setupRailwayDatabase } from "./railway-database/setup";
+import type {
+  FetchImplementation,
+  GenerationLogger,
+  RailwayResources,
+  SetupOptions,
+} from "./railway-database/types";
 
 const RAW_GEOJSON = {
   type: "FeatureCollection",
@@ -54,11 +62,16 @@ const RAW_CSV = [
   "",
 ].join("\n");
 
-function checksum(buffer) {
+interface RailwayFixtures {
+  readonly buffers: ReadonlyMap<string, Uint8Array>;
+  readonly manifest: RailwayResources;
+}
+
+function checksum(buffer: Uint8Array): string {
   return createHash("sha256").update(buffer).digest("hex");
 }
 
-function fixtureResources() {
+function fixtureResources(): RailwayFixtures {
   const geojson = Buffer.from(JSON.stringify(RAW_GEOJSON));
   const milestones = Buffer.from(RAW_CSV, "latin1");
   return {
@@ -81,42 +94,24 @@ function fixtureResources() {
   };
 }
 
-function fixtureFetch(buffers) {
-  return jest.fn(async (url) => {
-    const body = buffers.get(url);
+function fixtureFetch(
+  buffers: ReadonlyMap<string, Uint8Array>,
+): jest.MockedFunction<FetchImplementation> {
+  return jest.fn(async (input: string | URL) => {
+    const body = buffers.get(input.toString());
     if (body === undefined) {
       return new Response("Not found", { status: 404 });
     }
-    return new Response(body, {
+    return new Response(Uint8Array.from(body).buffer, {
       headers: { "content-type": "application/octet-stream" },
     });
   });
 }
 
 describe("railway database setup", () => {
-  let directory;
-  let databasePath;
-  let geojsonPath;
-  let parseMilestoneCsv;
-  let normalizeRailwayGeoJson;
-  let downloadResource;
-  let setupRailwayDatabase;
-
-  beforeAll(async () => {
-    ({ parseMilestoneCsv } = await import(
-      pathToFileURL(join(SCRIPT_DIRECTORY, "railway-database/csv.mjs")).href
-    ));
-    ({ normalizeRailwayGeoJson } = await import(
-      pathToFileURL(join(SCRIPT_DIRECTORY, "railway-database/geojson.mjs")).href
-    ));
-    ({ downloadResource } = await import(
-      pathToFileURL(join(SCRIPT_DIRECTORY, "railway-database/resources.mjs"))
-        .href
-    ));
-    ({ setupRailwayDatabase } = await import(
-      pathToFileURL(join(SCRIPT_DIRECTORY, "update-railway-database.mjs")).href
-    ));
-  });
+  let directory: string;
+  let databasePath: string;
+  let geojsonPath: string;
 
   beforeEach(() => {
     directory = mkdtempSync(join(tmpdir(), "arow-railway-database-"));
@@ -131,7 +126,10 @@ describe("railway database setup", () => {
   test("downloads, normalizes, and deterministically rebuilds both assets", async () => {
     const { buffers, manifest } = fixtureResources();
     const fetchImplementation = fixtureFetch(buffers);
-    const logger = { log: jest.fn(), warn: jest.fn() };
+    const logger = {
+      log: jest.fn<void, [string]>(),
+      warn: jest.fn<void, [string]>(),
+    } satisfies GenerationLogger;
     const options = {
       databasePath,
       expectedSnapshot: {
@@ -146,7 +144,7 @@ describe("railway database setup", () => {
       geojsonPath,
       logger,
       resources: manifest,
-    };
+    } satisfies SetupOptions;
 
     await expect(setupRailwayDatabase(options)).resolves.toEqual({
       fallbackSectionCount: 1,
@@ -160,7 +158,9 @@ describe("railway database setup", () => {
       "Skipped unsupported milestone D+000 at CSV line 4",
     );
 
-    const geojson = JSON.parse(readFileSync(geojsonPath, "utf8"));
+    const { geojson } = normalizeRailwayGeoJson(
+      JSON.parse(readFileSync(geojsonPath, "utf8")),
+    );
     expect(geojson.features[0]).toMatchObject({ id: "001000:1" });
     expect(geojson.features[0].properties).not.toHaveProperty("x_d_l93");
 
@@ -201,7 +201,13 @@ describe("railway database setup", () => {
     const { buffers, manifest } = fixtureResources();
     writeFileSync(geojsonPath, "existing geojson");
     writeFileSync(databasePath, "existing database");
-    manifest.milestones.sha256 = "0".repeat(64);
+    const invalidManifest: RailwayResources = {
+      ...manifest,
+      milestones: {
+        ...manifest.milestones,
+        sha256: "0".repeat(64),
+      },
+    };
 
     await expect(
       setupRailwayDatabase({
@@ -209,7 +215,7 @@ describe("railway database setup", () => {
         expectedSnapshot: undefined,
         fetchImplementation: fixtureFetch(buffers),
         geojsonPath,
-        resources: manifest,
+        resources: invalidManifest,
       }),
     ).rejects.toThrow("checksum mismatch");
     expect(readFileSync(geojsonPath, "utf8")).toBe("existing geojson");
@@ -249,8 +255,17 @@ describe("railway database setup", () => {
   });
 
   test("rejects unexpected GeoJSON properties", () => {
-    const rawGeojson = structuredClone(RAW_GEOJSON);
-    rawGeojson.features[0].properties.unexpected = true;
+    const rawGeojson = {
+      ...structuredClone(RAW_GEOJSON),
+      features: RAW_GEOJSON.features.map((feature, index) =>
+        index === 0
+          ? {
+              ...feature,
+              properties: { ...feature.properties, unexpected: true },
+            }
+          : feature,
+      ),
+    };
     expect(() => normalizeRailwayGeoJson(rawGeojson)).toThrow(
       "contains unexpected property unexpected",
     );
