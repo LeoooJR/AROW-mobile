@@ -1,22 +1,22 @@
 import { type ReactElement, type ReactNode, useCallback, useMemo } from "react";
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 
-import type { Milestone } from "@/features/milestones/milestone";
-import type { MilestoneLoadState } from "@/features/milestones/milestone-load-state";
+import type { Milestone } from "@/features/milestones/domain/milestone";
 import type {
   MilestoneLookupInput,
   MilestoneSearchState,
-} from "@/features/milestones/milestone-search";
+} from "@/features/milestones/search/contracts";
 import {
   RailwayReferenceContext,
   type RailwayReferenceModel,
-} from "@/features/milestones/railway-reference-context";
+} from "@/features/railway-reference/context";
+import type { MilestoneLoadState } from "@/features/railway-reference/milestone-state";
 import {
   findMilestone as findMilestoneInDatabase,
   loadMilestones,
   loadSearchableRailways,
-} from "@/features/milestones/railway-reference-database";
-import useRailwayReferenceLoad from "@/features/milestones/use-railway-reference-load";
+} from "@/features/railway-reference/sqlite/repository";
+import useAsyncLoad from "@/features/railway-reference/use-async-load";
 import railwayReferenceDatabaseAsset from "@/statics/railway_reference.sqlite";
 
 export interface RailwayReferenceProviderProps {
@@ -27,8 +27,8 @@ function RailwayReferenceDataProvider({
   children,
 }: RailwayReferenceProviderProps): ReactElement {
   const database = useSQLiteContext();
-  const milestoneLoad = useRailwayReferenceLoad(database, loadMilestones);
-  const railwayLoad = useRailwayReferenceLoad(database, loadSearchableRailways);
+  const milestoneLoad = useAsyncLoad(database, loadMilestones);
+  const railwayLoad = useAsyncLoad(database, loadSearchableRailways);
   const milestoneState = useMemo<MilestoneLoadState>(
     () =>
       milestoneLoad.status === "ready"

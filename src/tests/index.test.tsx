@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react-native";
 
-import { Milestone } from "@/features/milestones/milestone";
-import { useRailwayReference } from "@/features/milestones/railway-reference-context";
+import { Milestone } from "@/features/milestones/domain/milestone";
+import { useRailwayReference } from "@/features/railway-reference/context";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 
 import Index from "@/app/index";
 
-jest.mock("@/features/milestones/railway-reference-context", () => ({
+jest.mock("@/features/railway-reference/context", () => ({
   useRailwayReference: jest.fn(),
 }));
 

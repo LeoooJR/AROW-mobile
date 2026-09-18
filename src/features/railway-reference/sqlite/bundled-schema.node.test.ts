@@ -12,7 +12,7 @@ import {
 
 const databasePath = path.join(
   __dirname,
-  "../../statics/railway_reference.sqlite",
+  "../../../statics/railway_reference.sqlite",
 );
 
 function tableInfo(

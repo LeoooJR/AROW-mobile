@@ -1,17 +1,15 @@
 import type { SQLiteDatabase } from "expo-sqlite";
 
-import type { Milestone } from "@/features/milestones/milestone";
-import { Milestone as MilestoneValue } from "@/features/milestones/milestone";
-import type { MilestoneLookupInput } from "@/features/milestones/milestone-search";
+import type { Milestone } from "@/features/milestones/domain/milestone";
+import { Milestone as MilestoneValue } from "@/features/milestones/domain/milestone";
+import type { MilestoneLookupInput } from "@/features/milestones/search/contracts";
+import { searchableSectionRowsToRailways } from "@/features/railway-reference/sqlite/railway-assembly";
 import {
   FIND_MILESTONE_QUERY,
   LOAD_MILESTONES_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
-} from "@/features/milestones/railway-reference-queries";
-import {
-  SearchableRailwaySectionRecord,
-  searchableRailwaySectionRecordsToRailways,
-} from "@/features/milestones/searchable-railway-section-record";
+} from "@/features/railway-reference/sqlite/queries";
+import { SearchableRailwaySectionRow } from "@/features/railway-reference/sqlite/searchable-section-row";
 import type { Railway } from "@/features/railways/railway";
 import { decodeKilometricPointDatabaseRow } from "@shared/railway-reference/records";
 
@@ -41,9 +39,9 @@ export async function loadSearchableRailways(
   const records = await database.getAllAsync<unknown>(
     LOAD_SEARCHABLE_RAILWAYS_QUERY,
   );
-  return searchableRailwaySectionRecordsToRailways(
+  return searchableSectionRowsToRailways(
     records.map((record, index) =>
-      SearchableRailwaySectionRecord.fromUnknown(record, `at row ${index}`),
+      SearchableRailwaySectionRow.fromUnknown(record, `at row ${index}`),
     ),
   );
 }

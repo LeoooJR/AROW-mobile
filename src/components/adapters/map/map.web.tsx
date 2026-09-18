@@ -3,7 +3,7 @@ import { Text, View } from "react-native";
 
 import type { MapLayerVisibility } from "@/components/adapters/map/map-layer-visibility";
 import type { MapFeature } from "@/features/map-features/map-feature";
-import type { Milestone } from "@/features/milestones/milestone";
+import type { Milestone } from "@/features/milestones/domain/milestone";
 import type { GeographicCoordinates } from "@/types/geographic-coordinates";
 
 export interface MapLocation extends GeographicCoordinates {

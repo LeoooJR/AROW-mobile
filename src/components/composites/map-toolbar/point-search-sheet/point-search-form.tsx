@@ -5,7 +5,7 @@ import MilestoneSearchStep from "@/components/composites/map-toolbar/point-searc
 import type PointSearchFormModel from "@/components/composites/map-toolbar/point-search-sheet/point-search-form-model";
 import RailwayLineStep from "@/components/composites/map-toolbar/point-search-sheet/railway-line-step";
 import RailwaySectionStep from "@/components/composites/map-toolbar/point-search-sheet/railway-section-step";
-import type { MilestoneSearchState } from "@/features/milestones/milestone-search";
+import type { MilestoneSearchState } from "@/features/milestones/search/contracts";
 
 interface PointSearchFormProps {
   readonly compact: boolean;

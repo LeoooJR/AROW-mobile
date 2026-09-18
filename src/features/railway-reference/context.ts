@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 
-import type { MilestoneLoadState } from "@/features/milestones/milestone-load-state";
-import type { MilestoneSearchModel } from "@/features/milestones/milestone-search";
+import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
+import type { MilestoneLoadState } from "@/features/railway-reference/milestone-state";
 
 export interface RailwayReferenceModel {
   readonly milestoneSearch: MilestoneSearchModel;

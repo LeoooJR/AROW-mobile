@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 
-import type { Milestone } from "@/features/milestones/milestone";
+import type { Milestone } from "@/features/milestones/domain/milestone";
 import {
   type MilestoneLookupInput,
   type MilestoneResolution,
-  validateMilestoneInput,
-} from "@/features/milestones/milestone-search";
+} from "@/features/milestones/search/contracts";
+import { validateMilestoneInput } from "@/features/milestones/search/milestone-input";
 import {
   milestoneLookupErrorResolution,
   unavailableMilestoneResolution,
-} from "@/features/milestones/milestone-search-messages";
+} from "@/features/milestones/search/resolution-messages";
 import type { Railway } from "@/features/railways/railway";
 import type { RailwaySection } from "@/features/railways/railway-section";
 

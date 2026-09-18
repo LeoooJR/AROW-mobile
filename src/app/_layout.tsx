@@ -3,7 +3,7 @@ import "../global.css";
 import { Stack } from "expo-router";
 
 import { GluestackUIProvider } from "@/components/adapters/gluestack-ui-provider";
-import RailwayReferenceProvider from "@/features/milestones/railway-reference-provider";
+import RailwayReferenceProvider from "@/features/railway-reference/provider";
 
 export default function RootLayout() {
   return (

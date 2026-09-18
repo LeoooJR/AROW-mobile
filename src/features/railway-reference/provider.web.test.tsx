@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react-native";
 
-import { useRailwayReference } from "./railway-reference-context";
-import RailwayReferenceProvider from "./railway-reference-provider.web";
+import { useRailwayReference } from "./context";
+import RailwayReferenceProvider from "./provider.web";
 
 describe("RailwayReferenceProvider web fallback", () => {
   test("supplies unavailable state and an inert lookup", async () => {

@@ -2,7 +2,7 @@ import {
   milestoneLookupErrorResolution,
   outOfRangeMilestoneResolution,
   unavailableMilestoneResolution,
-} from "./milestone-search-messages";
+} from "./resolution-messages";
 
 describe("milestone search messages", () => {
   test("formats section bounds", () => {

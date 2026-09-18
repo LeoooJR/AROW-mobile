@@ -21,7 +21,7 @@ jest.mock("expo-asset", () => ({
   ],
 }));
 
-jest.mock("@/features/milestones/railway-reference-context", () => ({
+jest.mock("@/features/railway-reference/context", () => ({
   useRailwayReference: () => ({
     milestoneSearch: {
       findMilestone: jest.fn(),
@@ -46,8 +46,8 @@ jest.mock("@/hooks/platform/use-real-location", () => ({
 
 jest.mock("@/components/adapters/map/map", () => {
   const { Milestone: MockMilestone } = jest.requireActual<
-    typeof import("@/features/milestones/milestone")
-  >("@/features/milestones/milestone");
+    typeof import("@/features/milestones/domain/milestone")
+  >("@/features/milestones/domain/milestone");
   const { Railway: MockRailway } = jest.requireActual<
     typeof import("@/features/railways/railway")
   >("@/features/railways/railway");

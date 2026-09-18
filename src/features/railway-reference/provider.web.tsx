@@ -3,8 +3,8 @@ import { type ReactElement } from "react";
 import {
   RailwayReferenceContext,
   type RailwayReferenceModel,
-} from "@/features/milestones/railway-reference-context";
-import type { RailwayReferenceProviderProps } from "@/features/milestones/railway-reference-provider";
+} from "@/features/railway-reference/context";
+import type { RailwayReferenceProviderProps } from "@/features/railway-reference/provider";
 
 const UNAVAILABLE_REFERENCE: RailwayReferenceModel = {
   milestoneSearch: {

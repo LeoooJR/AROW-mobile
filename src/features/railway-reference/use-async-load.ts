@@ -11,7 +11,7 @@ interface LoadSnapshot<Database, Value> {
   readonly state: RailwayReferenceLoadState<Value>;
 }
 
-export default function useRailwayReferenceLoad<Database, Value>(
+export default function useAsyncLoad<Database, Value>(
   database: Database,
   load: (database: Database) => Promise<Value>,
 ): RailwayReferenceLoadState<Value> {

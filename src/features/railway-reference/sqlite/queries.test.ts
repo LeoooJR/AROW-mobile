@@ -2,7 +2,7 @@ import {
   FIND_MILESTONE_QUERY,
   LOAD_MILESTONES_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
-} from "./railway-reference-queries";
+} from "./queries";
 
 describe("railway reference queries", () => {
   test("uses the same complete milestone projection for loading and lookup", () => {

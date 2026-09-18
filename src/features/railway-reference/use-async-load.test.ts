@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 
-import useRailwayReferenceLoad from "./use-railway-reference-load";
+import useAsyncLoad from "./use-async-load";
 
 function deferred<Value>() {
   let resolve!: (value: Value) => void;
@@ -10,14 +10,12 @@ function deferred<Value>() {
   return { promise, resolve };
 }
 
-describe("useRailwayReferenceLoad", () => {
+describe("useAsyncLoad", () => {
   test("reports loading, ready, and error states", async () => {
     const request = deferred<string>();
     const load = jest.fn().mockReturnValue(request.promise);
     const database = {};
-    const view = await renderHook(() =>
-      useRailwayReferenceLoad(database, load),
-    );
+    const view = await renderHook(() => useAsyncLoad(database, load));
 
     expect(view.result.current).toEqual({ status: "loading" });
     await act(async () => {
@@ -29,7 +27,7 @@ describe("useRailwayReferenceLoad", () => {
     const failedDatabase = {};
     const failedLoad = () => Promise.reject(new Error("failed"));
     const { result: failedResult } = await renderHook(() =>
-      useRailwayReferenceLoad(failedDatabase, failedLoad),
+      useAsyncLoad(failedDatabase, failedLoad),
     );
     await waitFor(() => {
       expect(failedResult.current).toEqual({ status: "error" });
@@ -41,8 +39,7 @@ describe("useRailwayReferenceLoad", () => {
     const second = deferred<string>();
     const load = (database: { request: Promise<string> }) => database.request;
     const view = await renderHook(
-      (database: { request: Promise<string> }) =>
-        useRailwayReferenceLoad(database, load),
+      (database: { request: Promise<string> }) => useAsyncLoad(database, load),
       { initialProps: { request: first.promise } },
     );
 
@@ -66,7 +63,7 @@ describe("useRailwayReferenceLoad", () => {
     const pendingDatabase = {};
     const pendingLoad = () => pending.promise;
     const { result: unmountedResult, unmount } = await renderHook(() =>
-      useRailwayReferenceLoad(pendingDatabase, pendingLoad),
+      useAsyncLoad(pendingDatabase, pendingLoad),
     );
     await unmount();
     pending.resolve("ignored");

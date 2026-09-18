@@ -12,7 +12,7 @@ import { geographicCoordinatesFromPosition } from "@/components/adapters/map/geo
 import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
 import { type MapFeature } from "@/features/map-features/map-feature";
 import { isCanonicalRailwayLineCode } from "@shared/railway-reference/values";
-import { Milestone } from "@/features/milestones/milestone";
+import { Milestone } from "@/features/milestones/domain/milestone";
 import {
   isNonEmptyString,
   isPositiveInteger,

@@ -1,7 +1,7 @@
 import { act, render, screen, userEvent } from "@testing-library/react-native";
 import { BackHandler } from "react-native";
 
-import { Milestone } from "@/features/milestones/milestone";
+import { Milestone } from "@/features/milestones/domain/milestone";
 import { Railway } from "@/features/railways/railway";
 
 import Index from "@/app/index";
@@ -49,7 +49,7 @@ jest.mock("@/hooks/platform/use-real-location", () => ({
   }),
 }));
 
-jest.mock("@/features/milestones/railway-reference-context", () => ({
+jest.mock("@/features/railway-reference/context", () => ({
   useRailwayReference: () => ({
     milestoneSearch: {
       findMilestone: jest.fn(),

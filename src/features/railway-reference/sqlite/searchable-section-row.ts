@@ -1,4 +1,3 @@
-import { Railway } from "@/features/railways/railway";
 import type {
   RailwayMilestoneRange,
   RailwaySectionGeometry,
@@ -24,7 +23,7 @@ type GeometryRecord =
     }
   | { readonly status: "absent" };
 
-export class SearchableRailwaySectionRecord {
+export class SearchableRailwaySectionRow {
   readonly #geometry: GeometryRecord;
   readonly #lineCode: string;
   readonly #lineName: string;
@@ -49,7 +48,7 @@ export class SearchableRailwaySectionRecord {
   public static fromUnknown(
     value: unknown,
     context: string,
-  ): SearchableRailwaySectionRecord {
+  ): SearchableRailwaySectionRow {
     if (
       !isRecord(value) ||
       !isUnsignedInteger(value.minimum_position_m) ||
@@ -68,11 +67,11 @@ export class SearchableRailwaySectionRecord {
       throw new Error(`Invalid searchable railway section ${context}`);
     }
 
-    return new SearchableRailwaySectionRecord(
+    return new SearchableRailwaySectionRow(
       section.code_ligne,
       section.lib_ligne,
       section.rg_troncon,
-      SearchableRailwaySectionRecord.geometryFrom(section),
+      SearchableRailwaySectionRow.geometryFrom(section),
       {
         maximumLabel: value.maximum_label,
         maximumPositionMeters: value.maximum_position_m,
@@ -125,40 +124,4 @@ export class SearchableRailwaySectionRecord {
       sectionRank: this.#sectionRank,
     };
   }
-}
-
-class RailwayRecordGroup {
-  readonly #name: string;
-  readonly #sections: RailwaySectionInput[] = [];
-
-  public constructor(name: string) {
-    this.#name = name;
-  }
-
-  public add(record: SearchableRailwaySectionRecord): void {
-    if (record.lineName !== this.#name) {
-      throw new Error(`Conflicting names for railway line ${record.lineCode}`);
-    }
-    this.#sections.push(record.toRailwaySectionInput());
-  }
-
-  public toRailway(code: string): Railway {
-    return new Railway({ code, name: this.#name, sections: this.#sections });
-  }
-}
-
-export function searchableRailwaySectionRecordsToRailways(
-  records: readonly SearchableRailwaySectionRecord[],
-): readonly Railway[] {
-  const groups = new Map<string, RailwayRecordGroup>();
-  records.forEach((record) => {
-    const group =
-      groups.get(record.lineCode) ?? new RailwayRecordGroup(record.lineName);
-    group.add(record);
-    groups.set(record.lineCode, group);
-  });
-
-  return [...groups.entries()]
-    .map(([code, group]) => group.toRailway(code))
-    .sort((left, right) => left.name.localeCompare(right.name, "fr"));
 }

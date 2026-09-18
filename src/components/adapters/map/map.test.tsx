@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
-import { Milestone } from "@/features/milestones/milestone";
+import { Milestone } from "@/features/milestones/domain/milestone";
 
 import { DARK_MAP_STYLE } from "./map-style-dark";
 import { LIGHT_MAP_STYLE } from "./map-style-light";

@@ -1,9 +1,4 @@
-import { Railway } from "@/features/railways/railway";
-
-import {
-  SearchableRailwaySectionRecord,
-  searchableRailwaySectionRecordsToRailways,
-} from "./searchable-railway-section-record";
+import { SearchableRailwaySectionRow } from "./searchable-section-row";
 
 const GEOMETRY = {
   has_geometry: 1,
@@ -38,11 +33,11 @@ const SECTION_RECORDS = [
 
 function records(values = SECTION_RECORDS) {
   return values.map((value, index) =>
-    SearchableRailwaySectionRecord.fromUnknown(value, `at row ${index}`),
+    SearchableRailwaySectionRow.fromUnknown(value, `at row ${index}`),
   );
 }
 
-describe("SearchableRailwaySectionRecord", () => {
+describe("SearchableRailwaySectionRow", () => {
   test("exposes validated joined values and converts to section input", () => {
     const record = records()[0];
 
@@ -63,18 +58,8 @@ describe("SearchableRailwaySectionRecord", () => {
     expect(Object.isFrozen(record)).toBe(true);
   });
 
-  test("groups records into sorted Railway aggregates", () => {
-    const [railway] = searchableRailwaySectionRecordsToRailways(records());
-
-    expect(railway).toBeInstanceOf(Railway);
-    expect(railway?.sections.map((section) => section.sectionRank)).toEqual([
-      1, 2,
-    ]);
-    expect(railway?.sections[0]?.railway).toBe(railway);
-  });
-
   test("constructs fallback records with absent geometry", () => {
-    const record = SearchableRailwaySectionRecord.fromUnknown(
+    const record = SearchableRailwaySectionRow.fromUnknown(
       {
         code_ligne: "008000",
         has_geometry: 0,
@@ -110,26 +95,7 @@ describe("SearchableRailwaySectionRecord", () => {
     ],
   ])("rejects %s", (_description, value) => {
     expect(() =>
-      SearchableRailwaySectionRecord.fromUnknown(value, "at row 0"),
+      SearchableRailwaySectionRow.fromUnknown(value, "at row 0"),
     ).toThrow("Invalid searchable railway section at row 0");
-  });
-
-  test("rejects line-name conflicts and duplicate section ranks", () => {
-    const first = records();
-    const conflicting = SearchableRailwaySectionRecord.fromUnknown(
-      { ...SECTION_RECORDS[1], lib_ligne: "Conflicting name" },
-      "at row 2",
-    );
-    expect(() =>
-      searchableRailwaySectionRecordsToRailways([first[0], conflicting]),
-    ).toThrow("Conflicting names for railway line 893000");
-
-    const duplicate = SearchableRailwaySectionRecord.fromUnknown(
-      { ...SECTION_RECORDS[1], rg_troncon: 2 },
-      "at row 2",
-    );
-    expect(() =>
-      searchableRailwaySectionRecordsToRailways([first[0], duplicate]),
-    ).toThrow("Railway 893000 contains duplicate section ranks");
   });
 });

@@ -10,11 +10,11 @@ import {
   DEFAULT_MAP_LAYER_VISIBILITY,
   type MapLayerVisibility,
 } from "@/components/adapters/map/map-layer-visibility";
-import { Milestone } from "@/features/milestones/milestone";
+import { Milestone } from "@/features/milestones/domain/milestone";
 import type {
   MilestoneSearchModel,
   MilestoneSearchState,
-} from "@/features/milestones/milestone-search";
+} from "@/features/milestones/search/contracts";
 import { Railway } from "@/features/railways/railway";
 
 import MapToolbar from "./index";

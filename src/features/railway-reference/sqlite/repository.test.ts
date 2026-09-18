@@ -1,14 +1,15 @@
-import { Milestone } from "./milestone";
+import { Milestone } from "@/features/milestones/domain/milestone";
+
 import {
   findMilestone,
   loadMilestones,
   loadSearchableRailways,
-} from "./railway-reference-database";
+} from "./repository";
 import {
   FIND_MILESTONE_QUERY,
   LOAD_MILESTONES_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
-} from "./railway-reference-queries";
+} from "./queries";
 
 const MILESTONE_RECORD = {
   code_ligne: "893000",

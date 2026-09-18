@@ -1,4 +1,4 @@
-import type { Milestone } from "@/features/milestones/milestone";
+import type { Milestone } from "@/features/milestones/domain/milestone";
 
 export type MilestoneLoadState =
   | { readonly status: "unavailable" }

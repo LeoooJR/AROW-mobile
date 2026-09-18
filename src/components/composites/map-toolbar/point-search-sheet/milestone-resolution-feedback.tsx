@@ -2,7 +2,7 @@ import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
 import formatMapFeatureCoordinates from "@/features/map-features/map-feature-coordinate-presentation";
-import type { MilestoneResolution } from "@/features/milestones/milestone-search";
+import type { MilestoneResolution } from "@/features/milestones/search/contracts";
 import type { Railway } from "@/features/railways/railway";
 
 interface MilestoneResolutionFeedbackProps {

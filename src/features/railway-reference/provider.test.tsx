@@ -2,8 +2,8 @@ import { renderHook, waitFor } from "@testing-library/react-native";
 import { useSQLiteContext } from "expo-sqlite";
 import { type PropsWithChildren } from "react";
 
-import { useRailwayReference } from "./railway-reference-context";
-import RailwayReferenceProvider from "./railway-reference-provider";
+import { useRailwayReference } from "./context";
+import RailwayReferenceProvider from "./provider";
 
 jest.mock("expo-sqlite", () => ({
   SQLiteProvider: ({ children }: PropsWithChildren) => children,
