@@ -1,5 +1,5 @@
 import { AbstractMapFeature } from "./abstract-map-feature";
-import { RailwaySectionKey } from "./railway-section-key";
+import { RailwaySectionKey } from "@shared/railway-reference/values";
 
 export abstract class AbstractRailwaySectionFeature<
   TKind extends string,

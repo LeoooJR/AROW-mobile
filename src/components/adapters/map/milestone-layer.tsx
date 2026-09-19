@@ -11,14 +11,14 @@ import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 import { geographicCoordinatesFromPosition } from "@/components/adapters/map/geojson-validation";
 import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
 import { type MapFeature } from "@/features/map-features/map-feature";
-import { isCanonicalRailwayLineCode } from "@/features/map-features/railway-section-key";
-import { Milestone } from "@/features/milestones/milestone";
+import { isCanonicalRailwayLineCode } from "@shared/railway-reference/values";
+import { Milestone } from "@/features/milestones/domain/milestone";
 import {
   isNonEmptyString,
   isPositiveInteger,
   isRecord,
   isUnsignedInteger,
-} from "@/types/value-validation";
+} from "@shared/value-validation";
 
 export interface MilestoneLayerProps {
   readonly milestones: readonly Milestone[];

@@ -2,8 +2,8 @@ import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
 import Button from "@/components/primitives/button";
-import type { Milestone } from "@/features/milestones/milestone";
-import type { MilestoneResolution } from "@/features/milestones/milestone-search";
+import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { MilestoneResolution } from "@/features/milestones/search/contracts";
 
 interface PointSearchFooterProps {
   readonly bottomInset: number;

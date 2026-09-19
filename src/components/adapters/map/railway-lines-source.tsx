@@ -12,14 +12,14 @@ import type { MapFeature } from "@/features/map-features/map-feature";
 import {
   isCanonicalRailwayLineCode,
   RailwaySectionKey,
-} from "@/features/map-features/railway-section-key";
+} from "@shared/railway-reference/values";
 import { Railway } from "@/features/railways/railway";
 import type { RailwaySection } from "@/features/railways/railway-section";
 import {
   isNonEmptyString,
   isPositiveInteger,
   isRecord,
-} from "@/types/value-validation";
+} from "@shared/value-validation";
 
 export interface RailwayLinesSourceProps {
   readonly data: string;

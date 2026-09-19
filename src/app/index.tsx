@@ -12,8 +12,8 @@ import LocationBar from "@/components/composites/location-bar";
 import MapFeatureDetailsCard from "@/components/composites/map-feature-details-card";
 import MapToolbar from "@/components/composites/map-toolbar";
 import type { MapFeature } from "@/features/map-features/map-feature";
-import type { Milestone } from "@/features/milestones/milestone";
-import { useRailwayReference } from "@/features/milestones/railway-reference-context";
+import type { Milestone } from "@/features/milestones/domain/milestone";
+import { useRailwayReference } from "@/features/railway-reference/context";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 import railwayLinesAsset from "@/statics/lignes-par-type.geojson";
 

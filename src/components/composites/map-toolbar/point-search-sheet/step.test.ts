@@ -1,8 +1,8 @@
 import LineStep from "@/components/composites/map-toolbar/point-search-sheet/line-step";
 import MilestoneStep from "@/components/composites/map-toolbar/point-search-sheet/milestone-step";
 import SectionStep from "@/components/composites/map-toolbar/point-search-sheet/section-step";
-import { Milestone } from "@/features/milestones/milestone";
-import type { MilestoneResolution } from "@/features/milestones/milestone-search";
+import { Milestone } from "@/features/milestones/domain/milestone";
+import type { MilestoneResolution } from "@/features/milestones/search/contracts";
 import { Railway } from "@/features/railways/railway";
 import type { RailwaySection } from "@/features/railways/railway-section";
 

@@ -51,6 +51,7 @@
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/react-native": "^14.0.1",
     "@types/jest": "29.5.14",
+    "@types/node": "^24.13.5",
     "@types/react": "~19.2.2",
     "eslint": "^9.0.0",
     "eslint-config-expo": "~57.0.1",
@@ -66,21 +67,31 @@
     "prettier": "^3.9.6",
     "tailwindcss": "^4.3.3",
     "test-renderer": "^1.2.0",
+    "tsx": "^4.23.13",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.66.0"
   },
   "scripts": {
-    "database:update": "node ./script/update-railway-database.mjs",
+    "database:check": "tsx ./script/check-railway-database.ts",
+    "database:setup": "tsx ./script/update-railway-database.ts",
+    "prestart": "npm run database:check",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
+    "preandroid": "npm run database:check",
     "android": "expo start --android",
+    "preios": "npm run database:check",
     "ios": "expo start --ios",
+    "preweb": "npm run database:check",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
+    "pretest": "npm run database:check",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "pretest:coverage": "npm run database:check",
+    "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
     "test:e2e": "maestro test .maestro",
-    "test:watch": "jest --watch"
+    "pretest:watch": "npm run database:check",
+    "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch",
+    "eas-build-post-install": "npm run database:check"
   },
   "overrides": {
     "lightningcss": "1.30.1"

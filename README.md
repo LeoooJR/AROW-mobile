@@ -10,11 +10,33 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npm install
    ```
 
-2. Start the app
+2. Download and generate the railway reference assets
 
    ```bash
-   npx expo start
+   npm run database:setup
    ```
+
+   This explicit setup step downloads the pinned railway geometry and
+   kilometric-point sources from the project's [public Google Drive
+   folder](https://drive.google.com/drive/folders/1dRbp0vyVmZoOHnN9AQIbM4YXQ7HGADx2?usp=sharing).
+   It validates their checksums, then generates the ignored
+   `src/statics/lignes-par-type.geojson` and
+   `src/statics/railway_reference.sqlite` application assets. Rerunning the
+   command safely replaces both generated files.
+
+3. Start the app
+
+   ```bash
+   npm start
+   ```
+
+The start and test commands validate that both railway reference assets are
+present and structurally valid. If this check fails, rerun
+`npm run database:setup`; the check never downloads or repairs assets itself.
+
+Before running `eas build`, complete the same setup sequence locally. The EAS
+upload includes the generated railway assets, and the remote build validates
+them before bundling the application.
 
 In the output, you'll find options to open the app in a
 

@@ -2,7 +2,7 @@ import { type ReactElement } from "react";
 import { Text } from "react-native";
 
 import LineSearchStatusMessage from "@/components/composites/map-toolbar/point-search-sheet/line-search-status-message";
-import type { MilestoneSearchState } from "@/features/milestones/milestone-search";
+import type { MilestoneSearchState } from "@/features/milestones/search/contracts";
 
 interface LineSearchFeedbackProps {
   readonly hasResults: boolean;

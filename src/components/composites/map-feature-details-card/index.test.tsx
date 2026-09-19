@@ -1,6 +1,6 @@
 import { render, screen, userEvent } from "@testing-library/react-native";
 
-import { Milestone } from "@/features/milestones/milestone";
+import { Milestone } from "@/features/milestones/domain/milestone";
 import { Railway } from "@/features/railways/railway";
 
 import MapFeatureDetailsCard from "./index";

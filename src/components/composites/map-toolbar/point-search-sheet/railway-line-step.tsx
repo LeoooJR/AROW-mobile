@@ -7,7 +7,7 @@ import PointSearchStepHeader from "@/components/composites/map-toolbar/point-sea
 import RailwayLineResult from "@/components/composites/map-toolbar/point-search-sheet/railway-line-result";
 import Button from "@/components/primitives/button";
 import TextField from "@/components/primitives/text-field";
-import type { MilestoneSearchState } from "@/features/milestones/milestone-search";
+import type { MilestoneSearchState } from "@/features/milestones/search/contracts";
 import type { Railway } from "@/features/railways/railway";
 
 interface RailwayLineStepProps {

@@ -20,7 +20,7 @@ import MilestoneLayer from "@/components/adapters/map/milestone-layer";
 import RailwayLinesSource from "@/components/adapters/map/railway-lines-source";
 import UserLocationMarker from "@/components/adapters/map/user-location-marker";
 import type { MapFeature } from "@/features/map-features/map-feature";
-import type { Milestone } from "@/features/milestones/milestone";
+import type { Milestone } from "@/features/milestones/domain/milestone";
 import type { GeographicCoordinates } from "@/types/geographic-coordinates";
 
 export interface MapLocation extends GeographicCoordinates {

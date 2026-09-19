@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Generated native projects (Expo Continuous Native Generation)
+/android/
+/ios/
+
+# Native build files and signing credentials
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+*.apk
+*.aab
+*.ipa
+
+# Metro
+.metro-health-check*
+.cache/
+
+# Generated railway reference assets
+/src/statics/lignes-par-type.geojson
+/src/statics/railway_reference.sqlite
+/src/statics/.railway-database-*
+
+# Logs
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Tests
+coverage/
+.maestro/artifacts/*
+!.maestro/artifacts/.gitkeep
+
+# Local environment files
+.env*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Tooling
+.eslintcache
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Generated railway assets required by EAS Build
+!/src/statics/lignes-par-type.geojson
+!/src/statics/railway_reference.sqlite

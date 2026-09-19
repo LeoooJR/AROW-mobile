@@ -1,8 +1,8 @@
 import { renderHook, waitFor } from "@testing-library/react-native";
 
 import useMilestoneResolution from "@/components/composites/map-toolbar/point-search-sheet/use-milestone-resolution";
-import { Milestone } from "@/features/milestones/milestone";
-import type { MilestoneLookupInput } from "@/features/milestones/milestone-search";
+import { Milestone } from "@/features/milestones/domain/milestone";
+import type { MilestoneLookupInput } from "@/features/milestones/search/contracts";
 import { Railway } from "@/features/railways/railway";
 
 const line = new Railway({
