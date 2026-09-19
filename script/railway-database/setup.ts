@@ -1,6 +1,10 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
 
+import {
+  DEFAULT_RAILWAY_DATABASE_PATH,
+  DEFAULT_RAILWAY_GEOJSON_PATH,
+  EXPECTED_RAILWAY_SNAPSHOT,
+} from "./configuration";
 import { parseMilestoneCsv } from "./csv";
 import {
   completeRailwaySections,
@@ -27,16 +31,6 @@ import type {
   StagingWorkspace,
 } from "./types";
 
-const DEFAULT_GEOJSON_PATH = resolve("src/statics/lignes-par-type.geojson");
-const DEFAULT_DATABASE_PATH = resolve("src/statics/railway_reference.sqlite");
-const EXPECTED_SNAPSHOT: GenerationSummary = Object.freeze({
-  fallbackSectionCount: 2,
-  geometryCount: 1043,
-  geometryWithoutMilestoneCount: 27,
-  milestoneCount: 36812,
-  railwaySectionCount: 1045,
-  skippedMilestoneCount: 1,
-});
 const SUMMARY_KEYS = [
   "fallbackSectionCount",
   "geometryCount",
@@ -167,10 +161,10 @@ function reportGeneration(
 }
 
 export async function setupRailwayDatabase({
-  databasePath = DEFAULT_DATABASE_PATH,
-  expectedSnapshot = EXPECTED_SNAPSHOT,
+  databasePath = DEFAULT_RAILWAY_DATABASE_PATH,
+  expectedSnapshot = EXPECTED_RAILWAY_SNAPSHOT,
   fetchImplementation = fetch,
-  geojsonPath = DEFAULT_GEOJSON_PATH,
+  geojsonPath = DEFAULT_RAILWAY_GEOJSON_PATH,
   logger = console,
   resources = RAILWAY_RESOURCES,
 }: SetupOptions = {}): Promise<GenerationSummary> {

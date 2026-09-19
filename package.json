@@ -72,17 +72,26 @@
     "typescript-eslint": "^8.66.0"
   },
   "scripts": {
+    "database:check": "tsx ./script/check-railway-database.ts",
     "database:setup": "tsx ./script/update-railway-database.ts",
+    "prestart": "npm run database:check",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
+    "preandroid": "npm run database:check",
     "android": "expo start --android",
+    "preios": "npm run database:check",
     "ios": "expo start --ios",
+    "preweb": "npm run database:check",
     "web": "expo start --web",
     "lint": "expo lint",
+    "pretest": "npm run database:check",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "pretest:coverage": "npm run database:check",
     "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage",
     "test:e2e": "maestro test .maestro",
-    "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch"
+    "pretest:watch": "npm run database:check",
+    "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch",
+    "eas-build-post-install": "npm run database:check"
   },
   "overrides": {
     "lightningcss": "1.30.1"

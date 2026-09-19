@@ -27,8 +27,16 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
 3. Start the app
 
    ```bash
-   npx expo start
+   npm start
    ```
+
+The start and test commands validate that both railway reference assets are
+present and structurally valid. If this check fails, rerun
+`npm run database:setup`; the check never downloads or repairs assets itself.
+
+Before running `eas build`, complete the same setup sequence locally. The EAS
+upload includes the generated railway assets, and the remote build validates
+them before bundling the application.
 
 In the output, you'll find options to open the app in a
 

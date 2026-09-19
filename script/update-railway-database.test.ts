@@ -10,12 +10,22 @@ import { parseMilestoneCsv } from "./railway-database/csv";
 import { normalizeRailwayGeoJson } from "./railway-database/geojson";
 import { downloadResource } from "./railway-database/resources";
 import { setupRailwayDatabase } from "./railway-database/setup";
+import { validateRailwayAssets } from "./railway-database/asset-validation";
 import type {
   FetchImplementation,
   GenerationLogger,
   RailwayResources,
   SetupOptions,
 } from "./railway-database/types";
+
+const FIXTURE_SNAPSHOT = Object.freeze({
+  fallbackSectionCount: 1,
+  geometryCount: 1,
+  geometryWithoutMilestoneCount: 0,
+  milestoneCount: 2,
+  railwaySectionCount: 2,
+  skippedMilestoneCount: 1,
+});
 
 const RAW_GEOJSON = {
   type: "FeatureCollection",
@@ -123,37 +133,35 @@ describe("railway database setup", () => {
     rmSync(directory, { force: true, recursive: true });
   });
 
-  test("downloads, normalizes, and deterministically rebuilds both assets", async () => {
+  function fixtureSetupOptions(
+    logger: GenerationLogger = { log: () => undefined, warn: () => undefined },
+  ): SetupOptions {
     const { buffers, manifest } = fixtureResources();
-    const fetchImplementation = fixtureFetch(buffers);
+    return {
+      databasePath,
+      expectedSnapshot: FIXTURE_SNAPSHOT,
+      fetchImplementation: fixtureFetch(buffers),
+      geojsonPath,
+      logger,
+      resources: manifest,
+    };
+  }
+
+  async function generateValidFixtureAssets(): Promise<void> {
+    await setupRailwayDatabase(fixtureSetupOptions());
+  }
+
+  test("downloads, normalizes, and deterministically rebuilds both assets", async () => {
     const logger = {
       log: jest.fn<void, [string]>(),
       warn: jest.fn<void, [string]>(),
     } satisfies GenerationLogger;
-    const options = {
-      databasePath,
-      expectedSnapshot: {
-        fallbackSectionCount: 1,
-        geometryCount: 1,
-        geometryWithoutMilestoneCount: 0,
-        milestoneCount: 2,
-        railwaySectionCount: 2,
-        skippedMilestoneCount: 1,
-      },
-      fetchImplementation,
-      geojsonPath,
-      logger,
-      resources: manifest,
-    } satisfies SetupOptions;
+    const options = fixtureSetupOptions(logger);
+    const fetchImplementation = options.fetchImplementation;
 
-    await expect(setupRailwayDatabase(options)).resolves.toEqual({
-      fallbackSectionCount: 1,
-      geometryCount: 1,
-      geometryWithoutMilestoneCount: 0,
-      milestoneCount: 2,
-      railwaySectionCount: 2,
-      skippedMilestoneCount: 1,
-    });
+    await expect(setupRailwayDatabase(options)).resolves.toEqual(
+      FIXTURE_SNAPSHOT,
+    );
     expect(logger.warn).toHaveBeenCalledWith(
       "Skipped unsupported milestone D+000 at CSV line 4",
     );
@@ -195,6 +203,109 @@ describe("railway database setup", () => {
     expect(readFileSync(geojsonPath)).toEqual(firstGeojson);
     expect(readFileSync(databasePath)).toEqual(firstDatabase);
     expect(fetchImplementation).toHaveBeenCalledTimes(4);
+  });
+
+  test("validates generated railway assets without modifying them", async () => {
+    await generateValidFixtureAssets();
+    const originalGeojson = readFileSync(geojsonPath);
+    const originalDatabase = readFileSync(databasePath);
+
+    expect(() =>
+      validateRailwayAssets({
+        databasePath,
+        expectedSnapshot: FIXTURE_SNAPSHOT,
+        geojsonPath,
+      }),
+    ).not.toThrow();
+    expect(readFileSync(geojsonPath)).toEqual(originalGeojson);
+    expect(readFileSync(databasePath)).toEqual(originalDatabase);
+  });
+
+  test("reports a missing GeoJSON asset with setup guidance", async () => {
+    await generateValidFixtureAssets();
+
+    expect(() =>
+      validateRailwayAssets({
+        databasePath,
+        expectedSnapshot: FIXTURE_SNAPSHOT,
+        geojsonPath: join(directory, "missing.geojson"),
+      }),
+    ).toThrow(
+      "Railway GeoJSON asset is missing or invalid. ENOENT: no such file or directory",
+    );
+    expect(() =>
+      validateRailwayAssets({
+        databasePath,
+        expectedSnapshot: FIXTURE_SNAPSHOT,
+        geojsonPath: join(directory, "missing.geojson"),
+      }),
+    ).toThrow("Run `npm run database:setup`");
+  });
+
+  test("reports a missing SQLite asset with setup guidance", async () => {
+    await generateValidFixtureAssets();
+
+    expect(() =>
+      validateRailwayAssets({
+        databasePath: join(directory, "missing.sqlite"),
+        expectedSnapshot: FIXTURE_SNAPSHOT,
+        geojsonPath,
+      }),
+    ).toThrow("Railway SQLite asset is missing or invalid");
+    expect(() =>
+      validateRailwayAssets({
+        databasePath: join(directory, "missing.sqlite"),
+        expectedSnapshot: FIXTURE_SNAPSHOT,
+        geojsonPath,
+      }),
+    ).toThrow("Run `npm run database:setup`");
+  });
+
+  test("rejects malformed GeoJSON and corrupt SQLite assets", async () => {
+    await generateValidFixtureAssets();
+    writeFileSync(geojsonPath, "not JSON");
+
+    expect(() =>
+      validateRailwayAssets({
+        databasePath,
+        expectedSnapshot: FIXTURE_SNAPSHOT,
+        geojsonPath,
+      }),
+    ).toThrow("Railway GeoJSON asset is missing or invalid");
+
+    await generateValidFixtureAssets();
+    writeFileSync(databasePath, "not SQLite");
+    expect(() =>
+      validateRailwayAssets({
+        databasePath,
+        expectedSnapshot: FIXTURE_SNAPSHOT,
+        geojsonPath,
+      }),
+    ).toThrow("Railway SQLite asset is missing or invalid");
+  });
+
+  test("rejects assets whose counts do not match the expected snapshot", async () => {
+    await generateValidFixtureAssets();
+
+    expect(() =>
+      validateRailwayAssets({
+        databasePath,
+        expectedSnapshot: { ...FIXTURE_SNAPSHOT, geometryCount: 2 },
+        geojsonPath,
+      }),
+    ).toThrow(
+      "Railway GeoJSON asset is missing or invalid. Expected 2 railway features, received 1",
+    );
+
+    expect(() =>
+      validateRailwayAssets({
+        databasePath,
+        expectedSnapshot: { ...FIXTURE_SNAPSHOT, milestoneCount: 3 },
+        geojsonPath,
+      }),
+    ).toThrow(
+      "Railway SQLite asset is missing or invalid. Generated database row counts do not match their sources",
+    );
   });
 
   test("preserves existing outputs when a download checksum fails", async () => {
