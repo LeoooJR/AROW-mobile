@@ -50,11 +50,11 @@ tags:
 - assertNotVisible: "Couches ferroviaires"
 - waitForAnimationToEnd
 - tapOn:
-    point: "172,810"
+    point: "16%,32%"
 - assertNotVisible:
     id: "map-feature-details-card"
 - tapOn:
-    point: "260,300"
+    point: "24%,13%"
 - assertNotVisible:
     id: "map-feature-details-card"
 
@@ -73,7 +73,7 @@ tags:
     id: "close-layers-button"
 - waitForAnimationToEnd
 - tapOn:
-    point: "172,810"
+    point: "16%,32%"
     retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "PK 509\\+000"
@@ -81,7 +81,7 @@ tags:
 - tapOn:
     id: "close-map-feature-details"
 - tapOn:
-    point: "260,300"
+    point: "24%,13%"
     retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"

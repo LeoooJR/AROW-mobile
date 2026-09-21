@@ -9,7 +9,6 @@ import {
   LOAD_MILESTONES_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
 } from "@/features/railway-reference/sqlite/queries";
-import { SearchableRailwaySectionRow } from "@/features/railway-reference/sqlite/searchable-section-row";
 import type { Railway } from "@/features/railways/railway";
 import { decodeKilometricPointDatabaseRow } from "@shared/railway-reference/records";
 
@@ -39,11 +38,7 @@ export async function loadSearchableRailways(
   const records = await database.getAllAsync<unknown>(
     LOAD_SEARCHABLE_RAILWAYS_QUERY,
   );
-  return searchableSectionRowsToRailways(
-    records.map((record, index) =>
-      SearchableRailwaySectionRow.fromUnknown(record, `at row ${index}`),
-    ),
-  );
+  return searchableSectionRowsToRailways(records);
 }
 
 export async function findMilestone(

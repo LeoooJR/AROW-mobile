@@ -52,6 +52,19 @@ describe("railway reference database", () => {
     expect(getAllAsync).toHaveBeenCalledWith(LOAD_SEARCHABLE_RAILWAYS_QUERY);
   });
 
+  test("rejects malformed searchable railway rows with their row index", async () => {
+    await expect(
+      loadSearchableRailways({
+        getAllAsync: jest
+          .fn()
+          .mockResolvedValue([
+            SECTION_RECORD,
+            { ...SECTION_RECORD, minimum_position_m: -1 },
+          ]),
+      }),
+    ).rejects.toThrow("Invalid searchable railway section at row 1");
+  });
+
   test("binds the exact composite milestone lookup", async () => {
     const getFirstAsync = jest.fn().mockResolvedValue(MILESTONE_RECORD);
     const milestone = await findMilestone(
