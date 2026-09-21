@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from "@testing-library/react-native";
-import { useSQLiteContext } from "expo-sqlite";
+import { type SQLiteDatabase, useSQLiteContext } from "expo-sqlite";
 import { type PropsWithChildren } from "react";
 
 import { useRailwayReference } from "./context";
@@ -16,6 +16,11 @@ jest.mock(
 );
 
 const useSQLiteContextMock = jest.mocked(useSQLiteContext);
+type SQLiteDatabaseMock = Pick<SQLiteDatabase, "getAllAsync" | "getFirstAsync">;
+
+function asSQLiteDatabase(database: SQLiteDatabaseMock): SQLiteDatabase {
+  return database as SQLiteDatabase;
+}
 
 function deferred<Value>() {
   let resolve!: (value: Value) => void;
@@ -53,13 +58,15 @@ describe("RailwayReferenceProvider", () => {
   test("loads milestones and searchable railways independently", async () => {
     const milestones = deferred<unknown[]>();
     const railways = deferred<unknown[]>();
-    useSQLiteContextMock.mockReturnValue({
-      getAllAsync: jest
-        .fn()
-        .mockReturnValueOnce(milestones.promise)
-        .mockReturnValueOnce(railways.promise),
-      getFirstAsync: jest.fn().mockResolvedValue(MILESTONE_RECORD),
-    } as never);
+    useSQLiteContextMock.mockReturnValue(
+      asSQLiteDatabase({
+        getAllAsync: jest
+          .fn()
+          .mockReturnValueOnce(milestones.promise)
+          .mockReturnValueOnce(railways.promise),
+        getFirstAsync: jest.fn().mockResolvedValue(MILESTONE_RECORD),
+      }),
+    );
     const view = await renderHook(() => useRailwayReference(), {
       wrapper: RailwayReferenceProvider,
     });
@@ -82,13 +89,15 @@ describe("RailwayReferenceProvider", () => {
   });
 
   test("reports one projection failure without hiding the other", async () => {
-    useSQLiteContextMock.mockReturnValue({
-      getAllAsync: jest
-        .fn()
-        .mockRejectedValueOnce(new Error("milestones unavailable"))
-        .mockResolvedValueOnce([SECTION_RECORD]),
-      getFirstAsync: jest.fn(),
-    } as never);
+    useSQLiteContextMock.mockReturnValue(
+      asSQLiteDatabase({
+        getAllAsync: jest
+          .fn()
+          .mockRejectedValueOnce(new Error("milestones unavailable"))
+          .mockResolvedValueOnce([SECTION_RECORD]),
+        getFirstAsync: jest.fn(),
+      }),
+    );
     const view = await renderHook(() => useRailwayReference(), {
       wrapper: RailwayReferenceProvider,
     });
@@ -105,13 +114,15 @@ describe("RailwayReferenceProvider", () => {
     const firstDatabase = {
       getAllAsync: jest.fn().mockResolvedValue([]),
       getFirstAsync: jest.fn().mockResolvedValue(null),
-    };
+    } satisfies SQLiteDatabaseMock;
     const secondDatabase = {
       getAllAsync: jest.fn().mockResolvedValue([]),
       getFirstAsync: jest.fn().mockResolvedValue(null),
-    };
+    } satisfies SQLiteDatabaseMock;
     let currentDatabase = firstDatabase;
-    useSQLiteContextMock.mockImplementation(() => currentDatabase as never);
+    useSQLiteContextMock.mockImplementation(() =>
+      asSQLiteDatabase(currentDatabase),
+    );
     const view = await renderHook(() => useRailwayReference(), {
       wrapper: RailwayReferenceProvider,
     });

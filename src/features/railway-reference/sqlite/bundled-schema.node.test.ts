@@ -33,20 +33,28 @@ function tableMetadata(
 }
 
 describe("railway reference schema synchronization", () => {
-  let database: DatabaseSync;
+  let database: DatabaseSync | undefined;
+
+  function getDatabase(): DatabaseSync {
+    if (database === undefined) {
+      throw new Error("Railway reference database was not initialized");
+    }
+    return database;
+  }
 
   beforeAll(() => {
     database = new DatabaseSync(databasePath, { readOnly: true });
   });
 
   afterAll(() => {
-    database.close();
+    database?.close();
   });
 
   test.each([RAILWAY_SECTIONS_TABLE, KILOMETRIC_POINTS_TABLE])(
     "$name descriptor matches bundled SQLite metadata",
     (table) => {
-      const columns = tableInfo(database, table);
+      const activeDatabase = getDatabase();
+      const columns = tableInfo(activeDatabase, table);
       expect(
         columns.map((column) => ({
           name: column.name,
@@ -63,12 +71,12 @@ describe("railway reference schema synchronization", () => {
         })),
       );
 
-      expect(tableMetadata(database, table)).toMatchObject({
+      expect(tableMetadata(activeDatabase, table)).toMatchObject({
         strict: table.strict ? 1 : 0,
         wr: table.withoutRowId ? 1 : 0,
       });
 
-      const schema = database
+      const schema = activeDatabase
         .prepare(
           "SELECT sql FROM sqlite_schema WHERE type = 'table' AND name = ?",
         )
@@ -78,7 +86,7 @@ describe("railway reference schema synchronization", () => {
   );
 
   test("milestone foreign key matches the bundled database", () => {
-    const rows = database
+    const rows = getDatabase()
       .prepare(`PRAGMA foreign_key_list(${KILOMETRIC_POINTS_TABLE.name})`)
       .all()
       .sort((left, right) => Number(left.seq) - Number(right.seq));
@@ -92,9 +100,12 @@ describe("railway reference schema synchronization", () => {
   });
 
   test("bundled database passes integrity and foreign-key checks", () => {
-    expect(database.prepare("PRAGMA integrity_check").get()).toEqual({
+    const activeDatabase = getDatabase();
+    expect(activeDatabase.prepare("PRAGMA integrity_check").get()).toEqual({
       integrity_check: "ok",
     });
-    expect(database.prepare("PRAGMA foreign_key_check").get()).toBeUndefined();
+    expect(
+      activeDatabase.prepare("PRAGMA foreign_key_check").get(),
+    ).toBeUndefined();
   });
 });

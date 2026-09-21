@@ -1,3 +1,9 @@
+import {
+  KILOMETRIC_POINTS_TABLE,
+  projection,
+  RAILWAY_SECTIONS_TABLE,
+} from "../../shared/railway-reference/schema";
+
 export const ENABLE_FOREIGN_KEYS = "PRAGMA foreign_keys = ON";
 export const BEGIN_TRANSACTION = "BEGIN IMMEDIATE";
 export const COMMIT_TRANSACTION = "COMMIT";
@@ -35,8 +41,3 @@ export const SELECT_DATABASE_COUNTS = `
         )) AS geometry_without_milestone_count,
     (SELECT COUNT(*) FROM kilometric_points) AS milestone_count
 `;
-import {
-  KILOMETRIC_POINTS_TABLE,
-  projection,
-  RAILWAY_SECTIONS_TABLE,
-} from "../../shared/railway-reference/schema";
