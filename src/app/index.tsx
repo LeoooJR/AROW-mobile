@@ -21,6 +21,10 @@ type FeatureSelection =
   | { readonly feature: MapFeature; readonly origin: "map" }
   | { readonly feature: Milestone; readonly origin: "search" };
 
+function layerForFeature(feature: MapFeature): ToggleableMapLayer {
+  return feature.kind === "railway-section" ? "railway" : "milestone";
+}
+
 export default function Index() {
   const [railwayAssets] = useAssets(railwayLinesAsset);
   const { openSettings, requestAccess, retry, state } = useRealLocation();
@@ -82,7 +86,9 @@ export default function Index() {
     setLayerVisibility((current) => ({ ...current, [layer]: visible }));
     if (!visible) {
       setSelection((current) =>
-        current?.feature.kind === layer ? undefined : current,
+        current !== undefined && layerForFeature(current.feature) === layer
+          ? undefined
+          : current,
       );
     }
   };

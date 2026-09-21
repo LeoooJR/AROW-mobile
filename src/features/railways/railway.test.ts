@@ -1,5 +1,3 @@
-import { AbstractMapFeature } from "@/features/map-features/abstract-map-feature";
-
 import { Railway } from "./railway";
 
 const GEOMETRY = {
@@ -40,10 +38,9 @@ describe("Railway", () => {
     expect(railway.sections.map((section) => section.sectionRank)).toEqual([
       1, 2,
     ]);
-    expect(first).toBeInstanceOf(AbstractMapFeature);
     expect(first?.railway).toBe(railway);
     expect(second?.railway).toBe(railway);
-    expect(first?.kind).toBe("railway");
+    expect(first?.kind).toBe("railway-section");
     expect(first?.id).toBe("340311:1");
     expect(first?.geometry).toEqual(GEOMETRY);
     expect(second?.geometry).toEqual({ status: "absent" });

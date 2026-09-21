@@ -1,4 +1,4 @@
-import { AbstractRailwaySectionFeature } from "@/features/map-features/abstract-railway-section-feature";
+import { AbstractRailwayNetworkFeature } from "@/features/map-features/abstract-railway-network-feature";
 import type { GeographicCoordinates } from "@/types/geographic-coordinates";
 import {
   isLatitude,
@@ -26,7 +26,7 @@ function validatedCoordinates(
   return Object.freeze({ latitude, longitude });
 }
 
-export class Milestone extends AbstractRailwaySectionFeature<"milestone"> {
+export class Milestone extends AbstractRailwayNetworkFeature<"milestone"> {
   public readonly kind = "milestone";
 
   readonly #coordinates: GeographicCoordinates;

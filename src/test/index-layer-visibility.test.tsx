@@ -237,9 +237,13 @@ describe("map screen layer visibility", () => {
     await render(<Index />);
 
     await user.press(screen.getByRole("button", { name: "Select railway" }));
-    expect(screen.getByTestId("mock-details")).toHaveTextContent("railway");
+    expect(screen.getByTestId("mock-details")).toHaveTextContent(
+      "railway-section",
+    );
     await user.press(screen.getByRole("button", { name: "Hide milestone" }));
-    expect(screen.getByTestId("mock-details")).toHaveTextContent("railway");
+    expect(screen.getByTestId("mock-details")).toHaveTextContent(
+      "railway-section",
+    );
     await user.press(screen.getByRole("button", { name: "Hide railway" }));
     expect(screen.queryByTestId("mock-details")).not.toBeOnTheScreen();
   });
@@ -345,7 +349,9 @@ describe("map screen layer visibility", () => {
     expect(
       screen.getByRole("button", { name: "Activer le mode carte seule" }),
     ).toBeOnTheScreen();
-    expect(screen.getByTestId("mock-details")).toHaveTextContent("railway");
+    expect(screen.getByTestId("mock-details")).toHaveTextContent(
+      "railway-section",
+    );
     expect(screen.getByTestId("mock-location-bar")).toBeOnTheScreen();
     expect(screen.queryByText("Simulation action")).not.toBeOnTheScreen();
   });

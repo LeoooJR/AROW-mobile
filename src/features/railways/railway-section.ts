@@ -1,4 +1,4 @@
-import { AbstractRailwaySectionFeature } from "@/features/map-features/abstract-railway-section-feature";
+import { AbstractRailwayNetworkFeature } from "@/features/map-features/abstract-railway-network-feature";
 import type { Railway } from "@/features/railways/railway";
 import { isNonEmptyString, isUnsignedInteger } from "@shared/value-validation";
 
@@ -71,8 +71,8 @@ function validateMilestoneRange(
   return Object.freeze({ ...range });
 }
 
-export class RailwaySection extends AbstractRailwaySectionFeature<"railway"> {
-  public readonly kind = "railway";
+export class RailwaySection extends AbstractRailwayNetworkFeature<"railway-section"> {
+  public readonly kind = "railway-section";
 
   readonly #geometry: RailwaySectionGeometry;
   readonly #milestoneRange: RailwayMilestoneRange | undefined;

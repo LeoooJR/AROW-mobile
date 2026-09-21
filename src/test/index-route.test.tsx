@@ -112,7 +112,7 @@ jest.mock("@/components/adapters/map/map", () => {
             <MockText>Point</MockText>
           </MockPressable>
           <MockText>
-            {selectedFeature?.kind === "railway"
+            {selectedFeature?.kind === "railway-section"
               ? selectedFeature.name
               : (selectedFeature?.label ?? "Aucun élément")}
           </MockText>
