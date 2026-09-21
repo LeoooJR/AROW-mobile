@@ -9,6 +9,16 @@ module.exports = defineConfig([
   expoConfig,
   eslintPluginPrettierRecommended,
   {
+    rules: {
+      // Metro and TypeScript validate these declared asset modules; ESLint's
+      // import resolver only understands source-code extensions.
+      "import/no-unresolved": [
+        "error",
+        { ignore: ["\\.geojson$", "\\.sqlite$"] },
+      ],
+    },
+  },
+  {
     ...testingLibrary.configs["flat/react"],
     files: [
       "**/__tests__/**/*.{js,jsx,ts,tsx}",
