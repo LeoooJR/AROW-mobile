@@ -1,13 +1,8 @@
 import { Milestone } from "@/features/milestones/domain/milestone";
 
-import {
-  findMilestone,
-  loadMilestones,
-  loadSearchableRailways,
-} from "./repository";
+import { findMilestone, loadSearchableRailways } from "./repository";
 import {
   FIND_MILESTONE_QUERY,
-  LOAD_MILESTONES_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
 } from "./queries";
 
@@ -36,14 +31,6 @@ const SECTION_RECORD = {
 };
 
 describe("railway reference database", () => {
-  test("executes and converts complete milestone loading", async () => {
-    const getAllAsync = jest.fn().mockResolvedValue([MILESTONE_RECORD]);
-    const milestones = await loadMilestones({ getAllAsync });
-
-    expect(milestones[0]).toBeInstanceOf(Milestone);
-    expect(getAllAsync).toHaveBeenCalledWith(LOAD_MILESTONES_QUERY);
-  });
-
   test("executes and converts searchable railway loading", async () => {
     const getAllAsync = jest.fn().mockResolvedValue([SECTION_RECORD]);
     const railways = await loadSearchableRailways({ getAllAsync });
@@ -91,14 +78,6 @@ describe("railway reference database", () => {
   });
 
   test("rejects malformed query rows with their adapter context", async () => {
-    await expect(
-      loadMilestones({
-        getAllAsync: jest
-          .fn()
-          .mockResolvedValue([{ ...MILESTONE_RECORD, latitude: 91 }]),
-      }),
-    ).rejects.toThrow("Invalid milestone at row 0");
-
     await expect(
       findMilestone(
         {

@@ -10,19 +10,20 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npm install
    ```
 
-2. Download and generate the railway reference assets
+2. Prepare the railway reference assets
 
    ```bash
    npm run database:setup
    ```
 
-   This explicit setup step downloads the pinned railway geometry and
-   kilometric-point sources from the project's [public Google Drive
+   This explicit setup step downloads the pinned railway geometry, milestone
+   GeoJSON, and kilometric-point CSV from the project's [public Google Drive
    folder](https://drive.google.com/drive/folders/1dRbp0vyVmZoOHnN9AQIbM4YXQ7HGADx2?usp=sharing).
-   It validates their checksums, then generates the ignored
-   `src/statics/lignes-par-type.geojson` and
-   `src/statics/railway_reference.sqlite` application assets. Rerunning the
-   command safely replaces both generated files.
+   It validates their checksums and contents, normalizes the railway GeoJSON,
+   and generates the SQLite database from the CSV. Rerunning the command
+   atomically replaces the ignored `src/statics/lignes-par-type.geojson`,
+   `src/statics/milestones.geojson`, and
+   `src/statics/railway_reference.sqlite` application assets.
 
 3. Start the app
 
@@ -30,12 +31,12 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npm start
    ```
 
-The start and test commands validate that both railway reference assets are
+The start and test commands validate that all three railway reference assets are
 present and structurally valid. If this check fails, rerun
 `npm run database:setup`; the check never downloads or repairs assets itself.
 
 Before running `eas build`, complete the same setup sequence locally. The EAS
-upload includes the generated railway assets, and the remote build validates
+upload includes the prepared railway assets, and the remote build validates
 them before bundling the application.
 
 In the output, you'll find options to open the app in a

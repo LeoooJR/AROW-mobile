@@ -6,7 +6,6 @@ import type { MilestoneLookupInput } from "@/features/milestones/search/contract
 import { searchableSectionRowsToRailways } from "@/features/railway-reference/sqlite/railway-assembly";
 import {
   FIND_MILESTONE_QUERY,
-  LOAD_MILESTONES_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
 } from "@/features/railway-reference/sqlite/queries";
 import type { Railway } from "@/features/railways/railway";
@@ -21,15 +20,6 @@ function milestoneFromDatabaseRow(value: unknown, context: string): Milestone {
     positionMeters: row.position_m,
     sectionRank: row.rg_troncon,
   });
-}
-
-export async function loadMilestones(
-  database: Pick<SQLiteDatabase, "getAllAsync">,
-): Promise<readonly Milestone[]> {
-  const records = await database.getAllAsync<unknown>(LOAD_MILESTONES_QUERY);
-  return records.map((record, index) =>
-    milestoneFromDatabaseRow(record, `at row ${index}`),
-  );
 }
 
 export async function loadSearchableRailways(

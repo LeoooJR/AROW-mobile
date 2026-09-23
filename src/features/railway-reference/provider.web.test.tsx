@@ -9,12 +9,12 @@ describe("RailwayReferenceProvider web fallback", () => {
       wrapper: RailwayReferenceProvider,
     });
 
-    expect(view.result.current.milestoneState).toEqual({
-      status: "unavailable",
-    });
     expect(view.result.current.milestoneSearch.state).toEqual({
       status: "unavailable",
     });
+    expect(() =>
+      view.result.current.milestoneSearch.loadRailways(),
+    ).not.toThrow();
     await expect(
       view.result.current.milestoneSearch.findMilestone({
         lineCode: "893000",

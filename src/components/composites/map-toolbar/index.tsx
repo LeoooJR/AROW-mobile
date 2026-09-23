@@ -47,6 +47,7 @@ export default function MapToolbar({
           setOpenSheet("layers");
         }}
         onOpenPointSearch={() => {
+          milestoneSearch.loadRailways();
           setOpenSheet("pointSearch");
         }}
         pointSearchOpen={openSheet === "pointSearch"}

@@ -20,7 +20,6 @@ import MilestoneLayer from "@/components/adapters/map/milestone-layer";
 import RailwayLinesSource from "@/components/adapters/map/railway-lines-source";
 import UserLocationMarker from "@/components/adapters/map/user-location-marker";
 import type { MapFeature } from "@/features/map-features/map-feature";
-import type { Milestone } from "@/features/milestones/domain/milestone";
 import type { GeographicCoordinates } from "@/types/geographic-coordinates";
 
 export interface MapLocation extends GeographicCoordinates {
@@ -32,7 +31,7 @@ export interface MapProps {
   readonly focusRequest?: number;
   readonly layerVisibility?: MapLayerVisibility;
   readonly location?: MapLocation;
-  readonly milestones?: readonly Milestone[];
+  readonly milestoneData?: string;
   readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly railwayData?: string;
   readonly recenterRequest?: number;
@@ -45,14 +44,12 @@ const styles = StyleSheet.create({
   },
 });
 
-const EMPTY_MILESTONES = Object.freeze([]) satisfies readonly Milestone[];
-
 export default function Map({
   focusLocation,
   focusRequest,
   layerVisibility = DEFAULT_MAP_LAYER_VISIBILITY,
   location,
-  milestones,
+  milestoneData,
   onFeaturePress,
   railwayData,
   recenterRequest,
@@ -87,7 +84,7 @@ export default function Map({
         recenterRequest={recenterRequest}
       />
       <MilestoneLayer
-        milestones={milestones ?? EMPTY_MILESTONES}
+        data={milestoneData}
         onFeaturePress={onFeaturePress}
         selectedMilestone={selectedMilestone}
         visible={layerVisibility.milestone}

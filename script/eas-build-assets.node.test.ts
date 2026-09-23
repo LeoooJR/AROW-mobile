@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 const EAS_ASSET_INCLUSIONS = [
   "# Generated railway assets required by EAS Build",
   "!/src/statics/lignes-par-type.geojson",
+  "!/src/statics/milestones.geojson",
   "!/src/statics/railway_reference.sqlite",
 ].join("\n");
 

@@ -16,6 +16,7 @@ export default function LineSearchFeedback({
   searchState,
 }: LineSearchFeedbackProps): ReactElement | null {
   switch (searchState.status) {
+    case "idle":
     case "loading":
       return (
         <LineSearchStatusMessage>

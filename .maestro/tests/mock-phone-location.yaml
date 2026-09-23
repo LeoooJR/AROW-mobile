@@ -89,7 +89,9 @@ tags:
 - tapOn:
     id: "line-search-input"
 - inputText: "893000"
-- assertVisible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
+- extendedWaitUntil:
+    visible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
+    timeout: 30000
 - tapOn:
     id: "line-result-893000"
 - assertVisible: "Section 1"

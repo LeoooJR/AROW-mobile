@@ -120,6 +120,7 @@ jest.mock("@/components/adapters/native-bottom-sheet", () => {
 function ControlledToolbar({
   findMilestone = async () => milestone,
   initiallyFocused = false,
+  loadRailways = jest.fn(),
   onMapFocusChange = jest.fn(),
   searchState = milestoneSearch,
   onMilestoneSelect = jest.fn(),
@@ -127,6 +128,7 @@ function ControlledToolbar({
 }: {
   readonly findMilestone?: MilestoneSearchModel["findMilestone"];
   readonly initiallyFocused?: boolean;
+  readonly loadRailways?: jest.Mock;
   readonly onMapFocusChange?: jest.Mock;
   readonly onMilestoneSelect?: jest.Mock;
   readonly onVisibilityChange?: jest.Mock;
@@ -140,7 +142,7 @@ function ControlledToolbar({
   return (
     <MapToolbar
       mapFocused={mapFocused}
-      milestoneSearch={{ findMilestone, state: searchState }}
+      milestoneSearch={{ findMilestone, loadRailways, state: searchState }}
       onMapFocusChange={(focused) => {
         onMapFocusChange(focused);
         setMapFocused(focused);
@@ -178,6 +180,17 @@ describe("MapToolbar", () => {
     expect(screen.getByTestId("open-point-search")).toBeOnTheScreen();
     expect(screen.getByTestId("map-layers-button")).toBeOnTheScreen();
     expect(screen.getByTestId("map-focus-button")).toBeOnTheScreen();
+  });
+
+  test("starts catalog loading immediately before opening point search", async () => {
+    const user = userEvent.setup();
+    const loadRailways = jest.fn();
+    await render(<ControlledToolbar loadRailways={loadRailways} />);
+
+    await user.press(screen.getByTestId("open-point-search"));
+
+    expect(loadRailways).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("point-search-sheet")).toBeOnTheScreen();
   });
 
   test("enters map-only mode, closes search, and restores retained form state", async () => {
@@ -233,6 +246,7 @@ describe("MapToolbar", () => {
         mapFocused={false}
         milestoneSearch={{
           findMilestone: async () => milestone,
+          loadRailways: jest.fn(),
           state: milestoneSearch,
         }}
         onMapFocusChange={jest.fn()}
@@ -249,6 +263,7 @@ describe("MapToolbar", () => {
         mapFocused
         milestoneSearch={{
           findMilestone: async () => milestone,
+          loadRailways: jest.fn(),
           state: milestoneSearch,
         }}
         onMapFocusChange={jest.fn()}

@@ -32,7 +32,12 @@ const mockRailwayLine = new Railway({
 const mockRailway = mockRailwayLine.sections[0];
 
 jest.mock("expo-asset", () => ({
-  useAssets: () => [[{ localUri: "file:///railways.geojson" }]],
+  useAssets: () => [
+    [
+      { localUri: "file:///railways.geojson" },
+      { localUri: "file:///milestones.geojson" },
+    ],
+  ],
 }));
 
 jest.mock("@/statics/lignes-par-type.geojson", () => "railway-asset");
@@ -53,9 +58,9 @@ jest.mock("@/features/railway-reference/context", () => ({
   useRailwayReference: () => ({
     milestoneSearch: {
       findMilestone: jest.fn(),
+      loadRailways: jest.fn(),
       state: { status: "unavailable" },
     },
-    milestoneState: { milestones: [mockMilestone], status: "ready" },
   }),
 }));
 

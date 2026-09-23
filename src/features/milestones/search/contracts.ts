@@ -2,6 +2,7 @@ import type { Milestone } from "@/features/milestones/domain/milestone";
 import type { Railway } from "@/features/railways/railway";
 
 export type MilestoneSearchState =
+  | { readonly status: "idle" }
   | { readonly status: "loading" }
   | { readonly status: "unavailable" }
   | { readonly status: "error" }
@@ -20,6 +21,7 @@ export interface MilestoneSearchModel {
   readonly findMilestone: (
     input: MilestoneLookupInput,
   ) => Promise<Milestone | undefined>;
+  readonly loadRailways: () => void;
   readonly state: MilestoneSearchState;
 }
 

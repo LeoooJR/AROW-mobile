@@ -9,6 +9,7 @@ import {
   createTableSql,
   type RailwayReferenceTableDescriptor,
 } from "@shared/railway-reference/schema";
+import { FIND_MILESTONE_QUERY } from "@/features/railway-reference/sqlite/queries";
 
 const databasePath = path.join(
   __dirname,
@@ -107,5 +108,28 @@ describe("railway reference schema synchronization", () => {
     expect(
       activeDatabase.prepare("PRAGMA foreign_key_check").get(),
     ).toBeUndefined();
+  });
+
+  test("exact milestone lookup uses the composite primary key", () => {
+    const plan = getDatabase()
+      .prepare(`EXPLAIN QUERY PLAN ${FIND_MILESTONE_QUERY}`)
+      .all("893000", 1, 509_000);
+
+    expect(plan).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          detail: expect.stringContaining(
+            "SEARCH kilometric_points USING PRIMARY KEY",
+          ),
+        }),
+      ]),
+    );
+    expect(plan).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          detail: expect.stringMatching(/SCAN kilometric_points/),
+        }),
+      ]),
+    );
   });
 });

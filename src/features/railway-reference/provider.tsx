@@ -1,4 +1,12 @@
-import { type ReactElement, type ReactNode, useCallback, useMemo } from "react";
+import {
+  type ReactElement,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 
 import type { Milestone } from "@/features/milestones/domain/milestone";
@@ -10,13 +18,10 @@ import {
   RailwayReferenceContext,
   type RailwayReferenceModel,
 } from "@/features/railway-reference/context";
-import type { MilestoneLoadState } from "@/features/railway-reference/milestone-state";
 import {
   findMilestone as findMilestoneInDatabase,
-  loadMilestones,
   loadSearchableRailways,
 } from "@/features/railway-reference/sqlite/repository";
-import useAsyncLoad from "@/features/railway-reference/use-async-load";
 import railwayReferenceDatabaseAsset from "@/statics/railway_reference.sqlite";
 
 export interface RailwayReferenceProviderProps {
@@ -27,22 +32,36 @@ function RailwayReferenceDataProvider({
   children,
 }: RailwayReferenceProviderProps): ReactElement {
   const database = useSQLiteContext();
-  const milestoneLoad = useAsyncLoad(database, loadMilestones);
-  const railwayLoad = useAsyncLoad(database, loadSearchableRailways);
-  const milestoneState = useMemo<MilestoneLoadState>(
-    () =>
-      milestoneLoad.status === "ready"
-        ? { milestones: milestoneLoad.value, status: "ready" }
-        : milestoneLoad,
-    [milestoneLoad],
-  );
-  const searchState = useMemo<MilestoneSearchState>(
-    () =>
-      railwayLoad.status === "ready"
-        ? { railways: railwayLoad.value, status: "ready" }
-        : railwayLoad,
-    [railwayLoad],
-  );
+  const [searchState, setSearchState] = useState<MilestoneSearchState>({
+    status: "idle",
+  });
+  const catalogLoadStarted = useRef(false);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  const loadRailways = useCallback((): void => {
+    if (catalogLoadStarted.current) {
+      return;
+    }
+    catalogLoadStarted.current = true;
+    setSearchState({ status: "loading" });
+    void loadSearchableRailways(database).then(
+      (railways) => {
+        if (mounted.current) {
+          setSearchState({ railways, status: "ready" });
+        }
+      },
+      () => {
+        if (mounted.current) {
+          setSearchState({ status: "error" });
+        }
+      },
+    );
+  }, [database]);
   const findMilestone = useCallback(
     (input: MilestoneLookupInput): Promise<Milestone | undefined> =>
       findMilestoneInDatabase(database, input),
@@ -50,10 +69,9 @@ function RailwayReferenceDataProvider({
   );
   const value = useMemo<RailwayReferenceModel>(
     () => ({
-      milestoneSearch: { findMilestone, state: searchState },
-      milestoneState,
+      milestoneSearch: { findMilestone, loadRailways, state: searchState },
     }),
-    [findMilestone, milestoneState, searchState],
+    [findMilestone, loadRailways, searchState],
   );
 
   return (

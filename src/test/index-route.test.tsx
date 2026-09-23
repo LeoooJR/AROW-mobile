@@ -16,6 +16,10 @@ jest.mock("expo-asset", () => ({
         localUri: "file:///railways.geojson",
         uri: "asset:///railways.geojson",
       },
+      {
+        localUri: "file:///milestones.geojson",
+        uri: "asset:///milestones.geojson",
+      },
     ],
     undefined,
   ],
@@ -25,9 +29,9 @@ jest.mock("@/features/railway-reference/context", () => ({
   useRailwayReference: () => ({
     milestoneSearch: {
       findMilestone: jest.fn(),
+      loadRailways: jest.fn(),
       state: { status: "unavailable" },
     },
-    milestoneState: { status: "unavailable" },
   }),
 }));
 
