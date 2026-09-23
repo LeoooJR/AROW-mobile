@@ -9,6 +9,7 @@ import {
   isUnsignedInteger,
 } from "@shared/value-validation";
 import { decodeRailwaySectionDatabaseRow } from "@shared/railway-reference/records";
+import { isMilestoneLabelForPosition } from "@shared/railway-reference/values";
 
 interface DecodedSearchableRailwaySection {
   readonly lineCode: string;
@@ -50,6 +51,14 @@ function decodeSearchableRailwaySection(
       !isNonEmptyString(value.minimum_label) ||
       !isUnsignedInteger(value.maximum_position_m) ||
       !isNonEmptyString(value.maximum_label) ||
+      !isMilestoneLabelForPosition(
+        value.minimum_label,
+        value.minimum_position_m,
+      ) ||
+      !isMilestoneLabelForPosition(
+        value.maximum_label,
+        value.maximum_position_m,
+      ) ||
       value.minimum_position_m > value.maximum_position_m
     ) {
       throw new Error("Invalid milestone range");

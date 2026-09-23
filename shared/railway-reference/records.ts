@@ -2,6 +2,7 @@ import { isNonEmptyString, isRecord } from "../value-validation";
 import {
   isCanonicalRailwayLineCode,
   isKilometricPosition,
+  isMilestoneLabelForPosition,
   isRailwayLatitude,
   isRailwayLongitude,
   isRailwaySectionRank,
@@ -52,6 +53,7 @@ export function decodeKilometricPointDatabaseRow(
     !isRailwaySectionRank(value.rg_troncon) ||
     !isKilometricPosition(value.position_m) ||
     !isNonEmptyString(value.label) ||
+    !isMilestoneLabelForPosition(value.label, value.position_m) ||
     !isRailwayLatitude(value.latitude) ||
     !isRailwayLongitude(value.longitude)
   ) {

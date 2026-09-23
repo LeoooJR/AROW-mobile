@@ -56,6 +56,12 @@ describe("generated railway reference DDL", () => {
     database
       .prepare("INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?)")
       .run(...VALID_POINT);
+    database
+      .prepare("INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?)")
+      .run("893000", 1, 1_000, "001+000", 45.74744, 4.85933);
+    database
+      .prepare("INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?)")
+      .run("893000", 1, 0, "0+000", 45.74744, 4.85933);
     expect(database.prepare("PRAGMA integrity_check").get()).toEqual({
       integrity_check: "ok",
     });
@@ -86,6 +92,18 @@ describe("generated railway reference DDL", () => {
     ["section rank", [VALID_POINT[0], 0, ...VALID_POINT.slice(2)]],
     ["position", [...VALID_POINT.slice(0, 2), -1, ...VALID_POINT.slice(3)]],
     ["label", [...VALID_POINT.slice(0, 3), "", ...VALID_POINT.slice(4)]],
+    [
+      "mismatched label",
+      [...VALID_POINT.slice(0, 3), "508+000", ...VALID_POINT.slice(4)],
+    ],
+    [
+      "malformed nonempty label",
+      [...VALID_POINT.slice(0, 3), "509+00", ...VALID_POINT.slice(4)],
+    ],
+    [
+      "mismatched position",
+      [...VALID_POINT.slice(0, 2), 508_000, ...VALID_POINT.slice(3)],
+    ],
     ["latitude", [...VALID_POINT.slice(0, 4), 91, VALID_POINT[5]]],
     ["longitude", [...VALID_POINT.slice(0, 5), 181]],
   ])("rejects invalid point %s", (_description, values) => {

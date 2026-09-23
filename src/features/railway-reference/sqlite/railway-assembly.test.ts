@@ -98,6 +98,9 @@ describe("railway assembly", () => {
 
   test.each([
     ["an invalid range", row({ minimum_position_m: -1 })],
+    ["a mismatched minimum label", row({ minimum_label: "507+000" })],
+    ["a mismatched maximum label", row({ maximum_label: "510+000" })],
+    ["a malformed nonempty label", row({ minimum_label: "508+00" })],
     ["partial present geometry", row({ idgaia: null })],
     ["partial absent geometry", row({ has_geometry: 0, idgaia: null })],
   ])("rejects %s with its row index", (_description, value) => {

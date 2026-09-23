@@ -16,7 +16,9 @@ import {
   BEGIN_TRANSACTION,
   CHECK_DATABASE_INTEGRITY,
   CHECK_FOREIGN_KEYS,
+  CHECK_SCHEMA_VERSION,
   COMMIT_TRANSACTION,
+  DATABASE_SCHEMA_VERSION,
   ENABLE_FOREIGN_KEYS,
   INSERT_KILOMETRIC_POINT,
   INSERT_RAILWAY_SECTION,
@@ -218,6 +220,12 @@ export function validateRailwayDatabase(
 ): void {
   const database = new DatabaseSync(databasePath, { readOnly: true });
   try {
+    const version = database.prepare(CHECK_SCHEMA_VERSION).get();
+    if (version?.user_version !== DATABASE_SCHEMA_VERSION) {
+      throw new Error(
+        `Generated database schema version must be ${DATABASE_SCHEMA_VERSION}`,
+      );
+    }
     const integrity = database.prepare(CHECK_DATABASE_INTEGRITY).get();
     if (integrity?.integrity_check !== "ok") {
       throw new Error("Generated database failed its integrity check");

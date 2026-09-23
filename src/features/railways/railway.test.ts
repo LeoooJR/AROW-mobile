@@ -125,4 +125,30 @@ describe("Railway", () => {
         }),
     ).toThrow("Railway section milestone range is invalid");
   });
+
+  test.each([
+    ["minimum", { minimumLabel: "135+000" }],
+    ["maximum", { maximumLabel: "138+000" }],
+  ])("rejects a mismatched %s milestone-range label", (_bound, change) => {
+    expect(
+      () =>
+        new Railway({
+          code: "340311",
+          name: "Ligne",
+          sections: [
+            {
+              geometry: { status: "absent" },
+              milestoneRange: {
+                maximumLabel: "137+000",
+                maximumPositionMeters: 137_000,
+                minimumLabel: "136+000",
+                minimumPositionMeters: 136_000,
+                ...change,
+              },
+              sectionRank: 1,
+            },
+          ],
+        }),
+    ).toThrow("Railway section milestone range is invalid");
+  });
 });

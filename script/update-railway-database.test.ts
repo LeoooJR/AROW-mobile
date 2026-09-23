@@ -101,6 +101,22 @@ const RAW_MILESTONE_GEOJSON = {
   type: "FeatureCollection",
 } as const;
 
+function milestoneGeojsonWithMismatchedLabel() {
+  return {
+    ...RAW_MILESTONE_GEOJSON,
+    features: [
+      {
+        ...RAW_MILESTONE_GEOJSON.features[0],
+        properties: {
+          ...RAW_MILESTONE_GEOJSON.features[0].properties,
+          label: "002+000",
+        },
+      },
+      RAW_MILESTONE_GEOJSON.features[1],
+    ],
+  };
+}
+
 interface RailwayFixtures {
   readonly buffers: ReadonlyMap<string, Uint8Array>;
   readonly manifest: RailwayResources;
@@ -433,6 +449,44 @@ describe("railway database setup", () => {
     );
   });
 
+  test("rejects a milestone asset with a mismatched label and position", async () => {
+    await generateValidFixtureAssets();
+    writeFileSync(
+      milestoneGeojsonPath,
+      JSON.stringify(milestoneGeojsonWithMismatchedLabel()),
+    );
+
+    expect(() =>
+      validateRailwayAssets({
+        databasePath,
+        expectedSnapshot: FIXTURE_SNAPSHOT,
+        geojsonPath,
+        milestoneGeojsonPath,
+      }),
+    ).toThrow(
+      "Milestone GeoJSON asset is missing or invalid. Milestone GeoJSON contains an invalid feature",
+    );
+  });
+
+  test("rejects a database built with the previous schema version", async () => {
+    await generateValidFixtureAssets();
+    const database = new DatabaseSync(databasePath);
+    try {
+      database.exec("PRAGMA user_version = 1");
+    } finally {
+      database.close();
+    }
+
+    expect(() =>
+      validateRailwayAssets({
+        databasePath,
+        expectedSnapshot: FIXTURE_SNAPSHOT,
+        geojsonPath,
+        milestoneGeojsonPath,
+      }),
+    ).toThrow("Generated database schema version must be 2");
+  });
+
   test("preserves existing outputs when a download checksum fails", async () => {
     const { buffers, manifest } = fixtureResources();
     const invalidManifest: RailwayResources = {
@@ -465,6 +519,13 @@ describe("railway database setup", () => {
     await expectSetupFailurePreservesOutputs(
       fixtureResources(Buffer.from(JSON.stringify(invalidFeature))),
       "Milestone GeoJSON feature has invalid id wrong-id",
+    );
+
+    await expectSetupFailurePreservesOutputs(
+      fixtureResources(
+        Buffer.from(JSON.stringify(milestoneGeojsonWithMismatchedLabel())),
+      ),
+      "Milestone GeoJSON contains an invalid feature",
     );
 
     const wrongCount = {

@@ -29,6 +29,9 @@ describe("Milestone", () => {
     ["fractional metre position", { ...INPUT, positionMeters: 1.5 }],
     ["infinite metre position", { ...INPUT, positionMeters: Infinity }],
     ["empty label", { ...INPUT, label: "" }],
+    ["mismatched label", { ...INPUT, label: "240+000" }],
+    ["malformed label", { ...INPUT, label: "241+00" }],
+    ["mismatched position", { ...INPUT, positionMeters: 240_000 }],
     [
       "invalid latitude",
       { ...INPUT, coordinates: { latitude: 91, longitude: 0 } },

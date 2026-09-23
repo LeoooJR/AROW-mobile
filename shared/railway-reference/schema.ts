@@ -137,7 +137,16 @@ export const RAILWAY_SECTIONS_TABLE = table({
 });
 
 export const KILOMETRIC_POINTS_TABLE = table({
-  checks: [],
+  checks: [
+    `CHECK (
+      instr(label, '+') > 1 AND
+      length(label) - instr(label, '+') = 3 AND
+      substr(label, 1, instr(label, '+') - 1) NOT GLOB '*[^0-9]*' AND
+      substr(label, instr(label, '+') + 1) NOT GLOB '*[^0-9]*' AND
+      CAST(substr(label, 1, instr(label, '+') - 1) AS INTEGER) = position_m / 1000 AND
+      CAST(substr(label, instr(label, '+') + 1) AS INTEGER) = position_m % 1000
+    )`,
+  ],
   columns: [
     column({
       checkLayout: "continuation",

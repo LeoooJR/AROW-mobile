@@ -128,6 +128,27 @@ describe("MilestoneLayer", () => {
     expect(onFeaturePress).not.toHaveBeenCalled();
   });
 
+  test("ignores a pressed milestone whose label disagrees with its position", async () => {
+    const onFeaturePress = jest.fn();
+    const stopPropagation = jest.fn();
+    await render(<MilestoneLayer onFeaturePress={onFeaturePress} />);
+
+    await fireEvent(screen.getByTestId("mock-milestone-source"), "press", {
+      nativeEvent: {
+        features: [
+          {
+            ...FEATURE,
+            properties: { ...FEATURE.properties, label: "240+000" },
+          },
+        ],
+      },
+      stopPropagation,
+    });
+
+    expect(stopPropagation).not.toHaveBeenCalled();
+    expect(onFeaturePress).not.toHaveBeenCalled();
+  });
+
   test("highlights the selected milestone", async () => {
     jest.spyOn(ReactNative, "useColorScheme").mockReturnValue("light");
     await render(<MilestoneLayer selectedMilestone={MILESTONE} />);

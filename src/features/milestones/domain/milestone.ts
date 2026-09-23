@@ -5,7 +5,10 @@ import {
   isLongitude,
   isUnsignedInteger,
 } from "@shared/value-validation";
-import { milestoneId } from "@shared/railway-reference/values";
+import {
+  isMilestoneLabelForPosition,
+  milestoneId,
+} from "@shared/railway-reference/values";
 
 export interface MilestoneInput {
   readonly coordinates: GeographicCoordinates;
@@ -41,6 +44,9 @@ export class Milestone extends AbstractRailwayNetworkFeature<"milestone"> {
     }
     if (input.label.length === 0) {
       throw new Error("Milestone label must not be empty");
+    }
+    if (!isMilestoneLabelForPosition(input.label, input.positionMeters)) {
+      throw new Error("Milestone label and position must agree");
     }
 
     this.#coordinates = validatedCoordinates(input.coordinates);

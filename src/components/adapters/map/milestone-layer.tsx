@@ -11,7 +11,10 @@ import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 import { geographicCoordinatesFromPosition } from "@/components/adapters/map/geojson-validation";
 import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
 import { type MapFeature } from "@/features/map-features/map-feature";
-import { isCanonicalRailwayLineCode } from "@shared/railway-reference/values";
+import {
+  isCanonicalRailwayLineCode,
+  isMilestoneLabelForPosition,
+} from "@shared/railway-reference/values";
 import { Milestone } from "@/features/milestones/domain/milestone";
 import {
   isNonEmptyString,
@@ -87,7 +90,11 @@ function isMilestoneProperties(
     return false;
   }
 
-  return hasMilestoneIdentity(properties) && hasMilestoneMetadata(properties);
+  return (
+    hasMilestoneIdentity(properties) &&
+    hasMilestoneMetadata(properties) &&
+    isMilestoneLabelForPosition(properties.label, properties.positionMeters)
+  );
 }
 
 function hasMilestoneIdentity(properties: Record<string, unknown>): boolean {

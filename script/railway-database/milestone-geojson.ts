@@ -1,5 +1,6 @@
 import {
   isCanonicalRailwayLineCode,
+  isMilestoneLabelForPosition,
   milestoneId,
 } from "../../shared/railway-reference/values";
 import {
@@ -50,7 +51,11 @@ function normalizeFeature(value: unknown): MilestoneGeoJsonFeature {
     !isNonEmptyString(value.properties.label) ||
     !isCanonicalRailwayLineCode(value.properties.lineCode) ||
     !isPositiveInteger(value.properties.sectionRank) ||
-    !isUnsignedInteger(value.properties.positionMeters)
+    !isUnsignedInteger(value.properties.positionMeters) ||
+    !isMilestoneLabelForPosition(
+      value.properties.label,
+      value.properties.positionMeters,
+    )
   ) {
     throw new Error("Milestone GeoJSON contains an invalid feature");
   }
