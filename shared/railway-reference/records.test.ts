@@ -35,7 +35,10 @@ describe("railway reference database rows", () => {
 
   test.each([
     { ...MILESTONE, label: undefined },
+    { ...MILESTONE, label: "240+000" },
+    { ...MILESTONE, label: "241+00" },
     { ...MILESTONE, position_m: -1 },
+    { ...MILESTONE, position_m: 240_000 },
     { ...MILESTONE, latitude: 91 },
     { ...MILESTONE, longitude: -181 },
   ])("rejects malformed milestone %#", (value) => {

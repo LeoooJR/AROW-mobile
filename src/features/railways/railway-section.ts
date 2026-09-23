@@ -1,6 +1,7 @@
-import { AbstractRailwaySectionFeature } from "@/features/map-features/abstract-railway-section-feature";
+import { AbstractRailwayNetworkFeature } from "@/features/map-features/abstract-railway-network-feature";
 import type { Railway } from "@/features/railways/railway";
 import { isNonEmptyString, isUnsignedInteger } from "@shared/value-validation";
+import { isMilestoneLabelForPosition } from "@shared/railway-reference/values";
 
 export type RailwaySectionGeometry =
   | {
@@ -64,6 +65,14 @@ function validateMilestoneRange(
     !isNonEmptyString(range.maximumLabel) ||
     !isUnsignedInteger(range.minimumPositionMeters) ||
     !isUnsignedInteger(range.maximumPositionMeters) ||
+    !isMilestoneLabelForPosition(
+      range.minimumLabel,
+      range.minimumPositionMeters,
+    ) ||
+    !isMilestoneLabelForPosition(
+      range.maximumLabel,
+      range.maximumPositionMeters,
+    ) ||
     range.minimumPositionMeters > range.maximumPositionMeters
   ) {
     throw new Error("Railway section milestone range is invalid");
@@ -71,8 +80,8 @@ function validateMilestoneRange(
   return Object.freeze({ ...range });
 }
 
-export class RailwaySection extends AbstractRailwaySectionFeature<"railway"> {
-  public readonly kind = "railway";
+export class RailwaySection extends AbstractRailwayNetworkFeature<"railway-section"> {
+  public readonly kind = "railway-section";
 
   readonly #geometry: RailwaySectionGeometry;
   readonly #milestoneRange: RailwayMilestoneRange | undefined;

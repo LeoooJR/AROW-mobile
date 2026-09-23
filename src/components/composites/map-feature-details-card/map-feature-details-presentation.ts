@@ -11,7 +11,7 @@ export interface MapFeatureDetailsPresentation {
 export default function getMapFeatureDetailsPresentation(
   feature: MapFeature,
 ): MapFeatureDetailsPresentation {
-  if (feature.kind === "railway") {
+  if (feature.kind === "railway-section") {
     if (feature.geometry.status === "absent") {
       return {
         eyebrow: "Ligne ferroviaire",

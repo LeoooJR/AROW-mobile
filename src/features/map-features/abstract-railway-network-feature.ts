@@ -1,15 +1,15 @@
-import { AbstractMapFeature } from "./abstract-map-feature";
 import { RailwaySectionKey } from "@shared/railway-reference/values";
 
-export abstract class AbstractRailwaySectionFeature<
-  TKind extends string,
-> extends AbstractMapFeature<TKind> {
+export abstract class AbstractRailwayNetworkFeature<TKind extends string> {
+  public abstract readonly kind: TKind;
+
   readonly #key: RailwaySectionKey;
 
   protected constructor(lineCode: string | number, sectionRank: number) {
-    super();
     this.#key = new RailwaySectionKey(lineCode, sectionRank);
   }
+
+  public abstract get id(): string;
 
   public get key(): RailwaySectionKey {
     return this.#key;

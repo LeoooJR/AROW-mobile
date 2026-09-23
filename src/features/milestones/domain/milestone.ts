@@ -1,11 +1,14 @@
-import { AbstractRailwaySectionFeature } from "@/features/map-features/abstract-railway-section-feature";
+import { AbstractRailwayNetworkFeature } from "@/features/map-features/abstract-railway-network-feature";
 import type { GeographicCoordinates } from "@/types/geographic-coordinates";
 import {
   isLatitude,
   isLongitude,
   isUnsignedInteger,
 } from "@shared/value-validation";
-import { milestoneId } from "@shared/railway-reference/values";
+import {
+  isMilestoneLabelForPosition,
+  milestoneId,
+} from "@shared/railway-reference/values";
 
 export interface MilestoneInput {
   readonly coordinates: GeographicCoordinates;
@@ -26,7 +29,7 @@ function validatedCoordinates(
   return Object.freeze({ latitude, longitude });
 }
 
-export class Milestone extends AbstractRailwaySectionFeature<"milestone"> {
+export class Milestone extends AbstractRailwayNetworkFeature<"milestone"> {
   public readonly kind = "milestone";
 
   readonly #coordinates: GeographicCoordinates;
@@ -41,6 +44,9 @@ export class Milestone extends AbstractRailwaySectionFeature<"milestone"> {
     }
     if (input.label.length === 0) {
       throw new Error("Milestone label must not be empty");
+    }
+    if (!isMilestoneLabelForPosition(input.label, input.positionMeters)) {
+      throw new Error("Milestone label and position must agree");
     }
 
     this.#coordinates = validatedCoordinates(input.coordinates);

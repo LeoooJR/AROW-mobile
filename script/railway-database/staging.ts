@@ -12,6 +12,7 @@ import type { RailwayResources, StagingWorkspace } from "./types";
 interface StagingOptions {
   readonly databasePath: string;
   readonly geojsonPath: string;
+  readonly milestoneGeojsonPath: string;
   readonly resources: RailwayResources;
 }
 
@@ -37,11 +38,16 @@ function restoreBackups(
 export function createStagingWorkspace({
   databasePath,
   geojsonPath,
+  milestoneGeojsonPath,
   resources,
 }: StagingOptions): StagingWorkspace {
   const targetDatabasePath = resolve(databasePath);
   const targetGeojsonPath = resolve(geojsonPath);
-  if (dirname(targetDatabasePath) !== dirname(targetGeojsonPath)) {
+  const targetMilestoneGeojsonPath = resolve(milestoneGeojsonPath);
+  if (
+    dirname(targetDatabasePath) !== dirname(targetGeojsonPath) ||
+    dirname(targetDatabasePath) !== dirname(targetMilestoneGeojsonPath)
+  ) {
     throw new Error("Generated railway assets must share an output directory");
   }
 
@@ -54,8 +60,10 @@ export function createStagingWorkspace({
     rawMilestonesPath: join(directory, resources.milestones.name),
     stagedDatabasePath: join(directory, "railway_reference.generated"),
     stagedGeojsonPath: join(directory, "lignes-par-type.generated"),
+    stagedMilestoneGeojsonPath: join(directory, "milestones.generated"),
     targetDatabasePath,
     targetGeojsonPath,
+    targetMilestoneGeojsonPath,
   });
 }
 
@@ -68,6 +76,10 @@ export function promoteStagedOutputs(workspace: StagingWorkspace): void {
     {
       stagingPath: workspace.stagedDatabasePath,
       targetPath: workspace.targetDatabasePath,
+    },
+    {
+      stagingPath: workspace.stagedMilestoneGeojsonPath,
+      targetPath: workspace.targetMilestoneGeojsonPath,
     },
   ];
   const backups: Backup[] = [];

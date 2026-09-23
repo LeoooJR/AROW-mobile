@@ -4,14 +4,17 @@ import {
   type PressEventWithFeatures,
   type SymbolLayerSpecification,
 } from "@maplibre/maplibre-react-native";
-import type { Feature, FeatureCollection, Point } from "geojson";
-import { type ReactElement, useMemo } from "react";
+import type { FeatureCollection, Point } from "geojson";
+import { type ReactElement } from "react";
 import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 
 import { geographicCoordinatesFromPosition } from "@/components/adapters/map/geojson-validation";
 import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
 import { type MapFeature } from "@/features/map-features/map-feature";
-import { isCanonicalRailwayLineCode } from "@shared/railway-reference/values";
+import {
+  isCanonicalRailwayLineCode,
+  isMilestoneLabelForPosition,
+} from "@shared/railway-reference/values";
 import { Milestone } from "@/features/milestones/domain/milestone";
 import {
   isNonEmptyString,
@@ -21,21 +24,19 @@ import {
 } from "@shared/value-validation";
 
 export interface MilestoneLayerProps {
-  readonly milestones: readonly Milestone[];
+  readonly data?: string;
   readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly selectedMilestone?: Milestone;
   readonly visible?: boolean;
 }
 
 interface MilestoneGeoJSONProperties {
-  readonly kind: "milestone";
   readonly label: string;
   readonly lineCode: string;
   readonly positionMeters: number;
   readonly sectionRank: number;
 }
 
-type MilestoneGeoJSONFeature = Feature<Point, MilestoneGeoJSONProperties>;
 type MilestoneFeatureCollection = FeatureCollection<
   Point,
   MilestoneGeoJSONProperties
@@ -75,31 +76,12 @@ const LABEL_LAYOUT = {
   "text-size": 10,
 } satisfies SymbolLayerSpecification["layout"];
 
-export function milestonesToFeatureCollection(
-  milestones: readonly Milestone[],
-): MilestoneFeatureCollection {
-  return {
-    features: milestones.map((milestone): MilestoneGeoJSONFeature => ({
-      geometry: {
-        coordinates: [
-          milestone.coordinates.longitude,
-          milestone.coordinates.latitude,
-        ],
-        type: "Point",
-      },
-      id: milestone.id,
-      properties: {
-        kind: milestone.kind,
-        label: milestone.label,
-        lineCode: milestone.lineCode,
-        positionMeters: milestone.positionMeters,
-        sectionRank: milestone.sectionRank,
-      },
-      type: "Feature",
-    })),
-    type: "FeatureCollection",
-  };
-}
+const EMPTY_MILESTONES: MilestoneFeatureCollection = {
+  features: [],
+  type: "FeatureCollection",
+};
+Object.freeze(EMPTY_MILESTONES.features);
+Object.freeze(EMPTY_MILESTONES);
 
 function isMilestoneProperties(
   properties: GeoJSON.GeoJsonProperties,
@@ -108,12 +90,15 @@ function isMilestoneProperties(
     return false;
   }
 
-  return hasMilestoneIdentity(properties) && hasMilestoneMetadata(properties);
+  return (
+    hasMilestoneIdentity(properties) &&
+    hasMilestoneMetadata(properties) &&
+    isMilestoneLabelForPosition(properties.label, properties.positionMeters)
+  );
 }
 
 function hasMilestoneIdentity(properties: Record<string, unknown>): boolean {
   return (
-    properties.kind === "milestone" &&
     isCanonicalRailwayLineCode(properties.lineCode) &&
     isPositiveInteger(properties.sectionRank) &&
     isUnsignedInteger(properties.positionMeters)
@@ -151,7 +136,7 @@ function milestoneFromFeature(feature: GeoJSON.Feature): Milestone | undefined {
 }
 
 export default function MilestoneLayer({
-  milestones,
+  data,
   onFeaturePress,
   selectedMilestone,
   visible = true,
@@ -159,10 +144,6 @@ export default function MilestoneLayer({
   const colorScheme = useColorScheme();
   const palette =
     colorScheme === "dark" ? MILESTONE_PALETTES.dark : MILESTONE_PALETTES.light;
-  const collection = useMemo(
-    () => milestonesToFeatureCollection(milestones),
-    [milestones],
-  );
 
   const onPress = (
     event: NativeSyntheticEvent<PressEventWithFeatures>,
@@ -181,8 +162,9 @@ export default function MilestoneLayer({
 
   return (
     <GeoJSONSource
-      data={collection}
+      data={data ?? EMPTY_MILESTONES}
       id="railway-milestones-source"
+      key={data === undefined ? "empty-milestones" : data}
       onPress={visible ? onPress : undefined}
     >
       <Layer

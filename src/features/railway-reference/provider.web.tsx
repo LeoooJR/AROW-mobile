@@ -9,9 +9,9 @@ import type { RailwayReferenceProviderProps } from "@/features/railway-reference
 const UNAVAILABLE_REFERENCE: RailwayReferenceModel = {
   milestoneSearch: {
     findMilestone: async () => undefined,
+    loadRailways: () => undefined,
     state: { status: "unavailable" },
   },
-  milestoneState: { status: "unavailable" },
 };
 
 export default function RailwayReferenceProvider({

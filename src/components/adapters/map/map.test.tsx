@@ -14,8 +14,6 @@ const MILESTONE = new Milestone({
   positionMeters: 241_000,
   sectionRank: 1,
 });
-const MILESTONES = [MILESTONE] as const;
-
 jest.mock("@maplibre/maplibre-react-native", () => {
   const { View: MockView } =
     jest.requireActual<typeof import("react-native")>("react-native");
@@ -101,10 +99,7 @@ describe("Map", () => {
       3,
     );
     expect(screen.queryByTestId("mock-user-location-marker")).toBeNull();
-    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
-      "milestones",
-      [],
-    );
+    expect(screen.getByTestId("mock-milestone-layer")).not.toHaveProp("data");
     expect(screen.queryByTestId("mock-railway-lines-source")).toBeNull();
   });
 
@@ -151,14 +146,14 @@ describe("Map", () => {
     );
   });
 
-  test("forwards milestone data to its presentation layer", async () => {
+  test("forwards the milestone asset URI to its presentation layer", async () => {
     jest.spyOn(ReactNative, "useColorScheme").mockReturnValue("light");
 
-    await render(<Map milestones={MILESTONES} />);
+    await render(<Map milestoneData="file:///milestones.geojson" />);
 
     expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
-      "milestones",
-      MILESTONES,
+      "data",
+      "file:///milestones.geojson",
     );
     expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
       "visible",
@@ -182,7 +177,7 @@ describe("Map", () => {
     await render(
       <Map
         layerVisibility={{ milestone: false, railway: false }}
-        milestones={MILESTONES}
+        milestoneData="file:///milestones.geojson"
         railwayData="file:///railways.geojson"
       />,
     );
@@ -202,7 +197,7 @@ describe("Map", () => {
 
     await render(
       <Map
-        milestones={MILESTONES}
+        milestoneData="file:///milestones.geojson"
         onFeaturePress={onFeaturePress}
         railwayData="file:///railways.geojson"
         selectedFeature={MILESTONE}

@@ -16,15 +16,20 @@ import type { Milestone } from "@/features/milestones/domain/milestone";
 import { useRailwayReference } from "@/features/railway-reference/context";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 import railwayLinesAsset from "@/statics/lignes-par-type.geojson";
+import milestonesAsset from "@/statics/milestones.geojson";
 
 type FeatureSelection =
   | { readonly feature: MapFeature; readonly origin: "map" }
   | { readonly feature: Milestone; readonly origin: "search" };
 
+function layerForFeature(feature: MapFeature): ToggleableMapLayer {
+  return feature.kind === "railway-section" ? "railway" : "milestone";
+}
+
 export default function Index() {
-  const [railwayAssets] = useAssets(railwayLinesAsset);
+  const [railwayAssets] = useAssets([railwayLinesAsset, milestonesAsset]);
   const { openSettings, requestAccess, retry, state } = useRealLocation();
-  const { milestoneSearch, milestoneState } = useRailwayReference();
+  const { milestoneSearch } = useRailwayReference();
   const [recenterRequest, setRecenterRequest] = useState(0);
   const [milestoneFocusRequest, setMilestoneFocusRequest] = useState(0);
   const [mapFocused, setMapFocused] = useState(false);
@@ -33,6 +38,7 @@ export default function Index() {
     DEFAULT_MAP_LAYER_VISIBILITY,
   );
   const railwayData = railwayAssets?.[0]?.localUri ?? railwayAssets?.[0]?.uri;
+  const milestoneData = railwayAssets?.[1]?.localUri ?? railwayAssets?.[1]?.uri;
   const selectedFeature = selection?.feature;
   const showSimulationAction = selection?.origin === "search";
   const currentLocation =
@@ -82,7 +88,9 @@ export default function Index() {
     setLayerVisibility((current) => ({ ...current, [layer]: visible }));
     if (!visible) {
       setSelection((current) =>
-        current?.feature.kind === layer ? undefined : current,
+        current !== undefined && layerForFeature(current.feature) === layer
+          ? undefined
+          : current,
       );
     }
   };
@@ -120,11 +128,7 @@ export default function Index() {
         focusRequest={milestoneFocusRequest}
         layerVisibility={layerVisibility}
         location={currentLocation}
-        milestones={
-          milestoneState.status === "ready"
-            ? milestoneState.milestones
-            : undefined
-        }
+        milestoneData={milestoneData}
         onFeaturePress={(feature) => {
           setMapFocused(false);
           setSelection({ feature, origin: "map" });

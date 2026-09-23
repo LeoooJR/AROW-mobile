@@ -25,10 +25,8 @@ tags:
 - assertVisible: "(Autorisation requise|Accès refusé)"
 - tapOn:
     id: "location-status"
-- assertVisible:
-    id: ".*permission_allow(_foreground_only)?_button"
-- tapOn:
-    id: ".*permission_allow(_foreground_only)?_button"
+- assertVisible: "While using the app"
+- tapOn: "While using the app"
 - assertNotVisible: "(Autorisation requise|Accès refusé)"
 - assertVisible:
     id: "location-status"
@@ -45,7 +43,7 @@ tags:
 # The 509+000 milestone is visible northwest of the centered fix after the
 # fresh-start status bar settles.
 - tapOn:
-    point: "172,810"
+    point: "16%,32%"
     retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "PK 509\\+000"
@@ -57,7 +55,7 @@ tags:
 - assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
 # Replace the milestone selection with its parent railway section.
 - tapOn:
-    point: "260,300"
+    point: "24%,13%"
     retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
@@ -69,7 +67,7 @@ tags:
 # A selected railway remains below overlapping milestones for rendering and
 # press dispatch, so the milestone can replace the railway selection.
 - tapOn:
-    point: "172,810"
+    point: "16%,32%"
     retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "PK 509\\+000"
@@ -91,7 +89,9 @@ tags:
 - tapOn:
     id: "line-search-input"
 - inputText: "893000"
-- assertVisible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
+- extendedWaitUntil:
+    visible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
+    timeout: 30000
 - tapOn:
     id: "line-result-893000"
 - assertVisible: "Section 1"

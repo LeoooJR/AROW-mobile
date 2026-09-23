@@ -72,8 +72,8 @@
     "typescript-eslint": "^8.66.0"
   },
   "scripts": {
-    "database:check": "tsx ./script/check-railway-database.ts",
-    "database:setup": "tsx ./script/update-railway-database.ts",
+    "database:check": "node --import=tsx ./script/check-railway-database.ts",
+    "database:setup": "node --import=tsx ./script/update-railway-database.ts",
     "prestart": "npm run database:check",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",

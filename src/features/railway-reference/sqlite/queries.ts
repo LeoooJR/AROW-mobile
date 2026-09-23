@@ -27,11 +27,6 @@ const lineCode = "code_ligne";
 const sectionRank = "rg_troncon";
 const positionMeters = "position_m";
 
-export const LOAD_MILESTONES_QUERY = `
-  SELECT ${milestoneProjection}
-  FROM ${KILOMETRIC_POINTS_TABLE.name}
-`;
-
 export const LOAD_SEARCHABLE_RAILWAYS_QUERY = `
   WITH section_bounds AS (
     SELECT

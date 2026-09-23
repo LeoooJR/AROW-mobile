@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import {
   DEFAULT_RAILWAY_DATABASE_PATH,
   DEFAULT_RAILWAY_GEOJSON_PATH,
+  DEFAULT_MILESTONE_GEOJSON_PATH,
   EXPECTED_RAILWAY_SNAPSHOT,
 } from "./configuration";
 import { parseMilestoneCsv } from "./csv";
@@ -12,6 +13,7 @@ import {
   validateRailwayDatabase,
 } from "./database";
 import { normalizeRailwayGeoJson } from "./geojson";
+import { normalizeMilestoneGeoJson } from "./milestone-geojson";
 import { downloadResource, RAILWAY_RESOURCES } from "./resources";
 import {
   createStagingWorkspace,
@@ -68,10 +70,30 @@ async function downloadRailwaySources(
       workspace.rawMilestonesPath,
       fetchImplementation,
     ),
+    downloadResource(
+      resources.milestoneGeojson,
+      workspace.stagedMilestoneGeojsonPath,
+      fetchImplementation,
+    ),
   ]);
   const failure = results.find((result) => result.status === "rejected");
   if (failure !== undefined) {
     throw failure.reason;
+  }
+}
+
+function validateMilestoneGeoJson(
+  workspace: StagingWorkspace,
+  expectedMilestoneCount: number,
+): void {
+  const rawMilestoneGeojson: unknown = JSON.parse(
+    readFileSync(workspace.stagedMilestoneGeojsonPath, "utf8"),
+  );
+  const milestoneGeojson = normalizeMilestoneGeoJson(rawMilestoneGeojson);
+  if (milestoneGeojson.features.length !== expectedMilestoneCount) {
+    throw new Error(
+      `Expected ${expectedMilestoneCount} milestone features, received ${milestoneGeojson.features.length}`,
+    );
   }
 }
 
@@ -141,6 +163,7 @@ function buildStagedAssets(
   validateExpectedSnapshot(summary, expectedSnapshot);
 
   writeFileSync(workspace.stagedGeojsonPath, JSON.stringify(geojson));
+  validateMilestoneGeoJson(workspace, summary.milestoneCount);
   createRailwayDatabase(workspace.stagedDatabasePath, sections, milestones);
   validateRailwayDatabase(workspace.stagedDatabasePath, summary);
   return Object.freeze({ skipped, summary });
@@ -156,7 +179,7 @@ function reportGeneration(
     );
   }
   logger.log(
-    `Generated ${summary.railwaySectionCount} railway sections and ${summary.milestoneCount} milestones`,
+    `Prepared ${summary.railwaySectionCount} railway sections and ${summary.milestoneCount} milestones`,
   );
 }
 
@@ -166,11 +189,13 @@ export async function setupRailwayDatabase({
   fetchImplementation = fetch,
   geojsonPath = DEFAULT_RAILWAY_GEOJSON_PATH,
   logger = console,
+  milestoneGeojsonPath = DEFAULT_MILESTONE_GEOJSON_PATH,
   resources = RAILWAY_RESOURCES,
 }: SetupOptions = {}): Promise<GenerationSummary> {
   const workspace = createStagingWorkspace({
     databasePath,
     geojsonPath,
+    milestoneGeojsonPath,
     resources,
   });
   try {

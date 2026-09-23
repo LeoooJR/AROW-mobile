@@ -1,5 +1,3 @@
-import { AbstractMapFeature } from "@/features/map-features/abstract-map-feature";
-
 import { Railway } from "./railway";
 
 const GEOMETRY = {
@@ -40,10 +38,9 @@ describe("Railway", () => {
     expect(railway.sections.map((section) => section.sectionRank)).toEqual([
       1, 2,
     ]);
-    expect(first).toBeInstanceOf(AbstractMapFeature);
     expect(first?.railway).toBe(railway);
     expect(second?.railway).toBe(railway);
-    expect(first?.kind).toBe("railway");
+    expect(first?.kind).toBe("railway-section");
     expect(first?.id).toBe("340311:1");
     expect(first?.geometry).toEqual(GEOMETRY);
     expect(second?.geometry).toEqual({ status: "absent" });
@@ -121,6 +118,32 @@ describe("Railway", () => {
                 maximumPositionMeters: 1_000,
                 minimumLabel: "2+000",
                 minimumPositionMeters: 2_000,
+              },
+              sectionRank: 1,
+            },
+          ],
+        }),
+    ).toThrow("Railway section milestone range is invalid");
+  });
+
+  test.each([
+    ["minimum", { minimumLabel: "135+000" }],
+    ["maximum", { maximumLabel: "138+000" }],
+  ])("rejects a mismatched %s milestone-range label", (_bound, change) => {
+    expect(
+      () =>
+        new Railway({
+          code: "340311",
+          name: "Ligne",
+          sections: [
+            {
+              geometry: { status: "absent" },
+              milestoneRange: {
+                maximumLabel: "137+000",
+                maximumPositionMeters: 137_000,
+                minimumLabel: "136+000",
+                minimumPositionMeters: 136_000,
+                ...change,
               },
               sectionRank: 1,
             },

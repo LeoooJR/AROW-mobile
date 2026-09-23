@@ -23,6 +23,7 @@ export type RailwayResource = Readonly<
 
 export interface RailwayResources {
   readonly geojson: RailwayResource;
+  readonly milestoneGeojson: RailwayResource;
   readonly milestones: RailwayResource;
 }
 
@@ -105,6 +106,28 @@ export interface RailwayFeatureCollection {
   readonly type: "FeatureCollection";
 }
 
+export interface MilestoneGeoJsonProperties {
+  readonly label: string;
+  readonly lineCode: string;
+  readonly positionMeters: number;
+  readonly sectionRank: number;
+}
+
+export interface MilestoneGeoJsonFeature {
+  readonly geometry: {
+    readonly coordinates: readonly [number, number];
+    readonly type: "Point";
+  };
+  readonly id: string;
+  readonly properties: MilestoneGeoJsonProperties;
+  readonly type: "Feature";
+}
+
+export interface MilestoneFeatureCollection {
+  readonly features: readonly MilestoneGeoJsonFeature[];
+  readonly type: "FeatureCollection";
+}
+
 export interface NormalizedRailwayData {
   readonly geojson: RailwayFeatureCollection;
   readonly sections: readonly RailwaySectionWithGeometry[];
@@ -125,8 +148,10 @@ export interface StagingWorkspace {
   readonly rawMilestonesPath: string;
   readonly stagedDatabasePath: string;
   readonly stagedGeojsonPath: string;
+  readonly stagedMilestoneGeojsonPath: string;
   readonly targetDatabasePath: string;
   readonly targetGeojsonPath: string;
+  readonly targetMilestoneGeojsonPath: string;
 }
 
 export interface SetupOptions {
@@ -135,5 +160,6 @@ export interface SetupOptions {
   readonly fetchImplementation?: FetchImplementation;
   readonly geojsonPath?: string;
   readonly logger?: GenerationLogger;
+  readonly milestoneGeojsonPath?: string;
   readonly resources?: RailwayResources;
 }

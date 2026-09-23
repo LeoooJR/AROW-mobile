@@ -2,6 +2,7 @@ import {
   canonicalRailwayLineCode,
   isCanonicalRailwayLineCode,
   isKilometricPosition,
+  isMilestoneLabelForPosition,
   isRailwayLatitude,
   isRailwayLongitude,
   isRailwaySectionRank,
@@ -54,6 +55,21 @@ describe("railway reference values", () => {
     expect(parseMilestoneLabel("D+000")).toBeUndefined();
     expect(parseMilestoneLabel("241+07")).toBeUndefined();
   });
+
+  test.each([
+    ["001+000", 1_000, true],
+    ["0+000", 0, true],
+    ["509+000", 509_000, true],
+    ["509+000", 508_000, false],
+    ["509+00", 509_000, false],
+    ["D+000", 0, false],
+    ["0+000", -1, false],
+  ] as const)(
+    "compares milestone label %s with position %s",
+    (label, positionMeters, expected) => {
+      expect(isMilestoneLabelForPosition(label, positionMeters)).toBe(expected);
+    },
+  );
 
   test("validates railway ranks, positions, and coordinate limits", () => {
     expect(isRailwaySectionRank(1)).toBe(true);

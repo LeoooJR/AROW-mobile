@@ -1,15 +1,13 @@
 import {
   FIND_MILESTONE_QUERY,
-  LOAD_MILESTONES_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
 } from "./queries";
 
 describe("railway reference queries", () => {
-  test("uses the same complete milestone projection for loading and lookup", () => {
+  test("uses the complete milestone projection for exact lookup", () => {
     const columns =
       "code_ligne, rg_troncon, position_m, label, latitude, longitude";
 
-    expect(LOAD_MILESTONES_QUERY).toContain(`SELECT ${columns}`);
     expect(FIND_MILESTONE_QUERY).toContain(`SELECT ${columns}`);
   });
 

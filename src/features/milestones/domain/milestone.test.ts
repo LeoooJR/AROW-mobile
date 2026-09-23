@@ -1,5 +1,3 @@
-import { AbstractMapFeature } from "@/features/map-features/abstract-map-feature";
-
 import { Milestone } from "./milestone";
 
 const INPUT = {
@@ -14,7 +12,6 @@ describe("Milestone", () => {
   test("encapsulates milestone identity and values", () => {
     const milestone = new Milestone(INPUT);
 
-    expect(milestone).toBeInstanceOf(AbstractMapFeature);
     expect(milestone.kind).toBe("milestone");
     expect(milestone.id).toBe("001000:1:241000");
     expect(milestone.key.id).toBe("001000:1");
@@ -32,6 +29,9 @@ describe("Milestone", () => {
     ["fractional metre position", { ...INPUT, positionMeters: 1.5 }],
     ["infinite metre position", { ...INPUT, positionMeters: Infinity }],
     ["empty label", { ...INPUT, label: "" }],
+    ["mismatched label", { ...INPUT, label: "240+000" }],
+    ["malformed label", { ...INPUT, label: "241+00" }],
+    ["mismatched position", { ...INPUT, positionMeters: 240_000 }],
     [
       "invalid latitude",
       { ...INPUT, coordinates: { latitude: 91, longitude: 0 } },

@@ -30,6 +30,7 @@ expo-env.d.ts
 
 # Generated railway reference assets
 /src/statics/lignes-par-type.geojson
+/src/statics/milestones.geojson
 /src/statics/railway_reference.sqlite
 /src/statics/.railway-database-*
 

@@ -1,26 +1,21 @@
-import { renderHook, waitFor } from "@testing-library/react-native";
+import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { type SQLiteDatabase, useSQLiteContext } from "expo-sqlite";
 import { type PropsWithChildren } from "react";
 
 import { useRailwayReference } from "./context";
 import RailwayReferenceProvider from "./provider";
+import { FIND_MILESTONE_QUERY } from "./sqlite/queries";
 
 jest.mock("expo-sqlite", () => ({
   SQLiteProvider: ({ children }: PropsWithChildren) => children,
   useSQLiteContext: jest.fn(),
 }));
-
-jest.mock(
-  "@/statics/railway_reference.sqlite",
-  () => "railway-reference-asset",
-);
+jest.mock("@/statics/railway_reference.sqlite", () => "database-asset");
 
 const useSQLiteContextMock = jest.mocked(useSQLiteContext);
-type SQLiteDatabaseMock = Pick<SQLiteDatabase, "getAllAsync" | "getFirstAsync">;
-
-function asSQLiteDatabase(database: SQLiteDatabaseMock): SQLiteDatabase {
-  return database as SQLiteDatabase;
-}
+type DatabaseMock = Pick<SQLiteDatabase, "getAllAsync" | "getFirstAsync">;
+const asDatabase = (database: DatabaseMock): SQLiteDatabase =>
+  database as SQLiteDatabase;
 
 function deferred<Value>() {
   let resolve!: (value: Value) => void;
@@ -38,7 +33,6 @@ const MILESTONE_RECORD = {
   position_m: 509_000,
   rg_troncon: 1,
 };
-
 const SECTION_RECORD = {
   code_ligne: "893000",
   has_geometry: 1,
@@ -55,98 +49,98 @@ const SECTION_RECORD = {
 };
 
 describe("RailwayReferenceProvider", () => {
-  test("loads milestones and searchable railways independently", async () => {
-    const milestones = deferred<unknown[]>();
-    const railways = deferred<unknown[]>();
+  test("does not load the searchable catalog while mounting", async () => {
+    const getAllAsync = jest.fn();
     useSQLiteContextMock.mockReturnValue(
-      asSQLiteDatabase({
-        getAllAsync: jest
-          .fn()
-          .mockReturnValueOnce(milestones.promise)
-          .mockReturnValueOnce(railways.promise),
-        getFirstAsync: jest.fn().mockResolvedValue(MILESTONE_RECORD),
-      }),
+      asDatabase({ getAllAsync, getFirstAsync: jest.fn() }),
     );
     const view = await renderHook(() => useRailwayReference(), {
       wrapper: RailwayReferenceProvider,
     });
 
-    expect(view.result.current.milestoneState).toEqual({ status: "loading" });
+    expect(view.result.current.milestoneSearch.state).toEqual({
+      status: "idle",
+    });
+    expect(getAllAsync).not.toHaveBeenCalled();
+  });
+
+  test("loads the searchable catalog once and caches it", async () => {
+    const rows = deferred<unknown[]>();
+    const getAllAsync = jest.fn().mockReturnValue(rows.promise);
+    useSQLiteContextMock.mockReturnValue(
+      asDatabase({ getAllAsync, getFirstAsync: jest.fn() }),
+    );
+    const view = await renderHook(() => useRailwayReference(), {
+      wrapper: RailwayReferenceProvider,
+    });
+
+    await act(async () => {
+      view.result.current.milestoneSearch.loadRailways();
+    });
     expect(view.result.current.milestoneSearch.state).toEqual({
       status: "loading",
     });
-    milestones.resolve([MILESTONE_RECORD]);
-    await waitFor(() => {
-      expect(view.result.current.milestoneState.status).toBe("ready");
+    await act(async () => {
+      view.result.current.milestoneSearch.loadRailways();
     });
-    expect(view.result.current.milestoneSearch.state).toEqual({
-      status: "loading",
+    expect(getAllAsync).toHaveBeenCalledTimes(1);
+    rows.resolve([SECTION_RECORD]);
+    await waitFor(() =>
+      expect(view.result.current.milestoneSearch.state.status).toBe("ready"),
+    );
+    await act(async () => {
+      view.result.current.milestoneSearch.loadRailways();
     });
-    railways.resolve([SECTION_RECORD]);
-    await waitFor(() => {
-      expect(view.result.current.milestoneSearch.state.status).toBe("ready");
-    });
+    expect(getAllAsync).toHaveBeenCalledTimes(1);
   });
 
-  test("reports one projection failure without hiding the other", async () => {
+  test("preserves catalog errors without retrying", async () => {
+    const getAllAsync = jest.fn().mockRejectedValue(new Error("unavailable"));
     useSQLiteContextMock.mockReturnValue(
-      asSQLiteDatabase({
-        getAllAsync: jest
-          .fn()
-          .mockRejectedValueOnce(new Error("milestones unavailable"))
-          .mockResolvedValueOnce([SECTION_RECORD]),
-        getFirstAsync: jest.fn(),
+      asDatabase({ getAllAsync, getFirstAsync: jest.fn() }),
+    );
+    const view = await renderHook(() => useRailwayReference(), {
+      wrapper: RailwayReferenceProvider,
+    });
+
+    await act(async () => {
+      view.result.current.milestoneSearch.loadRailways();
+    });
+    await waitFor(() =>
+      expect(view.result.current.milestoneSearch.state).toEqual({
+        status: "error",
       }),
     );
-    const view = await renderHook(() => useRailwayReference(), {
-      wrapper: RailwayReferenceProvider,
+    await act(async () => {
+      view.result.current.milestoneSearch.loadRailways();
     });
-
-    await waitFor(() => {
-      expect(view.result.current.milestoneState).toEqual({ status: "error" });
-    });
-    await waitFor(() => {
-      expect(view.result.current.milestoneSearch.state.status).toBe("ready");
-    });
+    expect(getAllAsync).toHaveBeenCalledTimes(1);
   });
 
-  test("keeps exact lookup stable until the database changes", async () => {
-    const firstDatabase = {
-      getAllAsync: jest.fn().mockResolvedValue([]),
-      getFirstAsync: jest.fn().mockResolvedValue(null),
-    } satisfies SQLiteDatabaseMock;
-    const secondDatabase = {
-      getAllAsync: jest.fn().mockResolvedValue([]),
-      getFirstAsync: jest.fn().mockResolvedValue(null),
-    } satisfies SQLiteDatabaseMock;
-    let currentDatabase = firstDatabase;
-    useSQLiteContextMock.mockImplementation(() =>
-      asSQLiteDatabase(currentDatabase),
+  test("finds an exact milestone before loading the catalog", async () => {
+    const getAllAsync = jest.fn();
+    const getFirstAsync = jest.fn().mockResolvedValue(MILESTONE_RECORD);
+    useSQLiteContextMock.mockReturnValue(
+      asDatabase({ getAllAsync, getFirstAsync }),
     );
     const view = await renderHook(() => useRailwayReference(), {
       wrapper: RailwayReferenceProvider,
     });
-    const firstLookup = view.result.current.milestoneSearch.findMilestone;
 
-    await view.rerender(undefined);
-    expect(view.result.current.milestoneSearch.findMilestone).toBe(firstLookup);
-    await firstLookup({
+    const milestone = await view.result.current.milestoneSearch.findMilestone({
       lineCode: "893000",
       positionMeters: 509_000,
       sectionRank: 1,
     });
-    expect(firstDatabase.getFirstAsync).toHaveBeenCalled();
 
-    currentDatabase = secondDatabase;
-    await view.rerender(undefined);
-    const secondLookup = view.result.current.milestoneSearch.findMilestone;
-    expect(secondLookup).not.toBe(firstLookup);
-    await secondLookup({
-      lineCode: "893000",
-      positionMeters: 509_000,
-      sectionRank: 1,
-    });
-    expect(secondDatabase.getFirstAsync).toHaveBeenCalled();
+    expect(milestone?.id).toBe("893000:1:509000");
+    expect(getFirstAsync).toHaveBeenCalledWith(
+      FIND_MILESTONE_QUERY,
+      "893000",
+      1,
+      509_000,
+    );
+    expect(getAllAsync).not.toHaveBeenCalled();
   });
 
   test("rejects use outside its provider", async () => {

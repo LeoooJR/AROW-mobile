@@ -69,6 +69,17 @@ export function parseMilestoneLabel(
   });
 }
 
+export function isMilestoneLabelForPosition(
+  label: unknown,
+  positionMeters: unknown,
+): boolean {
+  if (typeof label !== "string" || !isKilometricPosition(positionMeters)) {
+    return false;
+  }
+
+  return parseMilestoneLabel(label)?.positionMeters === positionMeters;
+}
+
 export function railwaySectionId(
   lineCode: string | number,
   sectionRank: number,
