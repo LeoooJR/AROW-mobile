@@ -1,5 +1,3 @@
-import type { ColorSchemeName } from "react-native";
-
 export type MapToolbarTheme = "dark" | "light";
 
 interface MapToolbarPalette {
@@ -20,7 +18,3 @@ export const MAP_TOOLBAR_PALETTES = {
     sheet: "#FFFFFF",
   },
 } as const satisfies Record<MapToolbarTheme, MapToolbarPalette>;
-
-export function mapToolbarTheme(colorScheme: ColorSchemeName): MapToolbarTheme {
-  return colorScheme === "dark" ? "dark" : "light";
-}

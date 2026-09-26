@@ -5,6 +5,8 @@ import Svg, { Circle, Path } from "react-native-svg";
 
 import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
 import type { GeographicCoordinatesWithHeading } from "@/types/geographic-coordinates";
+import { normalizeDegrees } from "@/utils/angle";
+import { resolveColorTheme } from "@/utils/color-theme";
 
 export interface UserLocationMarkerProps {
   readonly bearing: number;
@@ -39,19 +41,14 @@ const styles = StyleSheet.create({
   },
 });
 
-function normalizedDegrees(degrees: number): number {
-  return ((degrees % 360) + 360) % 360;
-}
-
 export default function UserLocationMarker({
   bearing,
   location,
 }: UserLocationMarkerProps): ReactElement {
   const colorScheme = useColorScheme();
-  const colors =
-    colorScheme === "dark" ? MARKER_COLORS.dark : MARKER_COLORS.light;
+  const colors = MARKER_COLORS[resolveColorTheme(colorScheme)];
   const heading = location.heading ?? 0;
-  const rotation = normalizedDegrees(heading - bearing);
+  const rotation = normalizeDegrees(heading - bearing);
 
   return (
     <Marker

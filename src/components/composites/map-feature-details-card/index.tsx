@@ -6,13 +6,11 @@ import { SIMULATION_ACTION_OCCUPIED_HEIGHT } from "@/components/composites/locat
 import MapFeatureDetailsFact from "@/components/composites/map-feature-details-card/map-feature-details-fact";
 import MapFeatureDetailsHeader from "@/components/composites/map-feature-details-card/map-feature-details-header";
 import getMapFeatureDetailsPresentation from "@/components/composites/map-feature-details-card/map-feature-details-presentation";
-import {
-  MAP_FEATURE_DETAILS_PALETTES,
-  mapFeatureDetailsTheme,
-} from "@/components/composites/map-feature-details-card/map-feature-details-theme";
+import { MAP_FEATURE_DETAILS_PALETTES } from "@/components/composites/map-feature-details-card/map-feature-details-theme";
 import Card from "@/components/primitives/card";
 import Divider from "@/components/primitives/divider";
 import type { MapFeature } from "@/features/map-features/map-feature";
+import { resolveColorTheme } from "@/utils/color-theme";
 
 export interface MapFeatureDetailsCardProps {
   readonly feature: MapFeature;
@@ -27,8 +25,7 @@ export default function MapFeatureDetailsCard({
 }: MapFeatureDetailsCardProps): ReactElement {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
-  const palette =
-    MAP_FEATURE_DETAILS_PALETTES[mapFeatureDetailsTheme(colorScheme)];
+  const palette = MAP_FEATURE_DETAILS_PALETTES[resolveColorTheme(colorScheme)];
   const presentation = getMapFeatureDetailsPresentation(feature);
 
   return (

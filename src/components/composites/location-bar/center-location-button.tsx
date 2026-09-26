@@ -3,6 +3,7 @@ import { Text, useColorScheme, useWindowDimensions } from "react-native";
 
 import Button from "@/components/primitives/button";
 import LocationTargetIcon from "@/components/primitives/icons/location-target-icon";
+import { resolveColorTheme } from "@/utils/color-theme";
 
 interface CenterLocationButtonProps {
   readonly locationKind: "réelle" | "simulée";
@@ -34,11 +35,7 @@ export default function CenterLocationButton({
       variant="ghost"
     >
       <LocationTargetIcon
-        color={
-          colorScheme === "dark"
-            ? CENTER_ICON_COLORS.dark
-            : CENTER_ICON_COLORS.light
-        }
+        color={CENTER_ICON_COLORS[resolveColorTheme(colorScheme)]}
       />
       {compact ? null : (
         <Text className="text-[11px] font-semibold leading-[15px] text-text-primary">

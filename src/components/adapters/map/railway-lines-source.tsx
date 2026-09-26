@@ -20,6 +20,7 @@ import {
   isPositiveInteger,
   isRecord,
 } from "@shared/value-validation";
+import { resolveColorTheme } from "@/utils/color-theme";
 
 export interface RailwayLinesSourceProps {
   readonly data: string;
@@ -146,8 +147,7 @@ export default function RailwayLinesSource({
   visible = true,
 }: RailwayLinesSourceProps): ReactElement {
   const colorScheme = useColorScheme();
-  const colors =
-    colorScheme === "dark" ? LAYER_COLORS.dark : LAYER_COLORS.light;
+  const colors = LAYER_COLORS[resolveColorTheme(colorScheme)];
 
   const onPress = (
     event: NativeSyntheticEvent<PressEventWithFeatures>,

@@ -22,6 +22,7 @@ import {
   isRecord,
   isUnsignedInteger,
 } from "@shared/value-validation";
+import { resolveColorTheme } from "@/utils/color-theme";
 
 export interface MilestoneLayerProps {
   readonly data?: string;
@@ -142,8 +143,7 @@ export default function MilestoneLayer({
   visible = true,
 }: MilestoneLayerProps): ReactElement {
   const colorScheme = useColorScheme();
-  const palette =
-    colorScheme === "dark" ? MILESTONE_PALETTES.dark : MILESTONE_PALETTES.light;
+  const palette = MILESTONE_PALETTES[resolveColorTheme(colorScheme)];
 
   const onPress = (
     event: NativeSyntheticEvent<PressEventWithFeatures>,

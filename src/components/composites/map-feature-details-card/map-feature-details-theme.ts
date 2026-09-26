@@ -1,5 +1,3 @@
-import type { ColorSchemeName } from "react-native";
-
 export type MapFeatureDetailsTheme = "dark" | "light";
 
 interface MapFeatureDetailsPalette {
@@ -17,9 +15,3 @@ export const MAP_FEATURE_DETAILS_PALETTES = {
     shadow: "0 6px 18px rgba(10, 10, 10, 0.12)",
   },
 } as const satisfies Record<MapFeatureDetailsTheme, MapFeatureDetailsPalette>;
-
-export function mapFeatureDetailsTheme(
-  colorScheme: ColorSchemeName,
-): MapFeatureDetailsTheme {
-  return colorScheme === "dark" ? "dark" : "light";
-}

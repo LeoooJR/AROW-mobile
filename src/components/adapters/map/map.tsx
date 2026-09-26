@@ -17,10 +17,14 @@ import { LIGHT_MAP_STYLE } from "@/components/adapters/map/map-style-light";
 import MilestoneLayer from "@/components/adapters/map/milestone-layer";
 import RailwayLinesSource from "@/components/adapters/map/railway-lines-source";
 import UserLocationMarker from "@/components/adapters/map/user-location-marker";
+import { resolveColorTheme } from "@/utils/color-theme";
+
 export type {
   MapLocation,
   MapProps,
 } from "@/components/adapters/map/map-props";
+
+const MAP_STYLES = { dark: DARK_MAP_STYLE, light: LIGHT_MAP_STYLE };
 
 const styles = StyleSheet.create({
   map: {
@@ -56,7 +60,7 @@ export default function Map({
   return (
     <MapLibreMap
       accessibilityLabel="Carte ferroviaire interactive AROW"
-      mapStyle={colorScheme === "dark" ? DARK_MAP_STYLE : LIGHT_MAP_STYLE}
+      mapStyle={MAP_STYLES[resolveColorTheme(colorScheme)]}
       onRegionDidChange={onRegionDidChange}
       style={styles.map}
       testID="arow-map"
