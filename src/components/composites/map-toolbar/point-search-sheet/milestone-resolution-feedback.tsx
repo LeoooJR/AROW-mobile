@@ -1,9 +1,9 @@
 import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
-import formatMapFeatureCoordinates from "@/features/map-features/map-feature-coordinate-presentation";
 import type { MilestoneResolution } from "@/features/milestones/search/contracts";
 import type { Railway } from "@/features/railways/railway";
+import { formatGeographicCoordinates } from "@/utils/location-format";
 
 interface MilestoneResolutionFeedbackProps {
   readonly resolution: MilestoneResolution;
@@ -50,7 +50,7 @@ export default function MilestoneResolutionFeedback({
         {resolution.milestone.label}
       </Text>
       <Text className="mt-0.5 font-mono text-[10px] leading-4 text-text-muted">
-        {formatMapFeatureCoordinates(resolution.milestone.coordinates)}
+        {formatGeographicCoordinates(resolution.milestone.coordinates, "W")}
       </Text>
     </View>
   );

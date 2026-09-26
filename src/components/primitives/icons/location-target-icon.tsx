@@ -1,9 +1,9 @@
 import { type ReactElement } from "react";
 import Svg, { Circle, Path } from "react-native-svg";
 
-export interface LocationTargetIconProps {
-  readonly color: string;
-}
+import type { IconProps } from "@/components/primitives/icons/icon-props";
+
+export type LocationTargetIconProps = IconProps;
 
 export default function LocationTargetIcon({
   color,

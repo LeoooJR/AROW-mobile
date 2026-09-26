@@ -1,6 +1,5 @@
-import type { GeographicCoordinates } from "@/types/geographic-coordinates";
+import type { GeographicCoordinatesWithHeading } from "@/types/geographic-coordinates";
 
-export interface LocationDescriptor extends GeographicCoordinates {
+export interface LocationDescriptor extends GeographicCoordinatesWithHeading {
   readonly accuracy: number | null;
-  readonly heading: number | null;
 }

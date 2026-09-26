@@ -1,9 +1,9 @@
 import { type ReactElement } from "react";
 import Svg, { Path } from "react-native-svg";
 
-export interface PlayIconProps {
-  readonly color: string;
-}
+import type { IconProps } from "@/components/primitives/icons/icon-props";
+
+export type PlayIconProps = IconProps;
 
 export default function PlayIcon({ color }: PlayIconProps): ReactElement {
   return (

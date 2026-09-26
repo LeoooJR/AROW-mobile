@@ -1,9 +1,9 @@
 import { type ReactElement } from "react";
 import Svg, { Path } from "react-native-svg";
 
-export interface CloseIconProps {
-  readonly color: string;
-}
+import type { IconProps } from "@/components/primitives/icons/icon-props";
+
+export type CloseIconProps = IconProps;
 
 export default function CloseIcon({ color }: CloseIconProps): ReactElement {
   return (

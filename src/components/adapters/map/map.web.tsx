@@ -1,25 +1,12 @@
 import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
-import type { MapLayerVisibility } from "@/components/adapters/map/map-layer-visibility";
-import type { MapFeature } from "@/features/map-features/map-feature";
-import type { GeographicCoordinates } from "@/types/geographic-coordinates";
+import type { MapProps } from "@/components/adapters/map/map-props";
 
-export interface MapLocation extends GeographicCoordinates {
-  readonly heading: number | null;
-}
-
-export interface MapProps {
-  readonly focusLocation?: GeographicCoordinates;
-  readonly focusRequest?: number;
-  readonly layerVisibility?: MapLayerVisibility;
-  readonly location?: MapLocation;
-  readonly milestoneData?: string;
-  readonly onFeaturePress?: (feature: MapFeature) => void;
-  readonly railwayData?: string;
-  readonly recenterRequest?: number;
-  readonly selectedFeature?: MapFeature;
-}
+export type {
+  MapLocation,
+  MapProps,
+} from "@/components/adapters/map/map-props";
 
 export default function Map(_props: MapProps): ReactElement {
   return (

@@ -10,33 +10,17 @@ import {
 } from "react-native";
 
 import MapCamera from "@/components/adapters/map/map-camera";
-import {
-  DEFAULT_MAP_LAYER_VISIBILITY,
-  type MapLayerVisibility,
-} from "@/components/adapters/map/map-layer-visibility";
+import { DEFAULT_MAP_LAYER_VISIBILITY } from "@/components/adapters/map/map-layer-visibility";
+import type { MapProps } from "@/components/adapters/map/map-props";
 import { DARK_MAP_STYLE } from "@/components/adapters/map/map-style-dark";
 import { LIGHT_MAP_STYLE } from "@/components/adapters/map/map-style-light";
 import MilestoneLayer from "@/components/adapters/map/milestone-layer";
 import RailwayLinesSource from "@/components/adapters/map/railway-lines-source";
 import UserLocationMarker from "@/components/adapters/map/user-location-marker";
-import type { MapFeature } from "@/features/map-features/map-feature";
-import type { GeographicCoordinates } from "@/types/geographic-coordinates";
-
-export interface MapLocation extends GeographicCoordinates {
-  readonly heading: number | null;
-}
-
-export interface MapProps {
-  readonly focusLocation?: GeographicCoordinates;
-  readonly focusRequest?: number;
-  readonly layerVisibility?: MapLayerVisibility;
-  readonly location?: MapLocation;
-  readonly milestoneData?: string;
-  readonly onFeaturePress?: (feature: MapFeature) => void;
-  readonly railwayData?: string;
-  readonly recenterRequest?: number;
-  readonly selectedFeature?: MapFeature;
-}
+export type {
+  MapLocation,
+  MapProps,
+} from "@/components/adapters/map/map-props";
 
 const styles = StyleSheet.create({
   map: {

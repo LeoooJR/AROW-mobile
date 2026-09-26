@@ -4,16 +4,11 @@ import { StyleSheet, useColorScheme, View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 
 import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
-
-interface UserLocation {
-  readonly heading: number | null;
-  readonly latitude: number;
-  readonly longitude: number;
-}
+import type { GeographicCoordinatesWithHeading } from "@/types/geographic-coordinates";
 
 export interface UserLocationMarkerProps {
   readonly bearing: number;
-  readonly location: UserLocation;
+  readonly location: GeographicCoordinatesWithHeading;
 }
 
 interface MarkerColors {

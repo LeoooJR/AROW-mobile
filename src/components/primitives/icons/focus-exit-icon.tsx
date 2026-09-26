@@ -1,9 +1,9 @@
 import { type ReactElement } from "react";
 import Svg, { Path } from "react-native-svg";
 
-export interface FocusExitIconProps {
-  readonly color: string;
-}
+import type { IconProps } from "@/components/primitives/icons/icon-props";
+
+export type FocusExitIconProps = IconProps;
 
 export default function FocusExitIcon({
   color,

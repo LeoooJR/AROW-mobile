@@ -1,5 +1,5 @@
 import type { MapFeature } from "@/features/map-features/map-feature";
-import formatMapFeatureCoordinates from "@/features/map-features/map-feature-coordinate-presentation";
+import { formatGeographicCoordinates } from "@/utils/location-format";
 
 export interface MapFeatureDetailsPresentation {
   readonly coordinates?: string;
@@ -27,7 +27,7 @@ export default function getMapFeatureDetailsPresentation(
   }
 
   return {
-    coordinates: formatMapFeatureCoordinates(feature.coordinates),
+    coordinates: formatGeographicCoordinates(feature.coordinates, "W"),
     eyebrow: "Point kilométrique",
     milestone: feature.label,
     title: `PK ${feature.label}`,

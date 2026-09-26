@@ -1,9 +1,9 @@
 import { type ReactElement } from "react";
 import Svg, { Path } from "react-native-svg";
 
-export interface LayersIconProps {
-  readonly color: string;
-}
+import type { IconProps } from "@/components/primitives/icons/icon-props";
+
+export type LayersIconProps = IconProps;
 
 export default function LayersIcon({ color }: LayersIconProps): ReactElement {
   return (
