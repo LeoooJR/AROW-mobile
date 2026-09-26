@@ -29,6 +29,12 @@ dedicated review artifact:
 maestro --device emulator-5554 record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4
 ```
 
+For the standalone map-feature selection flow:
+
+```bash
+maestro --device emulator-5554 record --local .maestro/tests/manage-map-feature-selection.yaml .maestro/artifacts/map-feature-selection-e2e-recording.mp4
+```
+
 For the standalone map-layer feature flow:
 
 ```bash

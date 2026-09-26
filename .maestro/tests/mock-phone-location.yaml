@@ -1,5 +1,5 @@
 appId: com.leooojrrr.AROWmobile
-name: Inspect railway and milestone map features after granting location access
+name: Resolve a milestone after granting location access
 tags:
   - journey
   - location
@@ -8,7 +8,7 @@ tags:
   - railway
 ---
 # Preserve the development client's remembered Metro connection while following
-# the first-use journey from location permission to map-feature exploration.
+# the first-use journey from location permission to milestone resolution.
 - stopApp
 - setPermissions:
     permissions:
@@ -39,64 +39,8 @@ tags:
 - extendedWaitUntil:
     visible: "(Connectée|Active)"
     timeout: 30000
-- waitForAnimationToEnd
-# The 509+000 milestone is visible northwest of the centered fix after the
-# fresh-start status bar settles.
-- tapOn:
-    point: "16%,32%"
-    retryTapIfNoChange: true
-# Android system bars can shift this map target down before the camera settles.
-- runFlow:
-    when:
-      notVisible: "PK 509\\+000"
-    commands:
-      - tapOn:
-          point: "16%,33%"
-          retryTapIfNoChange: true
-- extendedWaitUntil:
-    visible: "PK 509\\+000"
-    timeout: 10000
-- assertVisible: "POINT KILOMÉTRIQUE"
-- assertVisible: "893000"
-- assertVisible: "1"
-- assertVisible: "509\\+000"
-- assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
-# Replace the milestone selection with its parent railway section.
-- tapOn:
-    point: "24%,13%"
-    retryTapIfNoChange: true
-- extendedWaitUntil:
-    visible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
-    timeout: 10000
-- assertNotVisible: "PK 509\\+000"
-- assertVisible: "893000"
-- assertVisible: "1"
-- assertVisible: "499\\+752 → 511\\+605"
-# A selected railway remains below overlapping milestones for rendering and
-# press dispatch, so the milestone can replace the railway selection.
-- tapOn:
-    point: "16%,32%"
-    retryTapIfNoChange: true
-- runFlow:
-    when:
-      notVisible: "PK 509\\+000"
-    commands:
-      - tapOn:
-          point: "16%,33%"
-          retryTapIfNoChange: true
-- extendedWaitUntil:
-    visible: "PK 509\\+000"
-    timeout: 10000
-- assertNotVisible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
-- assertVisible: "POINT KILOMÉTRIQUE"
-- assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
-- assertNotVisible:
-    id: "simulation-play-pause"
-- tapOn:
-    id: "close-map-feature-details"
-- assertNotVisible: "PK 509\\+000"
 
-# Resolve the same production milestone through the route-owned point search.
+# Resolve the production milestone through the route-owned point search.
 - tapOn:
     id: "open-point-search"
 - assertVisible: "Rechercher un point"

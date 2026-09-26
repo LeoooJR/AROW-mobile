@@ -1,7 +1,8 @@
 executionOrder:
   continueOnFailure: false
   flowsOrder:
-    - Inspect railway and milestone map features after granting location access
+    - Resolve a milestone after granting location access
+    - Select railway and milestone map features
     - Manage railway map layer visibility
     - Use the distraction-free map-only mode
 flows: "tests/**"
