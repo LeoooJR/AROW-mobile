@@ -42,7 +42,8 @@
       ],
       "@maplibre/maplibre-react-native",
       "expo-asset",
-      "expo-sqlite"
+      "expo-sqlite",
+      "./modules/arow-mock-location/app.plugin.js"
     ],
     "experiments": {
       "typedRoutes": true,

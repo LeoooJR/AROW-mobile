@@ -6,8 +6,22 @@ import {
 } from "@testing-library/react-native";
 
 import type { MapFeature } from "@/features/map-features/map-feature";
+import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { SimulationState } from "@/features/simulation/simulation-state";
 
 import Index from "@/app/index";
+
+const mockStartSimulation = jest.fn();
+const mockStopSimulation = jest.fn();
+let mockSimulationState: SimulationState = { status: "idle" };
+
+jest.mock("@/features/simulation/use-simulation", () => ({
+  useSimulation: () => ({
+    start: mockStartSimulation,
+    state: mockSimulationState,
+    stop: mockStopSimulation,
+  }),
+}));
 
 jest.mock("expo-asset", () => ({
   useAssets: () => [
@@ -127,16 +141,74 @@ jest.mock("@/components/adapters/map/map", () => {
 });
 
 jest.mock("@/components/composites/location-bar", () => {
-  const { View: MockView } =
-    jest.requireActual<typeof import("react-native")>("react-native");
+  const {
+    Pressable: MockPressable,
+    Text: MockText,
+    View: MockView,
+  } = jest.requireActual<typeof import("react-native")>("react-native");
 
   return {
     __esModule: true,
-    default: () => <MockView testID="mock-location-bar" />,
+    default: ({
+      onSimulationPress,
+      showSimulationAction,
+    }: {
+      readonly onSimulationPress: () => void;
+      readonly showSimulationAction: boolean;
+    }) => (
+      <MockView testID="mock-location-bar">
+        {showSimulationAction ? (
+          <MockPressable
+            accessibilityRole="button"
+            accessibilityLabel="Action de simulation"
+            onPress={onSimulationPress}
+          >
+            <MockText>Action de simulation</MockText>
+          </MockPressable>
+        ) : null}
+      </MockView>
+    ),
+  };
+});
+
+jest.mock("@/components/composites/map-toolbar", () => {
+  const { Milestone: MockMilestone } = jest.requireActual<
+    typeof import("@/features/milestones/domain/milestone")
+  >("@/features/milestones/domain/milestone");
+  const { Pressable: MockPressable, Text: MockText } =
+    jest.requireActual<typeof import("react-native")>("react-native");
+  const milestone = new MockMilestone({
+    coordinates: { latitude: 45.74744, longitude: 4.85933 },
+    label: "509+000",
+    lineCode: "893000",
+    positionMeters: 509_000,
+    sectionRank: 1,
+  });
+  return {
+    __esModule: true,
+    default: ({
+      onMilestoneSelect,
+    }: {
+      readonly onMilestoneSelect: (value: Milestone) => void;
+    }) => (
+      <MockPressable
+        accessibilityRole="button"
+        accessibilityLabel="Choisir un repère recherché"
+        onPress={() => onMilestoneSelect(milestone)}
+      >
+        <MockText>Recherche</MockText>
+      </MockPressable>
+    ),
   };
 });
 
 describe("Index map feature selection", () => {
+  beforeEach(() => {
+    mockSimulationState = { status: "idle" };
+    mockStartSimulation.mockReset();
+    mockStopSimulation.mockReset();
+  });
+
   test("shows, replaces, and closes shared feature details", async () => {
     const user = userEvent.setup();
     await render(<Index />);
@@ -180,5 +252,40 @@ describe("Index map feature selection", () => {
 
     expect(screen.queryByTestId("map-feature-details-card")).toBeNull();
     expect(screen.getByText("Aucun élément")).toBeOnTheScreen();
+  });
+
+  test("starts from a searched milestone and keeps stop available while exploring", async () => {
+    const user = userEvent.setup();
+    const view = await render(<Index />);
+    await user.press(
+      screen.getByRole("button", { name: "Choisir un repère recherché" }),
+    );
+    await user.press(
+      screen.getByRole("button", { name: "Action de simulation" }),
+    );
+    expect(mockStartSimulation).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "milestone", label: "509+000" }),
+    );
+
+    mockSimulationState = {
+      status: "running",
+      position: {
+        accuracy: null,
+        heading: null,
+        latitude: 45.74744,
+        longitude: 4.85933,
+      },
+    };
+    await view.rerender(<Index />);
+    await user.press(
+      screen.getByRole("button", { name: "Choisir une ligne test" }),
+    );
+    expect(
+      screen.getByRole("button", { name: "Action de simulation" }),
+    ).toBeOnTheScreen();
+    await user.press(
+      screen.getByRole("button", { name: "Action de simulation" }),
+    );
+    expect(mockStopSimulation).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,8 +1,12 @@
+import { formatLocationDescriptor } from "@/utils/location-format";
 import type {
-  LocationPosition,
   MockedLocationState,
   RealLocationState,
-} from "@/hooks/platform/use-real-location";
+} from "@/hooks/platform/real-location-state";
+import {
+  isSimulationStarted,
+  type SimulationState,
+} from "@/features/simulation/simulation-state";
 
 export interface LocationPresentation {
   readonly accessibilityLabel: string;
@@ -12,31 +16,61 @@ export interface LocationPresentation {
   readonly stateLabel: string;
 }
 
-function formatCoordinate(
-  value: number,
-  positiveHemisphere: string,
-  negativeHemisphere: string,
-): string {
-  const hemisphere = value >= 0 ? positiveHemisphere : negativeHemisphere;
-  return `${Math.abs(value).toFixed(5)} ${hemisphere}`;
-}
-
-function formatPosition(position: LocationPosition): string {
-  const coordinates = [
-    formatCoordinate(position.latitude, "N", "S"),
-    formatCoordinate(position.longitude, "E", "O"),
-  ].join(" · ");
-  const accuracy =
-    position.accuracy === null
-      ? "précision indisponible"
-      : `précision ${Math.max(0, Math.round(position.accuracy))} m`;
-
-  return `${coordinates} · ${accuracy}`;
-}
-
 export default function getLocationPresentation(
   state: RealLocationState | MockedLocationState,
+  simulation?: SimulationState,
 ): LocationPresentation {
+  if (simulation !== undefined && isSimulationStarted(simulation)) {
+    const detail = formatLocationDescriptor(simulation.position);
+    const running = simulation.status === "running";
+    return {
+      accessibilityLabel: `Position simulée, ${running ? "active" : "arrêt en cours"}. ${detail}`,
+      detail,
+      dotClassName: running ? "bg-success" : "bg-warning",
+      kindLabel: "Position simulée",
+      stateLabel: running ? "Active" : "Arrêt en cours",
+    };
+  }
+  if (
+    simulation?.status === "checking" ||
+    simulation?.status === "resolving" ||
+    simulation?.status === "starting"
+  ) {
+    const label =
+      simulation.status === "checking"
+        ? "Vérification"
+        : simulation.status === "resolving"
+          ? "Recherche du repère"
+          : "Activation en cours";
+    return {
+      accessibilityLabel: `Position simulée, ${label.toLowerCase()}`,
+      detail: label,
+      dotClassName: "bg-warning",
+      kindLabel: "Position simulée",
+      stateLabel: label,
+    };
+  }
+  if (simulation?.status === "error") {
+    const messages: Record<string, string> = {
+      MOCK_PROVIDER_NOT_SELECTED:
+        "Sélectionnez AROW comme application de position fictive",
+      LOCATION_SERVICES_DISABLED: "Activez les services de localisation",
+      LOCATION_PERMISSION_REQUIRED: "Autorisez l’accès à la position",
+      MILESTONE_UNAVAILABLE: "Repère indisponible. Réessayez la recherche",
+      CLEANUP_FAILED: "Arrêt incomplet. Réessayez",
+      UNSUPPORTED_PLATFORM: "Simulation disponible uniquement sur Android",
+    };
+    const detail =
+      messages[simulation.code] ?? "Simulation indisponible. Réessayez";
+    return {
+      accessibilityLabel: `Simulation indisponible. ${detail}`,
+      detail,
+      dotClassName: "bg-error",
+      kindLabel: "Position simulée",
+      stateLabel: "Erreur",
+    };
+  }
+
   switch (state.status) {
     case "checking":
       return {
@@ -72,7 +106,7 @@ export default function getLocationPresentation(
         stateLabel: "Connexion…",
       };
     case "connected": {
-      const detail = formatPosition(state.position);
+      const detail = formatLocationDescriptor(state.position);
       return {
         accessibilityLabel: `Position réelle, connectée. ${detail}`,
         detail,
@@ -82,7 +116,7 @@ export default function getLocationPresentation(
       };
     }
     case "mocked": {
-      const detail = formatPosition(state.position);
+      const detail = formatLocationDescriptor(state.position);
       return {
         accessibilityLabel: `Position simulée, active. ${detail}`,
         detail,

@@ -45,6 +45,14 @@ tags:
 - tapOn:
     point: "16%,32%"
     retryTapIfNoChange: true
+# Android system bars can shift this map target down before the camera settles.
+- runFlow:
+    when:
+      notVisible: "PK 509\\+000"
+    commands:
+      - tapOn:
+          point: "16%,33%"
+          retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "PK 509\\+000"
     timeout: 10000
@@ -69,6 +77,13 @@ tags:
 - tapOn:
     point: "16%,32%"
     retryTapIfNoChange: true
+- runFlow:
+    when:
+      notVisible: "PK 509\\+000"
+    commands:
+      - tapOn:
+          point: "16%,33%"
+          retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "PK 509\\+000"
     timeout: 10000
@@ -117,9 +132,12 @@ tags:
     id: "simulation-play-pause"
 - tapOn:
     id: "simulation-play-pause"
-# Starting the simulation is intentionally inert in this delivery.
-- assertVisible:
-    id: "simulation-play-pause"
+# Without selecting AROW as the developer mock-location app, the action fails
+# before the milestone is looked up or a foreground service is started.
+- extendedWaitUntil:
+    visible: "Sélectionnez AROW comme application de position fictive"
+    timeout: 10000
+- assertVisible: "Réessayer la simulation"
 - assertVisible: "PK 509\\+000"
 - assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
 - tapOn:

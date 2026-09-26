@@ -1,170 +1,71 @@
 import { useAssets } from "expo-asset";
-import { useEffect, useState } from "react";
-import { BackHandler, View } from "react-native";
+import { View } from "react-native";
 
 import Map from "@/components/adapters/map/map";
-import {
-  DEFAULT_MAP_LAYER_VISIBILITY,
-  type MapLayerVisibility,
-  type ToggleableMapLayer,
-} from "@/components/adapters/map/map-layer-visibility";
 import LocationBar from "@/components/composites/location-bar";
 import MapFeatureDetailsCard from "@/components/composites/map-feature-details-card";
 import MapToolbar from "@/components/composites/map-toolbar";
-import type { MapFeature } from "@/features/map-features/map-feature";
-import type { Milestone } from "@/features/milestones/domain/milestone";
+import { useMapLocation } from "@/features/map-screen/use-map-location";
+import { useMapSelection } from "@/features/map-screen/use-map-selection";
 import { useRailwayReference } from "@/features/railway-reference/context";
-import { useRealLocation } from "@/hooks/platform/use-real-location";
 import railwayLinesAsset from "@/statics/lignes-par-type.geojson";
 import milestonesAsset from "@/statics/milestones.geojson";
 
-type FeatureSelection =
-  | { readonly feature: MapFeature; readonly origin: "map" }
-  | { readonly feature: Milestone; readonly origin: "search" };
-
-function layerForFeature(feature: MapFeature): ToggleableMapLayer {
-  return feature.kind === "railway-section" ? "railway" : "milestone";
-}
-
 export default function Index() {
   const [railwayAssets] = useAssets([railwayLinesAsset, milestonesAsset]);
-  const { openSettings, requestAccess, retry, state } = useRealLocation();
   const { milestoneSearch } = useRailwayReference();
-  const [recenterRequest, setRecenterRequest] = useState(0);
-  const [milestoneFocusRequest, setMilestoneFocusRequest] = useState(0);
-  const [mapFocused, setMapFocused] = useState(false);
-  const [selection, setSelection] = useState<FeatureSelection>();
-  const [layerVisibility, setLayerVisibility] = useState<MapLayerVisibility>(
-    DEFAULT_MAP_LAYER_VISIBILITY,
+  const selection = useMapSelection();
+  const location = useMapLocation(
+    milestoneSearch.findMilestone,
+    selection.selectedSimulationMilestone,
   );
   const railwayData = railwayAssets?.[0]?.localUri ?? railwayAssets?.[0]?.uri;
   const milestoneData = railwayAssets?.[1]?.localUri ?? railwayAssets?.[1]?.uri;
-  const selectedFeature = selection?.feature;
-  const showSimulationAction = selection?.origin === "search";
-  const currentLocation =
-    state.status === "connected" ||
-    state.status === "mocked" ||
-    state.status === "locating"
-      ? state.position
-      : undefined;
-  const onLocationAction = (() => {
-    switch (state.status) {
-      case "permissionRequired":
-        return requestAccess;
-      case "denied":
-        return state.canAskAgain ? requestAccess : openSettings;
-      case "servicesDisabled":
-      case "error":
-        return retry;
-      case "checking":
-      case "requesting":
-      case "locating":
-      case "connected":
-      case "mocked":
-        return undefined;
-    }
-  })();
-  const onCenter = (() => {
-    switch (state.status) {
-      case "connected":
-      case "mocked":
-        return () => {
-          setRecenterRequest((request) => request + 1);
-        };
-      case "checking":
-      case "permissionRequired":
-      case "requesting":
-      case "locating":
-      case "servicesDisabled":
-      case "denied":
-      case "error":
-        return undefined;
-    }
-  })();
-  const onLayerVisibilityChange = (
-    layer: ToggleableMapLayer,
-    visible: boolean,
-  ): void => {
-    setLayerVisibility((current) => ({ ...current, [layer]: visible }));
-    if (!visible) {
-      setSelection((current) =>
-        current !== undefined && layerForFeature(current.feature) === layer
-          ? undefined
-          : current,
-      );
-    }
-  };
-  const onMilestoneSelect = (milestone: Milestone): void => {
-    setLayerVisibility((current) => ({ ...current, milestone: true }));
-    setSelection({ feature: milestone, origin: "search" });
-    setMilestoneFocusRequest((request) => request + 1);
-  };
-
-  useEffect(() => {
-    if (!mapFocused) {
-      return;
-    }
-
-    const subscription = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        setMapFocused(false);
-        return true;
-      },
-    );
-    return () => {
-      subscription.remove();
-    };
-  }, [mapFocused]);
+  const showOverlays = process.env.EXPO_OS !== "web" && !selection.mapFocused;
 
   return (
     <View className="flex-1 bg-surface">
       <Map
         focusLocation={
-          selectedFeature?.kind === "milestone"
-            ? selectedFeature.coordinates
+          selection.selectedFeature?.kind === "milestone"
+            ? selection.selectedFeature.coordinates
             : undefined
         }
-        focusRequest={milestoneFocusRequest}
-        layerVisibility={layerVisibility}
-        location={currentLocation}
+        focusRequest={selection.milestoneFocusRequest}
+        layerVisibility={selection.layerVisibility}
+        location={location.currentLocation}
         milestoneData={milestoneData}
-        onFeaturePress={(feature) => {
-          setMapFocused(false);
-          setSelection({ feature, origin: "map" });
-        }}
+        onFeaturePress={selection.onFeaturePress}
         railwayData={railwayData}
-        recenterRequest={recenterRequest}
-        selectedFeature={selectedFeature}
+        recenterRequest={location.recenterRequest}
+        selectedFeature={selection.selectedFeature}
       />
       {process.env.EXPO_OS !== "web" ? (
         <MapToolbar
-          mapFocused={mapFocused}
+          mapFocused={selection.mapFocused}
           milestoneSearch={milestoneSearch}
-          onMapFocusChange={setMapFocused}
-          onMilestoneSelect={onMilestoneSelect}
-          onVisibilityChange={onLayerVisibilityChange}
-          visibility={layerVisibility}
+          onMapFocusChange={selection.onMapFocusChange}
+          onMilestoneSelect={selection.onMilestoneSelect}
+          onVisibilityChange={selection.onVisibilityChange}
+          visibility={selection.layerVisibility}
         />
       ) : null}
-      {process.env.EXPO_OS !== "web" &&
-      !mapFocused &&
-      selectedFeature !== undefined ? (
+      {showOverlays && selection.selectedFeature !== undefined ? (
         <MapFeatureDetailsCard
-          feature={selectedFeature}
-          key={selectedFeature.kind}
-          onClose={() => {
-            setSelection(undefined);
-          }}
-          showSimulationAction={showSimulationAction}
+          feature={selection.selectedFeature}
+          key={selection.selectedFeature.kind}
+          onClose={selection.closeSelection}
+          showSimulationAction={location.showSimulationAction}
         />
       ) : null}
-      {process.env.EXPO_OS !== "web" && !mapFocused ? (
+      {showOverlays ? (
         <LocationBar
-          onAction={onLocationAction}
-          onCenter={onCenter}
-          showSimulationAction={showSimulationAction}
-          state={state}
+          onAction={location.onLocationAction}
+          onCenter={location.onCenter}
+          onSimulationPress={location.onSimulationPress}
+          showSimulationAction={location.showSimulationAction}
+          simulation={location.simulation}
+          state={location.state}
         />
       ) : null}
     </View>
