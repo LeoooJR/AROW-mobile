@@ -129,6 +129,7 @@ describe("useSimulation", () => {
   test("keeps an actionable error if native cleanup fails", async () => {
     executor.stop.mockResolvedValue({
       code: "CLEANUP_FAILED",
+      ownsProviders: true,
       status: "error",
     });
     const { result } = await renderHook(() =>

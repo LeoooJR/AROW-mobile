@@ -22,12 +22,12 @@ class MockLocationService : Service() {
   private val handler = Handler(Looper.getMainLooper())
   private val refresh = object : Runnable {
     override fun run() {
-      if (MockLocationEngine.snapshot()["status"] != "running") return
+      if (MockLocationEngine.snapshot() !is NativeRunningSnapshot) return
       try {
         MockLocationEngine.inject(this@MockLocationService)
         handler.postDelayed(this, REFRESH_INTERVAL_MS)
       } catch (exception: Exception) {
-        MockLocationEngine.fail(this@MockLocationService, "APPLY_FAILED")
+        MockLocationEngine.fail(this@MockLocationService, NativeErrorCode.APPLY_FAILED)
         stopSelf()
       }
     }
@@ -44,14 +44,14 @@ class MockLocationService : Service() {
     try {
       promoteToForeground()
       MockLocationEngine.activate(this)
-      if (MockLocationEngine.snapshot()["status"] == "running") {
+      if (MockLocationEngine.snapshot() is NativeRunningSnapshot) {
         handler.removeCallbacks(refresh)
         handler.postDelayed(refresh, REFRESH_INTERVAL_MS)
       } else {
         stopSelf()
       }
     } catch (exception: Exception) {
-      MockLocationEngine.fail(this, "START_FAILED")
+      MockLocationEngine.fail(this, NativeErrorCode.START_FAILED)
       stopSelf()
     }
     return START_NOT_STICKY
@@ -59,8 +59,8 @@ class MockLocationService : Service() {
 
   override fun onDestroy() {
     handler.removeCallbacks(refresh)
-    if (MockLocationEngine.snapshot()["status"] == "running" ||
-      MockLocationEngine.snapshot()["status"] == "starting") {
+    if (MockLocationEngine.snapshot() is NativeRunningSnapshot ||
+      MockLocationEngine.snapshot() is NativeStartingSnapshot) {
       MockLocationEngine.stop(this)
     }
     super.onDestroy()

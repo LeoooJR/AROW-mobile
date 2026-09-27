@@ -14,21 +14,17 @@ import kotlinx.coroutines.CompletableDeferred
 internal object MockLocationEngine {
   private val providers = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
   private val ownedProviders = mutableSetOf<String>()
-  private var pendingStart: CompletableDeferred<Map<String, Any?>>? = null
-  private var status = "stopped"
-  private var latitude: Double? = null
-  private var longitude: Double? = null
-  private var errorCode: String? = null
+  private var pendingStart: CompletableDeferred<NativeStartResult>? = null
+  private var state: NativeSnapshot = NativeStoppedSnapshot
 
   @Synchronized
-  fun snapshot(): Map<String, Any?> = buildMap {
-    put("status", status)
-    latitude?.let { put("latitude", it) }
-    longitude?.let { put("longitude", it) }
-    errorCode?.let { put("code", it) }
-  }
+  fun snapshot(): NativeSnapshot = state
 
-  fun readiness(context: Context): Map<String, Any?> {
+  @Synchronized
+  fun rejection(code: NativeReadinessErrorCode): NativeErrorSnapshot =
+    NativeErrorSnapshot(code.executionCode, ownedProviders.isNotEmpty())
+
+  fun readiness(context: Context): NativeReadiness {
     val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
     val mode = appOps.checkOpNoThrow(
       AppOpsManager.OPSTR_MOCK_LOCATION,
@@ -36,7 +32,7 @@ internal object MockLocationEngine {
       context.packageName,
     )
     if (mode != AppOpsManager.MODE_ALLOWED) {
-      return mapOf("ready" to false, "code" to "MOCK_PROVIDER_NOT_SELECTED")
+      return NativeReadiness.Failed(NativeReadinessErrorCode.MOCK_PROVIDER_NOT_SELECTED)
     }
 
     val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -47,31 +43,28 @@ internal object MockLocationEngine {
         manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
     if (!enabled) {
-      return mapOf("ready" to false, "code" to "LOCATION_SERVICES_DISABLED")
+      return NativeReadiness.Failed(NativeReadinessErrorCode.LOCATION_SERVICES_DISABLED)
     }
     if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-      return mapOf("ready" to false, "code" to "LOCATION_PERMISSION_REQUIRED")
+      return NativeReadiness.Failed(NativeReadinessErrorCode.LOCATION_PERMISSION_REQUIRED)
     }
-    return mapOf("ready" to true)
+    return NativeReadiness.Ready
   }
 
   @Synchronized
-  fun beginStart(latitude: Double, longitude: Double): CompletableDeferred<Map<String, Any?>> {
-    require(latitude.isFinite() && latitude in -90.0..90.0)
-    require(longitude.isFinite() && longitude in -180.0..180.0)
-    if ((status != "stopped" && status != "error") || ownedProviders.isNotEmpty()) {
+  fun beginStart(latitude: Double, longitude: Double): CompletableDeferred<NativeStartResult> {
+    val coordinates = MockCoordinates(latitude, longitude)
+    if ((state !is NativeStoppedSnapshot && state !is NativeErrorSnapshot) || ownedProviders.isNotEmpty()) {
       throw IllegalStateException("Simulation is already active")
     }
-    status = "starting"
-    this.latitude = latitude
-    this.longitude = longitude
-    errorCode = null
-    return CompletableDeferred<Map<String, Any?>>().also { pendingStart = it }
+    state = NativeStartingSnapshot(coordinates)
+    return CompletableDeferred<NativeStartResult>().also { pendingStart = it }
   }
 
   @Synchronized
   fun activate(context: Context) {
-    if (status != "starting") return
+    val starting = state
+    if (starting !is NativeStartingSnapshot) return
     val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     try {
       for (provider in providers) {
@@ -93,24 +86,28 @@ internal object MockLocationEngine {
         manager.setTestProviderEnabled(provider, true)
       }
       inject(context)
-      status = "running"
-      pendingStart?.complete(snapshot())
+      val running = NativeRunningSnapshot(starting.target)
+      state = running
+      pendingStart?.complete(running)
       pendingStart = null
     } catch (exception: Exception) {
-      fail(context, "APPLY_FAILED")
+      fail(context, NativeErrorCode.APPLY_FAILED)
     }
   }
 
   @Synchronized
   fun inject(context: Context) {
-    if (status != "starting" && status != "running") return
-    val lat = latitude ?: return
-    val lon = longitude ?: return
+    val current = state
+    val coordinates = when (current) {
+      is NativeStartingSnapshot -> current.target
+      is NativeRunningSnapshot -> current.position
+      else -> return
+    }
     val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     for (provider in ownedProviders) {
       val fix = Location(provider).apply {
-        this.latitude = lat
-        this.longitude = lon
+        this.latitude = coordinates.latitude
+        this.longitude = coordinates.longitude
         accuracy = 3f
         time = System.currentTimeMillis()
         elapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos()
@@ -120,32 +117,30 @@ internal object MockLocationEngine {
   }
 
   @Synchronized
-  fun fail(context: Context, code: String) {
+  fun fail(context: Context, code: NativeErrorCode): NativeErrorSnapshot {
     val cleanupError = removeProviders(context)
-    status = "error"
-    errorCode = cleanupError ?: code
-    pendingStart?.complete(snapshot())
+    val failure = NativeErrorSnapshot(cleanupError ?: code, ownedProviders.isNotEmpty())
+    state = failure
+    pendingStart?.complete(failure)
     pendingStart = null
+    return failure
   }
 
   @Synchronized
-  fun stop(context: Context): Map<String, Any?> {
+  fun stop(context: Context): NativeStopResult {
     val cleanupError = removeProviders(context)
-    if (cleanupError == null) {
-      status = "stopped"
-      latitude = null
-      longitude = null
-      errorCode = null
+    val result: NativeStopResult = if (cleanupError == null) {
+      NativeStoppedSnapshot
     } else {
-      status = "error"
-      errorCode = cleanupError
+      NativeErrorSnapshot(cleanupError, ownedProviders.isNotEmpty())
     }
-    pendingStart?.complete(snapshot())
+    state = result
+    pendingStart?.complete(result)
     pendingStart = null
-    return snapshot()
+    return result
   }
 
-  private fun removeProviders(context: Context): String? {
+  private fun removeProviders(context: Context): NativeErrorCode? {
     val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     var failed = false
     for (provider in ownedProviders.toList()) {
@@ -156,6 +151,6 @@ internal object MockLocationEngine {
         failed = true
       }
     }
-    return if (failed) "CLEANUP_FAILED" else null
+    return if (failed) NativeErrorCode.CLEANUP_FAILED else null
   }
 }

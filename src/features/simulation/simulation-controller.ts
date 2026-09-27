@@ -1,4 +1,8 @@
-import type { NativeSnapshot } from "../../../modules/arow-mock-location/src/ArowMockLocationModule";
+import { NativeContractError } from "../../../modules/arow-mock-location/src/decode-native-result";
+import type {
+  NativeSnapshot,
+  NativeStartResult,
+} from "../../../modules/arow-mock-location/src/native-contracts";
 
 import type { Milestone } from "@/features/milestones/domain/milestone";
 import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
@@ -99,16 +103,19 @@ export class SimulationController {
       const snapshot = await executor.getSnapshot();
       if (!this.isFreshSnapshot(operation, request)) return;
       this.applySnapshot(snapshot);
-    } catch {
+    } catch (error) {
       if (
         this.isFreshSnapshot(operation, request) &&
-        isSimulationRunning(this.simulationState)
+        (error instanceof NativeContractError ||
+          isSimulationRunning(this.simulationState))
       ) {
         this.publish(
           simulationError(
             "SIMULATION_UNAVAILABLE",
             true,
-            this.simulationState.position,
+            isSimulationStopRequired(this.simulationState)
+              ? this.simulationState.position
+              : undefined,
           ),
         );
       }
@@ -153,7 +160,7 @@ export class SimulationController {
     const readiness = await executor.checkReadiness();
     if (!this.isCurrent(operation)) return false;
     if (!readiness.ready) {
-      this.publish(simulationError(readiness.code ?? "READINESS_CHECK_FAILED"));
+      this.publish(simulationError(readiness.code));
       return false;
     }
     return true;
@@ -195,18 +202,20 @@ export class SimulationController {
     }
   }
 
-  private applyStartResult(result: NativeSnapshot): void {
-    const position = positionFromSnapshot(result);
-    if (result.status === "running" && position !== undefined) {
-      this.publish({ position, status: "running" });
-      return;
+  private applyStartResult(result: NativeStartResult): void {
+    switch (result.status) {
+      case "running":
+        this.publish({
+          position: positionFromSnapshot(result),
+          status: "running",
+        });
+        break;
+      case "error":
+        this.publish(simulationError(result.code, result.ownsProviders));
+        break;
+      case "stopped":
+        this.publish(simulationError("APPLY_FAILED"));
     }
-    this.publish(
-      simulationError(
-        result.code ?? "APPLY_FAILED",
-        result.code === "CLEANUP_FAILED" || result.status === "running",
-      ),
-    );
   }
 
   private async finishCanceledStart(
@@ -217,7 +226,7 @@ export class SimulationController {
       this.publish(
         result.status === "stopped"
           ? { status: "idle" }
-          : simulationError(result.code ?? "CLEANUP_FAILED", true),
+          : simulationError(result.code, result.ownsProviders),
       );
     } catch {
       this.publish(simulationError("CLEANUP_FAILED", true));
@@ -237,7 +246,7 @@ export class SimulationController {
       this.publish(
         result.status === "stopped"
           ? { status: "idle" }
-          : simulationError(result.code ?? "CLEANUP_FAILED", true, position),
+          : simulationError(result.code, result.ownsProviders, position),
       );
     } catch {
       if (this.isCurrent(operation)) {
@@ -250,17 +259,18 @@ export class SimulationController {
 
   private applySnapshot(snapshot: NativeSnapshot): void {
     if (snapshot.status === "running") {
-      const position = positionFromSnapshot(snapshot);
-      this.publish(
-        position === undefined
-          ? simulationError("SIMULATION_UNAVAILABLE", true)
-          : { position, status: "running" },
-      );
+      this.publish({
+        position: positionFromSnapshot(snapshot),
+        status: "running",
+      });
     } else if (snapshot.status === "error") {
       this.publish(
         simulationError(
-          snapshot.code ?? "SIMULATION_UNAVAILABLE",
-          snapshot.code === "CLEANUP_FAILED",
+          snapshot.code,
+          snapshot.ownsProviders,
+          isSimulationStopRequired(this.simulationState)
+            ? this.simulationState.position
+            : undefined,
         ),
       );
     } else if (

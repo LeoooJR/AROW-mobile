@@ -10,11 +10,3 @@ test("converts an applied fix without inventing accuracy or heading", () => {
     heading: null,
   });
 });
-
-test.each([
-  { status: "running" as const, latitude: 1 },
-  { status: "running" as const, longitude: 2 },
-  { status: "stopped" as const },
-])("ignores incomplete coordinates %j", (snapshot) => {
-  expect(positionFromSnapshot(snapshot)).toBeUndefined();
-});

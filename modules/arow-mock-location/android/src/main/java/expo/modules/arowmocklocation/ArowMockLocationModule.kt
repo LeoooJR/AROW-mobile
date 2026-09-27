@@ -15,24 +15,21 @@ class ArowMockLocationModule : Module() {
     AsyncFunction("checkReadiness") {
       val context = requireContext()
       try {
-        MockLocationEngine.readiness(context)
+        MockLocationEngine.readiness(context).toBridge()
       } catch (exception: Exception) {
-        mapOf("ready" to false, "code" to "READINESS_CHECK_FAILED")
+        NativeReadiness.Failed(NativeReadinessErrorCode.READINESS_CHECK_FAILED).toBridge()
       }
     }
 
     AsyncFunction("getSnapshot") {
-      MockLocationEngine.snapshot()
+      MockLocationEngine.snapshot().toBridge()
     }
 
     AsyncFunction("start") Coroutine { latitude: Double, longitude: Double ->
       val context = requireContext()
       val readiness = MockLocationEngine.readiness(context)
-      if (readiness["ready"] != true) {
-        return@Coroutine mapOf(
-          "status" to "error",
-          "code" to (readiness["code"] ?: "READINESS_CHECK_FAILED"),
-        )
+      if (readiness is NativeReadiness.Failed) {
+        return@Coroutine MockLocationEngine.rejection(readiness.code).toBridge()
       }
       val completion = MockLocationEngine.beginStart(latitude, longitude)
       val intent = Intent(context, MockLocationService::class.java).apply {
@@ -44,11 +41,11 @@ class ArowMockLocationModule : Module() {
         } else {
           context.startService(intent)
         }
-        withTimeout(10_000) { completion.await() }
+        withTimeout(10_000) { completion.await() }.toBridge()
       } catch (exception: Exception) {
-        MockLocationEngine.fail(context, "START_FAILED")
+        val failure = MockLocationEngine.fail(context, NativeErrorCode.START_FAILED)
         context.stopService(intent)
-        MockLocationEngine.snapshot()
+        failure.toBridge()
       }
     }
 
@@ -56,7 +53,7 @@ class ArowMockLocationModule : Module() {
       val context = requireContext()
       val snapshot = MockLocationEngine.stop(context)
       context.stopService(Intent(context, MockLocationService::class.java))
-      snapshot
+      snapshot.toBridge()
     }
   }
 

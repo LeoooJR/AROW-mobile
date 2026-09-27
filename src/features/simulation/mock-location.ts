@@ -1,13 +1,15 @@
 import type {
   NativeReadiness,
   NativeSnapshot,
-} from "../../../modules/arow-mock-location/src/ArowMockLocationModule";
+  NativeStartResult,
+  NativeStopResult,
+} from "../../../modules/arow-mock-location/src/native-contracts";
 
 export interface MockLocationExecutor {
   checkReadiness(): Promise<NativeReadiness>;
   getSnapshot(): Promise<NativeSnapshot>;
-  start(latitude: number, longitude: number): Promise<NativeSnapshot>;
-  stop(): Promise<NativeSnapshot>;
+  start(latitude: number, longitude: number): Promise<NativeStartResult>;
+  stop(): Promise<NativeStopResult>;
 }
 
 export async function getMockLocationExecutor(): Promise<MockLocationExecutor> {

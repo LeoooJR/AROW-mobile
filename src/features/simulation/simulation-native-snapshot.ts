@@ -1,11 +1,9 @@
-import type { NativeSnapshot } from "../../../modules/arow-mock-location/src/ArowMockLocationModule";
+import type { NativeRunningSnapshot } from "../../../modules/arow-mock-location/src/native-contracts";
 import type { LocationDescriptor } from "@/types/location-descriptor";
 
 export function positionFromSnapshot(
-  snapshot: NativeSnapshot,
-): LocationDescriptor | undefined {
-  if (snapshot.latitude === undefined || snapshot.longitude === undefined)
-    return undefined;
+  snapshot: NativeRunningSnapshot,
+): LocationDescriptor {
   return {
     accuracy: null,
     heading: null,

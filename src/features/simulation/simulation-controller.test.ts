@@ -2,6 +2,7 @@ import { waitFor } from "@testing-library/react-native";
 
 import { Milestone } from "@/features/milestones/domain/milestone";
 import { SimulationController } from "@/features/simulation/simulation-controller";
+import { NativeContractError } from "../../../modules/arow-mock-location/src/decode-native-result";
 
 const milestone = new Milestone({
   coordinates: { latitude: 45.74744, longitude: 4.85933 },
@@ -38,6 +39,97 @@ function setup() {
 }
 
 describe("SimulationController", () => {
+  test("exposes malformed initial reconciliation as uncertain active state", async () => {
+    const { controller, executor } = setup();
+    executor.getSnapshot.mockRejectedValue(new NativeContractError("snapshot"));
+    await controller.reconcile();
+    expect(controller.state).toEqual({
+      status: "error",
+      code: "SIMULATION_UNAVAILABLE",
+      mayBeActive: true,
+    });
+  });
+
+  test.each([true, false])(
+    "uses reported ownership %s rather than the error code",
+    async (ownsProviders) => {
+      const { controller, executor, findMilestone } = setup();
+      executor.start.mockResolvedValue({
+        status: "error",
+        code: "APPLY_FAILED",
+        ownsProviders,
+      });
+      controller.start(milestone, findMilestone);
+      await waitFor(() =>
+        expect(controller.state).toMatchObject({
+          status: "error",
+          code: "APPLY_FAILED",
+          mayBeActive: ownsProviders,
+        }),
+      );
+      executor.getSnapshot.mockResolvedValue({
+        status: "error",
+        code: "CLEANUP_FAILED",
+        ownsProviders,
+      });
+      await controller.reconcile();
+      expect(controller.state).toMatchObject({
+        code: "CLEANUP_FAILED",
+        mayBeActive: ownsProviders,
+      });
+    },
+  );
+
+  test("retains the previously applied position when reconciliation reports cleanup failure", async () => {
+    const { controller, executor, findMilestone } = setup();
+    controller.start(milestone, findMilestone);
+    await waitFor(() => expect(controller.state.status).toBe("running"));
+    executor.getSnapshot.mockResolvedValue({
+      status: "error",
+      code: "CLEANUP_FAILED",
+      ownsProviders: true,
+    });
+    await controller.reconcile();
+    expect(controller.state).toMatchObject({
+      status: "error",
+      mayBeActive: true,
+      position: milestone.coordinates,
+    });
+  });
+
+  test("does not report a native interrupted start as running", async () => {
+    const { controller, executor, findMilestone } = setup();
+    executor.start.mockResolvedValue({ status: "stopped" });
+    controller.start(milestone, findMilestone);
+    await waitFor(() =>
+      expect(controller.state).toMatchObject({
+        status: "error",
+        code: "APPLY_FAILED",
+        mayBeActive: false,
+      }),
+    );
+  });
+
+  test("keeps rejected start and stop results conservative", async () => {
+    const { controller, executor, findMilestone } = setup();
+    executor.start.mockRejectedValue(new NativeContractError("start"));
+    controller.start(milestone, findMilestone);
+    await waitFor(() =>
+      expect(controller.state).toMatchObject({
+        status: "error",
+        mayBeActive: true,
+      }),
+    );
+    executor.stop.mockRejectedValue(new NativeContractError("stop"));
+    controller.stop();
+    await waitFor(() =>
+      expect(controller.state).toMatchObject({
+        code: "CLEANUP_FAILED",
+        mayBeActive: true,
+      }),
+    );
+  });
+
   test("cancels lookup before native start", async () => {
     const { controller, executor, findMilestone } = setup();
     const lookup = deferred<Milestone>();
@@ -81,17 +173,22 @@ describe("SimulationController", () => {
 
   test("keeps canceled-start cleanup failure actionable", async () => {
     const { controller, executor, findMilestone } = setup();
-    const start = deferred<{ status: "running" }>();
+    const start = deferred<{
+      status: "running";
+      latitude: number;
+      longitude: number;
+    }>();
     executor.start.mockReturnValue(start.promise);
     executor.stop.mockResolvedValue({
       code: "CLEANUP_FAILED",
+      ownsProviders: true,
       status: "error",
     });
 
     controller.start(milestone, findMilestone);
     await waitFor(() => expect(controller.state.status).toBe("starting"));
     controller.stop();
-    start.resolve({ status: "running" });
+    start.resolve({ status: "running", latitude: 1, longitude: 2 });
     await waitFor(() =>
       expect(controller.state).toMatchObject({
         code: "CLEANUP_FAILED",
@@ -105,6 +202,7 @@ describe("SimulationController", () => {
     const { controller, executor, findMilestone } = setup();
     const firstStop = deferred<{
       code: "CLEANUP_FAILED";
+      ownsProviders: boolean;
       status: "error";
     }>();
     executor.stop
@@ -117,7 +215,11 @@ describe("SimulationController", () => {
     controller.stop();
     await waitFor(() => expect(executor.stop).toHaveBeenCalledTimes(1));
 
-    firstStop.resolve({ code: "CLEANUP_FAILED", status: "error" });
+    firstStop.resolve({
+      code: "CLEANUP_FAILED",
+      ownsProviders: true,
+      status: "error",
+    });
     await waitFor(() => expect(controller.state.status).toBe("error"));
     controller.stop();
     await waitFor(() => expect(controller.state.status).toBe("idle"));
