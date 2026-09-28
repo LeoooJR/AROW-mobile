@@ -5,7 +5,6 @@ import type {
 } from "../../../modules/arow-mock-location/src/native-contracts";
 
 import type { Milestone } from "@/features/milestones/domain/milestone";
-import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
 import type { MockLocationExecutor } from "@/features/simulation/mock-location";
 import { positionFromSnapshot } from "@/features/simulation/simulation-native-snapshot";
 import {
@@ -20,7 +19,6 @@ import {
 } from "@/features/simulation/simulation-state";
 import type { LocationDescriptor } from "@/types/location-descriptor";
 
-type FindMilestone = MilestoneSearchModel["findMilestone"];
 type LoadExecutor = () => Promise<MockLocationExecutor>;
 
 function errorCode(error: unknown): string {
@@ -51,7 +49,7 @@ export class SimulationController {
     };
   }
 
-  start(milestone: Milestone, findMilestone: FindMilestone): void {
+  start(milestone: Milestone): void {
     if (
       !isSimulationStopped(this.simulationState) &&
       !(
@@ -64,7 +62,7 @@ export class SimulationController {
     const operation = ++this.operation;
     this.cancelStart = false;
     this.publish({ status: "checking" });
-    void this.runStart(operation, milestone, findMilestone);
+    void this.runStart(operation, milestone);
   }
 
   stop(): void {
@@ -74,7 +72,7 @@ export class SimulationController {
       this.cancelStart = true;
       return;
     }
-    if (previous.status === "checking" || previous.status === "resolving") {
+    if (previous.status === "checking") {
       ++this.operation;
       this.publish({ status: "idle" });
       return;
@@ -125,19 +123,12 @@ export class SimulationController {
   private async runStart(
     operation: number,
     milestone: Milestone,
-    findMilestone: FindMilestone,
   ): Promise<void> {
     let executor: MockLocationExecutor | undefined;
     try {
       executor = await this.loadExecutor();
       if (!(await this.checkReadiness(operation, executor))) return;
-      const resolved = await this.resolveMilestone(
-        operation,
-        milestone,
-        findMilestone,
-      );
-      if (resolved === undefined) return;
-      await this.applyMilestone(operation, executor, resolved);
+      await this.applyMilestone(operation, executor, milestone);
     } catch (error) {
       if (!this.isCurrent(operation)) return;
       if (this.cancelStart && executor !== undefined) {
@@ -164,25 +155,6 @@ export class SimulationController {
       return false;
     }
     return true;
-  }
-
-  private async resolveMilestone(
-    operation: number,
-    milestone: Milestone,
-    findMilestone: FindMilestone,
-  ): Promise<Milestone | undefined> {
-    this.publish({ status: "resolving" });
-    const resolved = await findMilestone({
-      lineCode: milestone.lineCode,
-      positionMeters: milestone.positionMeters,
-      sectionRank: milestone.sectionRank,
-    });
-    if (!this.isCurrent(operation)) return undefined;
-    if (resolved === undefined || resolved.id !== milestone.id) {
-      this.publish(simulationError("MILESTONE_UNAVAILABLE"));
-      return undefined;
-    }
-    return resolved;
   }
 
   private async applyMilestone(

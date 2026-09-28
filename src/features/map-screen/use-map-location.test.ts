@@ -52,8 +52,7 @@ describe("useMapLocation", () => {
 
   test("starts only a searched milestone and keeps stop after selection closes", async () => {
     const { result, rerender } = await renderHook(
-      ({ selected }: { selected?: Milestone }) =>
-        useMapLocation(jest.fn(), selected),
+      ({ selected }: { selected?: Milestone }) => useMapLocation(selected),
       { initialProps: { selected: milestone } },
     );
     await act(async () => result.current.onSimulationPress());
@@ -73,16 +72,14 @@ describe("useMapLocation", () => {
       mayBeActive: false,
       status: "error",
     };
-    const { result } = await renderHook(() => useMapLocation(jest.fn()));
+    const { result } = await renderHook(() => useMapLocation());
     await act(async () => result.current.onLocationAction?.());
     expect(mockRequestAccess).toHaveBeenCalledTimes(1);
   });
 
   test("refreshes real location once after a running simulation stops", async () => {
     mockSimulation = { position, status: "running" };
-    const { result, rerender } = await renderHook(() =>
-      useMapLocation(jest.fn()),
-    );
+    const { result, rerender } = await renderHook(() => useMapLocation());
     mockSimulation = { status: "idle" };
     await rerender(undefined);
     expect(mockRetry).toHaveBeenCalledTimes(1);

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import { AppState } from "react-native";
 
 import type { Milestone } from "@/features/milestones/domain/milestone";
-import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
 import { getMockLocationExecutor } from "@/features/simulation/mock-location";
 import { SimulationController } from "@/features/simulation/simulation-controller";
 import {
@@ -18,9 +17,7 @@ export interface UseSimulationResult {
   readonly stop: () => void;
 }
 
-export function useSimulation(
-  findMilestone: MilestoneSearchModel["findMilestone"],
-): UseSimulationResult {
+export function useSimulation(): UseSimulationResult {
   const [controller] = useState(
     () => new SimulationController(getMockLocationExecutor),
   );
@@ -28,8 +25,8 @@ export function useSimulation(
   const running = isSimulationRunning(state);
 
   const start = useCallback(
-    (milestone: Milestone) => controller.start(milestone, findMilestone),
-    [controller, findMilestone],
+    (milestone: Milestone) => controller.start(milestone),
+    [controller],
   );
   const stop = useCallback(() => controller.stop(), [controller]);
 

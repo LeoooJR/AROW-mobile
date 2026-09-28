@@ -3,7 +3,6 @@ import type { LocationDescriptor } from "@/types/location-descriptor";
 export type SimulationState =
   | { readonly status: "idle" }
   | { readonly status: "checking" }
-  | { readonly status: "resolving" }
   | { readonly status: "starting" }
   | {
       readonly status: "running";
@@ -54,12 +53,9 @@ export function isSimulationError(
 
 export function isSimulationBusy(
   state: SimulationState,
-): state is StateWithStatus<
-  "checking" | "resolving" | "starting" | "stopping"
-> {
+): state is StateWithStatus<"checking" | "starting" | "stopping"> {
   return (
     state.status === "checking" ||
-    state.status === "resolving" ||
     state.status === "starting" ||
     state.status === "stopping"
   );

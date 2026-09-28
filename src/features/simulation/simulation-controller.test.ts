@@ -34,11 +34,39 @@ function setup() {
   const controller = new SimulationController(async () => executor);
   const onState = jest.fn();
   const unsubscribe = controller.subscribe(onState);
-  const findMilestone = jest.fn().mockResolvedValue(milestone);
-  return { controller, executor, findMilestone, onState, unsubscribe };
+  return { controller, executor, onState, unsubscribe };
 }
 
 describe("SimulationController", () => {
+  test("uses the selected milestone after readiness and waits for the first fix", async () => {
+    const { controller, executor } = setup();
+    const readiness = deferred<{ ready: true }>();
+    const firstFix = deferred<{
+      latitude: number;
+      longitude: number;
+      status: "running";
+    }>();
+    executor.checkReadiness.mockReturnValue(readiness.promise);
+    executor.start.mockReturnValue(firstFix.promise);
+
+    controller.start(milestone);
+    expect(controller.state.status).toBe("checking");
+    expect(executor.start).not.toHaveBeenCalled();
+
+    readiness.resolve({ ready: true });
+    await waitFor(() =>
+      expect(executor.start).toHaveBeenCalledWith(45.74744, 4.85933),
+    );
+    expect(controller.state.status).toBe("starting");
+
+    firstFix.resolve({
+      latitude: 45.74744,
+      longitude: 4.85933,
+      status: "running",
+    });
+    await waitFor(() => expect(controller.state.status).toBe("running"));
+  });
+
   test("exposes malformed initial reconciliation as uncertain active state", async () => {
     const { controller, executor } = setup();
     executor.getSnapshot.mockRejectedValue(new NativeContractError("snapshot"));
@@ -53,13 +81,13 @@ describe("SimulationController", () => {
   test.each([true, false])(
     "uses reported ownership %s rather than the error code",
     async (ownsProviders) => {
-      const { controller, executor, findMilestone } = setup();
+      const { controller, executor } = setup();
       executor.start.mockResolvedValue({
         status: "error",
         code: "APPLY_FAILED",
         ownsProviders,
       });
-      controller.start(milestone, findMilestone);
+      controller.start(milestone);
       await waitFor(() =>
         expect(controller.state).toMatchObject({
           status: "error",
@@ -81,8 +109,8 @@ describe("SimulationController", () => {
   );
 
   test("retains the previously applied position when reconciliation reports cleanup failure", async () => {
-    const { controller, executor, findMilestone } = setup();
-    controller.start(milestone, findMilestone);
+    const { controller, executor } = setup();
+    controller.start(milestone);
     await waitFor(() => expect(controller.state.status).toBe("running"));
     executor.getSnapshot.mockResolvedValue({
       status: "error",
@@ -98,9 +126,9 @@ describe("SimulationController", () => {
   });
 
   test("does not report a native interrupted start as running", async () => {
-    const { controller, executor, findMilestone } = setup();
+    const { controller, executor } = setup();
     executor.start.mockResolvedValue({ status: "stopped" });
-    controller.start(milestone, findMilestone);
+    controller.start(milestone);
     await waitFor(() =>
       expect(controller.state).toMatchObject({
         status: "error",
@@ -111,9 +139,9 @@ describe("SimulationController", () => {
   });
 
   test("keeps rejected start and stop results conservative", async () => {
-    const { controller, executor, findMilestone } = setup();
+    const { controller, executor } = setup();
     executor.start.mockRejectedValue(new NativeContractError("start"));
-    controller.start(milestone, findMilestone);
+    controller.start(milestone);
     await waitFor(() =>
       expect(controller.state).toMatchObject({
         status: "error",
@@ -130,22 +158,23 @@ describe("SimulationController", () => {
     );
   });
 
-  test("cancels lookup before native start", async () => {
-    const { controller, executor, findMilestone } = setup();
-    const lookup = deferred<Milestone>();
-    findMilestone.mockReturnValue(lookup.promise);
+  test("cancels pending readiness before native start", async () => {
+    const { controller, executor } = setup();
+    const readiness = deferred<{ ready: true }>();
+    executor.checkReadiness.mockReturnValue(readiness.promise);
 
-    controller.start(milestone, findMilestone);
-    await waitFor(() => expect(controller.state.status).toBe("resolving"));
+    controller.start(milestone);
+    await waitFor(() => expect(controller.state.status).toBe("checking"));
     controller.stop();
-    lookup.resolve(milestone);
+    readiness.resolve({ ready: true });
 
     expect(controller.state.status).toBe("idle");
-    await waitFor(() => expect(executor.start).not.toHaveBeenCalled());
+    await Promise.resolve();
+    expect(executor.start).not.toHaveBeenCalled();
   });
 
   test("waits for a canceled native start to finish cleanup", async () => {
-    const { controller, executor, findMilestone } = setup();
+    const { controller, executor } = setup();
     const start = deferred<{
       latitude: number;
       longitude: number;
@@ -155,11 +184,11 @@ describe("SimulationController", () => {
     executor.start.mockReturnValue(start.promise);
     executor.stop.mockReturnValue(stop.promise);
 
-    controller.start(milestone, findMilestone);
+    controller.start(milestone);
     await waitFor(() => expect(controller.state.status).toBe("starting"));
     controller.stop();
-    controller.start(milestone, findMilestone);
-    expect(findMilestone).toHaveBeenCalledTimes(1);
+    controller.start(milestone);
+    expect(executor.start).toHaveBeenCalledTimes(1);
     start.resolve({
       latitude: 45.74744,
       longitude: 4.85933,
@@ -172,7 +201,7 @@ describe("SimulationController", () => {
   });
 
   test("keeps canceled-start cleanup failure actionable", async () => {
-    const { controller, executor, findMilestone } = setup();
+    const { controller, executor } = setup();
     const start = deferred<{
       status: "running";
       latitude: number;
@@ -185,7 +214,7 @@ describe("SimulationController", () => {
       status: "error",
     });
 
-    controller.start(milestone, findMilestone);
+    controller.start(milestone);
     await waitFor(() => expect(controller.state.status).toBe("starting"));
     controller.stop();
     start.resolve({ status: "running", latitude: 1, longitude: 2 });
@@ -199,7 +228,7 @@ describe("SimulationController", () => {
   });
 
   test("runs one cleanup at a time and allows retry after failure", async () => {
-    const { controller, executor, findMilestone } = setup();
+    const { controller, executor } = setup();
     const firstStop = deferred<{
       code: "CLEANUP_FAILED";
       ownsProviders: boolean;
@@ -209,7 +238,7 @@ describe("SimulationController", () => {
       .mockReturnValueOnce(firstStop.promise)
       .mockResolvedValueOnce({ status: "stopped" });
 
-    controller.start(milestone, findMilestone);
+    controller.start(milestone);
     await waitFor(() => expect(controller.state.status).toBe("running"));
     controller.stop();
     controller.stop();
@@ -227,13 +256,13 @@ describe("SimulationController", () => {
   });
 
   test("discards a snapshot read before a newer start", async () => {
-    const { controller, executor, findMilestone } = setup();
+    const { controller, executor } = setup();
     const snapshot = deferred<{ status: "stopped" }>();
     executor.getSnapshot.mockReturnValue(snapshot.promise);
     const reconciliation = controller.reconcile();
     await waitFor(() => expect(executor.getSnapshot).toHaveBeenCalledTimes(1));
 
-    controller.start(milestone, findMilestone);
+    controller.start(milestone);
     await waitFor(() => expect(controller.state.status).toBe("running"));
     snapshot.resolve({ status: "stopped" });
     await reconciliation;

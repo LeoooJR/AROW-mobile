@@ -28,19 +28,17 @@ export default function SimulationAction({
   const label =
     state.status === "checking"
       ? "Vérification en cours"
-      : state.status === "resolving"
-        ? "Recherche du repère"
-        : state.status === "starting"
-          ? "Activation en cours"
-          : state.status === "stopping"
-            ? "Arrêt en cours"
-            : state.status === "running"
-              ? "Arrêter la simulation"
-              : state.status === "error"
-                ? stopping
-                  ? "Réessayer l’arrêt"
-                  : "Réessayer la simulation"
-                : "Démarrer la simulation";
+      : state.status === "starting"
+        ? "Activation en cours"
+        : state.status === "stopping"
+          ? "Arrêt en cours"
+          : state.status === "running"
+            ? "Arrêter la simulation"
+            : state.status === "error"
+              ? stopping
+                ? "Réessayer l’arrêt"
+                : "Réessayer la simulation"
+              : "Démarrer la simulation";
 
   return (
     <View

@@ -299,7 +299,13 @@ describe("MapToolbar", () => {
   test("resolves and emits an exact production milestone", async () => {
     const user = userEvent.setup();
     const onMilestoneSelect = jest.fn();
-    await render(<ControlledToolbar onMilestoneSelect={onMilestoneSelect} />);
+    const findMilestone = jest.fn().mockResolvedValue(milestone);
+    await render(
+      <ControlledToolbar
+        findMilestone={findMilestone}
+        onMilestoneSelect={onMilestoneSelect}
+      />,
+    );
 
     await user.press(screen.getByTestId("open-point-search"));
     const usePoint = screen.getByRole("button", { name: "Utiliser ce point" });
@@ -332,6 +338,12 @@ describe("MapToolbar", () => {
     await user.press(usePoint);
 
     expect(onMilestoneSelect).toHaveBeenCalledWith(milestone);
+    expect(findMilestone).toHaveBeenCalledTimes(1);
+    expect(findMilestone).toHaveBeenCalledWith({
+      lineCode: "893000",
+      positionMeters: 509_000,
+      sectionRank: 1,
+    });
     expect(screen.queryByTestId("point-search-sheet")).not.toBeOnTheScreen();
   });
 

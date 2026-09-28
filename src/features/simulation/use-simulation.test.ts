@@ -42,40 +42,23 @@ describe("useSimulation", () => {
     "MOCK_PROVIDER_NOT_SELECTED",
     "LOCATION_SERVICES_DISABLED",
     "LOCATION_PERMISSION_REQUIRED",
-  ])("rejects %s before looking up the milestone", async (code) => {
+  ])("rejects %s before native start", async (code) => {
     executor.checkReadiness.mockResolvedValue({
       code,
       ready: false,
     });
-    const findMilestone = jest.fn();
-    const { result } = await renderHook(() => useSimulation(findMilestone));
+    const { result } = await renderHook(() => useSimulation());
 
     await act(async () => result.current.start(milestone));
     await waitFor(() => expect(result.current.state.status).toBe("error"));
     expect(result.current.state).toMatchObject({
       code,
     });
-    expect(findMilestone).not.toHaveBeenCalled();
     expect(executor.start).not.toHaveBeenCalled();
   });
 
-  test("does not apply a missing milestone", async () => {
-    const findMilestone = jest.fn().mockResolvedValue(undefined);
-    const { result } = await renderHook(() => useSimulation(findMilestone));
-
-    await act(async () => result.current.start(milestone));
-    await waitFor(() => expect(result.current.state.status).toBe("error"));
-    expect(findMilestone).toHaveBeenCalledWith({
-      lineCode: "893000",
-      positionMeters: 509_000,
-      sectionRank: 1,
-    });
-    expect(executor.start).not.toHaveBeenCalled();
-  });
-
-  test("applies a resolved milestone once and cleans up on stop", async () => {
-    const findMilestone = jest.fn().mockResolvedValue(milestone);
-    const { result } = await renderHook(() => useSimulation(findMilestone));
+  test("applies the selected milestone once and cleans up on stop", async () => {
+    const { result } = await renderHook(() => useSimulation());
 
     await act(async () => {
       result.current.start(milestone);
@@ -98,9 +81,7 @@ describe("useSimulation", () => {
           completeStart = resolve;
         }),
     );
-    const { result } = await renderHook(() =>
-      useSimulation(jest.fn().mockResolvedValue(milestone)),
-    );
+    const { result } = await renderHook(() => useSimulation());
 
     await act(async () => result.current.start(milestone));
     await waitFor(() => expect(result.current.state.status).toBe("starting"));
@@ -121,7 +102,7 @@ describe("useSimulation", () => {
       longitude: 4.85933,
       status: "running",
     });
-    const { result } = await renderHook(() => useSimulation(jest.fn()));
+    const { result } = await renderHook(() => useSimulation());
     await waitFor(() => expect(executor.getSnapshot).toHaveBeenCalled());
     await waitFor(() => expect(result.current.state.status).toBe("running"));
   });
@@ -132,9 +113,7 @@ describe("useSimulation", () => {
       ownsProviders: true,
       status: "error",
     });
-    const { result } = await renderHook(() =>
-      useSimulation(jest.fn().mockResolvedValue(milestone)),
-    );
+    const { result } = await renderHook(() => useSimulation());
     await act(async () => result.current.start(milestone));
     await waitFor(() => expect(result.current.state.status).toBe("running"));
     await act(async () => result.current.stop());

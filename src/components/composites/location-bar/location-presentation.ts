@@ -31,17 +31,9 @@ export default function getLocationPresentation(
       stateLabel: running ? "Active" : "Arrêt en cours",
     };
   }
-  if (
-    simulation?.status === "checking" ||
-    simulation?.status === "resolving" ||
-    simulation?.status === "starting"
-  ) {
+  if (simulation?.status === "checking" || simulation?.status === "starting") {
     const label =
-      simulation.status === "checking"
-        ? "Vérification"
-        : simulation.status === "resolving"
-          ? "Recherche du repère"
-          : "Activation en cours";
+      simulation.status === "checking" ? "Vérification" : "Activation en cours";
     return {
       accessibilityLabel: `Position simulée, ${label.toLowerCase()}`,
       detail: label,
@@ -56,7 +48,6 @@ export default function getLocationPresentation(
         "Sélectionnez AROW comme application de position fictive",
       LOCATION_SERVICES_DISABLED: "Activez les services de localisation",
       LOCATION_PERMISSION_REQUIRED: "Autorisez l’accès à la position",
-      MILESTONE_UNAVAILABLE: "Repère indisponible. Réessayez la recherche",
       CLEANUP_FAILED: "Arrêt incomplet. Réessayez",
       UNSUPPORTED_PLATFORM: "Simulation disponible uniquement sur Android",
     };

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { Milestone } from "@/features/milestones/domain/milestone";
-import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
 import {
   isSimulationStopRequired,
   isSimulationStarted,
@@ -75,11 +74,10 @@ export interface MapLocationModel {
 }
 
 export function useMapLocation(
-  findMilestone: MilestoneSearchModel["findMilestone"],
   selectedMilestone?: Milestone,
 ): MapLocationModel {
   const { openSettings, requestAccess, retry, state } = useRealLocation();
-  const { start, state: simulation, stop } = useSimulation(findMilestone);
+  const { start, state: simulation, stop } = useSimulation();
   const [recenterRequest, setRecenterRequest] = useState(0);
   const simulationWasRunning = useRef(false);
   const stopRequired = isSimulationStopRequired(simulation);

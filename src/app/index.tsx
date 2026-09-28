@@ -15,10 +15,7 @@ export default function Index() {
   const [railwayAssets] = useAssets([railwayLinesAsset, milestonesAsset]);
   const { milestoneSearch } = useRailwayReference();
   const selection = useMapSelection();
-  const location = useMapLocation(
-    milestoneSearch.findMilestone,
-    selection.selectedSimulationMilestone,
-  );
+  const location = useMapLocation(selection.selectedSimulationMilestone);
   const railwayData = railwayAssets?.[0]?.localUri ?? railwayAssets?.[0]?.uri;
   const milestoneData = railwayAssets?.[1]?.localUri ?? railwayAssets?.[1]?.uri;
   const showOverlays = process.env.EXPO_OS !== "web" && !selection.mapFocused;

@@ -21,7 +21,6 @@ const cases: readonly [
 ][] = [
   [{ status: "idle" }, false, true, false, false, false, false],
   [{ status: "checking" }, false, false, false, false, true, false],
-  [{ status: "resolving" }, false, false, false, false, true, false],
   [{ status: "starting" }, false, false, true, false, true, false],
   [{ status: "running", position }, true, false, false, false, false, true],
   [{ status: "stopping", position }, true, false, false, false, true, true],
