@@ -86,7 +86,7 @@ describe("useSimulation", () => {
     await act(async () => result.current.start(milestone));
     await waitFor(() => expect(result.current.state.status).toBe("starting"));
     await act(async () => result.current.stop());
-    expect(result.current.state.status).toBe("starting");
+    expect(result.current.state.status).toBe("canceling");
     completeStart({
       latitude: 45.74744,
       longitude: 4.85933,
@@ -122,5 +122,22 @@ describe("useSimulation", () => {
       mayBeActive: true,
       code: "CLEANUP_FAILED",
     });
+  });
+
+  test("continues pending native cleanup after the hook unmounts", async () => {
+    let completeStop!: (value: { status: "stopped" }) => void;
+    executor.stop.mockReturnValue(
+      new Promise((resolve) => {
+        completeStop = resolve;
+      }),
+    );
+    const { result, unmount } = await renderHook(() => useSimulation());
+    await act(async () => result.current.start(milestone));
+    await waitFor(() => expect(result.current.state.status).toBe("running"));
+    await act(async () => result.current.stop());
+    expect(result.current.state.status).toBe("stopping");
+    await unmount();
+    completeStop({ status: "stopped" });
+    await waitFor(() => expect(executor.stop).toHaveBeenCalledTimes(1));
   });
 });

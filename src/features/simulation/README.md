@@ -25,6 +25,8 @@ flowchart LR
     Idle[Idle] -->|Start| Checking[Checking Android readiness]
     Checking -->|Ready| Starting[Starting native service]
     Starting -->|First fix applied| Running[Running]
+    Starting -->|Stop requested| Canceling[Canceling pending start]
+    Canceling -->|Native start settles| Stopping
     Running -->|Stop| Stopping[Removing test providers]
     Stopping -->|Cleanup succeeded| Idle
     Checking -->|Failure| Error[Error]
@@ -34,7 +36,7 @@ flowchart LR
     Error -->|Retry stop if providers may remain| Stopping
 ```
 
-The diagram shows the usual path. A stop during `checking` cancels the pending work and returns to `idle`. A stop during `starting` waits for the native start result and then calls native stop; it does not claim cleanup succeeded while that call is pending.
+The diagram shows the usual path. A stop during `checking` cancels the pending work and returns to `idle`. A stop during `starting` immediately enters `canceling`, waits for the native start result, then enters `stopping` and calls native stop. Neither state claims cleanup succeeded while it is pending.
 
 ### Start, step by step
 
@@ -47,13 +49,13 @@ For example, selecting PK 509+000 on line 893000 resolves the milestone in the s
 
 ### Stop and cleanup
 
-While running, the location control invokes `stop` even if the selected feature card has closed or another map feature is selected. The controller publishes `stopping` with the last applied position, then calls native stop. The engine removes only its owned test providers; the native module then stops the foreground service. The UI returns to `idle` only when native stop reports `stopped`.
+While running, the location control invokes `stop` even if the selected feature card has closed or another map feature is selected. The controller publishes `stopping` with the last applied position, then calls native stop. It also uses this same cleanup path after a canceled start or an active error without a known position. Repeated stop presses during `canceling` or `stopping` have no effect. The engine removes only its owned test providers; the native module then stops the foreground service. The UI returns to `idle` only when native stop reports `stopped`.
 
 If removal fails, native returns an `error` with `ownsProviders`. The controller uses that boolean for `mayBeActive`: `true` keeps an actionable **retry stop** control. It may retain the last applied position for display, but error coordinates are never treated as a new applied fix. A malformed stop response is handled conservatively as uncertain cleanup rather than success.
 
 ## UI state versus native state
 
-`SimulationState` is a UI/workflow state (`idle`, `checking`, `starting`, `running`, `stopping`, or `error`). Native snapshots have their own variants (`stopped`, `starting`, `running`, or `error`). The bridge decoder checks required fields, known codes, coordinate ranges, and provider ownership once, before a snapshot reaches the controller.
+`SimulationState` is a UI/workflow state (`idle`, `checking`, `starting`, `canceling`, `running`, `stopping`, or `error`). `canceling` and `stopping` make pending cleanup visible without private lifecycle flags. Native snapshots have their own variants (`stopped`, `starting`, `running`, or `error`). The bridge decoder checks required fields, known codes, coordinate ranges, and provider ownership once, before a snapshot reaches the controller.
 
 `useSimulation` reconciles from a native snapshot when it mounts and whenever the app becomes active. While its UI state is `running`, it also polls every two seconds. Operation and snapshot sequence numbers prevent late reads from overwriting a newer start or stop. Unmounting removes React listeners and the poller; it does **not** call native stop. The Android service can therefore continue sending fixes while the app is in the background. The service is not configured to restart after task removal, process termination, or device reboot.
 

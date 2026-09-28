@@ -42,6 +42,15 @@ export default function getLocationPresentation(
       stateLabel: label,
     };
   }
+  if (simulation?.status === "canceling" || simulation?.status === "stopping") {
+    return {
+      accessibilityLabel: "Position simulée, arrêt en cours",
+      detail: "Arrêt en cours",
+      dotClassName: "bg-warning",
+      kindLabel: "Position simulée",
+      stateLabel: "Arrêt en cours",
+    };
+  }
   if (simulation?.status === "error") {
     const messages: Record<string, string> = {
       MOCK_PROVIDER_NOT_SELECTED:

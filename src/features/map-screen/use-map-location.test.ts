@@ -77,6 +77,18 @@ describe("useMapLocation", () => {
     expect(mockRequestAccess).toHaveBeenCalledTimes(1);
   });
 
+  test.each([{ status: "canceling" }, { status: "stopping" }] as const)(
+    "keeps the stop control visible without a selected card while %s",
+    async (simulation) => {
+      mockSimulation = simulation;
+      const { result } = await renderHook(() => useMapLocation());
+      expect(result.current.showSimulationAction).toBe(true);
+      await act(async () => result.current.onSimulationPress());
+      expect(mockStop).toHaveBeenCalledTimes(1);
+      expect(mockStart).not.toHaveBeenCalled();
+    },
+  );
+
   test("refreshes real location once after a running simulation stops", async () => {
     mockSimulation = { position, status: "running" };
     const { result, rerender } = await renderHook(() => useMapLocation());

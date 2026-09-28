@@ -174,7 +174,7 @@ describe("SimulationController", () => {
   });
 
   test("waits for a canceled native start to finish cleanup", async () => {
-    const { controller, executor } = setup();
+    const { controller, executor, onState } = setup();
     const start = deferred<{
       latitude: number;
       longitude: number;
@@ -187,6 +187,8 @@ describe("SimulationController", () => {
     controller.start(milestone);
     await waitFor(() => expect(controller.state.status).toBe("starting"));
     controller.stop();
+    expect(controller.state.status).toBe("canceling");
+    controller.stop();
     controller.start(milestone);
     expect(executor.start).toHaveBeenCalledTimes(1);
     start.resolve({
@@ -195,9 +197,12 @@ describe("SimulationController", () => {
       status: "running",
     });
     await waitFor(() => expect(executor.stop).toHaveBeenCalledTimes(1));
-    expect(controller.state.status).toBe("starting");
+    expect(controller.state.status).toBe("stopping");
     stop.resolve({ status: "stopped" });
     await waitFor(() => expect(controller.state.status).toBe("idle"));
+    expect(onState).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: "running" }),
+    );
   });
 
   test("keeps canceled-start cleanup failure actionable", async () => {
@@ -225,6 +230,45 @@ describe("SimulationController", () => {
         status: "error",
       }),
     );
+  });
+
+  test("cleans up a rejected start after cancellation without reporting running", async () => {
+    const { controller, executor, onState } = setup();
+    let rejectStart!: (reason: Error) => void;
+    executor.start.mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectStart = reject;
+      }),
+    );
+
+    controller.start(milestone);
+    await waitFor(() => expect(controller.state.status).toBe("starting"));
+    controller.stop();
+    rejectStart(new Error("start failed"));
+
+    await waitFor(() => expect(controller.state.status).toBe("idle"));
+    expect(executor.stop).toHaveBeenCalledTimes(1);
+    expect(onState).not.toHaveBeenCalledWith(
+      expect.objectContaining({ status: "running" }),
+    );
+  });
+
+  test("shows stopping without a position when retrying an uncertain cleanup", async () => {
+    const { controller, executor } = setup();
+    const stop = deferred<{ status: "stopped" }>();
+    executor.getSnapshot.mockRejectedValue(new NativeContractError("snapshot"));
+    executor.stop.mockReturnValue(stop.promise);
+    await controller.reconcile();
+
+    controller.stop();
+    expect(controller.state).toEqual({
+      status: "stopping",
+      position: undefined,
+    });
+    controller.stop();
+    await waitFor(() => expect(executor.stop).toHaveBeenCalledTimes(1));
+    stop.resolve({ status: "stopped" });
+    await waitFor(() => expect(controller.state.status).toBe("idle"));
   });
 
   test("runs one cleanup at a time and allows retry after failure", async () => {
@@ -269,6 +313,29 @@ describe("SimulationController", () => {
     expect(controller.state.status).toBe("running");
   });
 
+  test("does not let a late running snapshot overwrite cleanup", async () => {
+    const { controller, executor } = setup();
+    controller.start(milestone);
+    await waitFor(() => expect(controller.state.status).toBe("running"));
+    const snapshot = deferred<{
+      latitude: number;
+      longitude: number;
+      status: "running";
+    }>();
+    const stop = deferred<{ status: "stopped" }>();
+    executor.getSnapshot.mockReturnValue(snapshot.promise);
+    executor.stop.mockReturnValue(stop.promise);
+    const reconciliation = controller.reconcile();
+    await waitFor(() => expect(executor.getSnapshot).toHaveBeenCalledTimes(1));
+
+    controller.stop();
+    snapshot.resolve({ latitude: 1, longitude: 2, status: "running" });
+    await reconciliation;
+    expect(controller.state.status).toBe("stopping");
+    stop.resolve({ status: "stopped" });
+    await waitFor(() => expect(controller.state.status).toBe("idle"));
+  });
+
   test("does not publish after unsubscribe, then reconciles on a new subscription", async () => {
     const { controller, executor, onState, unsubscribe } = setup();
     const snapshot = deferred<{
@@ -299,5 +366,21 @@ describe("SimulationController", () => {
     expect(newListener).toHaveBeenLastCalledWith(
       expect.objectContaining({ status: "running" }),
     );
+  });
+
+  test("finishes native cleanup without notifying an unmounted listener", async () => {
+    const { controller, executor, onState, unsubscribe } = setup();
+    const stop = deferred<{ status: "stopped" }>();
+    executor.stop.mockReturnValue(stop.promise);
+    controller.start(milestone);
+    await waitFor(() => expect(controller.state.status).toBe("running"));
+    controller.stop();
+    expect(controller.state.status).toBe("stopping");
+
+    unsubscribe();
+    const notifications = onState.mock.calls.length;
+    stop.resolve({ status: "stopped" });
+    await waitFor(() => expect(controller.state.status).toBe("idle"));
+    expect(onState).toHaveBeenCalledTimes(notifications);
   });
 });

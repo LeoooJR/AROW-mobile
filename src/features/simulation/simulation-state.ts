@@ -4,11 +4,12 @@ export type SimulationState =
   | { readonly status: "idle" }
   | { readonly status: "checking" }
   | { readonly status: "starting" }
+  | { readonly status: "canceling" }
   | {
       readonly status: "running";
       readonly position: LocationDescriptor;
     }
-  | { readonly status: "stopping"; readonly position: LocationDescriptor }
+  | { readonly status: "stopping"; readonly position?: LocationDescriptor }
   | {
       readonly status: "error";
       readonly code: string;
@@ -23,8 +24,13 @@ type StateWithStatus<Status extends SimulationState["status"]> = Extract<
 
 export function isSimulationStarted(
   state: SimulationState,
-): state is StateWithStatus<"running" | "stopping"> {
-  return state.status === "running" || state.status === "stopping";
+): state is
+  | StateWithStatus<"running">
+  | (StateWithStatus<"stopping"> & { readonly position: LocationDescriptor }) {
+  return (
+    state.status === "running" ||
+    (state.status === "stopping" && state.position !== undefined)
+  );
 }
 
 export function isSimulationRunning(
@@ -45,6 +51,12 @@ export function isSimulationStarting(
   return state.status === "starting";
 }
 
+export function isSimulationCanceling(
+  state: SimulationState,
+): state is StateWithStatus<"canceling"> {
+  return state.status === "canceling";
+}
+
 export function isSimulationError(
   state: SimulationState,
 ): state is StateWithStatus<"error"> {
@@ -53,10 +65,13 @@ export function isSimulationError(
 
 export function isSimulationBusy(
   state: SimulationState,
-): state is StateWithStatus<"checking" | "starting" | "stopping"> {
+): state is StateWithStatus<
+  "checking" | "starting" | "canceling" | "stopping"
+> {
   return (
     state.status === "checking" ||
-    state.status === "starting" ||
+    isSimulationStarting(state) ||
+    isSimulationCanceling(state) ||
     state.status === "stopping"
   );
 }
@@ -64,10 +79,12 @@ export function isSimulationBusy(
 export function isSimulationStopRequired(
   state: SimulationState,
 ): state is
-  | StateWithStatus<"running" | "stopping">
+  | StateWithStatus<"canceling" | "running" | "stopping">
   | (StateWithStatus<"error"> & { readonly mayBeActive: true }) {
   return (
-    isSimulationStarted(state) ||
+    isSimulationCanceling(state) ||
+    isSimulationRunning(state) ||
+    state.status === "stopping" ||
     (isSimulationError(state) && state.mayBeActive)
   );
 }

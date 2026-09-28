@@ -9,6 +9,7 @@ import type { MockLocationExecutor } from "@/features/simulation/mock-location";
 import { positionFromSnapshot } from "@/features/simulation/simulation-native-snapshot";
 import {
   isSimulationBusy,
+  isSimulationCanceling,
   isSimulationRunning,
   isSimulationStopped,
   isSimulationStarting,
@@ -32,8 +33,6 @@ export class SimulationController {
   private listener?: (state: SimulationState) => void;
   private operation = 0;
   private snapshotRequest = 0;
-  private cancelStart = false;
-  private stopInFlight = false;
 
   constructor(private readonly loadExecutor: LoadExecutor) {}
 
@@ -60,16 +59,16 @@ export class SimulationController {
       return;
     }
     const operation = ++this.operation;
-    this.cancelStart = false;
     this.publish({ status: "checking" });
     void this.runStart(operation, milestone);
   }
 
   stop(): void {
     const previous = this.simulationState;
-    if (this.stopInFlight) return;
+    if (isSimulationCanceling(previous) || previous.status === "stopping")
+      return;
     if (isSimulationStarting(previous)) {
-      this.cancelStart = true;
+      this.publish({ status: "canceling" });
       return;
     }
     if (previous.status === "checking") {
@@ -81,18 +80,11 @@ export class SimulationController {
       return;
     }
     const operation = ++this.operation;
-    const position = previous.position;
-    this.stopInFlight = true;
-    if (position !== undefined) this.publish({ status: "stopping", position });
-    void this.runStop(operation, position);
+    void this.cleanup(operation, previous.position);
   }
 
   async reconcile(): Promise<void> {
-    if (
-      this.listener === undefined ||
-      isSimulationBusy(this.simulationState) ||
-      this.stopInFlight
-    )
+    if (this.listener === undefined || isSimulationBusy(this.simulationState))
       return;
     const operation = this.operation;
     const request = ++this.snapshotRequest;
@@ -131,15 +123,21 @@ export class SimulationController {
       await this.applyMilestone(operation, executor, milestone);
     } catch (error) {
       if (!this.isCurrent(operation)) return;
-      if (this.cancelStart && executor !== undefined) {
-        await this.finishCanceledStart(executor);
-      } else {
+      if (!isSimulationCanceling(this.simulationState)) {
         this.publish(
           simulationError(
             errorCode(error),
             isSimulationStarting(this.simulationState),
           ),
         );
+      }
+    } finally {
+      if (
+        executor !== undefined &&
+        this.isCurrent(operation) &&
+        isSimulationCanceling(this.simulationState)
+      ) {
+        await this.cleanup(operation, undefined, executor);
       }
     }
   }
@@ -167,9 +165,10 @@ export class SimulationController {
       milestone.coordinates.latitude,
       milestone.coordinates.longitude,
     );
-    if (this.cancelStart) {
-      await this.finishCanceledStart(executor);
-    } else if (this.isCurrent(operation)) {
+    if (
+      this.isCurrent(operation) &&
+      isSimulationStarting(this.simulationState)
+    ) {
       this.applyStartResult(result);
     }
   }
@@ -190,30 +189,16 @@ export class SimulationController {
     }
   }
 
-  private async finishCanceledStart(
-    executor: MockLocationExecutor,
-  ): Promise<void> {
-    try {
-      const result = await executor.stop();
-      this.publish(
-        result.status === "stopped"
-          ? { status: "idle" }
-          : simulationError(result.code, result.ownsProviders),
-      );
-    } catch {
-      this.publish(simulationError("CLEANUP_FAILED", true));
-    } finally {
-      this.cancelStart = false;
-    }
-  }
-
-  private async runStop(
+  private async cleanup(
     operation: number,
     position?: LocationDescriptor,
+    executor?: MockLocationExecutor,
   ): Promise<void> {
+    if (!this.isCurrent(operation)) return;
+    this.publish({ status: "stopping", position });
     try {
-      const executor = await this.loadExecutor();
-      const result = await executor.stop();
+      const activeExecutor = executor ?? (await this.loadExecutor());
+      const result = await activeExecutor.stop();
       if (!this.isCurrent(operation)) return;
       this.publish(
         result.status === "stopped"
@@ -224,8 +209,6 @@ export class SimulationController {
       if (this.isCurrent(operation)) {
         this.publish(simulationError("CLEANUP_FAILED", true, position));
       }
-    } finally {
-      this.stopInFlight = false;
     }
   }
 
@@ -240,7 +223,8 @@ export class SimulationController {
         simulationError(
           snapshot.code,
           snapshot.ownsProviders,
-          isSimulationStopRequired(this.simulationState)
+          isSimulationStopRequired(this.simulationState) &&
+            !isSimulationCanceling(this.simulationState)
             ? this.simulationState.position
             : undefined,
         ),

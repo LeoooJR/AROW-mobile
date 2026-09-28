@@ -362,6 +362,19 @@ describe("LocationBar", () => {
     ).toBeDisabled();
 
     await view.rerender(
+      <LocationBar {...props} simulation={{ status: "canceling" }} />,
+    );
+    expect(screen.getByRole("button", { name: "Arrêt en cours" })).toBeBusy();
+    expect(screen.getAllByText("Arrêt en cours")).toHaveLength(3);
+
+    await view.rerender(
+      <LocationBar {...props} simulation={{ status: "stopping" }} />,
+    );
+    expect(
+      screen.getByRole("button", { name: "Arrêt en cours" }),
+    ).toBeDisabled();
+
+    await view.rerender(
       <LocationBar
         {...props}
         simulation={{

@@ -30,7 +30,7 @@ export default function SimulationAction({
       ? "Vérification en cours"
       : state.status === "starting"
         ? "Activation en cours"
-        : state.status === "stopping"
+        : state.status === "canceling" || state.status === "stopping"
           ? "Arrêt en cours"
           : state.status === "running"
             ? "Arrêter la simulation"

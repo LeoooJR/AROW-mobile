@@ -1,5 +1,6 @@
 import {
   isSimulationBusy,
+  isSimulationCanceling,
   isSimulationError,
   isSimulationRunning,
   isSimulationStarted,
@@ -22,8 +23,10 @@ const cases: readonly [
   [{ status: "idle" }, false, true, false, false, false, false],
   [{ status: "checking" }, false, false, false, false, true, false],
   [{ status: "starting" }, false, false, true, false, true, false],
+  [{ status: "canceling" }, false, false, false, false, true, true],
   [{ status: "running", position }, true, false, false, false, false, true],
   [{ status: "stopping", position }, true, false, false, false, true, true],
+  [{ status: "stopping" }, false, false, false, false, true, true],
   [
     { status: "error", code: "FAILED", mayBeActive: false },
     false,
@@ -57,6 +60,11 @@ test.each(cases)(
     ]).toEqual([started, stopped, starting, error, busy, stopRequired]);
     if (isSimulationStarted(state)) expect(state.position).toEqual(position);
     expect(isSimulationRunning(state)).toBe(state.status === "running");
+    expect(isSimulationCanceling(state)).toBe(state.status === "canceling");
+    if (isSimulationCanceling(state)) {
+      const status: "canceling" = state.status;
+      expect(status).toBe("canceling");
+    }
     if (isSimulationError(state)) expect(state.code).toBeDefined();
     if (isSimulationStopRequired(state) && state.status === "error") {
       const mayBeActive: true = state.mayBeActive;
