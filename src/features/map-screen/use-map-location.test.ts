@@ -66,15 +66,55 @@ describe("useMapLocation", () => {
     expect(mockStop).toHaveBeenCalledTimes(1);
   });
 
-  test("offers location permission action for simulation readiness failure", async () => {
+  test.each([
+    [{ status: "permissionRequired" }, mockRequestAccess],
+    [{ status: "denied", canAskAgain: true }, mockRequestAccess],
+    [{ status: "denied", canAskAgain: false }, mockOpenSettings],
+    [{ status: "servicesDisabled" }, mockRetry],
+    [{ status: "error" }, mockRetry],
+  ] as const)(
+    "uses the real-location action for %s when stopped or recovering simulation permission",
+    async (realLocation, expectedAction) => {
+      mockRealLocation = realLocation;
+      const { result, rerender } = await renderHook(() => useMapLocation());
+      await act(async () => result.current.onLocationAction?.());
+      expect(expectedAction).toHaveBeenCalledTimes(1);
+
+      mockSimulation = {
+        code: "LOCATION_PERMISSION_REQUIRED",
+        mayBeActive: false,
+        status: "error",
+      };
+      await rerender(undefined);
+      await act(async () => result.current.onLocationAction?.());
+      expect(expectedAction).toHaveBeenCalledTimes(2);
+      expect(
+        [mockRequestAccess, mockOpenSettings, mockRetry].filter(
+          (action) => action !== expectedAction && action.mock.calls.length > 0,
+        ),
+      ).toEqual([]);
+    },
+  );
+
+  test("does not request permission while real-location permission is being checked", async () => {
+    mockRealLocation = { status: "checking" };
     mockSimulation = {
       code: "LOCATION_PERMISSION_REQUIRED",
       mayBeActive: false,
       status: "error",
     };
     const { result } = await renderHook(() => useMapLocation());
-    await act(async () => result.current.onLocationAction?.());
-    expect(mockRequestAccess).toHaveBeenCalledTimes(1);
+    expect(result.current.onLocationAction).toBeUndefined();
+  });
+
+  test("does not offer recovery for unrelated simulation errors", async () => {
+    mockSimulation = {
+      code: "MOCK_PROVIDER_NOT_SELECTED",
+      mayBeActive: false,
+      status: "error",
+    };
+    const { result } = await renderHook(() => useMapLocation());
+    expect(result.current.onLocationAction).toBeUndefined();
   });
 
   test.each([{ status: "canceling" }, { status: "stopping" }] as const)(

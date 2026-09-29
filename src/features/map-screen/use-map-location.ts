@@ -27,12 +27,10 @@ function locationAction(
   simulation: SimulationState,
   actions: LocationAction,
 ): (() => void) | undefined {
-  if (
+  const permissionRecovery =
     isSimulationError(simulation) &&
-    simulation.code === "LOCATION_PERMISSION_REQUIRED"
-  )
-    return actions.requestAccess;
-  if (!isSimulationStopped(simulation)) return undefined;
+    simulation.code === "LOCATION_PERMISSION_REQUIRED";
+  if (!isSimulationStopped(simulation) && !permissionRecovery) return undefined;
   switch (state.status) {
     case "permissionRequired":
       return actions.requestAccess;
