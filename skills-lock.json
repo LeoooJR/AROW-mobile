@@ -5,7 +5,7 @@
       "source": "anthropics/skills",
       "sourceType": "github",
       "skillPath": "skills/frontend-design/SKILL.md",
-      "computedHash": "4eabc66183767153e404b39d1b839b1c37f2d82d86f0a0d7e880a579d8d62336"
+      "computedHash": "89496d5dd00f4810205f351759594fc2742bf8eea85a2f2b2d1de59f4bd91576"
     },
     "javascript-testing-patterns": {
       "source": "wshobson/agents",
@@ -17,7 +17,7 @@
       "source": "wshobson/agents",
       "sourceType": "github",
       "skillPath": "plugins/javascript-typescript/skills/modern-javascript-patterns/SKILL.md",
-      "computedHash": "ef81ef5b5b70287b3962dd0fce50c90b27c636e940ec4e80f9a0b216587be549"
+      "computedHash": "353c864ce983d7580a71fe80212c7da32d4bce5914874f1b39a76f9e04d37c31"
     },
     "thermo-nuclear-code-quality-review": {
       "source": "cursor/plugins",
