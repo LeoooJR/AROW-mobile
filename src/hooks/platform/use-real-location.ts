@@ -24,6 +24,7 @@ export function useRealLocation(): UseRealLocationResult {
       new RealLocationController(
         realLocationSource,
         process.env.EXPO_OS !== "web",
+        AppState.currentState,
       ),
   );
   const [state, setState] = useState<LocationState>(controller.state);

@@ -28,6 +28,7 @@ const watchPositionAsync = jest.mocked(Location.watchPositionAsync);
 
 const mockAppStateRemove = jest.fn();
 const mockLocationRemove = jest.fn();
+const initialAppState = AppState.currentState;
 let mockAppStateListener: ((state: AppStateStatus) => void) | undefined;
 let mockLocationError: Location.LocationErrorCallback | undefined;
 let mockLocationUpdate: Location.LocationCallback | undefined;
@@ -77,6 +78,7 @@ function deferred<Value>() {
 describe("useRealLocation", () => {
   beforeEach(() => {
     process.env.EXPO_OS = "android";
+    AppState.currentState = "active";
     mockAppStateListener = undefined;
     mockLocationError = undefined;
     mockLocationUpdate = undefined;
@@ -109,6 +111,7 @@ describe("useRealLocation", () => {
   });
 
   afterEach(() => {
+    AppState.currentState = initialAppState;
     jest.restoreAllMocks();
   });
 
@@ -120,6 +123,18 @@ describe("useRealLocation", () => {
         status: "permissionRequired",
       });
     });
+  });
+
+  test("waits for activation when mounted in the background", async () => {
+    AppState.currentState = "background";
+    const hook = await renderHook(() => useRealLocation());
+    expect(getForegroundPermissionsAsync).not.toHaveBeenCalled();
+
+    await act(async () => mockAppStateListener?.("active"));
+    await waitFor(() =>
+      expect(hook.result.current.state.status).toBe("permissionRequired"),
+    );
+    expect(getForegroundPermissionsAsync).toHaveBeenCalledTimes(1);
   });
 
   test("reports denied permission and whether it can be requested again", async () => {
@@ -365,7 +380,7 @@ describe("useRealLocation", () => {
     expect(mockAppStateRemove).toHaveBeenCalledTimes(1);
   });
 
-  test("ignores AppState synchronization while requesting permission", async () => {
+  test("rechecks permission after a dialog backgrounds and reactivates the app", async () => {
     const request = deferred<Location.LocationPermissionResponse>();
     requestForegroundPermissionsAsync.mockReturnValue(request.promise);
     const hook = await renderHook(() => useRealLocation());
@@ -384,9 +399,39 @@ describe("useRealLocation", () => {
     expect(getForegroundPermissionsAsync).toHaveBeenCalledTimes(1);
     expect(mockLocationRemove).not.toHaveBeenCalled();
 
+    getForegroundPermissionsAsync.mockResolvedValue(
+      permission(Location.PermissionStatus.GRANTED),
+    );
     await act(async () => {
-      request.resolve(permission(Location.PermissionStatus.DENIED));
+      request.resolve(permission(Location.PermissionStatus.GRANTED));
     });
+    await waitFor(() => expect(watchPositionAsync).toHaveBeenCalledTimes(1));
+    expect(getForegroundPermissionsAsync).toHaveBeenCalledTimes(2);
+    expect(requestForegroundPermissionsAsync).toHaveBeenCalledTimes(1);
+  });
+
+  test("does not watch while a permission request finishes in the background", async () => {
+    const request = deferred<Location.LocationPermissionResponse>();
+    requestForegroundPermissionsAsync.mockReturnValue(request.promise);
+    const hook = await renderHook(() => useRealLocation());
+    await waitFor(() =>
+      expect(hook.result.current.state.status).toBe("permissionRequired"),
+    );
+
+    await act(async () => {
+      hook.result.current.requestAccess();
+      mockAppStateListener?.("background");
+      request.resolve(permission(Location.PermissionStatus.GRANTED));
+    });
+    expect(watchPositionAsync).not.toHaveBeenCalled();
+    expect(hasServicesEnabledAsync).not.toHaveBeenCalled();
+
+    getForegroundPermissionsAsync.mockResolvedValue(
+      permission(Location.PermissionStatus.GRANTED),
+    );
+    await act(async () => mockAppStateListener?.("active"));
+    await waitFor(() => expect(watchPositionAsync).toHaveBeenCalledTimes(1));
+    expect(requestForegroundPermissionsAsync).toHaveBeenCalledTimes(1);
   });
 
   test("removes a watcher that resolves after unmount", async () => {

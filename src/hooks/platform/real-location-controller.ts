@@ -13,11 +13,18 @@ export class RealLocationController {
   private operation = 0;
   private permissionRequest?: number;
   private watcher?: LocationWatcher;
+  private foreground: boolean;
 
   constructor(
     private readonly source: RealLocationSource,
     private readonly enabled: boolean,
-  ) {}
+    initialAppState: AppStateStatus | null = "active",
+  ) {
+    this.foreground =
+      initialAppState === null ||
+      initialAppState === "unknown" ||
+      initialAppState === "active";
+  }
 
   get state(): LocationState {
     return this.locationState;
@@ -38,6 +45,7 @@ export class RealLocationController {
   retry = (): void => {
     if (
       !this.enabled ||
+      !this.foreground ||
       this.listener === undefined ||
       this.permissionRequest !== undefined
     )
@@ -49,6 +57,7 @@ export class RealLocationController {
   requestAccess = (): void => {
     if (
       !this.enabled ||
+      !this.foreground ||
       this.listener === undefined ||
       this.permissionRequest !== undefined
     )
@@ -65,9 +74,12 @@ export class RealLocationController {
   };
 
   onAppStateChange(next: AppStateStatus): void {
-    if (this.permissionRequest !== undefined) return;
-    if (next === "active") this.retry();
-    else this.cancelWatching();
+    this.foreground = next === "active";
+    if (!this.foreground) {
+      this.cancelWatching();
+    } else if (this.permissionRequest === undefined) {
+      this.retry();
+    }
   }
 
   private async checkPermission(
@@ -87,8 +99,11 @@ export class RealLocationController {
     } catch {
       this.reportFailure(operation);
     } finally {
-      if (this.permissionRequest === operation)
+      if (this.permissionRequest === operation) {
         this.permissionRequest = undefined;
+        if (this.foreground && !this.isCurrentOperation(operation))
+          this.retry();
+      }
     }
   }
 
@@ -149,7 +164,11 @@ export class RealLocationController {
   }
 
   private isCurrentOperation(operation: number): boolean {
-    return this.listener !== undefined && this.operation === operation;
+    return (
+      this.foreground &&
+      this.listener !== undefined &&
+      this.operation === operation
+    );
   }
 
   private reportFailure(operation: number): void {

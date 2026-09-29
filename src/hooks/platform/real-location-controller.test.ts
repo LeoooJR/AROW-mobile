@@ -1,4 +1,5 @@
 import { waitFor } from "@testing-library/react-native";
+import type { AppStateStatus } from "react-native";
 
 import { RealLocationController } from "./real-location-controller";
 import type {
@@ -26,7 +27,10 @@ function deferred<T>() {
   return { promise, resolve };
 }
 
-function setup(enabled = true) {
+function setup(
+  enabled = true,
+  initialAppState: AppStateStatus | null = "active",
+) {
   const source = {
     getPermission: jest
       .fn<ReturnType<RealLocationSource["getPermission"]>, []>()
@@ -43,7 +47,11 @@ function setup(enabled = true) {
       .mockResolvedValue({ remove: jest.fn() }),
     openSettings: jest.fn<Promise<void>, []>().mockResolvedValue(undefined),
   } satisfies RealLocationSource;
-  const controller = new RealLocationController(source, enabled);
+  const controller = new RealLocationController(
+    source,
+    enabled,
+    initialAppState,
+  );
   const listener = jest.fn();
   const unsubscribe = controller.subscribe(listener);
   return { controller, source, listener, unsubscribe };
@@ -77,6 +85,129 @@ test("ignores services results after backgrounding", async () => {
   await services.promise;
   expect(source.watch).not.toHaveBeenCalled();
 });
+
+test("waits for foreground before starting a watcher after a backgrounded permission request", async () => {
+  const { controller, source } = setup();
+  await waitFor(() => expect(source.watch).toHaveBeenCalledTimes(1));
+  const request = deferred<LocationPermission>();
+  source.requestPermission.mockReturnValueOnce(request.promise);
+
+  controller.requestAccess();
+  controller.onAppStateChange("background");
+  controller.requestAccess();
+  controller.retry();
+  request.resolve(granted);
+  await request.promise;
+  expect(source.requestPermission).toHaveBeenCalledTimes(1);
+  expect(source.watch).toHaveBeenCalledTimes(1);
+
+  controller.onAppStateChange("active");
+  await waitFor(() => expect(source.watch).toHaveBeenCalledTimes(2));
+  expect(source.getPermission).toHaveBeenCalledTimes(2);
+});
+
+test("defers one foreground recheck until a permission dialog settles", async () => {
+  const { controller, source } = setup();
+  await waitFor(() => expect(source.watch).toHaveBeenCalledTimes(1));
+  const request = deferred<LocationPermission>();
+  source.requestPermission.mockReturnValueOnce(request.promise);
+
+  controller.requestAccess();
+  controller.onAppStateChange("background");
+  controller.onAppStateChange("active");
+  controller.onAppStateChange("active");
+  expect(source.getPermission).toHaveBeenCalledTimes(1);
+  expect(source.watch).toHaveBeenCalledTimes(1);
+  request.resolve(granted);
+
+  await waitFor(() => expect(source.watch).toHaveBeenCalledTimes(2));
+  expect(source.requestPermission).toHaveBeenCalledTimes(1);
+  expect(source.getPermission).toHaveBeenCalledTimes(2);
+});
+
+test("removes a watcher returned after backgrounding during an access request", async () => {
+  const { controller, source } = setup();
+  await waitFor(() => expect(source.watch).toHaveBeenCalledTimes(1));
+  const late = deferred<LocationWatcher>();
+  const removeLate = jest.fn();
+  const removeResumed = jest.fn();
+  source.watch
+    .mockReturnValueOnce(late.promise)
+    .mockResolvedValueOnce({ remove: removeResumed });
+
+  controller.requestAccess();
+  await waitFor(() => expect(source.watch).toHaveBeenCalledTimes(2));
+  controller.onAppStateChange("background");
+  controller.onAppStateChange("active");
+  late.resolve({ remove: removeLate });
+
+  await waitFor(() => expect(removeLate).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(source.watch).toHaveBeenCalledTimes(3));
+  expect(removeResumed).not.toHaveBeenCalled();
+});
+
+test("rechecks denied permission after the dialog returns from background", async () => {
+  const { controller, source } = setup();
+  await waitFor(() => expect(source.watch).toHaveBeenCalledTimes(1));
+  const request = deferred<LocationPermission>();
+  const denied = {
+    granted: false,
+    canAskAgain: false,
+    undetermined: false,
+  };
+  source.requestPermission.mockReturnValueOnce(request.promise);
+  source.getPermission.mockResolvedValue(denied);
+
+  controller.requestAccess();
+  controller.onAppStateChange("background");
+  controller.onAppStateChange("active");
+  request.resolve(denied);
+
+  await waitFor(() =>
+    expect(controller.state).toEqual({ status: "denied", canAskAgain: false }),
+  );
+  expect(source.watch).toHaveBeenCalledTimes(1);
+  expect(source.requestPermission).toHaveBeenCalledTimes(1);
+});
+
+test("rechecks permission after a backgrounded request rejects", async () => {
+  const { controller, source } = setup();
+  await waitFor(() => expect(source.watch).toHaveBeenCalledTimes(1));
+  let rejectRequest!: (reason: Error) => void;
+  source.requestPermission.mockReturnValueOnce(
+    new Promise((_resolve, reject) => {
+      rejectRequest = reject;
+    }),
+  );
+
+  controller.requestAccess();
+  controller.onAppStateChange("background");
+  controller.onAppStateChange("active");
+  rejectRequest(new Error("permission unavailable"));
+
+  await waitFor(() => expect(source.watch).toHaveBeenCalledTimes(2));
+  expect(source.getPermission).toHaveBeenCalledTimes(2);
+  expect(source.requestPermission).toHaveBeenCalledTimes(1);
+  expect(controller.state.status).toBe("locating");
+});
+
+test("does not check location until an initially backgrounded app becomes active", async () => {
+  const { controller, source } = setup(true, "background");
+  expect(source.getPermission).not.toHaveBeenCalled();
+  controller.retry();
+  expect(source.getPermission).not.toHaveBeenCalled();
+
+  controller.onAppStateChange("active");
+  await waitFor(() => expect(source.watch).toHaveBeenCalledTimes(1));
+});
+
+test.each([null, "unknown"] as const)(
+  "treats launch state %s as active",
+  async (initialAppState) => {
+    const { source } = setup(true, initialAppState);
+    await waitFor(() => expect(source.watch).toHaveBeenCalledTimes(1));
+  },
+);
 
 test("removes a late watcher without replacing the resumed watcher", async () => {
   const { controller, source } = setup();
