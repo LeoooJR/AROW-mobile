@@ -1,5 +1,5 @@
 appId: com.leooojrrr.AROWmobile
-name: Resolve a milestone after granting location access
+name: Resolve a milestone with location access
 tags:
   - journey
   - location
@@ -7,12 +7,12 @@ tags:
   - milestone
   - railway
 ---
-# Preserve the development client's remembered Metro connection while following
-# the first-use journey from location permission to milestone resolution.
+# Preserve the development client's remembered Metro connection. Grant location
+# explicitly so repeated runs do not revoke the AVD's saved permission.
 - stopApp
 - setPermissions:
     permissions:
-      location: unset
+      location: allow
 - openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
 - extendedWaitUntil:
     visible:
@@ -20,14 +20,6 @@ tags:
     timeout: 60000
 - assertVisible:
     id: "arow-map"
-- assertVisible:
-    id: "location-status"
-- assertVisible: "(Autorisation requise|Accès refusé)"
-- tapOn:
-    id: "location-status"
-- assertVisible: "While using the app"
-- tapOn: "While using the app"
-- assertNotVisible: "(Autorisation requise|Accès refusé)"
 - assertVisible:
     id: "location-status"
 - setLocation:

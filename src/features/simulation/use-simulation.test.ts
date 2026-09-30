@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 
 import { Milestone } from "@/features/milestones/domain/milestone";
 import { getMockLocationExecutor } from "@/features/simulation/mock-location";
+import SimulationProvider from "@/features/simulation/simulation-provider";
 import { useSimulation } from "@/features/simulation/use-simulation";
 
 jest.mock("@/features/simulation/mock-location", () => ({
@@ -23,6 +24,10 @@ const executor = {
   stop: jest.fn(),
 };
 
+function renderSimulationHook() {
+  return renderHook(() => useSimulation(), { wrapper: SimulationProvider });
+}
+
 describe("useSimulation", () => {
   beforeEach(() => {
     process.env.EXPO_OS = "android";
@@ -38,6 +43,14 @@ describe("useSimulation", () => {
     executor.stop.mockResolvedValue({ status: "stopped" });
   });
 
+  test("requires the application simulation provider", async () => {
+    const error = jest.spyOn(console, "error").mockImplementation(() => {});
+    await expect(renderHook(() => useSimulation())).rejects.toThrow(
+      "useSimulation must be used within SimulationProvider",
+    );
+    error.mockRestore();
+  });
+
   test.each([
     "MOCK_PROVIDER_NOT_SELECTED",
     "LOCATION_SERVICES_DISABLED",
@@ -47,7 +60,7 @@ describe("useSimulation", () => {
       code,
       ready: false,
     });
-    const { result } = await renderHook(() => useSimulation());
+    const { result } = await renderSimulationHook();
 
     await act(async () => result.current.start(milestone));
     await waitFor(() => expect(result.current.state.status).toBe("error"));
@@ -58,7 +71,7 @@ describe("useSimulation", () => {
   });
 
   test("applies the selected milestone once and cleans up on stop", async () => {
-    const { result } = await renderHook(() => useSimulation());
+    const { result } = await renderSimulationHook();
 
     await act(async () => {
       result.current.start(milestone);
@@ -81,7 +94,7 @@ describe("useSimulation", () => {
           completeStart = resolve;
         }),
     );
-    const { result } = await renderHook(() => useSimulation());
+    const { result } = await renderSimulationHook();
 
     await act(async () => result.current.start(milestone));
     await waitFor(() => expect(result.current.state.status).toBe("starting"));
@@ -102,7 +115,7 @@ describe("useSimulation", () => {
       longitude: 4.85933,
       status: "running",
     });
-    const { result } = await renderHook(() => useSimulation());
+    const { result } = await renderSimulationHook();
     await waitFor(() => expect(executor.getSnapshot).toHaveBeenCalled());
     await waitFor(() => expect(result.current.state.status).toBe("running"));
   });
@@ -113,7 +126,7 @@ describe("useSimulation", () => {
       ownsProviders: true,
       status: "error",
     });
-    const { result } = await renderHook(() => useSimulation());
+    const { result } = await renderSimulationHook();
     await act(async () => result.current.start(milestone));
     await waitFor(() => expect(result.current.state.status).toBe("running"));
     await act(async () => result.current.stop());
@@ -131,7 +144,7 @@ describe("useSimulation", () => {
         completeStop = resolve;
       }),
     );
-    const { result, unmount } = await renderHook(() => useSimulation());
+    const { result, unmount } = await renderSimulationHook();
     await act(async () => result.current.start(milestone));
     await waitFor(() => expect(result.current.state.status).toBe("running"));
     await act(async () => result.current.stop());

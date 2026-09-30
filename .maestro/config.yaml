@@ -1,7 +1,8 @@
 executionOrder:
   continueOnFailure: false
   flowsOrder:
-    - Resolve a milestone after granting location access
+    - Recover location access after denial
+    - Resolve a milestone with location access
     - Select railway and milestone map features
     - Manage railway map layer visibility
     - Use the distraction-free map-only mode

@@ -4,15 +4,18 @@ import { Stack } from "expo-router";
 
 import { GluestackUIProvider } from "@/components/adapters/gluestack-ui-provider";
 import RailwayReferenceProvider from "@/features/railway-reference/provider";
+import SimulationProvider from "@/features/simulation/simulation-provider";
 
 export default function RootLayout() {
   return (
-    <RailwayReferenceProvider>
-      <GluestackUIProvider>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-        </Stack>
-      </GluestackUIProvider>
-    </RailwayReferenceProvider>
+    <SimulationProvider>
+      <RailwayReferenceProvider>
+        <GluestackUIProvider>
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+          </Stack>
+        </GluestackUIProvider>
+      </RailwayReferenceProvider>
+    </SimulationProvider>
   );
 }
