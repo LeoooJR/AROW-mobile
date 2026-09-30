@@ -14,6 +14,7 @@ export type SimulationState =
       readonly status: "error";
       readonly code: string;
       readonly mayBeActive: boolean;
+      readonly origin: "start" | "cleanup" | "reconciliation";
       readonly position?: LocationDescriptor;
     };
 
@@ -63,6 +64,17 @@ export function isSimulationError(
   return state.status === "error";
 }
 
+export function isSimulationDismissibleError(
+  state: SimulationState,
+): state is StateWithStatus<"error"> & {
+  readonly origin: "start";
+  readonly mayBeActive: false;
+} {
+  return (
+    isSimulationError(state) && state.origin === "start" && !state.mayBeActive
+  );
+}
+
 export function isSimulationBusy(
   state: SimulationState,
 ): state is StateWithStatus<
@@ -76,23 +88,26 @@ export function isSimulationBusy(
   );
 }
 
-export function isSimulationStopRequired(
-  state: SimulationState,
-): state is
+export function isSimulationStopRequired(state: SimulationState): state is
   | StateWithStatus<"canceling" | "running" | "stopping">
-  | (StateWithStatus<"error"> & { readonly mayBeActive: true }) {
+  | (StateWithStatus<"error"> & {
+      readonly mayBeActive: true;
+    })
+  | (StateWithStatus<"error"> & { readonly origin: "cleanup" }) {
   return (
     isSimulationCanceling(state) ||
     isSimulationRunning(state) ||
     state.status === "stopping" ||
-    (isSimulationError(state) && state.mayBeActive)
+    (isSimulationError(state) &&
+      (state.mayBeActive || state.origin === "cleanup"))
   );
 }
 
 export function simulationError(
   code: string,
-  mayBeActive = false,
+  origin: StateWithStatus<"error">["origin"],
+  mayBeActive: boolean,
   position?: LocationDescriptor,
-): SimulationState {
-  return { code, mayBeActive, position, status: "error" };
+): StateWithStatus<"error"> {
+  return { code, mayBeActive, origin, position, status: "error" };
 }

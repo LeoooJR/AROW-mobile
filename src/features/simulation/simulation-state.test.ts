@@ -1,6 +1,7 @@
 import {
   isSimulationBusy,
   isSimulationCanceling,
+  isSimulationDismissibleError,
   isSimulationError,
   isSimulationRunning,
   isSimulationStarted,
@@ -28,7 +29,7 @@ const cases: readonly [
   [{ status: "stopping", position }, true, false, false, false, true, true],
   [{ status: "stopping" }, false, false, false, false, true, true],
   [
-    { status: "error", code: "FAILED", mayBeActive: false },
+    { status: "error", code: "FAILED", mayBeActive: false, origin: "start" },
     false,
     false,
     false,
@@ -37,7 +38,12 @@ const cases: readonly [
     false,
   ],
   [
-    { status: "error", code: "CLEANUP_FAILED", mayBeActive: true },
+    {
+      status: "error",
+      code: "CLEANUP_FAILED",
+      mayBeActive: true,
+      origin: "cleanup",
+    },
     false,
     false,
     false,
@@ -66,9 +72,22 @@ test.each(cases)(
       expect(status).toBe("canceling");
     }
     if (isSimulationError(state)) expect(state.code).toBeDefined();
-    if (isSimulationStopRequired(state) && state.status === "error") {
-      const mayBeActive: true = state.mayBeActive;
-      expect(mayBeActive).toBe(true);
-    }
+    expect(isSimulationDismissibleError(state)).toBe(
+      state.status === "error" &&
+        state.origin === "start" &&
+        !state.mayBeActive,
+    );
+    if (isSimulationStopRequired(state) && state.status === "error")
+      expect(state.mayBeActive || state.origin === "cleanup").toBe(true);
   },
 );
+
+test.each([
+  { origin: "start", mayBeActive: true },
+  { origin: "cleanup", mayBeActive: false },
+  { origin: "reconciliation", mayBeActive: false },
+] as const)("keeps %j errors until explicitly handled", (error) => {
+  expect(
+    isSimulationDismissibleError({ status: "error", code: "FAILED", ...error }),
+  ).toBe(false);
+});

@@ -75,6 +75,7 @@ describe("SimulationController", () => {
       status: "error",
       code: "SIMULATION_UNAVAILABLE",
       mayBeActive: true,
+      origin: "reconciliation",
     });
   });
 
@@ -311,6 +312,51 @@ describe("SimulationController", () => {
     snapshot.resolve({ status: "stopped" });
     await reconciliation;
     expect(controller.state.status).toBe("running");
+  });
+
+  test("dismisses only the same inactive failed start and rejects a late snapshot", async () => {
+    const { controller, executor } = setup();
+    const snapshot = deferred<{ status: "stopped" }>();
+    executor.getSnapshot.mockReturnValue(snapshot.promise);
+    const reconciliation = controller.reconcile();
+    await waitFor(() => expect(executor.getSnapshot).toHaveBeenCalledTimes(1));
+    executor.checkReadiness.mockResolvedValue({
+      ready: false,
+      code: "MOCK_PROVIDER_NOT_SELECTED",
+    });
+    controller.start(milestone);
+    await waitFor(() => expect(controller.state.status).toBe("error"));
+    const firstError = controller.state;
+    controller.dismissStartError(firstError);
+    expect(controller.state.status).toBe("idle");
+    snapshot.resolve({ status: "stopped" });
+    await reconciliation;
+    expect(controller.state.status).toBe("idle");
+
+    controller.start(milestone);
+    await waitFor(() => expect(controller.state.status).toBe("error"));
+    controller.dismissStartError(firstError);
+    expect(controller.state.status).toBe("error");
+  });
+
+  test("does not dismiss cleanup or uncertain active errors", async () => {
+    const { controller, executor } = setup();
+    executor.getSnapshot.mockRejectedValue(new NativeContractError("snapshot"));
+    await controller.reconcile();
+    const reconciliationError = controller.state;
+    controller.dismissStartError(reconciliationError);
+    expect(controller.state).toBe(reconciliationError);
+
+    executor.stop.mockResolvedValue({
+      status: "error",
+      code: "CLEANUP_FAILED",
+      ownsProviders: false,
+    });
+    controller.stop();
+    await waitFor(() => expect(controller.state.status).toBe("error"));
+    const cleanupError = controller.state;
+    controller.dismissStartError(cleanupError);
+    expect(controller.state).toBe(cleanupError);
   });
 
   test("does not let a late running snapshot overwrite cleanup", async () => {

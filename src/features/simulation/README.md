@@ -30,8 +30,9 @@ flowchart LR
     Canceling -->|Native start settles| Stopping
     Running -->|Stop| Stopping[Removing test providers]
     Stopping -->|Cleanup succeeded| Idle
-    Checking -->|Failure| Error[Error]
+    Checking -->|Failure| Error[Failed start]
     Starting -->|Failure| Error
+    Error -->|Five seconds or card closes; no provider owned| Idle
     Stopping -->|Cleanup failed| Error
     Error -->|Retry start if inactive| Checking
     Error -->|Retry stop if providers may remain| Stopping
@@ -58,7 +59,7 @@ If removal fails, native returns an `error` with `ownsProviders`. The controller
 
 `SimulationState` is a UI/workflow state (`idle`, `checking`, `starting`, `canceling`, `running`, `stopping`, or `error`). `canceling` and `stopping` make pending cleanup visible without private lifecycle flags. Native snapshots have their own variants (`stopped`, `starting`, `running`, or `error`). The bridge decoder checks required fields, known codes, coordinate ranges, and provider ownership once, before a snapshot reaches the controller.
 
-The root layout mounts `SimulationProvider` around the route stack. It creates one controller for the application session, reconciles from a native snapshot when it mounts and whenever the app becomes active, and polls every two seconds while running. `useSimulation` reads the provider's state and actions; closing or remounting the map screen cannot create another controller or interrupt an operation. Operation and snapshot sequence numbers prevent late reads from overwriting a newer start or stop. When the root provider unmounts, it removes its React listener and poller but does **not** call native stop. The Android service can therefore continue sending fixes while the app is in the background. A new JS session creates a new controller and reconciles from native state. The service is not configured to restart after task removal, process termination, or device reboot.
+The root layout mounts `SimulationProvider` around the route stack. It creates one controller for the application session, reconciles from a native snapshot when it mounts and whenever the app becomes active, and polls every two seconds while running. `useSimulation` reads the provider's state and actions; closing or remounting the map screen cannot create another controller or interrupt an operation. An inactive failed start stays visible for five seconds from publication, then the provider asks the controller to dismiss that exact error. Closing the searched card dismisses it immediately and restores real-location feedback. Cleanup and reconciliation errors do not expire. Operation and snapshot sequence numbers prevent late reads from overwriting a newer start or stop. When the root provider unmounts, it removes its React listener and timers but does **not** call native stop. The Android service can therefore continue sending fixes while the app is in the background. A new JS session creates a new controller and reconciles from native state. The service is not configured to restart after task removal, process termination, or device reboot.
 
 An invalid native snapshot produces an actionable `SIMULATION_UNAVAILABLE` error with uncertain active state, even on initial reconciliation. When the native snapshot says `stopped`, the controller clears a state that still requires stopping. After a successful stop, map coordination retries the real-location watcher so the displayed position can return to the device's real location.
 

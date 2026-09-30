@@ -16,6 +16,7 @@ import {
 import { SimulationController } from "@/features/simulation/simulation-controller";
 import { getMockLocationExecutor } from "@/features/simulation/mock-location";
 import {
+  isSimulationDismissibleError,
   isSimulationRunning,
   type SimulationState,
 } from "@/features/simulation/simulation-state";
@@ -37,6 +38,11 @@ export default function SimulationProvider({
     [controller],
   );
   const stop = useCallback(() => controller.stop(), [controller]);
+  const dismissStartError = useCallback(
+    (expectedState: SimulationState) =>
+      controller.dismissStartError(expectedState),
+    [controller],
+  );
 
   useEffect(() => {
     const unsubscribe = controller.subscribe(setState);
@@ -56,9 +62,15 @@ export default function SimulationProvider({
     return () => clearInterval(timer);
   }, [controller, running]);
 
+  useEffect(() => {
+    if (!isSimulationDismissibleError(state)) return;
+    const timer = setTimeout(() => controller.dismissStartError(state), 5_000);
+    return () => clearTimeout(timer);
+  }, [controller, state]);
+
   const value = useMemo<SimulationModel>(
-    () => ({ start, state, stop }),
-    [start, state, stop],
+    () => ({ dismissStartError, start, state, stop }),
+    [dismissStartError, start, state, stop],
   );
 
   return (

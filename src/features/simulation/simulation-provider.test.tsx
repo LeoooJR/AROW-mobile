@@ -69,6 +69,9 @@ describe("SimulationProvider", () => {
   beforeEach(() => {
     process.env.EXPO_OS = "android";
     jest.clearAllMocks();
+    jest.spyOn(AppState, "addEventListener").mockReturnValue({
+      remove: jest.fn(),
+    });
     jest.mocked(getMockLocationExecutor).mockResolvedValue(executor);
     executor.checkReadiness.mockResolvedValue({ ready: true });
     executor.getSnapshot.mockResolvedValue({ status: "stopped" });
@@ -166,5 +169,115 @@ describe("SimulationProvider", () => {
     expect(executor.stop).not.toHaveBeenCalled();
     addEventListener.mockRestore();
     setInterval.mockRestore();
+  });
+
+  test("expires an inactive failed start after five seconds across screen remounts", async () => {
+    const view = await render(application(true));
+    await waitFor(() => expect(executor.getSnapshot).toHaveBeenCalledTimes(1));
+    executor.checkReadiness.mockResolvedValue({
+      code: "MOCK_PROVIDER_NOT_SELECTED",
+      ready: false,
+    });
+    jest.useFakeTimers();
+    try {
+      await fireEvent.press(
+        screen.getByRole("button", { name: "Start simulation" }),
+      );
+      await act(async () => Promise.resolve());
+      expect(screen.getByText("error")).toBeOnTheScreen();
+      await view.rerender(application(false));
+      await act(async () => jest.advanceTimersByTime(4_999));
+      await view.rerender(application(true));
+      expect(screen.getByText("error")).toBeOnTheScreen();
+      await act(async () => jest.advanceTimersByTime(1));
+      expect(screen.getByText("idle")).toBeOnTheScreen();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  test("cancels the old timeout on retry and never expires cleanup errors", async () => {
+    const view = await render(application(true));
+    await waitFor(() => expect(executor.getSnapshot).toHaveBeenCalledTimes(1));
+    executor.checkReadiness.mockResolvedValueOnce({
+      code: "MOCK_PROVIDER_NOT_SELECTED",
+      ready: false,
+    });
+    jest.useFakeTimers();
+    try {
+      await fireEvent.press(
+        screen.getByRole("button", { name: "Start simulation" }),
+      );
+      await act(async () => Promise.resolve());
+      expect(screen.getByText("error")).toBeOnTheScreen();
+      await act(async () => jest.advanceTimersByTime(1_000));
+      await fireEvent.press(
+        screen.getByRole("button", { name: "Start simulation" }),
+      );
+      await act(async () => Promise.resolve());
+      expect(screen.getByText("running")).toBeOnTheScreen();
+      executor.getSnapshot.mockResolvedValue(runningSnapshot);
+      await act(async () => jest.advanceTimersByTime(4_000));
+      expect(screen.getByText("running")).toBeOnTheScreen();
+
+      executor.stop.mockResolvedValue({
+        code: "CLEANUP_FAILED",
+        ownsProviders: false,
+        status: "error",
+      });
+      await fireEvent.press(
+        screen.getByRole("button", { name: "Stop simulation" }),
+      );
+      await act(async () => Promise.resolve());
+      expect(screen.getByText("error")).toBeOnTheScreen();
+      await act(async () => jest.advanceTimersByTime(5_000));
+      expect(screen.getByText("error")).toBeOnTheScreen();
+    } finally {
+      jest.useRealTimers();
+      await view.unmount();
+    }
+  });
+
+  test("does not expire an active-provider start error", async () => {
+    const view = await render(application(true));
+    await waitFor(() => expect(executor.getSnapshot).toHaveBeenCalledTimes(1));
+    executor.start.mockResolvedValue({
+      code: "APPLY_FAILED",
+      ownsProviders: true,
+      status: "error",
+    });
+    jest.useFakeTimers();
+    try {
+      await fireEvent.press(
+        screen.getByRole("button", { name: "Start simulation" }),
+      );
+      await act(async () => Promise.resolve());
+      expect(screen.getByText("error")).toBeOnTheScreen();
+      await act(async () => jest.advanceTimersByTime(5_000));
+      expect(screen.getByText("error")).toBeOnTheScreen();
+    } finally {
+      jest.useRealTimers();
+      await view.unmount();
+    }
+  });
+
+  test("clears a pending error timeout when the provider unmounts", async () => {
+    const view = await render(application(true));
+    await waitFor(() => expect(executor.getSnapshot).toHaveBeenCalledTimes(1));
+    executor.checkReadiness.mockResolvedValue({
+      code: "MOCK_PROVIDER_NOT_SELECTED",
+      ready: false,
+    });
+    const clearTimeout = jest.spyOn(global, "clearTimeout");
+    try {
+      await fireEvent.press(
+        screen.getByRole("button", { name: "Start simulation" }),
+      );
+      expect(await screen.findByText("error")).toBeOnTheScreen();
+      await view.unmount();
+      expect(clearTimeout).toHaveBeenCalled();
+    } finally {
+      clearTimeout.mockRestore();
+    }
   });
 });

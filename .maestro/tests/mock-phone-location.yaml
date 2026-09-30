@@ -80,3 +80,7 @@ tags:
     id: "close-map-feature-details"
 - assertNotVisible:
     id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "(Connectée|Active)"
+    timeout: 10000
+- assertNotVisible: "Sélectionnez AROW comme application de position fictive"

@@ -14,6 +14,7 @@ import {
   isSimulationStopped,
   isSimulationStarting,
   isSimulationError,
+  isSimulationDismissibleError,
   isSimulationStopRequired,
   simulationError,
   type SimulationState,
@@ -83,6 +84,17 @@ export class SimulationController {
     void this.cleanup(operation, previous.position);
   }
 
+  dismissStartError(expectedState: SimulationState): void {
+    if (
+      this.simulationState !== expectedState ||
+      !isSimulationDismissibleError(expectedState)
+    )
+      return;
+    ++this.operation;
+    ++this.snapshotRequest;
+    this.publish({ status: "idle" });
+  }
+
   async reconcile(): Promise<void> {
     if (this.listener === undefined || isSimulationBusy(this.simulationState))
       return;
@@ -102,6 +114,7 @@ export class SimulationController {
         this.publish(
           simulationError(
             "SIMULATION_UNAVAILABLE",
+            "reconciliation",
             true,
             isSimulationStopRequired(this.simulationState)
               ? this.simulationState.position
@@ -127,6 +140,7 @@ export class SimulationController {
         this.publish(
           simulationError(
             errorCode(error),
+            "start",
             isSimulationStarting(this.simulationState),
           ),
         );
@@ -149,7 +163,7 @@ export class SimulationController {
     const readiness = await executor.checkReadiness();
     if (!this.isCurrent(operation)) return false;
     if (!readiness.ready) {
-      this.publish(simulationError(readiness.code));
+      this.publish(simulationError(readiness.code, "start", false));
       return false;
     }
     return true;
@@ -182,10 +196,12 @@ export class SimulationController {
         });
         break;
       case "error":
-        this.publish(simulationError(result.code, result.ownsProviders));
+        this.publish(
+          simulationError(result.code, "start", result.ownsProviders),
+        );
         break;
       case "stopped":
-        this.publish(simulationError("APPLY_FAILED"));
+        this.publish(simulationError("APPLY_FAILED", "start", false));
     }
   }
 
@@ -203,11 +219,18 @@ export class SimulationController {
       this.publish(
         result.status === "stopped"
           ? { status: "idle" }
-          : simulationError(result.code, result.ownsProviders, position),
+          : simulationError(
+              result.code,
+              "cleanup",
+              result.ownsProviders,
+              position,
+            ),
       );
     } catch {
       if (this.isCurrent(operation)) {
-        this.publish(simulationError("CLEANUP_FAILED", true, position));
+        this.publish(
+          simulationError("CLEANUP_FAILED", "cleanup", true, position),
+        );
       }
     }
   }
@@ -222,6 +245,7 @@ export class SimulationController {
       this.publish(
         simulationError(
           snapshot.code,
+          "reconciliation",
           snapshot.ownsProviders,
           isSimulationStopRequired(this.simulationState) &&
             !isSimulationCanceling(this.simulationState)

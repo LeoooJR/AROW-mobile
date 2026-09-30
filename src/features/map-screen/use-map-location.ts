@@ -7,6 +7,7 @@ import {
   isSimulationStopped,
   isSimulationRunning,
   isSimulationError,
+  isSimulationDismissibleError,
   type SimulationState,
 } from "@/features/simulation/simulation-state";
 import { useSimulation } from "@/features/simulation/use-simulation";
@@ -75,9 +76,20 @@ export function useMapLocation(
   selectedMilestone?: Milestone,
 ): MapLocationModel {
   const { openSettings, requestAccess, retry, state } = useRealLocation();
-  const { start, state: simulation, stop } = useSimulation();
+  const {
+    dismissStartError,
+    start,
+    state: simulationState,
+    stop,
+  } = useSimulation();
   const [recenterRequest, setRecenterRequest] = useState(0);
   const simulationWasRunning = useRef(false);
+  const closedStartError =
+    selectedMilestone === undefined &&
+    isSimulationDismissibleError(simulationState);
+  const simulation: SimulationState = closedStartError
+    ? { status: "idle" }
+    : simulationState;
   const stopRequired = isSimulationStopRequired(simulation);
   const hasSimulatedPosition = isSimulationStarted(simulation);
   const running = isSimulationRunning(simulation);
@@ -90,6 +102,10 @@ export function useMapLocation(
     if (stopRequired) stop();
     else if (selectedMilestone !== undefined) start(selectedMilestone);
   }, [stopRequired, selectedMilestone, start, stop]);
+
+  useEffect(() => {
+    if (closedStartError) dismissStartError(simulationState);
+  }, [closedStartError, dismissStartError, simulationState]);
 
   useEffect(() => {
     if (running) {
