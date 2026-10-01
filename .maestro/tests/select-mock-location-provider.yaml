@@ -1,0 +1,40 @@
+appId: com.leooojrrr.AROWmobile
+name: Select AROW as the mock location app
+tags:
+  - feature
+  - location
+  - simulation
+  - developer-options
+---
+# Build number is safe to tap when Developer options are already enabled. This
+# also enables them on a fresh emulator without using an ADB shortcut.
+- launchApp: com.android.settings
+- scrollUntilVisible:
+    element: "(About phone|About emulated device)"
+    direction: DOWN
+- tapOn: "(About phone|About emulated device)"
+- scrollUntilVisible:
+    element: "Build number"
+    direction: DOWN
+- repeat:
+    times: 7
+    commands:
+      - tapOn: "Build number"
+- pressKey: back
+- scrollUntilVisible:
+    element: "System"
+    direction: DOWN
+- tapOn: "System"
+- scrollUntilVisible:
+    element: "Developer options"
+    direction: DOWN
+- tapOn: "Developer options"
+- scrollUntilVisible:
+    element: "Select mock location app"
+    direction: DOWN
+    timeout: 120000
+    speed: 80
+- tapOn: "Select mock location app"
+- assertVisible: "AROW-mobile"
+- tapOn: "AROW-mobile"
+- assertVisible: "Mock location app: AROW-mobile"

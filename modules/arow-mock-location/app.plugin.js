@@ -7,6 +7,7 @@ module.exports = function withArowMockLocation(config) {
     const manifest = config.modResults.manifest;
     const permissions = manifest["uses-permission"] ?? [];
     for (const name of [
+      "android.permission.ACCESS_MOCK_LOCATION",
       "android.permission.FOREGROUND_SERVICE",
       "android.permission.FOREGROUND_SERVICE_LOCATION",
     ]) {
