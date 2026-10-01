@@ -8,16 +8,14 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import NativeBottomSheet from "@/components/adapters/native-bottom-sheet";
-import {
-  MAP_TOOLBAR_PALETTES,
-  mapToolbarTheme,
-} from "@/components/composites/map-toolbar/map-toolbar-theme";
+import { MAP_TOOLBAR_PALETTES } from "@/components/composites/map-toolbar/map-toolbar-theme";
 import PointSearchFooter from "@/components/composites/map-toolbar/point-search-sheet/point-search-footer";
 import PointSearchForm from "@/components/composites/map-toolbar/point-search-sheet/point-search-form";
 import PointSearchSheetHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-sheet-header";
 import usePointSearchForm from "@/components/composites/map-toolbar/point-search-sheet/use-point-search-form";
 import type { Milestone } from "@/features/milestones/domain/milestone";
 import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
+import { resolveColorTheme } from "@/utils/color-theme";
 
 interface PointSearchSheetProps {
   readonly isOpen: boolean;
@@ -36,7 +34,7 @@ export default function PointSearchSheet({
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const compact = width <= 380;
-  const theme = mapToolbarTheme(colorScheme);
+  const theme = resolveColorTheme(colorScheme);
   const palette = MAP_TOOLBAR_PALETTES[theme];
   const placeholderColor = theme === "dark" ? "#A7A49D" : "#7A7A74";
   const form = usePointSearchForm(search);

@@ -7,31 +7,48 @@ import LocationContent from "@/components/composites/location-bar/location-conte
 import getLocationPresentation from "@/components/composites/location-bar/location-presentation";
 import LocationRow from "@/components/composites/location-bar/location-row";
 import SimulationAction from "@/components/composites/location-bar/simulation-action";
+import {
+  isSimulationStarted,
+  type SimulationState,
+} from "@/features/simulation/simulation-state";
 import type {
   MockedLocationState,
   RealLocationState,
-} from "@/hooks/platform/use-real-location";
+} from "@/hooks/platform/real-location-state";
 
 export interface LocationBarProps {
   readonly onAction?: () => void;
   readonly onCenter?: () => void;
+  readonly onSimulationPress?: () => void;
   readonly showSimulationAction?: boolean;
+  readonly simulation?: SimulationState;
   readonly state: RealLocationState | MockedLocationState;
 }
 
 export default function LocationBar({
   onAction,
   onCenter,
+  onSimulationPress,
   showSimulationAction = false,
+  simulation,
   state,
 }: LocationBarProps): ReactElement {
   const insets = useSafeAreaInsets();
-  const presentation = getLocationPresentation(state);
-  const canCenter = state.status === "connected" || state.status === "mocked";
+  const presentation = getLocationPresentation(state, simulation);
+  const hasSimulatedPosition =
+    simulation !== undefined && isSimulationStarted(simulation);
+  const canCenter =
+    hasSimulatedPosition ||
+    state.status === "connected" ||
+    state.status === "mocked";
   const centerAction =
     canCenter && onCenter !== undefined ? (
       <CenterLocationButton
-        locationKind={state.status === "mocked" ? "simulée" : "réelle"}
+        locationKind={
+          hasSimulatedPosition || state.status === "mocked"
+            ? "simulée"
+            : "réelle"
+        }
         onPress={onCenter}
       />
     ) : undefined;
@@ -48,7 +65,11 @@ export default function LocationBar({
       >
         <LocationContent presentation={presentation} />
       </LocationRow>
-      {showSimulationAction ? <SimulationAction /> : null}
+      {showSimulationAction &&
+      simulation !== undefined &&
+      onSimulationPress !== undefined ? (
+        <SimulationAction onPress={onSimulationPress} state={simulation} />
+      ) : null}
     </View>
   );
 }

@@ -1,0 +1,281 @@
+import { NativeContractError } from "../../../modules/arow-mock-location/src/decode-native-result";
+import type {
+  NativeSnapshot,
+  NativeStartResult,
+} from "../../../modules/arow-mock-location/src/native-contracts";
+
+import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { MockLocationExecutor } from "@/features/simulation/mock-location";
+import { positionFromSnapshot } from "@/features/simulation/simulation-native-snapshot";
+import {
+  isSimulationBusy,
+  isSimulationCanceling,
+  isSimulationRunning,
+  isSimulationStopped,
+  isSimulationStarting,
+  isSimulationError,
+  isSimulationDismissibleError,
+  isSimulationStopRequired,
+  simulationError,
+  type SimulationState,
+} from "@/features/simulation/simulation-state";
+import type { LocationDescriptor } from "@/types/location-descriptor";
+
+type LoadExecutor = () => Promise<MockLocationExecutor>;
+
+function errorCode(error: unknown): string {
+  return error instanceof Error && error.message === "UNSUPPORTED_PLATFORM"
+    ? "UNSUPPORTED_PLATFORM"
+    : "SIMULATION_UNAVAILABLE";
+}
+
+export class SimulationController {
+  private simulationState: SimulationState = { status: "idle" };
+  private listener?: (state: SimulationState) => void;
+  private operation = 0;
+  private snapshotRequest = 0;
+
+  constructor(private readonly loadExecutor: LoadExecutor) {}
+
+  get state(): SimulationState {
+    return this.simulationState;
+  }
+
+  subscribe(listener: (state: SimulationState) => void): () => void {
+    this.listener = listener;
+    listener(this.simulationState);
+    return () => {
+      if (this.listener === listener) this.listener = undefined;
+    };
+  }
+
+  start(milestone: Milestone): void {
+    if (
+      !isSimulationStopped(this.simulationState) &&
+      !(
+        isSimulationError(this.simulationState) &&
+        !this.simulationState.mayBeActive
+      )
+    ) {
+      return;
+    }
+    const operation = ++this.operation;
+    this.publish({ status: "checking" });
+    void this.runStart(operation, milestone);
+  }
+
+  stop(): void {
+    const previous = this.simulationState;
+    if (isSimulationCanceling(previous) || previous.status === "stopping")
+      return;
+    if (isSimulationStarting(previous)) {
+      this.publish({ status: "canceling" });
+      return;
+    }
+    if (previous.status === "checking") {
+      ++this.operation;
+      this.publish({ status: "idle" });
+      return;
+    }
+    if (!isSimulationStopRequired(previous)) {
+      return;
+    }
+    const operation = ++this.operation;
+    void this.cleanup(operation, previous.position);
+  }
+
+  dismissStartError(expectedState: SimulationState): void {
+    if (
+      this.simulationState !== expectedState ||
+      !isSimulationDismissibleError(expectedState)
+    )
+      return;
+    ++this.operation;
+    ++this.snapshotRequest;
+    this.publish({ status: "idle" });
+  }
+
+  async reconcile(): Promise<void> {
+    if (this.listener === undefined || isSimulationBusy(this.simulationState))
+      return;
+    const operation = this.operation;
+    const request = ++this.snapshotRequest;
+    try {
+      const executor = await this.loadExecutor();
+      const snapshot = await executor.getSnapshot();
+      if (!this.isFreshSnapshot(operation, request)) return;
+      this.applySnapshot(snapshot);
+    } catch (error) {
+      if (
+        this.isFreshSnapshot(operation, request) &&
+        (error instanceof NativeContractError ||
+          isSimulationRunning(this.simulationState))
+      ) {
+        this.publish(
+          simulationError(
+            "SIMULATION_UNAVAILABLE",
+            "reconciliation",
+            true,
+            isSimulationStopRequired(this.simulationState)
+              ? this.simulationState.position
+              : undefined,
+          ),
+        );
+      }
+    }
+  }
+
+  private async runStart(
+    operation: number,
+    milestone: Milestone,
+  ): Promise<void> {
+    let executor: MockLocationExecutor | undefined;
+    try {
+      executor = await this.loadExecutor();
+      if (!(await this.checkReadiness(operation, executor))) return;
+      await this.applyMilestone(operation, executor, milestone);
+    } catch (error) {
+      if (!this.isCurrent(operation)) return;
+      if (!isSimulationCanceling(this.simulationState)) {
+        this.publish(
+          simulationError(
+            errorCode(error),
+            "start",
+            isSimulationStarting(this.simulationState),
+          ),
+        );
+      }
+    } finally {
+      if (
+        executor !== undefined &&
+        this.isCurrent(operation) &&
+        isSimulationCanceling(this.simulationState)
+      ) {
+        await this.cleanup(operation, undefined, executor);
+      }
+    }
+  }
+
+  private async checkReadiness(
+    operation: number,
+    executor: MockLocationExecutor,
+  ): Promise<boolean> {
+    const readiness = await executor.checkReadiness();
+    if (!this.isCurrent(operation)) return false;
+    if (!readiness.ready) {
+      this.publish(simulationError(readiness.code, "start", false));
+      return false;
+    }
+    return true;
+  }
+
+  private async applyMilestone(
+    operation: number,
+    executor: MockLocationExecutor,
+    milestone: Milestone,
+  ): Promise<void> {
+    this.publish({ status: "starting" });
+    const result = await executor.start(
+      milestone.coordinates.latitude,
+      milestone.coordinates.longitude,
+    );
+    if (
+      this.isCurrent(operation) &&
+      isSimulationStarting(this.simulationState)
+    ) {
+      this.applyStartResult(result);
+    }
+  }
+
+  private applyStartResult(result: NativeStartResult): void {
+    switch (result.status) {
+      case "running":
+        this.publish({
+          position: positionFromSnapshot(result),
+          status: "running",
+        });
+        break;
+      case "error":
+        this.publish(
+          simulationError(result.code, "start", result.ownsProviders),
+        );
+        break;
+      case "stopped":
+        this.publish(simulationError("APPLY_FAILED", "start", false));
+    }
+  }
+
+  private async cleanup(
+    operation: number,
+    position?: LocationDescriptor,
+    executor?: MockLocationExecutor,
+  ): Promise<void> {
+    if (!this.isCurrent(operation)) return;
+    this.publish({ status: "stopping", position });
+    try {
+      const activeExecutor = executor ?? (await this.loadExecutor());
+      const result = await activeExecutor.stop();
+      if (!this.isCurrent(operation)) return;
+      this.publish(
+        result.status === "stopped"
+          ? { status: "idle" }
+          : simulationError(
+              result.code,
+              "cleanup",
+              result.ownsProviders,
+              position,
+            ),
+      );
+    } catch {
+      if (this.isCurrent(operation)) {
+        this.publish(
+          simulationError("CLEANUP_FAILED", "cleanup", true, position),
+        );
+      }
+    }
+  }
+
+  private applySnapshot(snapshot: NativeSnapshot): void {
+    if (snapshot.status === "running") {
+      this.publish({
+        position: positionFromSnapshot(snapshot),
+        status: "running",
+      });
+    } else if (snapshot.status === "error") {
+      this.publish(
+        simulationError(
+          snapshot.code,
+          "reconciliation",
+          snapshot.ownsProviders,
+          isSimulationStopRequired(this.simulationState) &&
+            !isSimulationCanceling(this.simulationState)
+            ? this.simulationState.position
+            : undefined,
+        ),
+      );
+    } else if (
+      snapshot.status === "stopped" &&
+      isSimulationStopRequired(this.simulationState)
+    ) {
+      this.publish({ status: "idle" });
+    }
+  }
+
+  private isCurrent(operation: number): boolean {
+    return this.operation === operation;
+  }
+
+  private isFreshSnapshot(operation: number, request: number): boolean {
+    return (
+      this.listener !== undefined &&
+      this.isCurrent(operation) &&
+      this.snapshotRequest === request &&
+      !isSimulationBusy(this.simulationState)
+    );
+  }
+
+  private publish(state: SimulationState): void {
+    this.simulationState = state;
+    this.listener?.(state);
+  }
+}

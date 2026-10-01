@@ -8,12 +8,10 @@ import type {
 } from "@/components/adapters/map/map-layer-visibility";
 import NativeBottomSheet from "@/components/adapters/native-bottom-sheet";
 import MapLayerRow from "@/components/composites/map-toolbar/map-layer-row";
-import {
-  MAP_TOOLBAR_PALETTES,
-  mapToolbarTheme,
-} from "@/components/composites/map-toolbar/map-toolbar-theme";
+import { MAP_TOOLBAR_PALETTES } from "@/components/composites/map-toolbar/map-toolbar-theme";
 import CloseIcon from "@/components/primitives/icons/close-icon";
 import IconButton from "@/components/primitives/icon-button";
+import { resolveColorTheme } from "@/utils/color-theme";
 
 interface MapLayersSheetProps {
   readonly isOpen: boolean;
@@ -33,7 +31,7 @@ export default function MapLayersSheet({
 }: MapLayersSheetProps): ReactElement {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
-  const palette = MAP_TOOLBAR_PALETTES[mapToolbarTheme(colorScheme)];
+  const palette = MAP_TOOLBAR_PALETTES[resolveColorTheme(colorScheme)];
 
   return (
     <NativeBottomSheet

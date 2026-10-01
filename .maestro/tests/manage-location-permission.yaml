@@ -1,0 +1,66 @@
+appId: com.leooojrrr.AROWmobile
+name: Recover location access after denial
+tags:
+  - feature
+  - location
+  - permission
+---
+# Deny without clearing app data or depending on a first-install prompt.
+- stopApp
+- setPermissions:
+    permissions:
+      location: deny
+- pressKey: home
+- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+- extendedWaitUntil:
+    visible:
+      id: "location-status"
+    timeout: 60000
+- extendedWaitUntil:
+    visible: "(Accès refusé|Accès bloqué)"
+    timeout: 30000
+- tapOn:
+    id: "location-status"
+
+# Android may offer another prompt or direct a previously denied app to Settings.
+- extendedWaitUntil:
+    visible: "(While using the app|Permissions|App permissions|Allow only while using the app)"
+    timeout: 30000
+- runFlow:
+    when:
+      visible: "Permissions"
+    commands:
+      - tapOn: "Permissions"
+- runFlow:
+    when:
+      visible: "App permissions"
+    commands:
+      - tapOn: "Location"
+- runFlow:
+    when:
+      visible: "Allow only while using the app"
+    commands:
+      - tapOn: "Allow only while using the app"
+- runFlow:
+    when:
+      visible: "While using the app"
+    commands:
+      - tapOn: "While using the app"
+
+# Returning to the app must recheck the grant and install a location watcher.
+- pressKey: home
+- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+- setLocation:
+    latitude: 45.74491
+    longitude: 4.86234
+- extendedWaitUntil:
+    visible: "(Connectée|Active)"
+    timeout: 30000
+- assertNotVisible: "(Accès refusé|Accès bloqué)"
+
+# The recovered grant must survive a cold app restart.
+- stopApp
+- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+- extendedWaitUntil:
+    visible: "(Connectée|Active)"
+    timeout: 30000

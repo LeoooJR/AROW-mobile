@@ -1,4 +1,5 @@
 import type { ColorSchemeName } from "react-native";
+import { resolveColorTheme } from "@/utils/color-theme";
 
 export interface SimulationActionPalette {
   readonly foreground: string;
@@ -19,5 +20,5 @@ export const SIMULATION_ACTION_PALETTES = {
 export function simulationActionPalette(
   colorScheme: ColorSchemeName,
 ): SimulationActionPalette {
-  return SIMULATION_ACTION_PALETTES[colorScheme === "dark" ? "dark" : "light"];
+  return SIMULATION_ACTION_PALETTES[resolveColorTheme(colorScheme)];
 }

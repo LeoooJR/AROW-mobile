@@ -73,8 +73,16 @@ tags:
     id: "close-layers-button"
 - waitForAnimationToEnd
 - tapOn:
-    point: "16%,32%"
+    point: "16%,34%"
     retryTapIfNoChange: true
+# A system-bar change can satisfy the generic UI-change check before selection.
+- runFlow:
+    when:
+      notVisible: "PK 509\\+000"
+    commands:
+      - tapOn:
+          point: "16%,34%"
+          retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "PK 509\\+000"
     timeout: 10000

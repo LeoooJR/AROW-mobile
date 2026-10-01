@@ -260,10 +260,13 @@ describe("LocationBar", () => {
     ).toHaveStyle({ paddingBottom: 24 });
   });
 
-  test("shows a no-op simulation action with accessible idle state", async () => {
+  test("starts from the accessible idle action", async () => {
+    const onSimulationPress = jest.fn();
     await render(
       <LocationBar
+        onSimulationPress={onSimulationPress}
         showSimulationAction
+        simulation={{ status: "idle" }}
         state={{
           position: {
             accuracy: 3,
@@ -290,6 +293,7 @@ describe("LocationBar", () => {
     await fireEvent.press(action);
 
     expect(screen.getByText("Position réelle")).toBeOnTheScreen();
+    expect(onSimulationPress).toHaveBeenCalledTimes(1);
     expect(action).toHaveProp("aria-pressed", false);
     expect(action).not.toBeBusy();
   });
@@ -297,7 +301,12 @@ describe("LocationBar", () => {
   test("uses the dark primary-action palette", async () => {
     mockColorScheme = "dark";
     await render(
-      <LocationBar showSimulationAction state={{ status: "checking" }} />,
+      <LocationBar
+        onSimulationPress={jest.fn()}
+        showSimulationAction
+        simulation={{ status: "idle" }}
+        state={{ status: "checking" }}
+      />,
     );
     const darkAction = screen.getByRole("button", {
       name: "Démarrer la simulation",
@@ -322,11 +331,68 @@ describe("LocationBar", () => {
   test("keeps the simulation action inside the safe-area-aware bar", async () => {
     mockSafeAreaBottom = 24;
     await render(
-      <LocationBar showSimulationAction state={{ status: "checking" }} />,
+      <LocationBar
+        onSimulationPress={jest.fn()}
+        showSimulationAction
+        simulation={{ status: "idle" }}
+        state={{ status: "checking" }}
+      />,
     );
 
     expect(screen.getByTestId("simulation-primary-action").parent).toHaveStyle({
       paddingBottom: 24,
     });
+  });
+
+  test("shows busy, running, and stop states", async () => {
+    const onSimulationPress = jest.fn();
+    const props = {
+      onSimulationPress,
+      showSimulationAction: true,
+      state: { status: "checking" } as const,
+    };
+    const view = await render(
+      <LocationBar {...props} simulation={{ status: "starting" }} />,
+    );
+    expect(
+      screen.getByRole("button", { name: "Activation en cours" }),
+    ).toBeBusy();
+    expect(
+      screen.getByRole("button", { name: "Activation en cours" }),
+    ).toBeDisabled();
+
+    await view.rerender(
+      <LocationBar {...props} simulation={{ status: "canceling" }} />,
+    );
+    expect(screen.getByRole("button", { name: "Arrêt en cours" })).toBeBusy();
+    expect(screen.getAllByText("Arrêt en cours")).toHaveLength(3);
+
+    await view.rerender(
+      <LocationBar {...props} simulation={{ status: "stopping" }} />,
+    );
+    expect(
+      screen.getByRole("button", { name: "Arrêt en cours" }),
+    ).toBeDisabled();
+
+    await view.rerender(
+      <LocationBar
+        {...props}
+        simulation={{
+          status: "running",
+          position: {
+            accuracy: null,
+            heading: null,
+            latitude: 45,
+            longitude: 4,
+          },
+        }}
+      />,
+    );
+    expect(screen.getByText("Position simulée")).toBeOnTheScreen();
+    expect(screen.getByText("Active")).toBeOnTheScreen();
+    const stop = screen.getByRole("button", { name: "Arrêter la simulation" });
+    expect(stop).toHaveProp("aria-pressed", true);
+    await fireEvent.press(stop);
+    expect(onSimulationPress).toHaveBeenCalledTimes(1);
   });
 });

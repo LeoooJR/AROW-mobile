@@ -1,9 +1,9 @@
 import { type ReactElement } from "react";
 import Svg, { Circle, Path } from "react-native-svg";
 
-export interface SearchIconProps {
-  readonly color: string;
-}
+import type { IconProps } from "@/components/primitives/icons/icon-props";
+
+export type SearchIconProps = IconProps;
 
 export default function SearchIcon({ color }: SearchIconProps): ReactElement {
   return (

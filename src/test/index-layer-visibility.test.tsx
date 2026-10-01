@@ -42,6 +42,14 @@ jest.mock("expo-asset", () => ({
 
 jest.mock("@/statics/lignes-par-type.geojson", () => "railway-asset");
 
+jest.mock("@/features/simulation/use-simulation", () => ({
+  useSimulation: () => ({
+    start: jest.fn(),
+    state: { status: "idle" },
+    stop: jest.fn(),
+  }),
+}));
+
 jest.mock("@/hooks/platform/use-real-location", () => ({
   useRealLocation: () => ({
     openSettings: jest.fn(),

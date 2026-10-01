@@ -60,8 +60,18 @@ or intentionally skipped check explicitly.
 - Successful Jest or Maestro tests do not replace a live application test.
   Agents must still launch and exercise the affected behavior on an Android
   virtual device before reporting the work as complete.
-- When Maestro E2E testing applies, run every configured flow. After the suite
-  passes, record and present the flows that exercise the feature produced or
+- When Maestro E2E testing applies, thoughtfully select the flows that exercise
+  the changed behavior and its plausible regressions. Inspect each flow's
+  assertions and the affected code paths; do not run the entire configured
+  suite by default. Briefly explain the selection before running it. For
+  example, a simulation native-contract change requires
+  `.maestro/tests/mock-phone-location.yaml`; map selection, layer visibility,
+  and map-only flows are required only if their behavior may be affected.
+  Expand the selection when shared behavior changes, or run the entire suite
+  when the scope warrants it or the user requests it. Every selected flow must
+  pass before reporting task validation as successful. Report which flows ran
+  and any coverage gaps requiring focused live checks. After the selected flows
+  pass, record and present the flows that exercise the feature produced or
   changed by the work so the user can review it. Record with Maestro's local
   recorder first. Use ADB `screenrecord` only when the Maestro recording fails,
   and rerun the same passing Maestro flow while the fallback recording is

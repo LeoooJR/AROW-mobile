@@ -1,19 +1,12 @@
 import type { Railway } from "@/features/railways/railway";
-
-function normalizeSearchQuery(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("fr")
-    .trim();
-}
+import { normalizeSearchText } from "@/utils/search-text";
 
 function isCodeQuery(query: string): boolean {
   return /^\d+$/.test(query);
 }
 
 export function isMilestoneLineQueryReady(query: string): boolean {
-  const normalizedQuery = normalizeSearchQuery(query);
+  const normalizedQuery = normalizeSearchText(query);
   if (normalizedQuery.length === 0) {
     return false;
   }
@@ -30,7 +23,7 @@ function lineMatchesQuery(
     return railway.code.startsWith(normalizedQuery);
   }
 
-  return normalizeSearchQuery(railway.name).includes(normalizedQuery);
+  return normalizeSearchText(railway.name).includes(normalizedQuery);
 }
 
 function compareLineSearchResults(
@@ -43,10 +36,8 @@ function compareLineSearchResults(
     return left.code.localeCompare(right.code);
   }
 
-  const leftStarts = normalizeSearchQuery(left.name).startsWith(
-    normalizedQuery,
-  );
-  const rightStarts = normalizeSearchQuery(right.name).startsWith(
+  const leftStarts = normalizeSearchText(left.name).startsWith(normalizedQuery);
+  const rightStarts = normalizeSearchText(right.name).startsWith(
     normalizedQuery,
   );
   if (leftStarts === rightStarts) {
@@ -65,7 +56,7 @@ export function searchRailways(
     return [];
   }
 
-  const normalizedQuery = normalizeSearchQuery(query);
+  const normalizedQuery = normalizeSearchText(query);
   const codeQuery = isCodeQuery(normalizedQuery);
   return railways
     .filter((railway) => lineMatchesQuery(railway, normalizedQuery, codeQuery))

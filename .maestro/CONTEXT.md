@@ -10,15 +10,20 @@ These instructions apply to the Maestro configuration and flows under
   temporary implementation stage.
 - Treat `.maestro/config.yaml` as the source of truth for the configured suite
   and execution order.
-- Run every configured flow before reporting Maestro validation as passing.
+- Select flows according to the changed behavior, their assertions, and
+  plausible regressions in affected code paths. Explain the selection before
+  running it and require every selected flow to pass. Follow the validation
+  guidance in `AGENTS.md`; run the complete configured suite only when the
+  change's scope warrants it or the user requests it. Report the flows run and
+  any coverage gaps requiring focused live checks.
 - Keep device selection explicit when more than one Android target may be
   connected. Automated local runs must target an `emulator-*` serial and must
   not select a physical device.
 
 ## Recording
 
-Record only the flows that exercise the feature being delivered. The complete
-suite must pass before recording. Run these commands from the repository root,
+Record only the flows that exercise the feature being delivered. All selected
+validation flows must pass before recording. Run these commands from the repository root,
 with `maestro` and `adb` available on `PATH`; project rules must not encode a
 coworker's home directory or local Android SDK installation path.
 
@@ -27,6 +32,12 @@ dedicated review artifact:
 
 ```bash
 maestro --device emulator-5554 record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4
+```
+
+For the standalone map-feature selection flow:
+
+```bash
+maestro --device emulator-5554 record --local .maestro/tests/manage-map-feature-selection.yaml .maestro/artifacts/map-feature-selection-e2e-recording.mp4
 ```
 
 For the standalone map-layer feature flow:

@@ -16,6 +16,13 @@ jest.mock("expo-asset", () => ({
 jest.mock("@/features/railway-reference/context", () => ({
   useRailwayReference: jest.fn(),
 }));
+jest.mock("@/features/simulation/use-simulation", () => ({
+  useSimulation: () => ({
+    start: jest.fn(),
+    state: { status: "idle" },
+    stop: jest.fn(),
+  }),
+}));
 jest.mock("@/hooks/platform/use-real-location", () => ({
   useRealLocation: jest.fn(),
 }));

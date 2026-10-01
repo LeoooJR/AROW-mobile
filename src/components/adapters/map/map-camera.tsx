@@ -6,15 +6,12 @@ import {
 import { type ReactElement, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "react-native-reanimated";
 
-interface MapCameraLocation {
-  readonly latitude: number;
-  readonly longitude: number;
-}
+import type { GeographicCoordinates } from "@/types/geographic-coordinates";
 
 export interface MapCameraProps {
-  readonly focusLocation?: MapCameraLocation;
+  readonly focusLocation?: GeographicCoordinates;
   readonly focusRequest?: number;
-  readonly location?: MapCameraLocation;
+  readonly location?: GeographicCoordinates;
   readonly recenterRequest?: number;
 }
 
@@ -55,7 +52,7 @@ const DEFAULT_MAP_CAMERA_SETTINGS = {
   },
 } satisfies MapCameraSettings;
 
-function locationCameraTarget(location: MapCameraLocation): CameraTarget {
+function locationCameraTarget(location: GeographicCoordinates): CameraTarget {
   return {
     center: [location.longitude, location.latitude],
     zoom: DEFAULT_MAP_CAMERA_SETTINGS.locationZoom,
@@ -63,7 +60,7 @@ function locationCameraTarget(location: MapCameraLocation): CameraTarget {
 }
 
 function initialCameraState(
-  location: MapCameraLocation | undefined,
+  location: GeographicCoordinates | undefined,
   focusRequest: number | undefined,
   recenterRequest: number | undefined,
 ): MapCameraState {
@@ -81,9 +78,9 @@ function initialCameraState(
 
 function deriveCameraState(
   current: MapCameraState,
-  focusLocation: MapCameraLocation | undefined,
+  focusLocation: GeographicCoordinates | undefined,
   focusRequest: number | undefined,
-  location: MapCameraLocation | undefined,
+  location: GeographicCoordinates | undefined,
   recenterRequest: number | undefined,
 ): MapCameraState {
   const focusChanged = current.focusRequest !== focusRequest;

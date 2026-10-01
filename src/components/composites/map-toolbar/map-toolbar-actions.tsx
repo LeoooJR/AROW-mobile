@@ -9,11 +9,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import MapFocusButton from "@/components/composites/map-toolbar/map-focus-button";
 import MapLayersButton from "@/components/composites/map-toolbar/map-layers-button";
-import {
-  MAP_TOOLBAR_PALETTES,
-  mapToolbarTheme,
-} from "@/components/composites/map-toolbar/map-toolbar-theme";
+import { MAP_TOOLBAR_PALETTES } from "@/components/composites/map-toolbar/map-toolbar-theme";
 import PointSearchButton from "@/components/composites/map-toolbar/point-search-button";
+import { resolveColorTheme } from "@/utils/color-theme";
 
 interface MapToolbarActionsProps {
   readonly layersOpen: boolean;
@@ -35,7 +33,7 @@ export default function MapToolbarActions({
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const palette = MAP_TOOLBAR_PALETTES[mapToolbarTheme(colorScheme)];
+  const palette = MAP_TOOLBAR_PALETTES[resolveColorTheme(colorScheme)];
   const compact = width <= 380;
   const buttonStyle = {
     borderCurve: "continuous",
