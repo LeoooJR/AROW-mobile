@@ -56,7 +56,7 @@ export function createStagingWorkspace({
   const directory = mkdtempSync(join(outputDirectory, ".railway-database-"));
   return Object.freeze({
     directory,
-    rawGeojsonPath: join(directory, resources.geojson.name),
+    rawGeojsonPath: join(directory, resources.railwayGeojson.name),
     rawMilestonesPath: join(directory, resources.milestones.name),
     stagedDatabasePath: join(directory, "railway_reference.generated"),
     stagedGeojsonPath: join(directory, "lignes-par-type.generated"),
