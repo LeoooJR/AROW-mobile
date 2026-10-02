@@ -1,0 +1,26 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1024"
+  height="1024"
+  viewBox="-54 -54 108 108"
+>
+  <defs>
+    <mask
+      id="arrow-cutout"
+      maskUnits="userSpaceOnUse"
+      x="-25"
+      y="-25"
+      width="50"
+      height="50"
+      style="mask-type: luminance"
+    >
+      <rect x="-25" y="-25" width="50" height="50" fill="#FFFFFF" />
+      <path d="M0 -7 L5 6 L0 3 L-5 6 Z" fill="#000000" />
+    </mask>
+  </defs>
+  <g transform="scale(1.32)" mask="url(#arrow-cutout)" fill="#FFFFFF">
+    <circle r="25" opacity="0.14" />
+    <!-- Include the original core's one-unit outer stroke extent. -->
+    <circle r="14" />
+  </g>
+</svg>

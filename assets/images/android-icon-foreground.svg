@@ -1,0 +1,13 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1024"
+  height="1024"
+  viewBox="-54 -54 108 108"
+>
+  <!-- The marker's 50-unit halo spans Android's 66-unit safe area. -->
+  <g transform="scale(1.32)">
+    <circle r="25" fill="#FF6A00" opacity="0.14" />
+    <circle r="13" fill="#FF6A00" stroke="#0A0A0A" stroke-width="2" />
+    <path d="M0 -7 L5 6 L0 3 L-5 6 Z" fill="#0A0A0A" />
+  </g>
+</svg>
