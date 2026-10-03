@@ -7,7 +7,7 @@ import {
   ToastTitle,
   useToast,
 } from "@/components/adapters/toast";
-import { useSimulation } from "@/features/simulation/use-simulation";
+import { useSimulation } from "@/hooks/features/use-simulation";
 import { isAppActive } from "@/utils/app-state";
 
 const TOAST_ID = "simulation-notifications-disabled";

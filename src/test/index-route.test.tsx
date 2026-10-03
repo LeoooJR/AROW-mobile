@@ -15,7 +15,7 @@ const mockStartSimulation = jest.fn();
 const mockStopSimulation = jest.fn();
 let mockSimulationState: SimulationState = { status: "idle" };
 
-jest.mock("@/features/simulation/use-simulation", () => ({
+jest.mock("@/hooks/features/use-simulation", () => ({
   useSimulation: () => ({
     start: mockStartSimulation,
     state: mockSimulationState,
@@ -39,7 +39,7 @@ jest.mock("expo-asset", () => ({
   ],
 }));
 
-jest.mock("@/features/railway-reference/context", () => ({
+jest.mock("@/hooks/features/use-railway-reference", () => ({
   useRailwayReference: () => ({
     milestoneSearch: {
       findMilestone: jest.fn(),

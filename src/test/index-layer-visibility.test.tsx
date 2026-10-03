@@ -42,7 +42,7 @@ jest.mock("expo-asset", () => ({
 
 jest.mock("@/statics/lignes-par-type.geojson", () => "railway-asset");
 
-jest.mock("@/features/simulation/use-simulation", () => ({
+jest.mock("@/hooks/features/use-simulation", () => ({
   useSimulation: () => ({
     start: jest.fn(),
     state: { status: "idle" },
@@ -62,7 +62,7 @@ jest.mock("@/hooks/platform/use-real-location", () => ({
   }),
 }));
 
-jest.mock("@/features/railway-reference/context", () => ({
+jest.mock("@/hooks/features/use-railway-reference", () => ({
   useRailwayReference: () => ({
     milestoneSearch: {
       findMilestone: jest.fn(),

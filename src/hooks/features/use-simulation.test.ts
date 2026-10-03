@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { Milestone } from "@/features/milestones/domain/milestone";
 import { getMockLocationExecutor } from "@/features/simulation/mock-location";
 import SimulationProvider from "@/features/simulation/simulation-provider";
-import { useSimulation } from "@/features/simulation/use-simulation";
+import { useSimulation } from "@/hooks/features/use-simulation";
 
 jest.mock("@/features/simulation/mock-location", () => ({
   getMockLocationExecutor: jest.fn(),

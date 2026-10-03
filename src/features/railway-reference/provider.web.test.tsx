@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react-native";
 
-import { useRailwayReference } from "./context";
+import { useRailwayReference } from "@/hooks/features/use-railway-reference";
 import RailwayReferenceProvider from "./provider.web";
 
 describe("RailwayReferenceProvider web fallback", () => {
