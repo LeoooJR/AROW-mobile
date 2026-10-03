@@ -30,6 +30,7 @@ const runningSnapshot = {
   status: "running" as const,
 };
 const executor = {
+  prepareNotifications: jest.fn(),
   checkReadiness: jest.fn(),
   getSnapshot: jest.fn(),
   start: jest.fn(),
@@ -74,6 +75,10 @@ describe("SimulationProvider", () => {
     });
     jest.mocked(getMockLocationExecutor).mockResolvedValue(executor);
     executor.checkReadiness.mockResolvedValue({ ready: true });
+    executor.prepareNotifications.mockResolvedValue({
+      status: "ready",
+      notificationVisible: true,
+    });
     executor.getSnapshot.mockResolvedValue({ status: "stopped" });
     executor.start.mockResolvedValue(runningSnapshot);
     executor.stop.mockResolvedValue({ status: "stopped" });
@@ -139,6 +144,7 @@ describe("SimulationProvider", () => {
     const setInterval = jest.spyOn(global, "setInterval");
     const view = await render(application(true));
     await waitFor(() => expect(executor.getSnapshot).toHaveBeenCalledTimes(1));
+    expect(executor.prepareNotifications).not.toHaveBeenCalled();
     await fireEvent.press(
       screen.getByRole("button", { name: "Start simulation" }),
     );
@@ -159,6 +165,7 @@ describe("SimulationProvider", () => {
       await Promise.resolve();
     });
     expect(executor.getSnapshot).toHaveBeenCalledTimes(3);
+    expect(executor.prepareNotifications).toHaveBeenCalledTimes(1);
 
     await view.rerender(application(true));
     expect(screen.getByText("running")).toBeOnTheScreen();

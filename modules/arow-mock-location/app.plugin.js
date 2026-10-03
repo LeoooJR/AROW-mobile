@@ -10,6 +10,7 @@ module.exports = function withArowMockLocation(config) {
       "android.permission.ACCESS_MOCK_LOCATION",
       "android.permission.FOREGROUND_SERVICE",
       "android.permission.FOREGROUND_SERVICE_LOCATION",
+      "android.permission.POST_NOTIFICATIONS",
     ]) {
       if (!permissions.some((item) => item.$["android:name"] === name)) {
         permissions.push({ $: { "android:name": name } });

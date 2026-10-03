@@ -7,4 +7,5 @@ executionOrder:
     - Manage railway map layer visibility
     - Use the distraction-free map-only mode
     - Select AROW as the mock location app
+    - Manage simulation notification visibility
 flows: "tests/**"

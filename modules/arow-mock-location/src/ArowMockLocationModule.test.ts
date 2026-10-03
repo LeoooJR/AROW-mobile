@@ -6,6 +6,7 @@ import { NativeContractError } from "./decode-native-result";
 jest.mock("expo", () => ({
   NativeModule: class {},
   requireNativeModule: jest.fn(() => ({
+    canShowSimulationNotification: jest.fn(),
     checkReadiness: jest.fn(),
     getSnapshot: jest.fn(),
     start: jest.fn(),
@@ -14,6 +15,26 @@ jest.mock("expo", () => ({
 }));
 
 const bridge = jest.mocked(requireNativeModule).mock.results[0].value;
+
+test.each([true, false])(
+  "decodes notification visibility %s",
+  async (visible) => {
+    bridge.canShowSimulationNotification.mockResolvedValue(visible);
+    await expect(executor.canShowSimulationNotification()).resolves.toBe(
+      visible,
+    );
+  },
+);
+
+test.each([undefined, null, 1, "true", {}])(
+  "rejects invalid notification visibility %j",
+  async (value) => {
+    bridge.canShowSimulationNotification.mockResolvedValue(value);
+    await expect(
+      executor.canShowSimulationNotification(),
+    ).rejects.toBeInstanceOf(NativeContractError);
+  },
+);
 
 test("decodes each native operation before exposing it to callers", async () => {
   bridge.checkReadiness.mockResolvedValue({ ready: true });

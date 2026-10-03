@@ -4,8 +4,13 @@ import type {
   NativeStartResult,
   NativeStopResult,
 } from "../../../modules/arow-mock-location/src/native-contracts";
+import {
+  prepareSimulationNotifications,
+  type NotificationPreparation,
+} from "./simulation-notifications";
 
 export interface MockLocationExecutor {
+  prepareNotifications(): Promise<NotificationPreparation>;
   checkReadiness(): Promise<NativeReadiness>;
   getSnapshot(): Promise<NativeSnapshot>;
   start(latitude: number, longitude: number): Promise<NativeStartResult>;
@@ -17,7 +22,14 @@ export async function getMockLocationExecutor(): Promise<MockLocationExecutor> {
     throw new Error("UNSUPPORTED_PLATFORM");
   }
 
-  return (
+  const nativeExecutor = (
     await import("../../../modules/arow-mock-location/src/ArowMockLocationModule")
   ).default;
+  return {
+    ...nativeExecutor,
+    prepareNotifications: () =>
+      prepareSimulationNotifications(
+        nativeExecutor.canShowSimulationNotification,
+      ),
+  };
 }

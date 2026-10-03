@@ -8,6 +8,8 @@ import {
 } from "react";
 import { AppState } from "react-native";
 
+import { isAppActive } from "@/utils/app-state";
+
 import type { Milestone } from "@/features/milestones/domain/milestone";
 import {
   SimulationContext,
@@ -28,8 +30,12 @@ export interface SimulationProviderProps {
 export default function SimulationProvider({
   children,
 }: SimulationProviderProps): ReactElement {
+  const [notificationWarningId, setNotificationWarningId] = useState(0);
   const [controller] = useState(
-    () => new SimulationController(getMockLocationExecutor),
+    () =>
+      new SimulationController(getMockLocationExecutor, () => {
+        setNotificationWarningId((id) => id + 1);
+      }),
   );
   const [state, setState] = useState<SimulationState>(controller.state);
   const running = isSimulationRunning(state);
@@ -48,7 +54,7 @@ export default function SimulationProvider({
     const unsubscribe = controller.subscribe(setState);
     void controller.reconcile();
     const listener = AppState.addEventListener("change", (next) => {
-      if (next === "active") void controller.reconcile();
+      if (isAppActive(next)) void controller.reconcile();
     });
     return () => {
       listener.remove();
@@ -69,8 +75,8 @@ export default function SimulationProvider({
   }, [controller, state]);
 
   const value = useMemo<SimulationModel>(
-    () => ({ dismissStartError, start, state, stop }),
-    [dismissStartError, start, state, stop],
+    () => ({ dismissStartError, notificationWarningId, start, state, stop }),
+    [dismissStartError, notificationWarningId, start, state, stop],
   );
 
   return (

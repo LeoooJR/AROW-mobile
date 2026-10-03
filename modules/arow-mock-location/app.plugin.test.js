@@ -116,6 +116,7 @@ describe("mock-location service manifest", () => {
       "android.permission.FOREGROUND_SERVICE",
       "android.permission.ACCESS_MOCK_LOCATION",
       "android.permission.FOREGROUND_SERVICE_LOCATION",
+      "android.permission.POST_NOTIFICATIONS",
     ]);
   });
 

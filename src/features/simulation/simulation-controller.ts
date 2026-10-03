@@ -35,7 +35,10 @@ export class SimulationController {
   private operation = 0;
   private snapshotRequest = 0;
 
-  constructor(private readonly loadExecutor: LoadExecutor) {}
+  constructor(
+    private readonly loadExecutor: LoadExecutor,
+    private readonly onNotificationUnavailable: () => void,
+  ) {}
 
   get state(): SimulationState {
     return this.simulationState;
@@ -133,7 +136,20 @@ export class SimulationController {
     try {
       executor = await this.loadExecutor();
       if (!(await this.checkReadiness(operation, executor))) return;
+      const notifications = await executor.prepareNotifications();
+      if (!this.isCurrent(operation)) return;
+      if (notifications.status === "cancelled") {
+        this.publish({ status: "idle" });
+        return;
+      }
       await this.applyMilestone(operation, executor, milestone);
+      if (
+        this.isCurrent(operation) &&
+        isSimulationRunning(this.simulationState) &&
+        !notifications.notificationVisible
+      ) {
+        this.onNotificationUnavailable();
+      }
     } catch (error) {
       if (!this.isCurrent(operation)) return;
       if (!isSimulationCanceling(this.simulationState)) {

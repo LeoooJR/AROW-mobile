@@ -22,6 +22,9 @@ function deferred<T>() {
 
 function setup() {
   const executor = {
+    prepareNotifications: jest
+      .fn()
+      .mockResolvedValue({ status: "ready", notificationVisible: true }),
     checkReadiness: jest.fn().mockResolvedValue({ ready: true }),
     getSnapshot: jest.fn().mockResolvedValue({ status: "stopped" }),
     start: jest.fn().mockResolvedValue({
@@ -31,13 +34,109 @@ function setup() {
     }),
     stop: jest.fn().mockResolvedValue({ status: "stopped" }),
   };
-  const controller = new SimulationController(async () => executor);
+  const onNotificationUnavailable = jest.fn();
+  const controller = new SimulationController(
+    async () => executor,
+    onNotificationUnavailable,
+  );
   const onState = jest.fn();
   const unsubscribe = controller.subscribe(onState);
-  return { controller, executor, onState, unsubscribe };
+  return {
+    controller,
+    executor,
+    onState,
+    unsubscribe,
+    onNotificationUnavailable,
+  };
 }
 
 describe("SimulationController", () => {
+  test("denial continues automatically and warns once after successful startup", async () => {
+    const { controller, executor, onNotificationUnavailable } = setup();
+    executor.prepareNotifications.mockResolvedValue({
+      status: "ready",
+      notificationVisible: false,
+    });
+    controller.start(milestone);
+    await waitFor(() => expect(controller.state.status).toBe("running"));
+    expect(onNotificationUnavailable).toHaveBeenCalledTimes(1);
+    executor.getSnapshot.mockResolvedValue({
+      status: "running",
+      ...milestone.coordinates,
+    });
+    await controller.reconcile();
+    controller.start(milestone);
+    expect(onNotificationUnavailable).toHaveBeenCalledTimes(1);
+    controller.stop();
+    await waitFor(() => expect(controller.state.status).toBe("idle"));
+    controller.start(milestone);
+    await waitFor(() =>
+      expect(onNotificationUnavailable).toHaveBeenCalledTimes(2),
+    );
+  });
+
+  test("readiness failure never prepares notifications", async () => {
+    const { controller, executor, onNotificationUnavailable } = setup();
+    executor.checkReadiness.mockResolvedValue({
+      ready: false,
+      code: "MOCK_PROVIDER_NOT_SELECTED",
+    });
+    controller.start(milestone);
+    await waitFor(() => expect(controller.state.status).toBe("error"));
+    expect(executor.prepareNotifications).not.toHaveBeenCalled();
+    expect(onNotificationUnavailable).not.toHaveBeenCalled();
+  });
+
+  test.each([false, true])(
+    "Stop prevents a late start during preparation (superseded: %s)",
+    async (supersede) => {
+      const { controller, executor, onNotificationUnavailable } = setup();
+      const pending = deferred<{
+        status: "ready";
+        notificationVisible: boolean;
+      }>();
+      executor.prepareNotifications.mockReturnValueOnce(pending.promise);
+      controller.start(milestone);
+      await waitFor(() =>
+        expect(executor.prepareNotifications).toHaveBeenCalledTimes(1),
+      );
+      expect(controller.state.status).toBe("checking");
+      controller.stop();
+      if (supersede) {
+        controller.start(milestone);
+        await waitFor(() => expect(controller.state.status).toBe("running"));
+      }
+      pending.resolve({ status: "ready", notificationVisible: false });
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      expect(executor.start).toHaveBeenCalledTimes(supersede ? 1 : 0);
+      expect(onNotificationUnavailable).not.toHaveBeenCalled();
+    },
+  );
+
+  test("cancelled preparation returns to idle without starting", async () => {
+    const { controller, executor } = setup();
+    executor.prepareNotifications.mockResolvedValue({ status: "cancelled" });
+    controller.start(milestone);
+    await waitFor(() => expect(controller.state.status).toBe("idle"));
+    expect(executor.start).not.toHaveBeenCalled();
+  });
+
+  test("preparation failure is an inactive start error", async () => {
+    const { controller, executor, onNotificationUnavailable } = setup();
+    executor.prepareNotifications.mockRejectedValue(
+      new Error("request failed"),
+    );
+    controller.start(milestone);
+    await waitFor(() =>
+      expect(controller.state).toMatchObject({
+        status: "error",
+        mayBeActive: false,
+        origin: "start",
+      }),
+    );
+    expect(executor.start).not.toHaveBeenCalled();
+    expect(onNotificationUnavailable).not.toHaveBeenCalled();
+  });
   test("uses the selected milestone after readiness and waits for the first fix", async () => {
     const { controller, executor } = setup();
     const readiness = deferred<{ ready: true }>();
