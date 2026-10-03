@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { Milestone } from "@/features/milestones/domain/milestone";
 import { getMockLocationExecutor } from "@/features/simulation/mock-location";
 import SimulationProvider from "@/features/simulation/simulation-provider";
-import { useSimulation } from "@/features/simulation/use-simulation";
+import { useSimulation } from "@/hooks/features/use-simulation";
 
 jest.mock("@/features/simulation/mock-location", () => ({
   getMockLocationExecutor: jest.fn(),
@@ -18,6 +18,7 @@ const milestone = new Milestone({
 });
 
 const executor = {
+  prepareNotifications: jest.fn(),
   checkReadiness: jest.fn(),
   getSnapshot: jest.fn(),
   start: jest.fn(),
@@ -29,11 +30,29 @@ function renderSimulationHook() {
 }
 
 describe("useSimulation", () => {
+  test("keeps warning events outside reconciled state and increments only on new hidden starts", async () => {
+    executor.prepareNotifications.mockResolvedValue({
+      status: "ready",
+      notificationVisible: false,
+    });
+    const { result } = await renderSimulationHook();
+    expect(result.current.notificationWarningId).toBe(0);
+    await act(async () => result.current.start(milestone));
+    await waitFor(() => expect(result.current.notificationWarningId).toBe(1));
+    await act(async () => result.current.stop());
+    expect(result.current.notificationWarningId).toBe(1);
+    await act(async () => result.current.start(milestone));
+    await waitFor(() => expect(result.current.notificationWarningId).toBe(2));
+  });
   beforeEach(() => {
     process.env.EXPO_OS = "android";
     jest.clearAllMocks();
     jest.mocked(getMockLocationExecutor).mockResolvedValue(executor);
     executor.checkReadiness.mockResolvedValue({ ready: true });
+    executor.prepareNotifications.mockResolvedValue({
+      status: "ready",
+      notificationVisible: true,
+    });
     executor.getSnapshot.mockResolvedValue({ status: "stopped" });
     executor.start.mockResolvedValue({
       latitude: 45.74744,
@@ -84,6 +103,7 @@ describe("useSimulation", () => {
     await act(async () => result.current.stop());
     await waitFor(() => expect(result.current.state.status).toBe("idle"));
     expect(executor.stop).toHaveBeenCalledTimes(1);
+    expect(executor.prepareNotifications).toHaveBeenCalledTimes(1);
   });
 
   test("stops a native start that completes after cancellation", async () => {

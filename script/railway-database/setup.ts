@@ -61,7 +61,7 @@ async function downloadRailwaySources(
 ): Promise<void> {
   const results = await Promise.allSettled([
     downloadResource(
-      resources.geojson,
+      resources.railwayGeojson,
       workspace.rawGeojsonPath,
       fetchImplementation,
     ),

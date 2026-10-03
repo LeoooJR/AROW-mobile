@@ -1,4 +1,5 @@
 import {
+  decodeNotificationVisibility,
   decodeReadiness,
   decodeSnapshot,
   decodeStartResult,
@@ -11,6 +12,21 @@ import {
   type NativeRunningSnapshot,
   type NativeStopResult,
 } from "./native-contracts";
+
+test.each([true, false])(
+  "accepts boolean notification visibility %s",
+  (visible) => {
+    expect(decodeNotificationVisibility(visible)).toBe(visible);
+  },
+);
+test.each([undefined, null, 0, "false", [], {}])(
+  "rejects malformed notification visibility %j",
+  (value) => {
+    expect(() => decodeNotificationVisibility(value)).toThrow(
+      NativeContractError,
+    );
+  },
+);
 
 test("accepts readiness and harmless additional fields", () => {
   expect(decodeReadiness({ ready: true, extra: 1 })).toEqual({ ready: true });

@@ -9,8 +9,10 @@ export interface GenerationLogger {
 }
 
 interface RailwayResourceMetadata {
+  readonly maxBytes: number;
   readonly name: string;
   readonly sha256: string;
+  readonly timeoutMs: number;
 }
 
 type RailwayResourceLocation =
@@ -22,7 +24,7 @@ export type RailwayResource = Readonly<
 >;
 
 export interface RailwayResources {
-  readonly geojson: RailwayResource;
+  readonly railwayGeojson: RailwayResource;
   readonly milestoneGeojson: RailwayResource;
   readonly milestones: RailwayResource;
 }

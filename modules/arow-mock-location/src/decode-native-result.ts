@@ -16,6 +16,13 @@ export class NativeContractError extends Error {
     this.name = "NativeContractError";
   }
 }
+
+export function decodeNotificationVisibility(value: unknown): boolean {
+  if (typeof value !== "boolean") {
+    throw new NativeContractError("notification visibility");
+  }
+  return value;
+}
 function isReadinessCode(value: unknown): value is NativeReadinessErrorCode {
   return NATIVE_READINESS_ERROR_CODES.some((code) => code === value);
 }

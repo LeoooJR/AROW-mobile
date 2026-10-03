@@ -40,7 +40,7 @@ Pressing **Utiliser ce point** closes the sheet. [`useMapSelection`](../src/feat
 
 ## 3. Press start
 
-[`useMapLocation`](../src/features/map-screen/use-map-location.ts) passes the searched milestone to [`useSimulation`](../src/features/simulation/use-simulation.ts). Pressing **Démarrer la simulation** calls the simulation controller, which proceeds in this order:
+[`useMapLocation`](../src/features/map-screen/use-map-location.ts) passes the searched milestone to [`useSimulation`](../src/hooks/features/use-simulation.ts). Pressing **Démarrer la simulation** calls the simulation controller, which proceeds in this order:
 
 ```text
 Check: AROW is the selected mock-location app

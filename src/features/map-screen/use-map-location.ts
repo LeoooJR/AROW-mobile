@@ -10,7 +10,7 @@ import {
   isSimulationDismissibleError,
   type SimulationState,
 } from "@/features/simulation/simulation-state";
-import { useSimulation } from "@/features/simulation/use-simulation";
+import { useSimulation } from "@/hooks/features/use-simulation";
 import {
   useRealLocation,
   type UseRealLocationResult,
