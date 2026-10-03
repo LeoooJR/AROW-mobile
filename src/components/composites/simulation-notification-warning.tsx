@@ -15,12 +15,17 @@ const TOAST_ID = "simulation-notifications-disabled";
 export default function SimulationNotificationWarning() {
   const { notificationWarningId, state } = useSimulation();
   const { show, close } = useToast();
+  const latestClose = useRef(close);
   const { width } = useWindowDimensions();
   const [appState, setAppState] = useState(AppState.currentState);
   const consumedEvent = useRef(0);
   const dismissal = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   );
+
+  useEffect(() => {
+    latestClose.current = close;
+  }, [close]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", setAppState);
@@ -65,15 +70,15 @@ export default function SimulationNotificationWarning() {
         </Toast>
       ),
     });
-    dismissal.current = setTimeout(() => close(TOAST_ID), 8_000);
+    dismissal.current = setTimeout(() => latestClose.current(TOAST_ID), 8_000);
   }, [appState, close, notificationWarningId, show, state, width]);
 
   useEffect(
     () => () => {
       clearTimeout(dismissal.current);
-      close(TOAST_ID);
+      latestClose.current(TOAST_ID);
     },
-    [close],
+    [],
   );
 
   return null;

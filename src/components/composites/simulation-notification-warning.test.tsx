@@ -94,6 +94,36 @@ test("shows one polite warning, expires at eight seconds, and never repeats reco
   expect(show).toHaveBeenCalledTimes(1);
 });
 
+test("changing toast callbacks preserves the deadline and uses the latest close callback", async () => {
+  const view = await render(application(1));
+  close.mockClear();
+  await act(async () => jest.advanceTimersByTime(4_000));
+  const nextClose = jest.fn();
+  const nextShow = jest.fn();
+  jest.mocked(useToast).mockReturnValue({
+    show: nextShow,
+    close: nextClose,
+    closeAll: jest.fn(),
+    isActive: jest.fn(),
+  });
+  await view.rerender(application(1));
+  expect(close).not.toHaveBeenCalled();
+  expect(nextClose).not.toHaveBeenCalled();
+  expect(nextShow).not.toHaveBeenCalled();
+  await act(async () => jest.advanceTimersByTime(3_999));
+  expect(nextClose).not.toHaveBeenCalled();
+  await act(async () => jest.advanceTimersByTime(1));
+  expect(nextClose).toHaveBeenCalledWith("simulation-notifications-disabled");
+  expect(close).not.toHaveBeenCalled();
+  nextClose.mockClear();
+  await view.rerender(application(2));
+  expect(nextShow).toHaveBeenCalledTimes(1);
+  await view.unmount();
+  expect(nextClose).toHaveBeenCalledTimes(1);
+  await act(async () => jest.advanceTimersByTime(8_000));
+  expect(nextClose).toHaveBeenCalledTimes(1);
+});
+
 test("new starts reuse one identifier and reset the deadline; Stop and unmount close it", async () => {
   const view = await render(application(1));
   await act(async () => jest.advanceTimersByTime(4_000));
