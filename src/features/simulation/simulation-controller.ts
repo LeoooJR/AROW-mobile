@@ -35,10 +35,7 @@ export class SimulationController {
   private operation = 0;
   private snapshotRequest = 0;
 
-  constructor(
-    private readonly loadExecutor: LoadExecutor,
-    private readonly onNotificationUnavailable: () => void,
-  ) {}
+  constructor(private readonly loadExecutor: LoadExecutor) {}
 
   get state(): SimulationState {
     return this.simulationState;
@@ -52,7 +49,7 @@ export class SimulationController {
     };
   }
 
-  start(milestone: Milestone): void {
+  start(milestone: Milestone): Promise<boolean> | undefined {
     if (
       !isSimulationStopped(this.simulationState) &&
       !(
@@ -64,7 +61,7 @@ export class SimulationController {
     }
     const operation = ++this.operation;
     this.publish({ status: "checking" });
-    void this.runStart(operation, milestone);
+    return this.runStart(operation, milestone);
   }
 
   stop(): void {
@@ -131,27 +128,17 @@ export class SimulationController {
   private async runStart(
     operation: number,
     milestone: Milestone,
-  ): Promise<void> {
+  ): Promise<boolean> {
     let executor: MockLocationExecutor | undefined;
     try {
       executor = await this.loadExecutor();
-      if (!(await this.checkReadiness(operation, executor))) return;
-      const notifications = await executor.prepareNotifications();
-      if (!this.isCurrent(operation)) return;
-      if (notifications.status === "cancelled") {
-        this.publish({ status: "idle" });
-        return;
-      }
+      if (!(await this.checkReadiness(operation, executor))) return false;
       await this.applyMilestone(operation, executor, milestone);
-      if (
-        this.isCurrent(operation) &&
-        isSimulationRunning(this.simulationState) &&
-        !notifications.notificationVisible
-      ) {
-        this.onNotificationUnavailable();
-      }
+      return (
+        this.isCurrent(operation) && isSimulationRunning(this.simulationState)
+      );
     } catch (error) {
-      if (!this.isCurrent(operation)) return;
+      if (!this.isCurrent(operation)) return false;
       if (!isSimulationCanceling(this.simulationState)) {
         this.publish(
           simulationError(
@@ -161,6 +148,7 @@ export class SimulationController {
           ),
         );
       }
+      return false;
     } finally {
       if (
         executor !== undefined &&

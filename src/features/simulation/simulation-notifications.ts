@@ -3,25 +3,34 @@ import { AppState, PermissionsAndroid } from "react-native";
 import { isAppActive } from "@/utils/app-state";
 import { isAndroidVersionAtLeast } from "@/utils/platform";
 
-export type NotificationPreparation =
-  | { readonly status: "ready"; readonly notificationVisible: boolean }
-  | { readonly status: "cancelled" };
+export interface NotificationPreparation {
+  readonly notificationVisible: boolean;
+}
+
+async function canShowSimulationNotification(): Promise<boolean> {
+  if (process.env.EXPO_OS !== "android") return false;
+  const native = (
+    await import("../../../modules/arow-mock-location/src/ArowMockLocationModule")
+  ).default;
+  return native.canShowSimulationNotification();
+}
 
 export async function prepareSimulationNotifications(
-  canShowNotification: () => Promise<boolean>,
+  isCurrent: () => boolean,
+  canShowNotification: () => Promise<boolean> = canShowSimulationNotification,
 ): Promise<NotificationPreparation> {
-  if (!isAppActive(AppState.currentState)) return { status: "cancelled" };
+  if (!isCurrent() || !isAppActive(AppState.currentState))
+    return { notificationVisible: false };
   if (isAndroidVersionAtLeast(33)) {
     const permission = PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS;
     const granted = await PermissionsAndroid.check(permission);
-    if (!isAppActive(AppState.currentState)) return { status: "cancelled" };
+    if (!isCurrent() || !isAppActive(AppState.currentState))
+      return { notificationVisible: false };
     if (!granted) {
       await PermissionsAndroid.request(permission);
     }
   }
-  if (!isAppActive(AppState.currentState)) return { status: "cancelled" };
+  if (!isCurrent()) return { notificationVisible: false };
   const notificationVisible = await canShowNotification();
-  return isAppActive(AppState.currentState)
-    ? { status: "ready", notificationVisible }
-    : { status: "cancelled" };
+  return { notificationVisible };
 }

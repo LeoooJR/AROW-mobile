@@ -50,6 +50,8 @@ Check: fine location permission is granted
 Start the Android executor with the selected Milestone's coordinates
         ↓ only after the first fix is applied
 Report running
+        ↓ independently, after successful startup
+Prepare notification consent and visibility without changing simulation state
 ```
 
 The search sheet performs the only milestone lookup. The selected `Milestone` already contains validated coordinates, and the bundled reference cannot change between selection and start. Readiness runs before native start, so a missing mock-app selection or disabled location services fails quickly without applying a fix. Native start also checks readiness before applying a fix. A start request alone is **not** reported as success.

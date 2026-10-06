@@ -28,6 +28,7 @@ appId: com.leooojrrr.AROWmobile
 - waitForAnimationToEnd:
     timeout: 2000
 - inputText: "509"
+- hideKeyboard
 - tapOn:
     id: "milestone-metric-input"
 - waitForAnimationToEnd:
