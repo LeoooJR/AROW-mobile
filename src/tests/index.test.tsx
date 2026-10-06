@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react-native";
 
-import { useRailwayReference } from "@/features/railway-reference/context";
+import { useRailwayReference } from "@/hooks/features/use-railway-reference";
 import { useRealLocation } from "@/hooks/platform/use-real-location";
 
 import Index from "@/app/index";
@@ -13,10 +13,10 @@ jest.mock("expo-asset", () => ({
     ],
   ],
 }));
-jest.mock("@/features/railway-reference/context", () => ({
+jest.mock("@/hooks/features/use-railway-reference", () => ({
   useRailwayReference: jest.fn(),
 }));
-jest.mock("@/features/simulation/use-simulation", () => ({
+jest.mock("@/hooks/features/use-simulation", () => ({
   useSimulation: () => ({
     start: jest.fn(),
     state: { status: "idle" },

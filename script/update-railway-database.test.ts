@@ -1,10 +1,20 @@
 /** @jest-environment node */
 
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { runInThisContext } from "node:vm";
 
 import { parseMilestoneCsv } from "./railway-database/csv";
 import { normalizeRailwayGeoJson } from "./railway-database/geojson";
@@ -16,8 +26,20 @@ import type {
   FetchImplementation,
   GenerationLogger,
   RailwayResources,
+  RailwayResource,
   SetupOptions,
 } from "./railway-database/types";
+
+// The Expo preset installs native-app networking globals even in Node tests.
+// These host build-script tests need Node's actual fetch and stream primitives.
+beforeAll(() => {
+  Object.assign(
+    globalThis,
+    runInThisContext(
+      "({ fetch, Response, ReadableStream, AbortController, AbortSignal })",
+    ),
+  );
+});
 
 const FIXTURE_SNAPSHOT = Object.freeze({
   fallbackSectionCount: 1,
@@ -126,6 +148,305 @@ function checksum(buffer: Uint8Array): string {
   return createHash("sha256").update(buffer).digest("hex");
 }
 
+describe("bounded resource downloads", () => {
+  let directory: string;
+  let destination: string;
+  const data = Buffer.from("valid resource");
+
+  function resource(overrides: Partial<RailwayResource> = {}): RailwayResource {
+    return {
+      name: "resource.csv",
+      url: "https://example.test/resource",
+      sha256: checksum(data),
+      maxBytes: data.length,
+      timeoutMs: 1000,
+      ...overrides,
+    } as RailwayResource;
+  }
+
+  beforeEach(() => {
+    directory = mkdtempSync(join(tmpdir(), "arow-download-"));
+    destination = join(directory, "download");
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    rmSync(directory, { force: true, recursive: true });
+  });
+
+  test.each([
+    { maxBytes: 0 },
+    { maxBytes: -1 },
+    { maxBytes: 1.5 },
+    { maxBytes: NaN },
+    { maxBytes: Infinity },
+    { maxBytes: Number.MAX_SAFE_INTEGER + 1 },
+    { timeoutMs: 0 },
+    { timeoutMs: -1 },
+    { timeoutMs: 1.5 },
+    { timeoutMs: NaN },
+    { timeoutMs: Infinity },
+    { timeoutMs: 2_147_483_648 },
+  ])("rejects invalid limits before fetch: %j", async (limits) => {
+    const fetchImplementation = jest.fn<
+      ReturnType<FetchImplementation>,
+      Parameters<FetchImplementation>
+    >();
+    await expect(
+      downloadResource(resource(limits), destination, fetchImplementation),
+    ).rejects.toThrow("resource.csv");
+    expect(fetchImplementation).not.toHaveBeenCalled();
+    expect(existsSync(destination)).toBe(false);
+  });
+
+  test.each([0, 1])(
+    "accepts valid data with %i bytes of headroom and clears its timer",
+    async (headroom) => {
+      const startTimer = jest.spyOn(globalThis, "setTimeout");
+      const clearTimer = jest.spyOn(globalThis, "clearTimeout");
+      const fetchImplementation = jest.fn<
+        ReturnType<FetchImplementation>,
+        Parameters<FetchImplementation>
+      >(async () => new Response(data));
+      await downloadResource(
+        resource({ maxBytes: data.length + headroom }),
+        destination,
+        fetchImplementation,
+      );
+      expect(readFileSync(destination)).toEqual(data);
+      const signal = fetchImplementation.mock.calls[0]?.[1]?.signal;
+      expect(signal).toBeInstanceOf(AbortSignal);
+      expect(signal?.aborted).toBe(false);
+      expect(clearTimer).toHaveBeenCalledWith(startTimer.mock.results[0].value);
+    },
+  );
+
+  test.each([undefined, "1", "999999"])(
+    "rejects excessive streaming bytes with Content-Length %s",
+    async (length) => {
+      let bytesOnDisk = -1;
+      const cancel = jest.fn(() => {
+        bytesOnDisk = readFileSync(destination).length;
+      });
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(Buffer.from("ok"));
+          controller.enqueue(Buffer.alloc(100));
+        },
+        cancel,
+      });
+      const fetchImplementation: FetchImplementation = async () =>
+        new Response(body, {
+          headers: length === undefined ? {} : { "content-length": length },
+        });
+      await expect(
+        downloadResource(
+          resource({ maxBytes: 2 }),
+          destination,
+          fetchImplementation,
+        ),
+      ).rejects.toThrow("resource.csv: download exceeds 2 byte limit");
+      expect(cancel).toHaveBeenCalledTimes(1);
+      expect(bytesOnDisk).toBeGreaterThanOrEqual(0);
+      expect(bytesOnDisk).toBeLessThanOrEqual(2);
+      expect(existsSync(destination)).toBe(false);
+    },
+  );
+
+  test("rejects a single oversized chunk before writing any bytes", async () => {
+    let bytesOnDisk = -1;
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(Buffer.alloc(100));
+      },
+      cancel() {
+        bytesOnDisk = readFileSync(destination).length;
+      },
+    });
+    await expect(
+      downloadResource(
+        resource({ maxBytes: 2 }),
+        destination,
+        async () => new Response(body),
+      ),
+    ).rejects.toThrow("byte limit");
+    expect(bytesOnDisk).toBe(0);
+    expect(existsSync(destination)).toBe(false);
+  });
+
+  test("aborts fetch before headers and clears its timer", async () => {
+    const startTimer = jest.spyOn(globalThis, "setTimeout");
+    const clearTimer = jest.spyOn(globalThis, "clearTimeout");
+    let signal: AbortSignal | undefined;
+    const fetchImplementation: FetchImplementation = (_input, init) =>
+      new Promise((_resolve, reject) => {
+        signal = init?.signal ?? undefined;
+        signal?.addEventListener("abort", () => reject(signal?.reason), {
+          once: true,
+        });
+      });
+    await expect(
+      downloadResource(
+        resource({ timeoutMs: 20 }),
+        destination,
+        fetchImplementation,
+      ),
+    ).rejects.toThrow("resource.csv: download timed out after 20 ms");
+    expect(signal?.aborted).toBe(true);
+    expect(clearTimer).toHaveBeenCalledWith(startTimer.mock.results[0].value);
+    expect(existsSync(destination)).toBe(false);
+  });
+
+  test.each([false, true])(
+    "enforces the overall deadline on a body (keeps producing: %s)",
+    async (keepsProducing) => {
+      let interval: ReturnType<typeof setInterval> | undefined;
+      let produced = 0;
+      const cancel = jest.fn(() => clearInterval(interval));
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(Buffer.from("x"));
+          if (keepsProducing)
+            interval = setInterval(() => {
+              produced++;
+              controller.enqueue(Buffer.from("x"));
+            }, 5);
+        },
+        cancel,
+      });
+      const startTimer = jest.spyOn(globalThis, "setTimeout");
+      const clearTimer = jest.spyOn(globalThis, "clearTimeout");
+      try {
+        await expect(
+          downloadResource(
+            resource({ maxBytes: 1000, timeoutMs: 40 }),
+            destination,
+            async () => new Response(body),
+          ),
+        ).rejects.toThrow("timed out after 40 ms");
+        expect(cancel).toHaveBeenCalledTimes(1);
+        if (keepsProducing) expect(produced).toBeGreaterThan(0);
+        expect(clearTimer).toHaveBeenCalledWith(
+          startTimer.mock.results[0].value,
+        );
+        expect(existsSync(destination)).toBe(false);
+      } finally {
+        clearInterval(interval);
+      }
+    },
+  );
+
+  test.each(["checksum", "HTTP", "HTML", "missing body", "stream", "fetch"])(
+    "cleans up a %s failure and clears its timer",
+    async (failure) => {
+      const startTimer = jest.spyOn(globalThis, "setTimeout");
+      const clearTimer = jest.spyOn(globalThis, "clearTimeout");
+      const cancel = jest.fn();
+      let signal: AbortSignal | undefined;
+      const fetchImplementation: FetchImplementation = async (_input, init) => {
+        signal = init?.signal ?? undefined;
+        if (failure === "fetch") throw new Error("network failed");
+        if (failure === "missing body") return new Response(null);
+        if (failure === "stream")
+          return new Response(
+            new ReadableStream({
+              start(controller) {
+                controller.error(new Error("stream failed"));
+              },
+            }),
+          );
+        if (failure === "checksum") return new Response(data);
+        const body = new ReadableStream({ cancel });
+        return new Response(
+          body,
+          failure === "HTTP"
+            ? { status: 503 }
+            : { headers: { "content-type": "text/html" } },
+        );
+      };
+      const message = {
+        checksum: "checksum mismatch",
+        HTTP: "HTTP 503",
+        HTML: "returned HTML",
+        "missing body": "empty response body",
+        stream: "stream failed",
+        fetch: "Could not download",
+      }[failure]!;
+      await expect(
+        downloadResource(
+          resource({ sha256: "0".repeat(64) }),
+          destination,
+          fetchImplementation,
+        ),
+      ).rejects.toThrow(message);
+      expect(signal?.aborted).toBe(true);
+      if (failure === "HTTP" || failure === "HTML")
+        expect(cancel).toHaveBeenCalledTimes(1);
+      expect(clearTimer).toHaveBeenCalledWith(startTimer.mock.results[0].value);
+      expect(existsSync(destination)).toBe(false);
+    },
+  );
+
+  test("preserves an existing destination and cancels the unused response", async () => {
+    writeFileSync(destination, "existing output");
+    const cancel = jest.fn();
+    const body = new ReadableStream({ cancel });
+    await expect(
+      downloadResource(resource(), destination, async () => new Response(body)),
+    ).rejects.toThrow("EEXIST");
+    expect(readFileSync(destination, "utf8")).toBe("existing output");
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  test.each(["headers", "body"])(
+    "real Node fetch cancels a stalled %s response",
+    async (phase) => {
+      let markClosed!: () => void;
+      const connectionClosed = new Promise<void>((resolve) => {
+        markClosed = resolve;
+      });
+      let markStarted!: () => void;
+      const requestStarted = new Promise<void>((resolve) => {
+        markStarted = resolve;
+      });
+      const server = createServer((_request, response) => {
+        response.on("close", markClosed);
+        if (phase === "body") {
+          response.writeHead(200);
+          response.write("partial");
+        }
+        markStarted();
+      });
+      await new Promise<void>((resolve, reject) => {
+        server.once("error", reject);
+        server.listen(0, "127.0.0.1", resolve);
+      });
+      try {
+        const address = server.address() as AddressInfo;
+        const download = downloadResource(
+          resource({
+            url: `http://127.0.0.1:${address.port}/`,
+            timeoutMs: 250,
+          }),
+          destination,
+        );
+        const rejection = expect(download).rejects.toThrow(
+          "timed out after 250 ms",
+        );
+        await requestStarted;
+        await rejection;
+        await connectionClosed;
+        expect(existsSync(destination)).toBe(false);
+      } finally {
+        server.closeAllConnections();
+        await new Promise<void>((resolve, reject) =>
+          server.close((error) => (error ? reject(error) : resolve())),
+        );
+      }
+    },
+  );
+});
+
 function fixtureResources(
   milestoneGeojson = Buffer.from(JSON.stringify(RAW_MILESTONE_GEOJSON)),
 ): RailwayFixtures {
@@ -138,17 +459,23 @@ function fixtureResources(
       ["https://example.test/milestones", milestones],
     ]),
     manifest: {
-      geojson: {
+      railwayGeojson: {
+        maxBytes: geojson.length,
+        timeoutMs: 1000,
         name: "railways.geojson",
         sha256: checksum(geojson),
         url: "https://example.test/railways",
       },
       milestoneGeojson: {
+        maxBytes: milestoneGeojson.length,
+        timeoutMs: 1000,
         name: "milestones.geojson",
         sha256: checksum(milestoneGeojson),
         url: "https://example.test/milestone-geojson",
       },
       milestones: {
+        maxBytes: milestones.length,
+        timeoutMs: 1000,
         name: "milestones.csv",
         sha256: checksum(milestones),
         url: "https://example.test/milestones",
@@ -210,7 +537,7 @@ describe("railway database setup", () => {
   async function expectSetupFailurePreservesOutputs(
     fixtures: RailwayFixtures,
     expectedMessage: string,
-    fetchImplementation = fixtureFetch(fixtures.buffers),
+    fetchImplementation: FetchImplementation = fixtureFetch(fixtures.buffers),
   ): Promise<void> {
     writeFileSync(geojsonPath, "existing geojson");
     writeFileSync(milestoneGeojsonPath, "existing milestone geojson");
@@ -231,6 +558,11 @@ describe("railway database setup", () => {
       "existing milestone geojson",
     );
     expect(readFileSync(databasePath, "utf8")).toBe("existing database");
+    expect(
+      readdirSync(directory).some((name) =>
+        name.startsWith(".railway-database-"),
+      ),
+    ).toBe(false);
   }
 
   test("downloads, validates, and deterministically prepares all assets", async () => {
@@ -503,6 +835,58 @@ describe("railway database setup", () => {
     );
   });
 
+  test.each(["size", "timeout", "stream"])(
+    "preserves outputs and waits for siblings after %s failure",
+    async (failure) => {
+      const fixtures = fixtureResources();
+      let siblingFinished = false;
+      let failedBodyCancelled = false;
+      const manifest: RailwayResources = {
+        ...fixtures.manifest,
+        milestoneGeojson: {
+          ...fixtures.manifest.milestoneGeojson,
+          maxBytes: 1,
+          timeoutMs: 20,
+        },
+      };
+      const fetchImplementation: FetchImplementation = async (input) => {
+        if (input.toString() === manifest.milestoneGeojson.url) {
+          return new Response(
+            new ReadableStream<Uint8Array>({
+              start(controller) {
+                if (failure === "size")
+                  controller.enqueue(Buffer.from("too big"));
+                if (failure === "stream")
+                  controller.error(new Error("fixture stream failed"));
+              },
+              cancel() {
+                failedBodyCancelled = true;
+              },
+            }),
+          );
+        }
+        if (input.toString() === manifest.milestones.url) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          siblingFinished = true;
+        }
+        return new Response(
+          Uint8Array.from(fixtures.buffers.get(input.toString())!).buffer,
+        );
+      };
+      await expectSetupFailurePreservesOutputs(
+        { ...fixtures, manifest },
+        failure === "size"
+          ? "byte limit"
+          : failure === "timeout"
+            ? "timed out"
+            : "fixture stream failed",
+        fetchImplementation,
+      );
+      expect(siblingFinished).toBe(true);
+      if (failure !== "stream") expect(failedBodyCancelled).toBe(true);
+    },
+  );
+
   test("rejects malformed, invalid, and incomplete milestone GeoJSON", async () => {
     await expectSetupFailurePreservesOutputs(
       fixtureResources(Buffer.from("not JSON")),
@@ -563,7 +947,13 @@ describe("railway database setup", () => {
     const destinationPath = join(directory, "download");
     await expect(
       downloadResource(
-        { name: "resource.csv", sha256: "unused", url: "test" },
+        {
+          maxBytes: 100,
+          timeoutMs: 1000,
+          name: "resource.csv",
+          sha256: "unused",
+          url: "test",
+        },
         destinationPath,
         async () =>
           new Response("<html></html>", {

@@ -7,7 +7,7 @@ This guide describes the **local Android simulation** started from a selected ra
 | File                                                                                                                                       | Responsibility                                                                            |
 | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
 | [`simulation-provider.tsx`](simulation-provider.tsx)                                                                                       | Application-scoped owner of one controller, foreground reconciliation, and running polls. |
-| [`use-simulation.ts`](use-simulation.ts)                                                                                                   | React adapter: exposes the provider's `start`, `stop`, and `state` to screen consumers.   |
+| [`use-simulation.ts`](../../hooks/features/use-simulation.ts)                                                                              | React adapter: exposes the provider's `start`, `stop`, and `state` to screen consumers.   |
 | [`simulation-controller.ts`](simulation-controller.ts)                                                                                     | Orders operations, handles cancellation, publishes UI state, and reconciles native state. |
 | [`simulation-state.ts`](simulation-state.ts)                                                                                               | UI state variants and typed predicates such as `isSimulationStopRequired`.                |
 | [`mock-location.ts`](mock-location.ts)                                                                                                     | Loads the Android executor and defines the operations the controller needs.               |
@@ -46,6 +46,11 @@ The diagram shows the usual path. A stop during `checking` cancels the pending w
 2. The point-search sheet has already resolved the `Milestone` domain object and its coordinates. `SimulationController` checks Android readiness before applying it: AROW must be the selected mock-location app, location services must be enabled, and fine location permission must be granted.
 3. The controller passes that milestone's coordinates to the native executor without another lookup. The native module checks readiness again, starts the notification-backed service, installs GPS and network test providers, and injects the first fix. Native `start` returns `running` only after that fix is applied. Later fixes receive fresh timestamps roughly every second.
 4. The bridge decoder validates the result. The controller converts a valid `NativeRunningSnapshot` to a `LocationDescriptor` with `accuracy` and `heading` set to `null`, then publishes `running`.
+5. After successful startup, the provider separately prepares notification visibility. On Android 13 or later it requests `POST_NOTIFICATIONS` only when needed and while the application is active, then queries actual application/channel visibility. Denial, a pending request, or preparation exceptions cannot change the simulation result. Temporary inactivity while the permission dialog closes does not cancel simulation. Stop, a newer accepted Start, or provider unmount invalidates late results and prevents a pending permission check from opening a stale prompt.
+
+The service posts **Simulation AROW active** on channel `arow_simulation`, with notification ID `8051`. With notification consent and the channel enabled, it remains in the drawer while AROW is backgrounded. Service destruction explicitly removes it, including after a failed startup.
+
+When visibility is unavailable, a successful explicit Start emits one warning event through the provider's `notificationWarningId`, outside `SimulationState`. The root warning listener displays **Notifications désactivées** for eight seconds inside the safe viewport, below the toolbar. It announces politely, never blocks Stop, reuses one toast identifier, and closes on Stop or unmount. Events received while backgrounded are delivered upon return only if simulation is still running. Reconciliation never emits another warning. This message cannot provide background visibility; Android's active-applications panel remains available when notification consent is denied.
 
 For example, selecting PK 509+000 on line 893000 resolves the milestone in the search sheet; the Android executor receives that object's latitude and longitude. The UI can show `running` only after native start returns an applied fix. A failed readiness check prevents native start.
 
@@ -65,7 +70,27 @@ An invalid native snapshot produces an actionable `SIMULATION_UNAVAILABLE` error
 
 ## Working on this workflow
 
-- Keep the ordering **search-sheet milestone lookup → readiness → native start → first-fix acknowledgement**. Do not infer success from a request to start the service.
+- Keep the ordering **search-sheet milestone lookup → readiness → native start → first-fix acknowledgement → independent notification preparation**. Do not infer success from a request to start the service or gate simulation on notification consent.
 - Keep native resource ownership explicit. If a provider remains after partial cleanup, report it through `ownsProviders`; never infer ownership from an error code.
 - Keep UI state and native bridge contracts distinct. Add or change a native result in the Kotlin contracts, TypeScript contracts, decoder, and controller together.
-- Cover races in [`simulation-controller.test.ts`](simulation-controller.test.ts), bridge shapes in [`decode-native-result.test.ts`](../../../modules/arow-mock-location/src/decode-native-result.test.ts), and hook reconciliation in [`use-simulation.test.ts`](use-simulation.test.ts). For an Android behavior change, exercise the affected path on an emulator; [`mock-phone-location.yaml`](../../../.maestro/tests/mock-phone-location.yaml) covers the milestone journey and fail-fast mock-app check.
+- Cover races in [`simulation-controller.test.ts`](simulation-controller.test.ts), bridge shapes in [`decode-native-result.test.ts`](../../../modules/arow-mock-location/src/decode-native-result.test.ts), and hook reconciliation in [`use-simulation.test.ts`](../../hooks/features/use-simulation.test.ts). For an Android behavior change, exercise the affected path on an emulator; [`mock-phone-location.yaml`](../../../.maestro/tests/mock-phone-location.yaml) covers the milestone journey and fail-fast mock-app check.
+- [`manage-simulation-notification.yaml`](../../../.maestro/tests/manage-simulation-notification.yaml) exercises consent, foreground/background notification visibility, Stop removal, denial continuation, warning expiry, and accessible Stop. Run it after selecting AROW as the mock-location provider. Host tests cover stale notification attempts, independent simulation startup, and warning delivery across foreground transitions.
+
+Before each notification journey or recording, reset consent on the confirmed emulator without clearing application data:
+
+```bash
+adb -s emulator-5554 shell pm revoke com.leooojrrr.AROWmobile android.permission.POST_NOTIFICATIONS
+adb -s emulator-5554 shell pm clear-permission-flags com.leooojrrr.AROWmobile android.permission.POST_NOTIFICATIONS user-set user-fixed
+```
+
+Use the actual confirmed emulator serial. Maestro's `notifications: unset` revokes consent but does not clear permanent-denial flags, so it cannot alone restore the first-request prompt.
+
+### Initial SEC-02 verification
+
+The focused host suites passed 169 tests, including cancellation during preparation, malformed bridge responses, warning delivery, expiry, and reconciliation. Android compilation, Expo introspection, both debug/release merged manifests, and the web bundle passed. The missing-provider, provider-selection, and notification journeys passed on an Android 36 emulator with the rebuilt development client. Focused Settings checks also confirmed recovery after enabling notifications and automatic continuation when the channel is blocked despite granted consent; the dark-theme warning remained readable and Stop remained usable.
+
+The delivered notification journey is recorded locally at `.maestro/artifacts/simulation-notification-e2e-recording.mp4`. Detailed evidence and temporary manifest paths are in the ignored security report. `expo install --check` still reports 20 existing dependency version mismatches; no dependencies were upgraded for this fix.
+
+### Startup independence verification (2026-10-06)
+
+The eight focused host suites passed 85 tests for independent startup, preparation failures, stale attempts, Stop races, warning lifecycle, and existing simulation behavior. Formatting, lint, TypeScript, and Android/web exports passed. The notification Maestro journey passed after its shared fixture dismissed the keyboard before selecting the metric field. It verified consent, background notification visibility, Stop removal, denial continuation, warning expiry, and repeated starts. A read-only Android service snapshot also confirmed foreground service `8051` while the notification permission dialog was resumed. No new recording, dependency, or Kotlin change was required.

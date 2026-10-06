@@ -1,0 +1,42 @@
+appId: com.leooojrrr.AROWmobile
+---
+- launchApp:
+    stopApp: false
+    permissions:
+      location: allow
+      notifications: unset
+- extendedWaitUntil:
+    visible:
+      id: "arow-map"
+    timeout: 120000
+- tapOn:
+    id: "open-point-search"
+- tapOn:
+    id: "line-search-input"
+- waitForAnimationToEnd:
+    timeout: 2000
+- eraseText
+- inputText: "893000"
+- extendedWaitUntil:
+    visible:
+      id: "line-result-893000"
+    timeout: 30000
+- tapOn:
+    id: "line-result-893000"
+- tapOn:
+    id: "milestone-kilometer-input"
+- waitForAnimationToEnd:
+    timeout: 2000
+- inputText: "509"
+- hideKeyboard
+- tapOn:
+    id: "milestone-metric-input"
+- waitForAnimationToEnd:
+    timeout: 2000
+- inputText: "000"
+- pressKey: Enter
+- tapOn:
+    id: "use-selected-point"
+- extendedWaitUntil:
+    visible: "PK 509\\+000"
+    timeout: 10000

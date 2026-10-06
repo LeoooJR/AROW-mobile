@@ -7,7 +7,7 @@ import MapFeatureDetailsCard from "@/components/composites/map-feature-details-c
 import MapToolbar from "@/components/composites/map-toolbar";
 import { useMapLocation } from "@/features/map-screen/use-map-location";
 import { useMapSelection } from "@/features/map-screen/use-map-selection";
-import { useRailwayReference } from "@/features/railway-reference/context";
+import { useRailwayReference } from "@/hooks/features/use-railway-reference";
 import railwayLinesAsset from "@/statics/lignes-par-type.geojson";
 import milestonesAsset from "@/statics/milestones.geojson";
 

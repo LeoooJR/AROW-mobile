@@ -10,6 +10,7 @@ module.exports = function withArowMockLocation(config) {
       "android.permission.ACCESS_MOCK_LOCATION",
       "android.permission.FOREGROUND_SERVICE",
       "android.permission.FOREGROUND_SERVICE_LOCATION",
+      "android.permission.POST_NOTIFICATIONS",
     ]) {
       if (!permissions.some((item) => item.$["android:name"] === name)) {
         permissions.push({ $: { "android:name": name } });
@@ -22,14 +23,17 @@ module.exports = function withArowMockLocation(config) {
       throw new Error("Android application manifest is missing");
     }
     const services = application.service ?? [];
-    if (!services.some((item) => item.$["android:name"] === SERVICE_NAME)) {
-      services.push({
-        $: {
-          "android:exported": "false",
-          "android:foregroundServiceType": "location",
-          "android:name": SERVICE_NAME,
-        },
-      });
+    const matchingServices = services.filter(
+      (item) => item.$["android:name"] === SERVICE_NAME,
+    );
+    if (matchingServices.length === 0) {
+      const service = { $: { "android:name": SERVICE_NAME } };
+      services.push(service);
+      matchingServices.push(service);
+    }
+    for (const service of matchingServices) {
+      service.$["android:exported"] = "false";
+      service.$["android:foregroundServiceType"] = "location";
     }
     application.service = services;
     return config;

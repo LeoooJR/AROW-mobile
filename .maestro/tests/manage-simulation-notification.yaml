@@ -1,0 +1,81 @@
+appId: com.leooojrrr.AROWmobile
+name: Manage simulation notification visibility
+tags:
+  - journey
+  - simulation
+  - notifications
+---
+# Requires AROW to be selected as the mock-location provider. Permission resets
+# are reversible and preserve application data.
+# Before each run, clear POST_NOTIFICATIONS user-set and user-fixed flags with
+# adb shell pm clear-permission-flags; Maestro's unset does not clear denial flags.
+- stopApp
+- setPermissions:
+    permissions:
+      location: allow
+      notifications: unset
+- runFlow: ../flows/select-simulation-milestone.yaml
+- tapOn:
+    id: "simulation-play-pause"
+- tapOn: "Allow"
+- extendedWaitUntil:
+    visible: "Arrêter la simulation"
+    timeout: 10000
+- assertNotVisible: "Notifications désactivées"
+- swipe:
+    start: "50%,2%"
+    end: "50%,80%"
+    duration: 500
+- assertVisible: "Simulation AROW active"
+- pressKey: Back
+- pressKey: Home
+- swipe:
+    start: "50%,2%"
+    end: "50%,80%"
+    duration: 500
+- assertVisible: "Simulation AROW active"
+- pressKey: Back
+- launchApp:
+    stopApp: false
+    permissions:
+      location: allow
+      notifications: allow
+- tapOn: "Arrêter la simulation"
+- extendedWaitUntil:
+    visible: "Démarrer la simulation"
+    timeout: 10000
+- swipe:
+    start: "50%,2%"
+    end: "50%,80%"
+    duration: 500
+- assertNotVisible: "Simulation AROW active"
+- pressKey: Back
+- tapOn:
+    id: "simulation-play-pause"
+- assertVisible: "Arrêter la simulation"
+- tapOn: "Arrêter la simulation"
+
+# Revoke consent and prove automatic continuation, expiry, and usable Stop.
+- stopApp
+- setPermissions:
+    permissions:
+      notifications: unset
+- runFlow: ../flows/select-simulation-milestone.yaml
+- tapOn:
+    id: "simulation-play-pause"
+- tapOn: "Don’t allow"
+- assertVisible: "Arrêter la simulation"
+- assertVisible: "Notifications désactivées"
+- extendedWaitUntil:
+    notVisible: "Notifications désactivées"
+    timeout: 12000
+- assertVisible: "Arrêter la simulation"
+- tapOn: "Arrêter la simulation"
+- tapOn:
+    id: "simulation-play-pause"
+# A repeated start after this denial returns without another system prompt.
+# Avoid a conditional prompt lookup: Maestro waits long enough to expire the toast.
+- assertVisible: "Notifications désactivées"
+- tapOn: "Arrêter la simulation"
+- assertNotVisible: "Notifications désactivées"
+- assertVisible: "Démarrer la simulation"

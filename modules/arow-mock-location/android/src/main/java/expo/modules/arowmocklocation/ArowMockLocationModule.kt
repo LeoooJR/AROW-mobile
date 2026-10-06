@@ -1,7 +1,10 @@
 package expo.modules.arowmocklocation
 
+import android.Manifest
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
@@ -11,6 +14,16 @@ import kotlinx.coroutines.withTimeout
 class ArowMockLocationModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("ArowMockLocation")
+
+    AsyncFunction("canShowSimulationNotification") {
+      val context = requireContext()
+      val notifications = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      val permissionGranted = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+        context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+      val channelEnabled = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
+        notifications.getNotificationChannel(MockLocationService.CHANNEL_ID)?.importance != NotificationManager.IMPORTANCE_NONE
+      permissionGranted && notifications.areNotificationsEnabled() && channelEnabled
+    }
 
     AsyncFunction("checkReadiness") {
       val context = requireContext()

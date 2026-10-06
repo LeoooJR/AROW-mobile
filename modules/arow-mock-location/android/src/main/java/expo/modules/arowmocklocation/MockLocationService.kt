@@ -14,7 +14,7 @@ import android.os.Looper
 class MockLocationService : Service() {
   companion object {
     const val ACTION_START = "expo.modules.arowmocklocation.START"
-    private const val CHANNEL_ID = "arow_simulation"
+    internal const val CHANNEL_ID = "arow_simulation"
     private const val NOTIFICATION_ID = 8051
     private const val REFRESH_INTERVAL_MS = 1_000L
   }
@@ -59,11 +59,18 @@ class MockLocationService : Service() {
 
   override fun onDestroy() {
     handler.removeCallbacks(refresh)
-    if (MockLocationEngine.snapshot() is NativeRunningSnapshot ||
-      MockLocationEngine.snapshot() is NativeStartingSnapshot) {
-      MockLocationEngine.stop(this)
+    try {
+      if (MockLocationEngine.snapshot() is NativeRunningSnapshot ||
+        MockLocationEngine.snapshot() is NativeStartingSnapshot) {
+        MockLocationEngine.stop(this)
+      }
+    } finally {
+      try {
+        stopForeground(STOP_FOREGROUND_REMOVE)
+      } finally {
+        super.onDestroy()
+      }
     }
-    super.onDestroy()
   }
 
   private fun promoteToForeground() {

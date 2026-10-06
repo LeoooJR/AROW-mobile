@@ -40,7 +40,7 @@ Pressing **Utiliser ce point** closes the sheet. [`useMapSelection`](../src/feat
 
 ## 3. Press start
 
-[`useMapLocation`](../src/features/map-screen/use-map-location.ts) passes the searched milestone to [`useSimulation`](../src/features/simulation/use-simulation.ts). Pressing **Démarrer la simulation** calls the simulation controller, which proceeds in this order:
+[`useMapLocation`](../src/features/map-screen/use-map-location.ts) passes the searched milestone to [`useSimulation`](../src/hooks/features/use-simulation.ts). Pressing **Démarrer la simulation** calls the simulation controller, which proceeds in this order:
 
 ```text
 Check: AROW is the selected mock-location app
@@ -50,6 +50,8 @@ Check: fine location permission is granted
 Start the Android executor with the selected Milestone's coordinates
         ↓ only after the first fix is applied
 Report running
+        ↓ independently, after successful startup
+Prepare notification consent and visibility without changing simulation state
 ```
 
 The search sheet performs the only milestone lookup. The selected `Milestone` already contains validated coordinates, and the bundled reference cannot change between selection and start. Readiness runs before native start, so a missing mock-app selection or disabled location services fails quickly without applying a fix. Native start also checks readiness before applying a fix. A start request alone is **not** reported as success.

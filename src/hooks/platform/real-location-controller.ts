@@ -1,5 +1,7 @@
 import type { AppStateStatus } from "react-native";
 
+import { isAppActive } from "@/utils/app-state";
+
 import type {
   LocationPermission,
   LocationWatcher,
@@ -23,7 +25,7 @@ export class RealLocationController {
     this.foreground =
       initialAppState === null ||
       initialAppState === "unknown" ||
-      initialAppState === "active";
+      isAppActive(initialAppState);
   }
 
   get state(): LocationState {
@@ -74,7 +76,7 @@ export class RealLocationController {
   };
 
   onAppStateChange(next: AppStateStatus): void {
-    this.foreground = next === "active";
+    this.foreground = isAppActive(next);
     if (!this.foreground) {
       this.cancelWatching();
     } else if (this.permissionRequest === undefined) {

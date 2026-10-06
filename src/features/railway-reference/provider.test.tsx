@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { type SQLiteDatabase, useSQLiteContext } from "expo-sqlite";
 import { type PropsWithChildren } from "react";
 
-import { useRailwayReference } from "./context";
+import { useRailwayReference } from "@/hooks/features/use-railway-reference";
 import RailwayReferenceProvider from "./provider";
 import { FIND_MILESTONE_QUERY } from "./sqlite/queries";
 

@@ -49,7 +49,7 @@ export class SimulationController {
     };
   }
 
-  start(milestone: Milestone): void {
+  start(milestone: Milestone): Promise<boolean> | undefined {
     if (
       !isSimulationStopped(this.simulationState) &&
       !(
@@ -61,7 +61,7 @@ export class SimulationController {
     }
     const operation = ++this.operation;
     this.publish({ status: "checking" });
-    void this.runStart(operation, milestone);
+    return this.runStart(operation, milestone);
   }
 
   stop(): void {
@@ -128,14 +128,17 @@ export class SimulationController {
   private async runStart(
     operation: number,
     milestone: Milestone,
-  ): Promise<void> {
+  ): Promise<boolean> {
     let executor: MockLocationExecutor | undefined;
     try {
       executor = await this.loadExecutor();
-      if (!(await this.checkReadiness(operation, executor))) return;
+      if (!(await this.checkReadiness(operation, executor))) return false;
       await this.applyMilestone(operation, executor, milestone);
+      return (
+        this.isCurrent(operation) && isSimulationRunning(this.simulationState)
+      );
     } catch (error) {
-      if (!this.isCurrent(operation)) return;
+      if (!this.isCurrent(operation)) return false;
       if (!isSimulationCanceling(this.simulationState)) {
         this.publish(
           simulationError(
@@ -145,6 +148,7 @@ export class SimulationController {
           ),
         );
       }
+      return false;
     } finally {
       if (
         executor !== undefined &&

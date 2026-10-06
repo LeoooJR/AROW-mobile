@@ -15,7 +15,7 @@ const mockOpenSettings = jest.fn();
 let mockSimulation: SimulationState = { status: "idle" };
 let mockRealLocation: LocationState = { status: "permissionRequired" };
 
-jest.mock("@/features/simulation/use-simulation", () => ({
+jest.mock("@/hooks/features/use-simulation", () => ({
   useSimulation: () => ({
     dismissStartError: mockDismissStartError,
     start: mockStart,

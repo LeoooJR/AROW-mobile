@@ -10,8 +10,14 @@ import { AppState, Pressable, Text } from "react-native";
 
 import { Milestone } from "@/features/milestones/domain/milestone";
 import { getMockLocationExecutor } from "@/features/simulation/mock-location";
+import { prepareSimulationNotifications } from "@/features/simulation/simulation-notifications";
+
 import SimulationProvider from "@/features/simulation/simulation-provider";
-import { useSimulation } from "@/features/simulation/use-simulation";
+import { useSimulation } from "@/hooks/features/use-simulation";
+
+jest.mock("@/features/simulation/simulation-notifications", () => ({
+  prepareSimulationNotifications: jest.fn(),
+}));
 
 jest.mock("@/features/simulation/mock-location", () => ({
   getMockLocationExecutor: jest.fn(),
@@ -74,6 +80,9 @@ describe("SimulationProvider", () => {
     });
     jest.mocked(getMockLocationExecutor).mockResolvedValue(executor);
     executor.checkReadiness.mockResolvedValue({ ready: true });
+    jest.mocked(prepareSimulationNotifications).mockResolvedValue({
+      notificationVisible: true,
+    });
     executor.getSnapshot.mockResolvedValue({ status: "stopped" });
     executor.start.mockResolvedValue(runningSnapshot);
     executor.stop.mockResolvedValue({ status: "stopped" });
@@ -139,6 +148,7 @@ describe("SimulationProvider", () => {
     const setInterval = jest.spyOn(global, "setInterval");
     const view = await render(application(true));
     await waitFor(() => expect(executor.getSnapshot).toHaveBeenCalledTimes(1));
+    expect(jest.mocked(prepareSimulationNotifications)).not.toHaveBeenCalled();
     await fireEvent.press(
       screen.getByRole("button", { name: "Start simulation" }),
     );
@@ -159,6 +169,9 @@ describe("SimulationProvider", () => {
       await Promise.resolve();
     });
     expect(executor.getSnapshot).toHaveBeenCalledTimes(3);
+    expect(jest.mocked(prepareSimulationNotifications)).toHaveBeenCalledTimes(
+      1,
+    );
 
     await view.rerender(application(true));
     expect(screen.getByText("running")).toBeOnTheScreen();

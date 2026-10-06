@@ -1,6 +1,7 @@
 import { NativeModule, requireNativeModule } from "expo";
 
 import {
+  decodeNotificationVisibility,
   decodeReadiness,
   decodeSnapshot,
   decodeStartResult,
@@ -8,6 +9,7 @@ import {
 } from "./decode-native-result";
 
 declare class ArowMockLocationModule extends NativeModule {
+  canShowSimulationNotification(): Promise<unknown>;
   checkReadiness(): Promise<unknown>;
   getSnapshot(): Promise<unknown>;
   start(latitude: number, longitude: number): Promise<unknown>;
@@ -17,6 +19,10 @@ declare class ArowMockLocationModule extends NativeModule {
 const nativeModule =
   requireNativeModule<ArowMockLocationModule>("ArowMockLocation");
 export default {
+  canShowSimulationNotification: async () =>
+    decodeNotificationVisibility(
+      await nativeModule.canShowSimulationNotification(),
+    ),
   checkReadiness: async () =>
     decodeReadiness(await nativeModule.checkReadiness()),
   getSnapshot: async () => decodeSnapshot(await nativeModule.getSnapshot()),

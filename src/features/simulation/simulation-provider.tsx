@@ -4,9 +4,12 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { AppState } from "react-native";
+
+import { isAppActive } from "@/utils/app-state";
 
 import type { Milestone } from "@/features/milestones/domain/milestone";
 import {
@@ -15,6 +18,7 @@ import {
 } from "@/features/simulation/simulation-context";
 import { SimulationController } from "@/features/simulation/simulation-controller";
 import { getMockLocationExecutor } from "@/features/simulation/mock-location";
+import { prepareSimulationNotifications } from "@/features/simulation/simulation-notifications";
 import {
   isSimulationDismissibleError,
   isSimulationRunning,
@@ -28,16 +32,47 @@ export interface SimulationProviderProps {
 export default function SimulationProvider({
   children,
 }: SimulationProviderProps): ReactElement {
+  const [notificationWarningId, setNotificationWarningId] = useState(0);
+  const notificationAttempt = useRef(0);
+  const mounted = useRef(false);
+  const invalidateNotificationAttempt = useCallback(
+    () => ++notificationAttempt.current,
+    [],
+  );
   const [controller] = useState(
     () => new SimulationController(getMockLocationExecutor),
   );
   const [state, setState] = useState<SimulationState>(controller.state);
   const running = isSimulationRunning(state);
   const start = useCallback(
-    (milestone: Milestone) => controller.start(milestone),
-    [controller],
+    (milestone: Milestone): void => {
+      const completion = controller.start(milestone);
+      if (completion === undefined) return;
+      const attempt = invalidateNotificationAttempt();
+      const isCurrent = () =>
+        mounted.current &&
+        attempt === notificationAttempt.current &&
+        isSimulationRunning(controller.state);
+      void completion.then(async (started) => {
+        if (!started || !isCurrent()) return;
+        let notificationVisible = false;
+        try {
+          ({ notificationVisible } =
+            await prepareSimulationNotifications(isCurrent));
+        } catch {
+          // Notification availability cannot change the simulation result.
+        }
+        if (isCurrent() && !notificationVisible) {
+          setNotificationWarningId((id) => id + 1);
+        }
+      });
+    },
+    [controller, invalidateNotificationAttempt],
   );
-  const stop = useCallback(() => controller.stop(), [controller]);
+  const stop = useCallback(() => {
+    invalidateNotificationAttempt();
+    controller.stop();
+  }, [controller, invalidateNotificationAttempt]);
   const dismissStartError = useCallback(
     (expectedState: SimulationState) =>
       controller.dismissStartError(expectedState),
@@ -45,16 +80,19 @@ export default function SimulationProvider({
   );
 
   useEffect(() => {
+    mounted.current = true;
     const unsubscribe = controller.subscribe(setState);
     void controller.reconcile();
     const listener = AppState.addEventListener("change", (next) => {
-      if (next === "active") void controller.reconcile();
+      if (isAppActive(next)) void controller.reconcile();
     });
     return () => {
+      mounted.current = false;
+      invalidateNotificationAttempt();
       listener.remove();
       unsubscribe();
     };
-  }, [controller]);
+  }, [controller, invalidateNotificationAttempt]);
 
   useEffect(() => {
     if (!running) return;
@@ -69,8 +107,8 @@ export default function SimulationProvider({
   }, [controller, state]);
 
   const value = useMemo<SimulationModel>(
-    () => ({ dismissStartError, start, state, stop }),
-    [dismissStartError, start, state, stop],
+    () => ({ dismissStartError, notificationWarningId, start, state, stop }),
+    [dismissStartError, notificationWarningId, start, state, stop],
   );
 
   return (

@@ -17,7 +17,8 @@ export async function getMockLocationExecutor(): Promise<MockLocationExecutor> {
     throw new Error("UNSUPPORTED_PLATFORM");
   }
 
-  return (
+  const nativeExecutor = (
     await import("../../../modules/arow-mock-location/src/ArowMockLocationModule")
   ).default;
+  return nativeExecutor;
 }

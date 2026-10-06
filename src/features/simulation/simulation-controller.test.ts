@@ -34,10 +34,81 @@ function setup() {
   const controller = new SimulationController(async () => executor);
   const onState = jest.fn();
   const unsubscribe = controller.subscribe(onState);
-  return { controller, executor, onState, unsubscribe };
+  return {
+    controller,
+    executor,
+    onState,
+    unsubscribe,
+  };
 }
 
 describe("SimulationController", () => {
+  test("accepted starts report completion; ignored starts return undefined", async () => {
+    const { controller } = setup();
+    const completion = controller.start(milestone);
+    expect(controller.state.status).toBe("checking");
+    expect(controller.start(milestone)).toBeUndefined();
+    await expect(completion).resolves.toBe(true);
+    expect(controller.state.status).toBe("running");
+    expect(controller.start(milestone)).toBeUndefined();
+  });
+
+  test("readiness failures resolve false and preserve the native error", async () => {
+    const { controller, executor } = setup();
+    executor.checkReadiness.mockResolvedValue({
+      ready: false,
+      code: "MOCK_PROVIDER_NOT_SELECTED",
+    });
+    await expect(controller.start(milestone)).resolves.toBe(false);
+    expect(controller.state).toMatchObject({
+      status: "error",
+      code: "MOCK_PROVIDER_NOT_SELECTED",
+    });
+    expect(executor.start).not.toHaveBeenCalled();
+  });
+
+  test("native startup exceptions resolve false without rejecting completion", async () => {
+    const { controller, executor } = setup();
+    executor.start.mockRejectedValueOnce(new Error("native unavailable"));
+    await expect(controller.start(milestone)).resolves.toBe(false);
+    expect(controller.state).toMatchObject({
+      status: "error",
+      origin: "start",
+    });
+  });
+
+  test("cancelled native startup resolves false after provider cleanup", async () => {
+    const { controller, executor } = setup();
+    const firstFix = deferred<{
+      status: "running";
+      latitude: number;
+      longitude: number;
+    }>();
+    executor.start.mockReturnValueOnce(firstFix.promise);
+    const completion = controller.start(milestone);
+    await waitFor(() => expect(controller.state.status).toBe("starting"));
+    controller.stop();
+    firstFix.resolve({ status: "running", ...milestone.coordinates });
+    await expect(completion).resolves.toBe(false);
+    expect(executor.stop).toHaveBeenCalledTimes(1);
+    expect(controller.state.status).toBe("idle");
+  });
+
+  test("Stop during readiness resolves false without a late native start", async () => {
+    const { controller, executor } = setup();
+    const readiness = deferred<{ ready: true }>();
+    executor.checkReadiness.mockReturnValueOnce(readiness.promise);
+    const completion = controller.start(milestone);
+    await waitFor(() =>
+      expect(executor.checkReadiness).toHaveBeenCalledTimes(1),
+    );
+    controller.stop();
+    readiness.resolve({ ready: true });
+    await expect(completion).resolves.toBe(false);
+    expect(executor.start).not.toHaveBeenCalled();
+    expect(controller.state.status).toBe("idle");
+  });
+
   test("uses the selected milestone after readiness and waits for the first fix", async () => {
     const { controller, executor } = setup();
     const readiness = deferred<{ ready: true }>();
