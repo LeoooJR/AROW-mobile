@@ -85,6 +85,14 @@ To check the native splash screen, build a local release preview. It embeds the
 JavaScript and railway assets and opens directly without Metro or the Expo
 development launcher. No EAS account or build service is needed.
 
+The splash stays visible until the local railway sources and initial map viewport
+are rendered. A startup error or 30-second timeout opens a retry screen. After
+restoring connectivity, choose **Réessayer** to reload the map without clearing
+application data. Validate splash appearance in this release preview rather than
+the development client.
+On Android, the native splash hands off to matching in-app artwork while MapLibre
+renders; the loading screen remains until the map is ready.
+
 Use Node.js 24 or newer, the installed JDK, the Android SDK and `android` CLI,
 and the dependencies and railway assets prepared above. Start an Android emulator,
 then run:

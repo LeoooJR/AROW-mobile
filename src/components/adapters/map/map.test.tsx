@@ -77,6 +77,81 @@ jest.mock("./railway-lines-source", () => {
 });
 
 describe("Map", () => {
+  test("accepts a fully rendered frame after loading style when no new map-cycle event arrives", async () => {
+    const onReady = jest.fn();
+    await render(
+      <Map
+        onReady={onReady}
+        railwayData="file:///railways.geojson"
+        milestoneData="file:///milestones.geojson"
+      />,
+    );
+    await fireEvent(
+      screen.getByTestId("arow-map"),
+      "didFinishRenderingFrameFully",
+    );
+    expect(onReady).not.toHaveBeenCalled();
+    await fireEvent(screen.getByTestId("arow-map"), "didFinishLoadingStyle");
+    await fireEvent(
+      screen.getByTestId("arow-map"),
+      "didFinishRenderingFrameFully",
+    );
+    expect(onReady).toHaveBeenCalledTimes(1);
+  });
+  test("ignores partial rendering and missing sources before reporting readiness once", async () => {
+    const onReady = jest.fn();
+    const view = await render(<Map onReady={onReady} />);
+    await fireEvent(
+      screen.getByTestId("arow-map"),
+      "didFinishRenderingMapFully",
+    );
+    await fireEvent(screen.getByTestId("arow-map"), "didFinishLoadingStyle");
+    await fireEvent(
+      screen.getByTestId("arow-map"),
+      "didFinishRenderingMapFully",
+    );
+    expect(onReady).not.toHaveBeenCalled();
+    await view.rerender(
+      <Map
+        onReady={onReady}
+        railwayData="file:///railways.geojson"
+        milestoneData="file:///milestones.geojson"
+      />,
+    );
+    await fireEvent(screen.getByTestId("arow-map"), "didFinishRenderingMap");
+    expect(onReady).not.toHaveBeenCalled();
+    await fireEvent(
+      screen.getByTestId("arow-map"),
+      "didFinishRenderingMapFully",
+    );
+    await fireEvent(
+      screen.getByTestId("arow-map"),
+      "didFinishRenderingMapFully",
+    );
+    expect(onReady).toHaveBeenCalledTimes(1);
+  });
+
+  test("reports startup loading failure once and cannot report ready afterward", async () => {
+    const onReady = jest.fn();
+    const onLoadError = jest.fn();
+    await render(
+      <Map
+        onReady={onReady}
+        onLoadError={onLoadError}
+        railwayData="file:///railways.geojson"
+        milestoneData="file:///milestones.geojson"
+      />,
+    );
+    await fireEvent(screen.getByTestId("arow-map"), "didFailLoadingMap");
+    await fireEvent(screen.getByTestId("arow-map"), "didFailLoadingMap");
+    await fireEvent(screen.getByTestId("arow-map"), "didFinishLoadingStyle");
+    await fireEvent(
+      screen.getByTestId("arow-map"),
+      "didFinishRenderingMapFully",
+    );
+    expect(onLoadError).toHaveBeenCalledTimes(1);
+    expect(onReady).not.toHaveBeenCalled();
+  });
   afterEach(() => {
     jest.restoreAllMocks();
   });

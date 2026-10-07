@@ -10,6 +10,11 @@ import type { Milestone } from "@/features/milestones/domain/milestone";
 import type { SimulationState } from "@/features/simulation/simulation-state";
 
 import Index from "@/app/index";
+import { useAssets } from "expo-asset";
+import { AppStartupContext } from "@/features/app-startup/context";
+jest.mock("@/hooks/features/use-map-startup", () => ({
+  useMapStartup: () => undefined,
+}));
 
 const mockStartSimulation = jest.fn();
 const mockStopSimulation = jest.fn();
@@ -24,7 +29,7 @@ jest.mock("@/hooks/features/use-simulation", () => ({
 }));
 
 jest.mock("expo-asset", () => ({
-  useAssets: () => [
+  useAssets: jest.fn(() => [
     [
       {
         localUri: "file:///railways.geojson",
@@ -36,8 +41,12 @@ jest.mock("expo-asset", () => ({
       },
     ],
     undefined,
-  ],
+  ]),
 }));
+
+const defaultRailwayAssets = jest.mocked(useAssets).getMockImplementation()?.(
+  [],
+);
 
 jest.mock("@/hooks/features/use-railway-reference", () => ({
   useRailwayReference: () => ({
@@ -203,7 +212,32 @@ jest.mock("@/components/composites/map-toolbar", () => {
 });
 
 describe("Index map feature selection", () => {
+  afterEach(() => jest.restoreAllMocks());
+  test("does not mount the native map before both railway assets load", async () => {
+    jest.mocked(useAssets).mockReturnValue([undefined, undefined]);
+    await render(<Index />);
+    expect(screen.queryByTestId("mock-map")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Choisir une ligne test" }),
+    ).toBeNull();
+  });
+  test("reports railway asset errors to startup", async () => {
+    jest
+      .mocked(useAssets)
+      .mockReturnValue([undefined, new Error("missing asset")]);
+    const onFailure = jest.fn();
+    await render(
+      <AppStartupContext.Provider
+        value={{ status: "loading", onFailure, onReady: jest.fn() }}
+      >
+        <Index />
+      </AppStartupContext.Provider>,
+    );
+    expect(onFailure).toHaveBeenCalledTimes(1);
+  });
   beforeEach(() => {
+    if (defaultRailwayAssets)
+      jest.mocked(useAssets).mockReturnValue(defaultRailwayAssets);
     mockSimulationState = { status: "idle" };
     mockStartSimulation.mockReset();
     mockStopSimulation.mockReset();

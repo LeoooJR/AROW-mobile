@@ -2,7 +2,7 @@ import {
   Map as MapLibreMap,
   type ViewStateChangeEvent,
 } from "@maplibre/maplibre-react-native";
-import { type ReactElement, useCallback, useState } from "react";
+import { type ReactElement, useCallback, useRef, useState } from "react";
 import {
   type NativeSyntheticEvent,
   StyleSheet,
@@ -39,12 +39,16 @@ export default function Map({
   location,
   milestoneData,
   onFeaturePress,
+  onReady,
+  onLoadError,
   railwayData,
   recenterRequest,
   selectedFeature,
 }: MapProps): ReactElement {
   const colorScheme = useColorScheme();
   const [bearing, setBearing] = useState(0);
+  const styleLoaded = useRef(false);
+  const startupSettled = useRef(false);
   const selectedSection =
     selectedFeature === undefined ? undefined : selectedFeature.key;
   const selectedMilestone =
@@ -57,10 +61,41 @@ export default function Map({
     [],
   );
 
+  const reportReady = () => {
+    if (
+      !startupSettled.current &&
+      styleLoaded.current &&
+      railwayData !== undefined &&
+      milestoneData !== undefined
+    ) {
+      startupSettled.current = true;
+      onReady?.();
+    }
+  };
+
   return (
     <MapLibreMap
       accessibilityLabel="Carte ferroviaire interactive AROW"
+      androidView="texture"
       mapStyle={MAP_STYLES[resolveColorTheme(colorScheme)]}
+      onWillStartLoadingMap={() => {
+        styleLoaded.current = false;
+      }}
+      onDidFinishLoadingStyle={() => {
+        styleLoaded.current = true;
+      }}
+      onDidFinishRenderingMapFully={
+        onReady === undefined ? undefined : reportReady
+      }
+      onDidFinishRenderingFrameFully={
+        onReady === undefined ? undefined : reportReady
+      }
+      onDidFailLoadingMap={() => {
+        if (!startupSettled.current) {
+          startupSettled.current = true;
+          onLoadError?.();
+        }
+      }}
       onRegionDidChange={onRegionDidChange}
       style={styles.map}
       testID="arow-map"

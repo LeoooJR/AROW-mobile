@@ -1,6 +1,7 @@
 import type { StyleSpecification } from "@maplibre/maplibre-react-native";
 
 import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
+import { BASEMAP_SOURCE_URL } from "@/features/map-screen/basemap-config";
 
 interface MapStylePalette {
   readonly border: string;
@@ -29,7 +30,7 @@ export function createMapStyle(
     sources: {
       openmaptiles: {
         type: "vector",
-        url: "https://tiles.openfreemap.org/planet",
+        url: BASEMAP_SOURCE_URL,
         attribution,
       },
     },

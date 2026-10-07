@@ -14,6 +14,8 @@ export interface MapProps {
   readonly location?: MapLocation;
   readonly milestoneData?: string;
   readonly onFeaturePress?: (feature: MapFeature) => void;
+  readonly onReady?: () => void;
+  readonly onLoadError?: () => void;
   readonly railwayData?: string;
   readonly recenterRequest?: number;
   readonly selectedFeature?: MapFeature;

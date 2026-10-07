@@ -1,5 +1,14 @@
-import { act, renderHook, waitFor } from "@testing-library/react-native";
-import { type SQLiteDatabase, useSQLiteContext } from "expo-sqlite";
+import {
+  act,
+  render,
+  renderHook,
+  waitFor,
+} from "@testing-library/react-native";
+import {
+  type SQLiteDatabase,
+  SQLiteProvider,
+  useSQLiteContext,
+} from "expo-sqlite";
 import { type PropsWithChildren } from "react";
 
 import { useRailwayReference } from "@/hooks/features/use-railway-reference";
@@ -7,7 +16,7 @@ import RailwayReferenceProvider from "./provider";
 import { FIND_MILESTONE_QUERY } from "./sqlite/queries";
 
 jest.mock("expo-sqlite", () => ({
-  SQLiteProvider: ({ children }: PropsWithChildren) => children,
+  SQLiteProvider: jest.fn(({ children }: PropsWithChildren) => children),
   useSQLiteContext: jest.fn(),
 }));
 jest.mock("@/statics/railway_reference.sqlite", () => "database-asset");
@@ -49,6 +58,27 @@ const SECTION_RECORD = {
 };
 
 describe("RailwayReferenceProvider", () => {
+  test("forwards database initialization failure outside the render phase", async () => {
+    const error = new Error("database failed");
+    const onError = jest.fn();
+    const provider = jest.mocked(SQLiteProvider);
+    const original = provider.getMockImplementation();
+    provider.mockImplementation((props) => {
+      props.onError?.(error);
+      expect(onError).not.toHaveBeenCalled();
+      return null;
+    });
+    try {
+      await render(
+        <RailwayReferenceProvider onError={onError}>
+          {null}
+        </RailwayReferenceProvider>,
+      );
+      await waitFor(() => expect(onError).toHaveBeenCalledWith(error));
+    } finally {
+      if (original) provider.mockImplementation(original);
+    }
+  });
   test("does not load the searchable catalog while mounting", async () => {
     const getAllAsync = jest.fn();
     useSQLiteContextMock.mockReturnValue(
