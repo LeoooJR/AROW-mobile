@@ -27,7 +27,7 @@ describes that future integration.
 ## Get started
 
 You need **Node.js 24 or newer**, npm, and an Android development environment with
-the Android SDK, Java, and an emulator or connected device.
+the Android SDK, Java, the `android` CLI, and an emulator or connected device.
 
 ### 1. Install dependencies
 
@@ -53,27 +53,81 @@ them.
 
 ### 3. Open the Android app
 
-Start your Android emulator or connect your development device, then build and
-open the app:
+Start your Android emulator, then build and open the development client:
 
 ```bash
-npx expo run:android
+./script/build_dev_client.sh --device medium_phone
 ```
 
-AROW uses native map and mock-location modules, so it needs a development build.
+AROW uses native map and mock-location modules, so it needs a custom native build.
+The helper installs the debug APK, starts or reuses Metro, and opens the client.
+Its APK is generated at `android/app/build/outputs/apk/debug/app-debug.apk`.
 For subsequent sessions with that build installed, start the development server:
 
 ```bash
-npm start -- --dev-client
+./script/start_dev_client.sh --dev-client
 ```
 
 Press **a** in the terminal to open the Android app. Rebuild after changing native
 modules or Expo configuration.
 
+The old `script/build_and_run.sh` entry point forwards to this helper so existing
+Codex Run actions and approval rules continue to work.
+
 To use location simulation, grant precise location access, enable Android
 location services, and select **AROW-mobile** as the mock location app in Android
 Developer options. The app checks these requirements before starting a
 simulation.
+
+### Local Android preview
+
+To check the native splash screen, build a local release preview. It embeds the
+JavaScript and railway assets and opens directly without Metro or the Expo
+development launcher. No EAS account or build service is needed.
+
+Use Node.js 24 or newer, the installed JDK, the Android SDK and `android` CLI,
+and the dependencies and railway assets prepared above. Start an Android emulator,
+then run:
+
+```bash
+./script/build_and_run_preview.sh --device medium_phone
+```
+
+Both build helpers require an explicit AVD name, such as `medium_phone`, rather
+than an ADB serial. The named emulator must already be connected and booted.
+Missing names and ambiguous matches are rejected; no default device is selected.
+
+Physical devices are not supported by these helpers. Each invocation refreshes the
+generated Android configuration and runs an incremental build, so changes
+to JavaScript, native modules, and splash configuration are included. Gradle
+caches are retained. The APK targets the selected emulator's CPU architecture.
+Missing prerequisites are reported without installing tools,
+dependencies, or railway assets automatically. The first build may download the
+Expo native template and Gradle dependencies.
+
+On machines with limited RAM, reduce Gradle's parallel workers for a build:
+
+```bash
+GRADLE_OPTS=-Dorg.gradle.workers.max=1 ./script/build_and_run_preview.sh --device medium_phone
+```
+
+The APK is generated at
+`android/app/build/outputs/apk/release/app-release.apk`. It uses local development
+signing for testing; it is not a store submission artifact. Preview and development
+builds use the same app ID and replace each other while preserving application
+data. A signing conflict stops installation; the helper never uninstalls or clears
+the app.
+
+To inspect the splash again, force-stop the preview and launch it from the emulator's
+app launcher. Metro can remain stopped. To switch back to development, reinstall
+the development build on the same emulator:
+
+```bash
+./script/build_dev_client.sh --device medium_phone
+```
+
+Replace `medium_phone` with your emulator's AVD name. Starting Metro alone
+does not turn an installed release preview into a development client.
 
 ## Explore the project
 
