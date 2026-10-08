@@ -48,7 +48,9 @@ export default function Map({
   const colorScheme = useColorScheme();
   const [bearing, setBearing] = useState(0);
   const styleLoaded = useRef(false);
-  const startupSettled = useRef(false);
+  const initialRenderState = useRef<"pending" | "reported" | "failed">(
+    "pending",
+  );
   const selectedSection =
     selectedFeature === undefined ? undefined : selectedFeature.key;
   const selectedMilestone =
@@ -63,12 +65,12 @@ export default function Map({
 
   const reportReady = () => {
     if (
-      !startupSettled.current &&
+      initialRenderState.current === "pending" &&
       styleLoaded.current &&
       railwayData !== undefined &&
       milestoneData !== undefined
     ) {
-      startupSettled.current = true;
+      initialRenderState.current = "reported";
       onReady?.();
     }
   };
@@ -90,12 +92,16 @@ export default function Map({
       onDidFinishRenderingFrameFully={
         onReady === undefined ? undefined : reportReady
       }
-      onDidFailLoadingMap={() => {
-        if (!startupSettled.current) {
-          startupSettled.current = true;
-          onLoadError?.();
-        }
-      }}
+      onDidFailLoadingMap={
+        onLoadError === undefined
+          ? undefined
+          : () => {
+              if (initialRenderState.current !== "failed") {
+                initialRenderState.current = "failed";
+                onLoadError();
+              }
+            }
+      }
       onRegionDidChange={onRegionDidChange}
       style={styles.map}
       testID="arow-map"

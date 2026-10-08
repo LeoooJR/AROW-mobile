@@ -88,9 +88,11 @@ jest.mock("@/components/adapters/map/map", () => {
     __esModule: true,
     default: ({
       onFeaturePress,
+      onLoadError,
       selectedFeature,
     }: {
       readonly onFeaturePress?: (value: MapFeature) => void;
+      readonly onLoadError?: () => void;
       readonly selectedFeature?: MapFeature;
     }) => {
       const railwayLine = new MockRailway({
@@ -119,7 +121,7 @@ jest.mock("@/components/adapters/map/map", () => {
       });
 
       return (
-        <MockView>
+        <MockView testID="mock-map" {...{ onLoadError }}>
           <MockPressable
             accessibilityLabel="Choisir une ligne test"
             accessibilityRole="button"
@@ -212,6 +214,27 @@ jest.mock("@/components/composites/map-toolbar", () => {
 });
 
 describe("Index map feature selection", () => {
+  test.each(["loading", "error", "ready"] as const)(
+    "only supplies a loading-error callback during startup (%s)",
+    async (status) => {
+      const onFailure = jest.fn();
+      await render(
+        <AppStartupContext.Provider
+          value={{ status, onFailure, onReady: jest.fn() }}
+        >
+          <Index />
+        </AppStartupContext.Provider>,
+      );
+      if (status === "loading") {
+        expect(screen.getByTestId("mock-map")).toHaveProp(
+          "onLoadError",
+          onFailure,
+        );
+      } else {
+        expect(screen.getByTestId("mock-map")).not.toHaveProp("onLoadError");
+      }
+    },
+  );
   afterEach(() => jest.restoreAllMocks());
   test("does not mount the native map before both railway assets load", async () => {
     jest.mocked(useAssets).mockReturnValue([undefined, undefined]);

@@ -1,11 +1,26 @@
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  userEvent,
+} from "@testing-library/react-native";
+import { fetch } from "expo/fetch";
 import * as ReactNative from "react-native";
 
 import { Milestone } from "@/features/milestones/domain/milestone";
+import { useMapStartup } from "@/hooks/features/use-map-startup";
+import {
+  type AppStartupResult,
+  useAppStartup,
+} from "@/hooks/platform/use-app-startup";
 
 import { DARK_MAP_STYLE } from "./map-style-dark";
 import { LIGHT_MAP_STYLE } from "./map-style-light";
 import Map from "./map";
+
+jest.mock("expo/fetch", () => ({ fetch: jest.fn() }));
+jest.mock("expo-splash-screen", () => ({ hide: jest.fn() }));
 
 const MILESTONE = new Milestone({
   coordinates: { latitude: 45.74, longitude: 4.86 },
@@ -77,6 +92,52 @@ jest.mock("./railway-lines-source", () => {
 });
 
 describe("Map", () => {
+  test("a reported render still permits one subsequent loading failure", async () => {
+    const onReady = jest.fn();
+    const onLoadError = jest.fn();
+    await render(
+      <Map
+        onReady={onReady}
+        onLoadError={onLoadError}
+        railwayData="file:///railways.geojson"
+        milestoneData="file:///milestones.geojson"
+      />,
+    );
+    await fireEvent(screen.getByTestId("arow-map"), "didFinishLoadingStyle");
+    await fireEvent(
+      screen.getByTestId("arow-map"),
+      "didFinishRenderingMapFully",
+    );
+    await fireEvent(screen.getByTestId("arow-map"), "didFailLoadingMap");
+    await fireEvent(screen.getByTestId("arow-map"), "didFailLoadingMap");
+    await fireEvent(
+      screen.getByTestId("arow-map"),
+      "didFinishRenderingFrameFully",
+    );
+    expect(onReady).toHaveBeenCalledTimes(1);
+    expect(onLoadError).toHaveBeenCalledTimes(1);
+  });
+
+  test("removing startup callbacks detaches render and loading-error listeners", async () => {
+    const onReady = jest.fn();
+    const onLoadError = jest.fn();
+    const view = await render(
+      <Map onReady={onReady} onLoadError={onLoadError} />,
+    );
+    await view.rerender(<Map />);
+    expect(screen.getByTestId("arow-map")).not.toHaveProp(
+      "onDidFinishRenderingMapFully",
+    );
+    expect(screen.getByTestId("arow-map")).not.toHaveProp(
+      "onDidFinishRenderingFrameFully",
+    );
+    expect(screen.getByTestId("arow-map")).not.toHaveProp(
+      "onDidFailLoadingMap",
+    );
+    expect(onReady).not.toHaveBeenCalled();
+    expect(onLoadError).not.toHaveBeenCalled();
+  });
+
   test("accepts a fully rendered frame after loading style when no new map-cycle event arrives", async () => {
     const onReady = jest.fn();
     await render(
@@ -299,5 +360,87 @@ describe("Map", () => {
       "selectedMilestone",
       MILESTONE,
     );
+  });
+});
+
+function StartupMap({ startup }: { readonly startup: AppStartupResult }) {
+  const onReady = useMapStartup(startup);
+  return (
+    <Map
+      onReady={onReady}
+      onLoadError={startup.status === "loading" ? startup.onFailure : undefined}
+      railwayData="file:///railways.geojson"
+      milestoneData="file:///milestones.geojson"
+    />
+  );
+}
+
+function StartupHarness() {
+  const startup = useAppStartup("android");
+  return (
+    <ReactNative.View>
+      <ReactNative.Text role="status">{startup.status}</ReactNative.Text>
+      <StartupMap key={startup.attempt} startup={startup} />
+      {startup.status === "error" ? (
+        <ReactNative.Pressable role="button" onPress={startup.retry}>
+          <ReactNative.Text>Réessayer</ReactNative.Text>
+        </ReactNative.Pressable>
+      ) : null}
+    </ReactNative.View>
+  );
+}
+
+type BasemapResponse = Awaited<ReturnType<typeof fetch>>;
+const basemapResponse = () =>
+  ({
+    ok: true,
+    json: async () => ({ tiles: ["https://tiles.test/{z}/{x}/{y}.pbf"] }),
+  }) as BasemapResponse;
+
+async function renderFullMap() {
+  await fireEvent(screen.getByTestId("arow-map"), "didFinishLoadingStyle");
+  await fireEvent(screen.getByTestId("arow-map"), "didFinishRenderingMapFully");
+}
+
+describe("Map startup integration", () => {
+  beforeEach(() => jest.mocked(fetch).mockReset());
+
+  test("render then failure stays in error after late metadata success, and retry can become ready", async () => {
+    let resolve!: (value: BasemapResponse) => void;
+    jest
+      .mocked(fetch)
+      .mockReturnValueOnce(
+        new Promise((done) => {
+          resolve = done;
+        }),
+      )
+      .mockResolvedValueOnce(basemapResponse());
+    await render(<StartupHarness />);
+    await renderFullMap();
+    expect(screen.getByRole("status")).toHaveTextContent("loading");
+    const signal = jest.mocked(fetch).mock.calls[0][1]?.signal;
+    await fireEvent(screen.getByTestId("arow-map"), "didFailLoadingMap");
+    expect(screen.getByRole("status")).toHaveTextContent("error");
+    expect(signal?.aborted).toBe(true);
+    await act(async () => resolve(basemapResponse()));
+    expect(screen.getByRole("status")).toHaveTextContent("error");
+    await userEvent
+      .setup()
+      .press(screen.getByRole("button", { name: "Réessayer" }));
+    expect(screen.getByRole("status")).toHaveTextContent("loading");
+    await renderFullMap();
+    expect(screen.getByRole("status")).toHaveTextContent("ready");
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  test("successful startup ignores subsequent map-loading failures", async () => {
+    jest.mocked(fetch).mockResolvedValue(basemapResponse());
+    await render(<StartupHarness />);
+    await renderFullMap();
+    expect(screen.getByRole("status")).toHaveTextContent("ready");
+    await fireEvent(screen.getByTestId("arow-map"), "didFailLoadingMap");
+    expect(screen.getByRole("status")).toHaveTextContent("ready");
+    expect(screen.queryByRole("button", { name: "Réessayer" })).toBeNull();
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });

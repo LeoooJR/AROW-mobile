@@ -48,7 +48,7 @@ export default function Index() {
           milestoneData={milestoneData}
           onFeaturePress={selection.onFeaturePress}
           onReady={onMapReady}
-          onLoadError={onFailure}
+          onLoadError={startup?.status === "loading" ? onFailure : undefined}
           railwayData={railwayData}
           recenterRequest={location.recenterRequest}
           selectedFeature={selection.selectedFeature}
