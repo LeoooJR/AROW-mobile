@@ -1,102 +1,120 @@
-import { act, renderHook, waitFor } from "@testing-library/react-native";
-import { fetch } from "expo/fetch";
+import { act, renderHook } from "@testing-library/react-native";
 
 import type { AppStartupActions } from "@/features/app-startup/context";
+import { createBasemapStartupAttempt } from "@/features/map-screen/check-basemap-source";
 import { useMapStartup } from "./use-map-startup";
 
-jest.mock("expo/fetch", () => ({ fetch: jest.fn() }));
-const fetchMock = jest.mocked(fetch);
-type Response = Awaited<ReturnType<typeof fetch>>;
-const response = (
-  body: unknown = { tiles: ["https://tiles.test/{z}/{x}/{y}.pbf"] },
-  ok = true,
-) => ({ ok, json: async () => body }) as Response;
+jest.mock("@/features/map-screen/check-basemap-source", () => ({
+  createBasemapStartupAttempt: jest.fn(),
+}));
+const createAttempt = jest.mocked(createBasemapStartupAttempt);
 const startup = (): AppStartupActions => ({
   status: "loading",
   onFailure: jest.fn(),
   onReady: jest.fn(),
 });
+const nativeTest = process.env.EXPO_OS === "web" ? test.skip : test;
 
-beforeEach(() => fetchMock.mockReset());
-
-test("rendering alone cannot dismiss loading before the basemap source is available", async () => {
-  let resolve!: (value: Response) => void;
-  fetchMock.mockReturnValue(
-    new Promise((done) => {
-      resolve = done;
-    }),
-  );
-  const model = startup();
-  const view = await renderHook(() => useMapStartup(model));
-  await act(async () => {
-    view.result.current?.();
-    view.result.current?.();
-  });
-  expect(model.onReady).not.toHaveBeenCalled();
-  await act(async () => resolve(response()));
-  expect(model.onReady).toHaveBeenCalledTimes(1);
+beforeEach(() => {
+  createAttempt.mockReset();
+  createAttempt.mockImplementation(() => ({
+    check: jest.fn(async () => {}),
+    onRendered: jest.fn(),
+  }));
 });
 
-test("basemap availability alone still waits for full rendering", async () => {
-  fetchMock.mockResolvedValue(response());
-  const model = startup();
-  const view = await renderHook(() => useMapStartup(model));
-  expect(model.onReady).not.toHaveBeenCalled();
-  await act(async () => view.result.current?.());
-  expect(model.onReady).toHaveBeenCalledTimes(1);
-});
-
-test.each([
-  ["HTTP error", response(undefined, false)],
-  ["missing tiles", response({})],
-  ["invalid tiles", response({ tiles: [42] })],
-])(
-  "reports basemap %s instead of accepting a fully rendered blank map",
-  async (_label, result) => {
-    fetchMock.mockResolvedValue(result);
-    const model = startup();
-    const view = await renderHook(() => useMapStartup(model));
-    await act(async () => view.result.current?.());
-    await waitFor(() => expect(model.onFailure).toHaveBeenCalledTimes(1));
-    expect(model.onReady).not.toHaveBeenCalled();
+test.each([null, "error", "ready"] as const)(
+  "inactive startup (%s) initiates no check or render callback",
+  async (status) => {
+    const view = await renderHook(() =>
+      useMapStartup(status === null ? null : { ...startup(), status }),
+    );
+    expect(view.result.current).toBeUndefined();
+    for (const attempt of createAttempt.mock.results) {
+      expect(attempt.value.check).not.toHaveBeenCalled();
+    }
   },
 );
 
-test("network failure enters the startup error path", async () => {
-  fetchMock.mockRejectedValue(new Error("offline"));
-  const model = startup();
-  await renderHook(() => useMapStartup(model));
-  await waitFor(() => expect(model.onFailure).toHaveBeenCalledTimes(1));
-  expect(model.onReady).not.toHaveBeenCalled();
+test("loading only starts a check on native platforms", async () => {
+  await renderHook(() => useMapStartup(startup()));
+  const attempt = createAttempt.mock.results[0].value;
+  expect(attempt.check).toHaveBeenCalledTimes(
+    process.env.EXPO_OS === "web" ? 0 : 1,
+  );
 });
 
-test("unmount aborts the old attempt and ignores its late network failure", async () => {
-  let reject!: (error: Error) => void;
-  fetchMock.mockReturnValue(
-    new Promise((_resolve, fail) => {
-      reject = fail;
-    }),
-  );
+nativeTest(
+  "delegates stable render events and startup callbacks to the attempt",
+  async () => {
+    const model = startup();
+    const view = await renderHook(() => useMapStartup(model));
+    const attempt = createAttempt.mock.results[0].value;
+    expect(createAttempt).toHaveBeenCalledWith({
+      onReady: model.onReady,
+      onFailure: model.onFailure,
+    });
+    await act(async () => view.result.current?.());
+    expect(attempt.onRendered).toHaveBeenCalledTimes(1);
+    await view.rerender(undefined);
+    expect(view.result.current).toBe(attempt.onRendered);
+    expect(createAttempt).toHaveBeenCalledTimes(1);
+    expect(attempt.check).toHaveBeenCalledTimes(1);
+  },
+);
+
+nativeTest("unmount cancels the attempt's request", async () => {
   const model = startup();
   const view = await renderHook(() => useMapStartup(model));
-  const signal = fetchMock.mock.calls[0][1]?.signal;
+  const attempt = createAttempt.mock.results[0].value;
+  const signal: AbortSignal = attempt.check.mock.calls[0][0];
+  expect(signal.aborted).toBe(false);
   await view.unmount();
-  expect(signal?.aborted).toBe(true);
-  await act(async () => reject(new Error("cancelled")));
-  expect(model.onFailure).not.toHaveBeenCalled();
+  expect(signal.aborted).toBe(true);
 });
 
-test("startup failure cancels an outstanding basemap request", async () => {
-  fetchMock.mockReturnValue(new Promise(() => {}));
+nativeTest.each(["error", "ready"] as const)(
+  "startup %s cancels its outstanding request",
+  async (status) => {
+    const model = startup();
+    const view = await renderHook(
+      (props: AppStartupActions) => useMapStartup(props),
+      { initialProps: model },
+    );
+    const attempt = createAttempt.mock.results[0].value;
+    const signal: AbortSignal = attempt.check.mock.calls[0][0];
+    await view.rerender({ ...model, status });
+    expect(signal.aborted).toBe(true);
+    expect(view.result.current).toBeUndefined();
+  },
+);
+
+nativeTest("retry remounts with a fresh attempt and signal", async () => {
   const model = startup();
-  const view = await renderHook(
-    ({ status }: Pick<AppStartupActions, "status">) =>
-      useMapStartup({ ...model, status }),
-    {
-      initialProps: { status: "loading" as AppStartupActions["status"] },
-    },
-  );
-  const signal = fetchMock.mock.calls[0][1]?.signal;
-  await view.rerender({ status: "error" });
-  expect(signal?.aborted).toBe(true);
+  const first = await renderHook(() => useMapStartup(model));
+  const old = createAttempt.mock.results[0].value;
+  const oldSignal: AbortSignal = old.check.mock.calls[0][0];
+  await first.unmount();
+  const retry = await renderHook(() => useMapStartup(model));
+  const current = createAttempt.mock.results[1].value;
+  expect(oldSignal.aborted).toBe(true);
+  expect(current).not.toBe(old);
+  expect(current.check.mock.calls[0][0].aborted).toBe(false);
+  expect(retry.result.current).toBe(current.onRendered);
 });
+
+nativeTest(
+  "changed attempt callbacks abort the previous check and create a fresh attempt",
+  async () => {
+    const view = await renderHook(
+      (props: AppStartupActions) => useMapStartup(props),
+      { initialProps: startup() },
+    );
+    const old = createAttempt.mock.results[0].value;
+    await view.rerender(startup());
+    const current = createAttempt.mock.results[1].value;
+    expect(old.check.mock.calls[0][0].aborted).toBe(true);
+    expect(current).not.toBe(old);
+    expect(current.check).toHaveBeenCalledTimes(1);
+  },
+);
