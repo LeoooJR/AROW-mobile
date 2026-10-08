@@ -10,6 +10,11 @@ import type { Milestone } from "@/features/milestones/domain/milestone";
 import type { SimulationState } from "@/features/simulation/simulation-state";
 
 import Index from "@/app/index";
+import { useAssets } from "expo-asset";
+import { AppStartupContext } from "@/features/app-startup/context";
+jest.mock("@/hooks/features/use-map-startup", () => ({
+  useMapStartup: () => undefined,
+}));
 
 const mockStartSimulation = jest.fn();
 const mockStopSimulation = jest.fn();
@@ -24,7 +29,7 @@ jest.mock("@/hooks/features/use-simulation", () => ({
 }));
 
 jest.mock("expo-asset", () => ({
-  useAssets: () => [
+  useAssets: jest.fn(() => [
     [
       {
         localUri: "file:///railways.geojson",
@@ -36,8 +41,12 @@ jest.mock("expo-asset", () => ({
       },
     ],
     undefined,
-  ],
+  ]),
 }));
+
+const defaultRailwayAssets = jest.mocked(useAssets).getMockImplementation()?.(
+  [],
+);
 
 jest.mock("@/hooks/features/use-railway-reference", () => ({
   useRailwayReference: () => ({
@@ -79,9 +88,11 @@ jest.mock("@/components/adapters/map/map", () => {
     __esModule: true,
     default: ({
       onFeaturePress,
+      onLoadError,
       selectedFeature,
     }: {
       readonly onFeaturePress?: (value: MapFeature) => void;
+      readonly onLoadError?: () => void;
       readonly selectedFeature?: MapFeature;
     }) => {
       const railwayLine = new MockRailway({
@@ -110,7 +121,7 @@ jest.mock("@/components/adapters/map/map", () => {
       });
 
       return (
-        <MockView>
+        <MockView testID="mock-map" {...{ onLoadError }}>
           <MockPressable
             accessibilityLabel="Choisir une ligne test"
             accessibilityRole="button"
@@ -203,7 +214,53 @@ jest.mock("@/components/composites/map-toolbar", () => {
 });
 
 describe("Index map feature selection", () => {
+  test.each(["loading", "error", "ready"] as const)(
+    "only supplies a loading-error callback during startup (%s)",
+    async (status) => {
+      const onFailure = jest.fn();
+      await render(
+        <AppStartupContext.Provider
+          value={{ status, onFailure, onReady: jest.fn() }}
+        >
+          <Index />
+        </AppStartupContext.Provider>,
+      );
+      if (status === "loading") {
+        expect(screen.getByTestId("mock-map")).toHaveProp(
+          "onLoadError",
+          onFailure,
+        );
+      } else {
+        expect(screen.getByTestId("mock-map")).not.toHaveProp("onLoadError");
+      }
+    },
+  );
+  afterEach(() => jest.restoreAllMocks());
+  test("does not mount the native map before both railway assets load", async () => {
+    jest.mocked(useAssets).mockReturnValue([undefined, undefined]);
+    await render(<Index />);
+    expect(screen.queryByTestId("mock-map")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Choisir une ligne test" }),
+    ).toBeNull();
+  });
+  test("reports railway asset errors to startup", async () => {
+    jest
+      .mocked(useAssets)
+      .mockReturnValue([undefined, new Error("missing asset")]);
+    const onFailure = jest.fn();
+    await render(
+      <AppStartupContext.Provider
+        value={{ status: "loading", onFailure, onReady: jest.fn() }}
+      >
+        <Index />
+      </AppStartupContext.Provider>,
+    );
+    expect(onFailure).toHaveBeenCalledTimes(1);
+  });
   beforeEach(() => {
+    if (defaultRailwayAssets)
+      jest.mocked(useAssets).mockReturnValue(defaultRailwayAssets);
     mockSimulationState = { status: "idle" };
     mockStartSimulation.mockReset();
     mockStopSimulation.mockReset();

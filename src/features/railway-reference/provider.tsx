@@ -26,6 +26,7 @@ import railwayReferenceDatabaseAsset from "@/statics/railway_reference.sqlite";
 
 export interface RailwayReferenceProviderProps {
   readonly children: ReactNode;
+  readonly onError?: (error: Error) => void;
 }
 
 function RailwayReferenceDataProvider({
@@ -83,11 +84,21 @@ function RailwayReferenceDataProvider({
 
 export default function RailwayReferenceProvider({
   children,
+  onError,
 }: RailwayReferenceProviderProps): ReactElement {
+  // SQLiteProvider reports initialization errors during render. Defer the
+  // notification so it does not update the root while a child renders.
+  const reportError = useCallback(
+    (error: Error) => {
+      queueMicrotask(() => onError?.(error));
+    },
+    [onError],
+  );
   return (
     <SQLiteProvider
       assetSource={{ assetId: railwayReferenceDatabaseAsset }}
       databaseName="railway_reference.sqlite"
+      onError={onError === undefined ? undefined : reportError}
     >
       <RailwayReferenceDataProvider>{children}</RailwayReferenceDataProvider>
     </SQLiteProvider>

@@ -38,15 +38,19 @@ jest.mock("../global.css", () => ({}));
 
 test("mounts the warning and routes inside the existing provider hierarchy", async () => {
   await render(<RootLayout />);
-  const warning = screen.getByText("Notification warning listener");
-  expect(screen.getByTestId("toast-provider")).toContainElement(warning);
-  expect(screen.getByTestId("toast-provider")).toContainElement(
-    screen.getByTestId("routes"),
+  const hidden = { includeHiddenElements: true };
+  expect(screen.queryByText("Notification warning listener")).toBeNull();
+  const warning = screen.getByText("Notification warning listener", hidden);
+  expect(screen.getByTestId("toast-provider", hidden)).toContainElement(
+    warning,
   );
-  expect(screen.getByTestId("railway-provider")).toContainElement(
-    screen.getByTestId("toast-provider"),
+  expect(screen.getByTestId("toast-provider", hidden)).toContainElement(
+    screen.getByTestId("routes", hidden),
   );
-  expect(screen.getByTestId("simulation-provider")).toContainElement(
-    screen.getByTestId("railway-provider"),
+  expect(screen.getByTestId("railway-provider", hidden)).toContainElement(
+    screen.getByTestId("toast-provider", hidden),
+  );
+  expect(screen.getByTestId("simulation-provider", hidden)).toContainElement(
+    screen.getByTestId("railway-provider", hidden),
   );
 });

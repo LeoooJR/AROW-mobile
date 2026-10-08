@@ -18,6 +18,26 @@ module.exports = function withArowMockLocation(config) {
     }
     manifest["uses-permission"] = permissions;
 
+    // Mock location is an intentional release capability for railway research.
+    manifest.$ ??= {};
+    manifest.$["xmlns:tools"] ??= "http://schemas.android.com/tools";
+    for (const permission of permissions) {
+      if (
+        permission.$["android:name"] !==
+        "android.permission.ACCESS_MOCK_LOCATION"
+      ) {
+        continue;
+      }
+      const ignoredIssues = (permission.$["tools:ignore"] ?? "")
+        .split(",")
+        .map((issue) => issue.trim())
+        .filter(Boolean);
+      if (!ignoredIssues.includes("MockLocation")) {
+        ignoredIssues.push("MockLocation");
+      }
+      permission.$["tools:ignore"] = ignoredIssues.join(",");
+    }
+
     const application = manifest.application?.[0];
     if (application === undefined) {
       throw new Error("Android application manifest is missing");

@@ -41,7 +41,7 @@ before starting the helper below. See the project
 In one terminal, start Metro and leave it running:
 
 ```bash
-./script/build_and_run.sh --dev-client
+./script/start_dev_client.sh --dev-client
 ```
 
 The helper resolves the Android SDK and starts Expo for the installed

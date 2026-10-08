@@ -26,6 +26,54 @@ async function applyManifestMod(manifest) {
 }
 
 describe("mock-location service manifest", () => {
+  test("allows the intentional release mock-location permission without suppressing other checks", async () => {
+    const manifest = await applyManifestMod({ application: [{}] });
+    expect(manifest.$["xmlns:tools"]).toBe("http://schemas.android.com/tools");
+    const permissions = manifest["uses-permission"];
+    expect(
+      permissions.find(
+        (permission) =>
+          permission.$["android:name"] ===
+          "android.permission.ACCESS_MOCK_LOCATION",
+      ).$["tools:ignore"],
+    ).toBe("MockLocation");
+    for (const permission of permissions) {
+      if (
+        permission.$["android:name"] !==
+        "android.permission.ACCESS_MOCK_LOCATION"
+      ) {
+        expect(permission.$["tools:ignore"]).toBeUndefined();
+      }
+    }
+  });
+
+  test.each(["OtherIssue", "OtherIssue, MockLocation"])(
+    "preserves existing lint annotations and permission attributes: %s",
+    async (ignoredIssues) => {
+      const permission = {
+        $: {
+          "android:name": "android.permission.ACCESS_MOCK_LOCATION",
+          "tools:ignore": ignoredIssues,
+          "android:maxSdkVersion": "36",
+        },
+      };
+      const manifest = await applyManifestMod({
+        $: { "xmlns:custom": "urn:custom" },
+        application: [{}],
+        "uses-permission": [permission],
+      });
+      const firstResult = structuredClone(manifest);
+      await applyManifestMod(manifest);
+      expect(manifest).toEqual(firstResult);
+      expect(manifest.$["xmlns:custom"]).toBe("urn:custom");
+      expect(permission.$).toEqual({
+        "android:name": "android.permission.ACCESS_MOCK_LOCATION",
+        "tools:ignore": "OtherIssue,MockLocation",
+        "android:maxSdkVersion": "36",
+      });
+    },
+  );
+
   test("creates a private location service when absent", async () => {
     const manifest = await applyManifestMod({ application: [{}] });
     expect(manifest.application[0].service).toEqual([
