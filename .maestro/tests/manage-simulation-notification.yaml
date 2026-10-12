@@ -21,7 +21,8 @@ tags:
 - extendedWaitUntil:
     visible: "Arrêter la simulation"
     timeout: 10000
-- assertNotVisible: "Notifications désactivées"
+- assertNotVisible:
+    id: "simulation-notification-warning"
 - swipe:
     start: "50%,2%"
     end: "50%,80%"
@@ -55,7 +56,7 @@ tags:
 - assertVisible: "Arrêter la simulation"
 - tapOn: "Arrêter la simulation"
 
-# Revoke consent and prove automatic continuation, expiry, and usable Stop.
+# Revoke consent and prove continuation, persistence, manual dismissal, and Stop.
 - stopApp
 - setPermissions:
     permissions:
@@ -65,17 +66,30 @@ tags:
     id: "simulation-play-pause"
 - tapOn: "Don’t allow"
 - assertVisible: "Arrêter la simulation"
-- assertVisible: "Notifications désactivées"
-- extendedWaitUntil:
-    notVisible: "Notifications désactivées"
-    timeout: 12000
+- assertVisible: "Avertissement"
+- assertVisible:
+    id: "simulation-notification-warning"
+# Keep checking visibility beyond the former eight-second deadline.
+- evalScript: ${output.warningDeadline = Date.now() + 9000}
+- repeat:
+    while:
+      true: ${Date.now() < output.warningDeadline}
+    commands:
+      - assertVisible:
+          id: "simulation-notification-warning"
+- assertVisible:
+    id: "simulation-notification-warning"
+- tapOn: "Fermer le message"
+- assertNotVisible:
+    id: "simulation-notification-warning"
 - assertVisible: "Arrêter la simulation"
 - tapOn: "Arrêter la simulation"
 - tapOn:
     id: "simulation-play-pause"
 # A repeated start after this denial returns without another system prompt.
-# Avoid a conditional prompt lookup: Maestro waits long enough to expire the toast.
-- assertVisible: "Notifications désactivées"
+- assertVisible:
+    id: "simulation-notification-warning"
 - tapOn: "Arrêter la simulation"
-- assertNotVisible: "Notifications désactivées"
+- assertNotVisible:
+    id: "simulation-notification-warning"
 - assertVisible: "Démarrer la simulation"

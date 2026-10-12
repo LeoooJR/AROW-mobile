@@ -4,6 +4,10 @@ import { Text as MockText, View as MockView } from "react-native";
 
 import RootLayout from "../app/_layout";
 
+jest.mock("react-native-safe-area-context", () => ({
+  useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
+}));
+
 jest.mock("expo-router", () => {
   const Stack = ({ children }: { children: ReactNode }) => (
     <MockView testID="routes">{children}</MockView>
