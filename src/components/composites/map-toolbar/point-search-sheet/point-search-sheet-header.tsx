@@ -1,19 +1,12 @@
 import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
-import CloseIcon from "@/components/primitives/icons/close-icon";
-import IconButton from "@/components/primitives/icon-button";
-
 interface PointSearchSheetHeaderProps {
   readonly compact: boolean;
-  readonly iconColor: string;
-  readonly onClose: () => void;
 }
 
 export default function PointSearchSheetHeader({
   compact,
-  iconColor,
-  onClose,
 }: PointSearchSheetHeaderProps): ReactElement {
   return (
     <>
@@ -29,16 +22,6 @@ export default function PointSearchSheetHeader({
             Ligne, section, puis repère kilométrique.
           </Text>
         </View>
-        <IconButton
-          aria-label="Fermer la recherche"
-          className="-mt-1.5"
-          onPress={onClose}
-          role="button"
-          testID="close-point-search"
-          variant="ghost"
-        >
-          <CloseIcon color={iconColor} />
-        </IconButton>
       </View>
     </>
   );

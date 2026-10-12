@@ -54,11 +54,7 @@ export default function PointSearchSheet({
         style={{ flex: 1 }}
         testID="point-search-sheet"
       >
-        <PointSearchSheetHeader
-          compact={compact}
-          iconColor={palette.icon}
-          onClose={onDismiss}
-        />
+        <PointSearchSheetHeader compact={compact} />
         <ScrollView
           contentContainerStyle={{
             paddingBottom: Math.max(90, 76 + insets.bottom),

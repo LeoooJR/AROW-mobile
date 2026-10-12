@@ -45,8 +45,9 @@ tags:
 - tapOn:
     id: "milestones-layer-switch"
 - assertVisible: "Afficher les points kilométriques"
-- tapOn:
-    id: "close-layers-button"
+- swipe:
+    start: "50%,84%"
+    end: "50%,98%"
 - assertNotVisible: "Couches ferroviaires"
 - waitForAnimationToEnd
 - tapOn:
@@ -69,8 +70,9 @@ tags:
 - tapOn:
     id: "milestones-layer-switch"
 - assertVisible: "Masquer les points kilométriques"
-- tapOn:
-    id: "close-layers-button"
+- swipe:
+    start: "50%,84%"
+    end: "50%,98%"
 - waitForAnimationToEnd
 - tapOn:
     point: "16%,34%"

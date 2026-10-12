@@ -430,6 +430,9 @@ describe("MapToolbar", () => {
     const user = userEvent.setup();
     await render(<ControlledToolbar />);
     await user.press(screen.getByTestId("open-point-search"));
+    expect(
+      screen.queryByRole("button", { name: "Fermer la recherche" }),
+    ).not.toBeOnTheScreen();
     await user.type(
       screen.getByLabelText("Nom de ligne ou code unique"),
       "893000",
@@ -510,8 +513,13 @@ describe("MapToolbar", () => {
       paddingBottom: 20,
     });
 
-    await user.press(
-      screen.getByRole("button", { name: "Fermer les couches" }),
+    expect(
+      screen.queryByRole("button", { name: "Fermer les couches" }),
+    ).not.toBeOnTheScreen();
+    await fireEvent.press(
+      screen.getByTestId("mock-native-sheet-dismiss", {
+        includeHiddenElements: true,
+      }),
     );
 
     expect(screen.queryByTestId("map-layers-sheet")).not.toBeOnTheScreen();
