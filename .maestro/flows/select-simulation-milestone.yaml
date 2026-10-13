@@ -9,13 +9,24 @@ appId: com.leooojrrr.AROWmobile
     visible:
       id: "arow-map"
     timeout: 120000
+- retry:
+    maxRetries: 2
+    commands:
+      - runFlow:
+          when:
+            visible: "Réessayer"
+          commands:
+            - tapOn: "Réessayer"
+      - extendedWaitUntil:
+          notVisible:
+            id: "startup-screen"
+          timeout: 45000
 - tapOn:
     id: "open-point-search"
 - tapOn:
     id: "line-search-input"
 - waitForAnimationToEnd:
     timeout: 2000
-- eraseText
 - inputText: "893000"
 - extendedWaitUntil:
     visible:

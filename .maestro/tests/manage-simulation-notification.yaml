@@ -15,8 +15,12 @@ tags:
       location: allow
       notifications: unset
 - runFlow: ../flows/select-simulation-milestone.yaml
-- tapOn:
-    id: "simulation-play-pause"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn:
+          id: "simulation-play-pause"
+      - assertVisible: "Allow"
 - tapOn: "Allow"
 - extendedWaitUntil:
     visible: "Arrêter la simulation"
@@ -27,20 +31,47 @@ tags:
     start: "50%,2%"
     end: "50%,80%"
     duration: 500
-- assertVisible: "Simulation AROW active"
+- assertVisible: "Simulation de position active"
+- runFlow:
+    when:
+      visible: "La simulation continue en arrière-plan\\. Vous pouvez l’arrêter dans AROW\\."
+    commands:
+      - tapOn:
+          id: "android:id/expand_button"
+          text: "Collapse"
+          childOf:
+            id: "android:id/notification_header"
+            containsDescendants:
+              - text: "AROW-mobile"
+- assertNotVisible: "La simulation continue en arrière-plan\\. Vous pouvez l’arrêter dans AROW\\."
+- takeScreenshot: .maestro/artifacts/active-notification-collapsed
+- assertNotVisible: "Mettre en pause"
+- assertNotVisible: "Reprendre"
+- assertNotVisible: "Arrêter"
+- tapOn:
+    id: "android:id/expand_button"
+    childOf:
+      id: "android:id/expand_button_touch_container"
+      childOf:
+        id: "android:id/notification_headerless_view_row"
+        childOf:
+          id: "android:id/status_bar_latest_event_content"
+          containsDescendants:
+            - text: "Simulation de position active"
+- assertVisible: "Une position ferroviaire simulée est appliquée\\."
+- assertVisible: "La simulation continue en arrière-plan\\. Vous pouvez l’arrêter dans AROW\\."
+- takeScreenshot: .maestro/artifacts/active-notification-expanded
 - pressKey: Back
 - pressKey: Home
 - swipe:
     start: "50%,2%"
     end: "50%,80%"
     duration: 500
-- assertVisible: "Simulation AROW active"
-- pressKey: Back
-- launchApp:
-    stopApp: false
-    permissions:
-      location: allow
-      notifications: allow
+- assertVisible: "Simulation de position active"
+- tapOn: "Simulation de position active"
+- extendedWaitUntil:
+    visible: "Arrêter la simulation"
+    timeout: 10000
 - tapOn: "Arrêter la simulation"
 - extendedWaitUntil:
     visible: "Démarrer la simulation"
@@ -49,7 +80,7 @@ tags:
     start: "50%,2%"
     end: "50%,80%"
     duration: 500
-- assertNotVisible: "Simulation AROW active"
+- assertNotVisible: "Simulation de position active"
 - pressKey: Back
 - tapOn:
     id: "simulation-play-pause"
