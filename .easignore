@@ -34,6 +34,9 @@ expo-env.d.ts
 /src/statics/railway_reference.sqlite
 /src/statics/.railway-database-*
 
+# Local security audit
+/security_best_practices_report.md
+
 # Logs
 *.log
 npm-debug.*
@@ -57,6 +60,41 @@ coverage/
 # Operating system files
 .DS_Store
 Thumbs.db
+
+# Development references and tooling (all build profiles)
+/design-prototype/
+/docs/
+/.maestro/
+/.agents/
+/.codex/
+/.vscode/
+/skills-lock.json
+**/*.md
+
+# Tests and test/lint configuration
+**/*.test.*
+**/*.spec.*
+**/__tests__/
+**/__mocks__/
+/src/test/
+/jest.config.*
+/eslint.config.*
+
+# Generated local-module outputs; keep native sources and resources
+/modules/**/android/build/
+/modules/**/android/.gradle/
+/modules/**/android/.cxx/
+
+# Unused starter artwork retained locally for development
+/assets/images/android-icon-background.png
+/assets/images/expo-badge.png
+/assets/images/expo-badge-white.png
+/assets/images/expo-logo.png
+/assets/images/logo-glow.png
+/assets/images/react-logo*.png
+/assets/images/splash-icon.png
+/assets/images/tabIcons/
+/assets/images/tutorial-web.png
 
 # Generated railway assets required by EAS Build
 !/src/statics/lignes-par-type.geojson

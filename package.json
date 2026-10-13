@@ -76,7 +76,6 @@
     "database:setup": "node --import=tsx ./script/update-railway-database.ts",
     "prestart": "npm run database:check",
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
     "preandroid": "npm run database:check",
     "android": "expo start --android",
     "preios": "npm run database:check",
