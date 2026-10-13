@@ -156,6 +156,20 @@ decision, follow that theme's prototype; use `DESIGN.md` for complementary
 design guidance where the prototypes are silent. These sources take precedence
 over local component, hook, or constants guidance when design rules conflict.
 
+## Gluestack component acquisition
+
+Agents must not install or execute the `gluestack-ui` CLI, at any version,
+through a package runner, global installation, project script, or direct
+invocation. This includes initialization, component generation, and updates.
+
+Use the **Manual** installation instructions on the
+[official component documentation](https://gluestack.io/ui/docs/components/all-components).
+Copy component source into the project and review it before integration. Follow
+[`src/components/CONTEXT.md`](src/components/CONTEXT.md) for placement,
+compatibility, design, and accessibility requirements. Review any proposed
+dependency changes explicitly; manually copied components may still depend on
+the existing `@gluestack-ui/core` and `@gluestack-ui/utils` runtime packages.
+
 ## Scoped source contexts
 
 Before creating, moving, or modifying files in these directories, read and

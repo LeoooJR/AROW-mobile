@@ -132,7 +132,7 @@ documentation required by the repository-level `AGENTS.md`.
 ## Gluestack UI v5
 
 Gluestack UI is installed as a source-owned component library on top of
-NativeWind v5 and Tailwind CSS v4. Generated gluestack components belong in
+NativeWind v5 and Tailwind CSS v4. Manually copied gluestack components belong in
 `src/components/adapters`; application code must import them directly through
 the `@/components/adapters/<component>` boundary rather than importing
 `@gluestack-ui/*` package APIs.
@@ -142,11 +142,18 @@ normal adapter dependency direction: it owns gluestack overlay and toast
 providers and is mounted once by `src/app/_layout.tsx`. Do not mount additional
 copies in routes or feature components.
 
-Use `npx gluestack-ui@latest add <component>` to add components. The repository's
-`gluestack-ui.config.json` keeps CLI output inside `src/components/adapters`.
-Review generated code before use so it follows this context, `DESIGN.md`, the
-project's semantic theme tokens, accessibility requirements, kebab-case naming,
-and strict TypeScript rules.
+Agents must not install or run the `gluestack-ui` CLI at any version, including
+through `npx`, `npm exec`, `yarn dlx`, `pnpm dlx`, global commands, or project
+scripts. Use the **Manual** installation tab in the official component
+documentation and copy the required source into `src/components/adapters`.
+
+Review and adapt copied code before use so it follows this context, `DESIGN.md`,
+the project's semantic theme tokens, accessibility requirements, kebab-case
+naming, and strict TypeScript rules. Verify compatibility with Expo SDK 57,
+NativeWind v5, and Tailwind CSS v4. Prefer existing application-owned primitives
+when they already provide the required behavior and presentation. Review
+dependency instructions separately; manual copying can still require Gluestack
+runtime packages and must not trigger automatic dependency installation.
 
 **Before using any component, always verify the latest usage patterns at**
 **https://gluestack.io/ui/docs/components/${componentName}/**.
