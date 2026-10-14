@@ -1,6 +1,6 @@
 import type { MilestoneResolution } from "@/features/milestones/search/contracts";
-import type { Railway } from "@/features/railways/railway";
-import type { RailwaySection } from "@/features/railways/railway-section";
+import type { Railway } from "@/features/railways/domain/railway";
+import type { RailwaySection } from "@/features/railways/domain/railway-section";
 
 export interface LineSearchFormModel {
   readonly changeQuery: (query: string) => void;

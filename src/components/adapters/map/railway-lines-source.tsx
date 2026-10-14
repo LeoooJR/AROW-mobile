@@ -13,8 +13,8 @@ import {
   isCanonicalRailwayLineCode,
   RailwaySectionKey,
 } from "@shared/railway-reference/values";
-import { Railway } from "@/features/railways/railway";
-import type { RailwaySection } from "@/features/railways/railway-section";
+import { Railway } from "@/features/railways/domain/railway";
+import type { RailwaySection } from "@/features/railways/domain/railway-section";
 import {
   isNonEmptyString,
   isPositiveInteger,

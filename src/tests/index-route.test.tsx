@@ -76,8 +76,8 @@ jest.mock("@/components/adapters/map/map", () => {
     typeof import("@/features/milestones/domain/milestone")
   >("@/features/milestones/domain/milestone");
   const { Railway: MockRailway } = jest.requireActual<
-    typeof import("@/features/railways/railway")
-  >("@/features/railways/railway");
+    typeof import("@/features/railways/domain/railway")
+  >("@/features/railways/domain/railway");
   const {
     Pressable: MockPressable,
     Text: MockText,

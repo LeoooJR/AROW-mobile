@@ -1,11 +1,11 @@
-import type { Railway } from "@/features/railways/railway";
+import type { Railway } from "@/features/railways/domain/railway";
 import { normalizeSearchText } from "@/utils/search-text";
 
 function isCodeQuery(query: string): boolean {
   return /^\d+$/.test(query);
 }
 
-export function isMilestoneLineQueryReady(query: string): boolean {
+export function isRailwayQueryReady(query: string): boolean {
   const normalizedQuery = normalizeSearchText(query);
   if (normalizedQuery.length === 0) {
     return false;
@@ -52,7 +52,7 @@ export function searchRailways(
   query: string,
   limit = 20,
 ): readonly Railway[] {
-  if (!isMilestoneLineQueryReady(query)) {
+  if (!isRailwayQueryReady(query)) {
     return [];
   }
 

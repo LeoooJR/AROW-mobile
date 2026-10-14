@@ -28,7 +28,7 @@ The form has three steps:
 
 For example, searching for code **893000** finds **Ligne de Collonges-Fontaines à Lyon-Guillotière**. Selecting its section **1**, then entering `509` + `000`, requests the point at **509,000 metres** along that section.
 
-[`usePointSearchForm`](../src/components/composites/map-toolbar/point-search-sheet/use-point-search-form.ts) holds the form state. [`searchRailways`](../src/features/milestones/search/railway-search.ts) filters the loaded lines, while [`validateMilestoneInput`](../src/features/milestones/search/milestone-input.ts) checks the entered point.
+[`usePointSearchForm`](../src/components/composites/map-toolbar/point-search-sheet/use-point-search-form.ts) holds the form state. [`searchRailways`](../src/features/railways/search/railway-search.ts) filters the loaded lines, while [`validateMilestoneInput`](../src/features/milestones/search/milestone-input.ts) checks the entered point.
 
 ## 2. Resolve and select the milestone
 

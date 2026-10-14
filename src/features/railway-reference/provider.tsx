@@ -10,10 +10,8 @@ import {
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 
 import type { Milestone } from "@/features/milestones/domain/milestone";
-import type {
-  MilestoneLookupInput,
-  MilestoneSearchState,
-} from "@/features/milestones/search/contracts";
+import type { MilestoneLookupInput } from "@/features/milestones/search/contracts";
+import type { RailwaySearchState } from "@/features/railways/search/contracts";
 import {
   RailwayReferenceContext,
   type RailwayReferenceModel,
@@ -33,7 +31,7 @@ function RailwayReferenceDataProvider({
   children,
 }: RailwayReferenceProviderProps): ReactElement {
   const database = useSQLiteContext();
-  const [searchState, setSearchState] = useState<MilestoneSearchState>({
+  const [searchState, setSearchState] = useState<RailwaySearchState>({
     status: "idle",
   });
   const catalogLoadStarted = useRef(false);

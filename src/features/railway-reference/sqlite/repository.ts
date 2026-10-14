@@ -8,7 +8,7 @@ import {
   FIND_MILESTONE_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
 } from "@/features/railway-reference/sqlite/queries";
-import type { Railway } from "@/features/railways/railway";
+import type { Railway } from "@/features/railways/domain/railway";
 import { decodeKilometricPointDatabaseRow } from "@shared/railway-reference/records";
 
 function milestoneFromDatabaseRow(value: unknown, context: string): Milestone {

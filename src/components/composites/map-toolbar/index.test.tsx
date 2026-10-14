@@ -11,11 +11,9 @@ import {
   type MapLayerVisibility,
 } from "@/components/adapters/map/map-layer-visibility";
 import { Milestone } from "@/features/milestones/domain/milestone";
-import type {
-  MilestoneSearchModel,
-  MilestoneSearchState,
-} from "@/features/milestones/search/contracts";
-import { Railway } from "@/features/railways/railway";
+import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
+import type { RailwaySearchState } from "@/features/railways/search/contracts";
+import { Railway } from "@/features/railways/domain/railway";
 
 import MapToolbar from "./index";
 
@@ -48,7 +46,7 @@ const milestoneSearch = {
     }),
   ],
   status: "ready",
-} satisfies MilestoneSearchState;
+} satisfies RailwaySearchState;
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -132,7 +130,7 @@ function ControlledToolbar({
   readonly onMapFocusChange?: jest.Mock;
   readonly onMilestoneSelect?: jest.Mock;
   readonly onVisibilityChange?: jest.Mock;
-  readonly searchState?: MilestoneSearchState;
+  readonly searchState?: RailwaySearchState;
 }) {
   const [mapFocused, setMapFocused] = useState(initiallyFocused);
   const [visibility, setVisibility] = useState<MapLayerVisibility>(

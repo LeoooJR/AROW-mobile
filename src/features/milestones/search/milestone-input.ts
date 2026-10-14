@@ -1,5 +1,5 @@
 import { outOfRangeMilestoneResolution } from "@/features/milestones/search/resolution-messages";
-import type { RailwaySection } from "@/features/railways/railway-section";
+import type { RailwaySection } from "@/features/railways/domain/railway-section";
 import { parseMilestoneLabel } from "@shared/railway-reference/values";
 
 import type { MilestoneInputResolution } from "./contracts";

@@ -1,6 +1,6 @@
-import { Railway } from "@/features/railways/railway";
+import { Railway } from "@/features/railways/domain/railway";
 
-import { isMilestoneLineQueryReady, searchRailways } from "./railway-search";
+import { isRailwayQueryReady, searchRailways } from "./railway-search";
 
 function createRailway(code: string, name: string): Railway {
   return new Railway({
@@ -30,7 +30,7 @@ describe("railway search", () => {
     ["é", false],
     ["1", true],
   ] as const)("reports whether query %p can be searched", (query, ready) => {
-    expect(isMilestoneLineQueryReady(query)).toBe(ready);
+    expect(isRailwayQueryReady(query)).toBe(ready);
   });
 
   test("searches accent-insensitive names and code prefixes with a result cap", () => {

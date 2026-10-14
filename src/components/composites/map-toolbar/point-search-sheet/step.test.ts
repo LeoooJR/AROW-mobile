@@ -3,8 +3,8 @@ import MilestoneStep from "@/components/composites/map-toolbar/point-search-shee
 import SectionStep from "@/components/composites/map-toolbar/point-search-sheet/section-step";
 import { Milestone } from "@/features/milestones/domain/milestone";
 import type { MilestoneResolution } from "@/features/milestones/search/contracts";
-import { Railway } from "@/features/railways/railway";
-import type { RailwaySection } from "@/features/railways/railway-section";
+import { Railway } from "@/features/railways/domain/railway";
+import type { RailwaySection } from "@/features/railways/domain/railway-section";
 
 const milestone = new Milestone({
   coordinates: { latitude: 45.74744, longitude: 4.85933 },

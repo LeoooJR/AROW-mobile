@@ -10,8 +10,8 @@ import {
   milestoneLookupErrorResolution,
   unavailableMilestoneResolution,
 } from "@/features/milestones/search/resolution-messages";
-import type { Railway } from "@/features/railways/railway";
-import type { RailwaySection } from "@/features/railways/railway-section";
+import type { Railway } from "@/features/railways/domain/railway";
+import type { RailwaySection } from "@/features/railways/domain/railway-section";
 
 interface LookupResult {
   readonly key: string;

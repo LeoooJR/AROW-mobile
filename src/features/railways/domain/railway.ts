@@ -2,7 +2,7 @@ import { canonicalRailwayLineCode } from "@shared/railway-reference/values";
 import {
   RailwaySection,
   type RailwaySectionInput,
-} from "@/features/railways/railway-section";
+} from "@/features/railways/domain/railway-section";
 import { isNonEmptyString } from "@shared/value-validation";
 
 export interface RailwayInput {

@@ -1,8 +1,8 @@
 import type { Dispatch } from "react";
 
 import type { PointSearchFormAction } from "@/components/composites/map-toolbar/point-search-sheet/point-search-form-reducer";
-import type { Railway } from "@/features/railways/railway";
-import type { RailwaySection } from "@/features/railways/railway-section";
+import type { Railway } from "@/features/railways/domain/railway";
+import type { RailwaySection } from "@/features/railways/domain/railway-section";
 
 export interface PointSearchFormActions {
   readonly changeKilometer: (value: string) => void;

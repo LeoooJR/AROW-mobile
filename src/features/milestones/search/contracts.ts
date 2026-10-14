@@ -1,15 +1,5 @@
 import type { Milestone } from "@/features/milestones/domain/milestone";
-import type { Railway } from "@/features/railways/railway";
-
-export type MilestoneSearchState =
-  | { readonly status: "idle" }
-  | { readonly status: "loading" }
-  | { readonly status: "unavailable" }
-  | { readonly status: "error" }
-  | {
-      readonly railways: readonly Railway[];
-      readonly status: "ready";
-    };
+import type { RailwaySearchState } from "@/features/railways/search/contracts";
 
 export interface MilestoneLookupInput {
   readonly lineCode: string;
@@ -22,7 +12,7 @@ export interface MilestoneSearchModel {
     input: MilestoneLookupInput,
   ) => Promise<Milestone | undefined>;
   readonly loadRailways: () => void;
-  readonly state: MilestoneSearchState;
+  readonly state: RailwaySearchState;
 }
 
 export type MilestoneResolution =

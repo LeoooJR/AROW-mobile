@@ -10,10 +10,10 @@ import pointSearchFormReducer, {
 import useMilestoneResolution from "@/components/composites/map-toolbar/point-search-sheet/use-milestone-resolution";
 import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
 import {
-  isMilestoneLineQueryReady,
+  isRailwayQueryReady,
   searchRailways,
-} from "@/features/milestones/search/railway-search";
-import type { Railway } from "@/features/railways/railway";
+} from "@/features/railways/search/railway-search";
+import type { Railway } from "@/features/railways/domain/railway";
 
 const EMPTY_RAILWAYS: readonly Railway[] = [];
 
@@ -52,7 +52,7 @@ export default function usePointSearchForm(
     line: {
       changeQuery,
       query: state.query,
-      queryReady: isMilestoneLineQueryReady(state.query),
+      queryReady: isRailwayQueryReady(state.query),
       reset: resetLine,
       results,
       select: selectSearchLine,

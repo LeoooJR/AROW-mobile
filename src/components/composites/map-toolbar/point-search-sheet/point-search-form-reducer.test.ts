@@ -4,8 +4,8 @@ import pointSearchFormReducer, {
   selectedSection,
   type PointSearchFormState,
 } from "@/components/composites/map-toolbar/point-search-sheet/point-search-form-reducer";
-import { Railway } from "@/features/railways/railway";
-import type { RailwaySection } from "@/features/railways/railway-section";
+import { Railway } from "@/features/railways/domain/railway";
+import type { RailwaySection } from "@/features/railways/domain/railway-section";
 
 function createLine(ranks: readonly number[]): Railway {
   return new Railway({

@@ -1,4 +1,4 @@
-import { Railway } from "@/features/railways/railway";
+import { Railway } from "@/features/railways/domain/railway";
 
 import {
   parsePastedMilestone,

@@ -7,8 +7,8 @@ import PointSearchStepHeader from "@/components/composites/map-toolbar/point-sea
 import RailwayLineResult from "@/components/composites/map-toolbar/point-search-sheet/railway-line-result";
 import Button from "@/components/primitives/button";
 import TextField from "@/components/primitives/text-field";
-import type { MilestoneSearchState } from "@/features/milestones/search/contracts";
-import type { Railway } from "@/features/railways/railway";
+import type { RailwaySearchState } from "@/features/railways/search/contracts";
+import type { Railway } from "@/features/railways/domain/railway";
 
 interface RailwayLineStepProps {
   readonly onQueryChange: (query: string) => void;
@@ -18,7 +18,7 @@ interface RailwayLineStepProps {
   readonly query: string;
   readonly queryReady: boolean;
   readonly results: readonly Railway[];
-  readonly searchState: MilestoneSearchState;
+  readonly searchState: RailwaySearchState;
   readonly selectedLine?: Railway;
 }
 

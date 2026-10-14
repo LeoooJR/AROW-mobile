@@ -1,5 +1,5 @@
 import { AbstractRailwayNetworkFeature } from "@/features/map-features/abstract-railway-network-feature";
-import type { Railway } from "@/features/railways/railway";
+import type { Railway } from "@/features/railways/domain/railway";
 import { isNonEmptyString, isUnsignedInteger } from "@shared/value-validation";
 import { isMilestoneLabelForPosition } from "@shared/railway-reference/values";
 

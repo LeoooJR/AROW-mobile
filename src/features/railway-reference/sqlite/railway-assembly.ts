@@ -1,8 +1,8 @@
-import { Railway } from "@/features/railways/railway";
+import { Railway } from "@/features/railways/domain/railway";
 import type {
   RailwaySectionGeometry,
   RailwaySectionInput,
-} from "@/features/railways/railway-section";
+} from "@/features/railways/domain/railway-section";
 import {
   isNonEmptyString,
   isRecord,

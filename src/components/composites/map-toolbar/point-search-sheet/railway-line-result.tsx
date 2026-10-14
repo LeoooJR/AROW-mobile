@@ -2,7 +2,7 @@ import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
 import Button from "@/components/primitives/button";
-import type { Railway } from "@/features/railways/railway";
+import type { Railway } from "@/features/railways/domain/railway";
 
 interface RailwayLineResultProps {
   readonly line: Railway;

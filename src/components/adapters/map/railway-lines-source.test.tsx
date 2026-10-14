@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
 import { RailwaySectionKey } from "@shared/railway-reference/values";
-import { RailwaySection } from "@/features/railways/railway-section";
+import { RailwaySection } from "@/features/railways/domain/railway-section";
 
 import { MAP_LAYER_IDS } from "./map-layer-ids";
 import RailwayLinesSource from "./railway-lines-source";

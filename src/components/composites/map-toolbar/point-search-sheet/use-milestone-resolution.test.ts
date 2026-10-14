@@ -3,7 +3,7 @@ import { renderHook, waitFor } from "@testing-library/react-native";
 import useMilestoneResolution from "@/components/composites/map-toolbar/point-search-sheet/use-milestone-resolution";
 import { Milestone } from "@/features/milestones/domain/milestone";
 import type { MilestoneLookupInput } from "@/features/milestones/search/contracts";
-import { Railway } from "@/features/railways/railway";
+import { Railway } from "@/features/railways/domain/railway";
 
 const line = new Railway({
   code: "893000",
