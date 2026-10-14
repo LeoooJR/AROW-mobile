@@ -14,8 +14,8 @@ import { useSimulation } from "@/hooks/features/use-simulation";
 import {
   useRealLocation,
   type UseRealLocationResult,
-} from "@/hooks/platform/use-real-location";
-import type { LocationState } from "@/hooks/platform/real-location-state";
+} from "@/hooks/features/use-real-location";
+import type { LocationState } from "@/features/real-location/real-location-state";
 import type { LocationDescriptor } from "@/types/location-descriptor";
 
 type LocationAction = Pick<

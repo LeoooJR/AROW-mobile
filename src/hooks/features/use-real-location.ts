@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
 import { AppState } from "react-native";
 
-import { RealLocationController } from "./real-location-controller";
-import { realLocationSource } from "./real-location-source";
-import type { LocationState } from "./real-location-state";
-
-export type {
-  LocationState,
-  RealLocationState,
-  MockedLocationState,
-} from "./real-location-state";
+import { RealLocationController } from "@/features/real-location/real-location-controller";
+import { realLocationSource } from "@/features/real-location/real-location-source";
+import type { LocationState } from "@/features/real-location/real-location-state";
 
 export interface UseRealLocationResult {
   readonly openSettings: () => void;

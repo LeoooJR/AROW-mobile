@@ -14,7 +14,7 @@ import {
 import type {
   MockedLocationState,
   RealLocationState,
-} from "@/hooks/platform/real-location-state";
+} from "@/features/real-location/real-location-state";
 
 export interface LocationBarProps {
   readonly onAction?: () => void;

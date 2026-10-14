@@ -62,7 +62,7 @@ jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ bottom: 0, left: 0, right: 0, top: 0 }),
 }));
 
-jest.mock("@/hooks/platform/use-real-location", () => ({
+jest.mock("@/hooks/features/use-real-location", () => ({
   useRealLocation: () => ({
     openSettings: jest.fn(),
     requestAccess: jest.fn(),

@@ -4,7 +4,7 @@ import getLocationPresentation from "@/components/composites/location-bar/locati
 import { Milestone } from "@/features/milestones/domain/milestone";
 import { useMapLocation } from "@/features/map-screen/use-map-location";
 import type { SimulationState } from "@/features/simulation/simulation-state";
-import type { LocationState } from "@/hooks/platform/use-real-location";
+import type { LocationState } from "@/features/real-location/real-location-state";
 
 const mockStart = jest.fn();
 const mockStop = jest.fn();
@@ -23,7 +23,7 @@ jest.mock("@/hooks/features/use-simulation", () => ({
     stop: mockStop,
   }),
 }));
-jest.mock("@/hooks/platform/use-real-location", () => ({
+jest.mock("@/hooks/features/use-real-location", () => ({
   useRealLocation: () => ({
     openSettings: mockOpenSettings,
     requestAccess: mockRequestAccess,

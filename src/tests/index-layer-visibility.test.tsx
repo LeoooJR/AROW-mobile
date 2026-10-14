@@ -50,7 +50,7 @@ jest.mock("@/hooks/features/use-simulation", () => ({
   }),
 }));
 
-jest.mock("@/hooks/platform/use-real-location", () => ({
+jest.mock("@/hooks/features/use-real-location", () => ({
   useRealLocation: () => ({
     openSettings: jest.fn(),
     requestAccess: jest.fn(),
