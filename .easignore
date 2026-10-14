@@ -76,7 +76,7 @@ Thumbs.db
 **/*.spec.*
 **/__tests__/
 **/__mocks__/
-/src/test/
+/src/tests/
 /jest.config.*
 /eslint.config.*
 

@@ -6,7 +6,7 @@ import Map from "@/components/adapters/map/map";
 import LocationBar from "@/components/composites/location-bar";
 import MapFeatureDetailsCard from "@/components/composites/map-feature-details-card";
 import MapToolbar from "@/components/composites/map-toolbar";
-import { AppStartupContext } from "@/features/app-startup/context";
+import { AppStartupContext } from "@/contexts/app-startup-context";
 import { useMapStartup } from "@/hooks/features/use-map-startup";
 import { useMapLocation } from "@/features/map-screen/use-map-location";
 import { useMapSelection } from "@/features/map-screen/use-map-selection";

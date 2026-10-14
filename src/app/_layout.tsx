@@ -7,7 +7,7 @@ import { View } from "react-native";
 import { GluestackUIProvider } from "@/components/adapters/gluestack-ui-provider";
 import SimulationNotificationWarning from "@/components/composites/simulation-notification-warning";
 import StartupScreen from "@/components/composites/startup-screen";
-import { AppStartupContext } from "@/features/app-startup/context";
+import { AppStartupContext } from "@/contexts/app-startup-context";
 import { useAppStartup } from "@/hooks/platform/use-app-startup";
 import RailwayReferenceProvider from "@/features/railway-reference/provider";
 import SimulationProvider from "@/features/simulation/simulation-provider";

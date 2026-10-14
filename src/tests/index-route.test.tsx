@@ -5,13 +5,13 @@ import {
   within,
 } from "@testing-library/react-native";
 
-import type { MapFeature } from "@/features/map-features/map-feature";
+import type { MapFeature } from "@/types/map-feature";
 import type { Milestone } from "@/features/milestones/domain/milestone";
 import type { SimulationState } from "@/features/simulation/simulation-state";
 
 import Index from "@/app/index";
 import { useAssets } from "expo-asset";
-import { AppStartupContext } from "@/features/app-startup/context";
+import { AppStartupContext } from "@/contexts/app-startup-context";
 jest.mock("@/hooks/features/use-map-startup", () => ({
   useMapStartup: () => undefined,
 }));

@@ -52,7 +52,8 @@ dependencies are not allowed.
 
 Feature hooks may import feature-owned contexts and model types. They expose
 those contexts to shared consumers without owning controllers, business workflows,
-data access, or persistence. Providers and contexts stay with their features.
+data access, or persistence. Feature-owned providers and contexts stay with their
+features. Application-wide infrastructure contexts belong in `src/contexts`.
 
 ## Hook API conventions
 

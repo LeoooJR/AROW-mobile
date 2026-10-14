@@ -33,7 +33,7 @@ describe("EAS build asset inclusion", () => {
       "skills-lock.json",
       "AGENTS.md",
       "src/components/CONTEXT.md",
-      "src/test/asset-mock.ts",
+      "src/tests/asset-mock.ts",
       "src/features/simulation/simulation-controller.test.ts",
       "script/eas-build-assets.node.test.ts",
       "modules/arow-mock-location/app.plugin.test.js",

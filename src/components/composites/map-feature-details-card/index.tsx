@@ -9,7 +9,7 @@ import getMapFeatureDetailsPresentation from "@/components/composites/map-featur
 import { MAP_FEATURE_DETAILS_PALETTES } from "@/components/composites/map-feature-details-card/map-feature-details-theme";
 import Card from "@/components/primitives/card";
 import Divider from "@/components/primitives/divider";
-import type { MapFeature } from "@/features/map-features/map-feature";
+import type { MapFeature } from "@/types/map-feature";
 import { resolveColorTheme } from "@/utils/color-theme";
 
 export interface MapFeatureDetailsCardProps {

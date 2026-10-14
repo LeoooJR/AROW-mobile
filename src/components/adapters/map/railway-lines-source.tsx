@@ -8,7 +8,7 @@ import { type ReactElement } from "react";
 import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 
 import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
-import type { MapFeature } from "@/features/map-features/map-feature";
+import type { MapFeature } from "@/types/map-feature";
 import {
   isCanonicalRailwayLineCode,
   RailwaySectionKey,

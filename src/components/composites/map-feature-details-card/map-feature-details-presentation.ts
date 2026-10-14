@@ -1,4 +1,4 @@
-import type { MapFeature } from "@/features/map-features/map-feature";
+import type { MapFeature } from "@/types/map-feature";
 import { formatGeographicCoordinates } from "@/utils/location-format";
 
 export interface MapFeatureDetailsPresentation {
