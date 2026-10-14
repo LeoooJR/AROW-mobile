@@ -20,7 +20,7 @@ import {
   findMilestone as findMilestoneInDatabase,
   findRailwayMilestoneBounds as findBoundsInDatabase,
   loadSearchableRailways,
-} from "@/features/railway-reference/sqlite/repository";
+} from "@/features/railway-reference/repository";
 import railwayReferenceDatabaseAsset from "@/statics/railway_reference.sqlite";
 import type { RailwaySectionKey } from "@shared/railway-reference/values";
 

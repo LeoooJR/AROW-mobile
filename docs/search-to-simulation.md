@@ -60,12 +60,17 @@ For the example above, the selected `Milestone` resolves to approximately **45.7
 
 ## Where to look in code
 
-| Responsibility                                                       | File                                                                                                                                                                    |
-| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Open/close the sheet and hand the chosen milestone to the map screen | [`map-toolbar/index.tsx`](../src/components/composites/map-toolbar/index.tsx)                                                                                           |
-| Form stages, selection, and resolved-point feedback                  | [`point-search-sheet/`](../src/components/composites/map-toolbar/point-search-sheet/)                                                                                   |
-| Read lines and milestones from the bundled database                  | [`railway-reference/provider.tsx`](../src/features/railway-reference/provider.tsx) and [`sqlite/repository.ts`](../src/features/railway-reference/sqlite/repository.ts) |
-| Preserve the searched origin and request map focus                   | [`use-map-selection.ts`](../src/features/map-screen/use-map-selection.ts)                                                                                               |
-| Check readiness and confirm start                                    | [`simulation-controller.ts`](../src/features/simulation/simulation-controller.ts)                                                                                       |
+Within railway-reference, `sqlite/reader.ts` executes queries and returns raw rows.
+The feature-level repository passes those rows to `mapping/`, where the milestone
+and railway mappers validate them with the shared row decoders and construct domain
+objects. Railway grouping and sorting also belong to the railway mapper.
+
+| Responsibility                                                       | File                                                                                                                                                      |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Open/close the sheet and hand the chosen milestone to the map screen | [`map-toolbar/index.tsx`](../src/components/composites/map-toolbar/index.tsx)                                                                             |
+| Form stages, selection, and resolved-point feedback                  | [`point-search-sheet/`](../src/components/composites/map-toolbar/point-search-sheet/)                                                                     |
+| Read lines and milestones from the bundled database                  | [`railway-reference/provider.tsx`](../src/features/railway-reference/provider.tsx) and [`repository.ts`](../src/features/railway-reference/repository.ts) |
+| Preserve the searched origin and request map focus                   | [`use-map-selection.ts`](../src/features/map-screen/use-map-selection.ts)                                                                                 |
+| Check readiness and confirm start                                    | [`simulation-controller.ts`](../src/features/simulation/simulation-controller.ts)                                                                         |
 
 The [milestone Maestro journey](../.maestro/tests/mock-phone-location.yaml) exercises the search, selection, and fail-fast mock-app check. Its assertions stop before a successful native start, so a change to first-fix acknowledgement also needs a focused Android check.

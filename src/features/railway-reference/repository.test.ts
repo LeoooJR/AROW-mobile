@@ -4,7 +4,7 @@ import { findMilestone, loadSearchableRailways } from "./repository";
 import {
   FIND_MILESTONE_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
-} from "./queries";
+} from "./sqlite/queries";
 
 const MILESTONE_RECORD = {
   code_ligne: "893000",

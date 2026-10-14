@@ -1,6 +1,6 @@
 import { Railway } from "@/features/railways/domain/railway";
 
-import { searchableSectionRowsToRailways } from "./railway-assembly";
+import { searchableSectionRowsToRailways } from "./railway-mapper";
 
 const BASE_ROW = {
   code_ligne: "893000",
