@@ -1,4 +1,5 @@
 import {
+  fireEvent,
   render,
   screen,
   userEvent,
@@ -12,6 +13,11 @@ import type { SimulationState } from "@/features/simulation/simulation-state";
 import Index from "@/app/index";
 import { useAssets } from "expo-asset";
 import { AppStartupContext } from "@/contexts/app-startup-context";
+const mockFindBounds = jest.fn().mockResolvedValue({});
+jest.mock("@/components/adapters/toast", () => ({
+  useToast: () => mockToast,
+}));
+const mockToast = { show: jest.fn(), close: jest.fn() };
 jest.mock("@/hooks/features/use-map-startup", () => ({
   useMapStartup: () => undefined,
 }));
@@ -50,6 +56,7 @@ const defaultRailwayAssets = jest.mocked(useAssets).getMockImplementation()?.(
 
 jest.mock("@/hooks/features/use-railway-reference", () => ({
   useRailwayReference: () => ({
+    findRailwayMilestoneBounds: mockFindBounds,
     milestoneSearch: {
       findMilestone: jest.fn(),
       loadRailways: jest.fn(),
@@ -161,13 +168,17 @@ jest.mock("@/components/composites/location-bar", () => {
   return {
     __esModule: true,
     default: ({
+      onLayout,
       onSimulationPress,
       showSimulationAction,
     }: {
+      readonly onLayout?: (
+        event: import("react-native").LayoutChangeEvent,
+      ) => void;
       readonly onSimulationPress: () => void;
       readonly showSimulationAction: boolean;
     }) => (
-      <MockView testID="mock-location-bar">
+      <MockView testID="mock-location-bar" onLayout={onLayout}>
         {showSimulationAction ? (
           <MockPressable
             accessibilityRole="button"
@@ -214,6 +225,27 @@ jest.mock("@/components/composites/map-toolbar", () => {
 });
 
 describe("Index map feature selection", () => {
+  test("keeps details above a location bar that grows with enlarged text", async () => {
+    mockFindBounds.mockClear();
+    const user = userEvent.setup();
+    await render(<Index />);
+    await user.press(
+      screen.getByRole("button", { name: "Choisir une ligne test" }),
+    );
+    await fireEvent(screen.getByTestId("mock-location-bar"), "layout", {
+      nativeEvent: { layout: { height: 200, width: 400, x: 0, y: 0 } },
+    });
+    expect(screen.getByTestId("map-feature-details-card")).toHaveStyle({
+      bottom: 216,
+    });
+    await fireEvent(screen.getByTestId("mock-location-bar"), "layout", {
+      nativeEvent: { layout: { height: 150, width: 400, x: 0, y: 0 } },
+    });
+    expect(screen.getByTestId("map-feature-details-card")).toHaveStyle({
+      bottom: 166,
+    });
+    expect(mockFindBounds).toHaveBeenCalledTimes(1);
+  });
   test.each(["loading", "error", "ready"] as const)(
     "only supplies a loading-error callback during startup (%s)",
     async (status) => {

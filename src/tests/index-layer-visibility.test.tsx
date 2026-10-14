@@ -5,6 +5,11 @@ import { Milestone } from "@/features/milestones/domain/milestone";
 import { Railway } from "@/features/railways/domain/railway";
 
 import Index from "@/app/index";
+const mockFindBounds = jest.fn().mockResolvedValue({});
+const mockToast = { show: jest.fn(), close: jest.fn() };
+jest.mock("@/components/adapters/toast", () => ({
+  useToast: () => mockToast,
+}));
 
 const mockMilestone = new Milestone({
   coordinates: { latitude: 45.74744, longitude: 4.85933 },
@@ -64,6 +69,7 @@ jest.mock("@/hooks/features/use-real-location", () => ({
 
 jest.mock("@/hooks/features/use-railway-reference", () => ({
   useRailwayReference: () => ({
+    findRailwayMilestoneBounds: mockFindBounds,
     milestoneSearch: {
       findMilestone: jest.fn(),
       loadRailways: jest.fn(),
@@ -188,36 +194,47 @@ jest.mock("@/components/composites/map-toolbar", () => {
   };
 });
 
-jest.mock("@/components/composites/map-feature-details-card", () => {
-  const {
-    Pressable: MockPressable,
-    Text: MockText,
-    View: MockView,
-  } = jest.requireActual<typeof import("react-native")>("react-native");
+jest.mock(
+  "@/components/composites/map-feature-details-card/milestone-details-card",
+  () => {
+    const {
+      Pressable: MockPressable,
+      Text: MockText,
+      View: MockView,
+    } = jest.requireActual<typeof import("react-native")>("react-native");
 
-  return {
-    __esModule: true,
-    default: ({
-      feature,
-      onClose,
-      showSimulationAction,
-    }: {
-      readonly feature: { readonly kind: string };
-      readonly onClose: () => void;
-      readonly showSimulationAction?: boolean;
-    }) => (
-      <MockView>
-        <MockText testID="mock-details">{feature.kind}</MockText>
-        {showSimulationAction ? (
-          <MockText>Raised for simulation action</MockText>
-        ) : null}
-        <MockPressable onPress={onClose} role="button">
-          <MockText>Close details</MockText>
-        </MockPressable>
-      </MockView>
+    return {
+      __esModule: true,
+      default: ({
+        feature,
+        onClose,
+        showSimulationAction,
+      }: {
+        readonly feature: { readonly kind: string };
+        readonly onClose: () => void;
+        readonly showSimulationAction?: boolean;
+      }) => (
+        <MockView>
+          <MockText testID="mock-details">{feature.kind}</MockText>
+          {showSimulationAction ? (
+            <MockText>Raised for simulation action</MockText>
+          ) : null}
+          <MockPressable onPress={onClose} role="button">
+            <MockText>Close details</MockText>
+          </MockPressable>
+        </MockView>
+      ),
+    };
+  },
+);
+
+jest.mock(
+  "@/components/composites/map-feature-details-card/railway-details-card",
+  () =>
+    jest.requireMock(
+      "@/components/composites/map-feature-details-card/milestone-details-card",
     ),
-  };
-});
+);
 
 jest.mock("@/components/composites/location-bar", () => {
   const { Text: MockText, View: MockView } =

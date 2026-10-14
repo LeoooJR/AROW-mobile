@@ -57,17 +57,19 @@ Milestone dots and labels render above railway lines. This preserves their visua
 
 The route renders the card only when a feature is selected and native overlays are visible. The web map is an accessible fallback, not the interactive MapLibre map.
 
+Railway details provide **Premier repère** and **Dernier repère** controls. They focus the lowest or highest recorded PK in the selected section, keeping the railway card and highlight selected. These bounds come from the reference database and may differ from the geometry's displayed start/end labels. Empty sections disable both controls; a lookup error shows an error toast and either control can retry. Camera focus never starts or changes simulation.
+
 ## A map tap is not a simulation request
 
 `useMapSelection` records where a milestone came from. A tapped map milestone has `origin: "map"` and is for inspection. A milestone chosen through point search has `origin: "search"`; that path also makes the milestone available to the simulation start control and requests camera focus. The metadata card can look the same in both cases, but tapping a map marker alone never starts a location simulation. If a simulation is already running, its stop control stays available independently of which card is open.
 
 ## Where to change behavior
 
-| Need                                                        | Start here                                                                                                                                                                                                                        |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Recognize a different GeoJSON hit or change validation      | [`milestone-layer.tsx`](../src/components/adapters/map/milestone-layer.tsx) or [`railway-lines-source.tsx`](../src/components/adapters/map/railway-lines-source.tsx)                                                              |
-| Change selection, layer hiding, close, or map-only behavior | [`use-map-selection.ts`](../src/features/map-screen/use-map-selection.ts)                                                                                                                                                         |
-| Change what metadata appears                                | [`map-feature-details-presentation.ts`](../src/components/composites/map-feature-details-card/map-feature-details-presentation.ts) and [`MapFeatureDetailsCard`](../src/components/composites/map-feature-details-card/index.tsx) |
-| Check the complete interaction on Android                   | [Map-feature selection Maestro flow](../.maestro/tests/manage-map-feature-selection.yaml)                                                                                                                                         |
+| Need                                                        | Start here                                                                                                                                                                                                            |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Recognize a different GeoJSON hit or change validation      | [`milestone-layer.tsx`](../src/components/adapters/map/milestone-layer.tsx) or [`railway-lines-source.tsx`](../src/components/adapters/map/railway-lines-source.tsx)                                                  |
+| Change selection, layer hiding, close, or map-only behavior | [`use-map-selection.ts`](../src/features/map-screen/use-map-selection.ts)                                                                                                                                             |
+| Change what metadata appears                                | [`RailwayDetailsCard`](../src/components/composites/map-feature-details-card/railway-details-card.tsx) and [`MilestoneDetailsCard`](../src/components/composites/map-feature-details-card/milestone-details-card.tsx) |
+| Check the complete interaction on Android                   | [Map-feature selection Maestro flow](../.maestro/tests/manage-map-feature-selection.yaml)                                                                                                                             |
 
 The route that connects these pieces is [`src/app/index.tsx`](../src/app/index.tsx). The map adapter renders and reports presses; it does not own the selected feature or load railway data.

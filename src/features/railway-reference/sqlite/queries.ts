@@ -63,3 +63,17 @@ export const FIND_MILESTONE_QUERY = `
   WHERE ${lineCode} = ? AND ${sectionRank} = ? AND ${positionMeters} = ?
   LIMIT 1
 `;
+
+export const FIND_RAILWAY_MILESTONE_BOUNDS_QUERY = `
+  SELECT ${milestoneProjection}
+  FROM ${KILOMETRIC_POINTS_TABLE.name}
+  WHERE ${lineCode} = ? AND ${sectionRank} = ?
+    AND ${positionMeters} IN (
+      SELECT MIN(${positionMeters}) FROM ${KILOMETRIC_POINTS_TABLE.name}
+      WHERE ${lineCode} = ? AND ${sectionRank} = ?
+      UNION
+      SELECT MAX(${positionMeters}) FROM ${KILOMETRIC_POINTS_TABLE.name}
+      WHERE ${lineCode} = ? AND ${sectionRank} = ?
+    )
+  ORDER BY ${positionMeters} ASC
+`;

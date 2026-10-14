@@ -13,12 +13,25 @@ const milestone = new Milestone({
 });
 
 describe("useMapSelection", () => {
+  test("camera focus is repeatable and independent from selected feature and layers", async () => {
+    const { result } = await renderHook(useMapSelection);
+    await act(async () => result.current.onFeaturePress(milestone));
+    const visibility = result.current.layerVisibility;
+    const target = { latitude: 46, longitude: 5 };
+    await act(async () => result.current.focusOnLocation(target));
+    await act(async () => result.current.focusOnLocation(target));
+    expect(result.current.focusRequest).toBe(2);
+    expect(result.current.focusLocation).toEqual(target);
+    expect(result.current.selectedFeature).toBe(milestone);
+    expect(result.current.selectedSimulationMilestone).toBeUndefined();
+    expect(result.current.layerVisibility).toBe(visibility);
+  });
   test("distinguishes searched points from map selections", async () => {
     const { result } = await renderHook(useMapSelection);
 
     await act(async () => result.current.onMilestoneSelect(milestone));
     expect(result.current.selectedSimulationMilestone).toBe(milestone);
-    expect(result.current.milestoneFocusRequest).toBe(1);
+    expect(result.current.focusRequest).toBe(1);
 
     await act(async () => result.current.onFeaturePress(milestone));
     expect(result.current.selectedFeature).toBe(milestone);

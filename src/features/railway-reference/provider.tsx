@@ -18,9 +18,11 @@ import {
 } from "@/features/railway-reference/context";
 import {
   findMilestone as findMilestoneInDatabase,
+  findRailwayMilestoneBounds as findBoundsInDatabase,
   loadSearchableRailways,
 } from "@/features/railway-reference/sqlite/repository";
 import railwayReferenceDatabaseAsset from "@/statics/railway_reference.sqlite";
+import type { RailwaySectionKey } from "@shared/railway-reference/values";
 
 export interface RailwayReferenceProviderProps {
   readonly children: ReactNode;
@@ -66,11 +68,16 @@ function RailwayReferenceDataProvider({
       findMilestoneInDatabase(database, input),
     [database],
   );
+  const findRailwayMilestoneBounds = useCallback(
+    (section: RailwaySectionKey) => findBoundsInDatabase(database, section),
+    [database],
+  );
   const value = useMemo<RailwayReferenceModel>(
     () => ({
+      findRailwayMilestoneBounds,
       milestoneSearch: { findMilestone, loadRailways, state: searchState },
     }),
-    [findMilestone, loadRailways, searchState],
+    [findMilestone, findRailwayMilestoneBounds, loadRailways, searchState],
   );
 
   return (

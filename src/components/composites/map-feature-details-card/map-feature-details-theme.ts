@@ -7,7 +7,7 @@ interface MapFeatureDetailsPalette {
 
 export const MAP_FEATURE_DETAILS_PALETTES = {
   dark: {
-    icon: "#FAF9F6",
+    icon: "#FFFFFF",
     shadow: "0 6px 18px rgba(0, 0, 0, 0.28)",
   },
   light: {

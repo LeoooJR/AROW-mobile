@@ -4,6 +4,9 @@ import { useRailwayReference } from "@/hooks/features/use-railway-reference";
 import { useRealLocation } from "@/hooks/features/use-real-location";
 
 import Index from "@/app/index";
+jest.mock("@/components/adapters/toast", () => ({
+  useToast: () => ({ show: jest.fn(), close: jest.fn() }),
+}));
 
 jest.mock("expo-asset", () => ({
   useAssets: () => [
@@ -53,6 +56,7 @@ const useRealLocationMock = jest.mocked(useRealLocation);
 describe("Index", () => {
   beforeEach(() => {
     useRailwayReferenceMock.mockReturnValue({
+      findRailwayMilestoneBounds: async () => ({}),
       milestoneSearch: {
         findMilestone: jest.fn(),
         loadRailways: jest.fn(),

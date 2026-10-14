@@ -6,10 +6,32 @@ import type { MilestoneLookupInput } from "@/features/milestones/search/contract
 import { searchableSectionRowsToRailways } from "@/features/railway-reference/sqlite/railway-assembly";
 import {
   FIND_MILESTONE_QUERY,
+  FIND_RAILWAY_MILESTONE_BOUNDS_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
 } from "@/features/railway-reference/sqlite/queries";
 import type { Railway } from "@/features/railways/domain/railway";
 import { decodeKilometricPointDatabaseRow } from "@shared/railway-reference/records";
+import type { RailwaySectionKey } from "@shared/railway-reference/values";
+import type { RailwayMilestoneBounds } from "@/features/railway-reference/context";
+
+export async function findRailwayMilestoneBounds(
+  database: Pick<SQLiteDatabase, "getAllAsync">,
+  section: RailwaySectionKey,
+): Promise<RailwayMilestoneBounds> {
+  const records = await database.getAllAsync<unknown>(
+    FIND_RAILWAY_MILESTONE_BOUNDS_QUERY,
+    section.lineCode,
+    section.sectionRank,
+    section.lineCode,
+    section.sectionRank,
+    section.lineCode,
+    section.sectionRank,
+  );
+  const points = records.map((row) =>
+    milestoneFromDatabaseRow(row, "section boundary"),
+  );
+  return { first: points[0], last: points.at(-1) };
+}
 
 function milestoneFromDatabaseRow(value: unknown, context: string): Milestone {
   const row = decodeKilometricPointDatabaseRow(value, context);

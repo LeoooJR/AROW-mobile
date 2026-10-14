@@ -8,6 +8,7 @@ import {
 } from "@/components/adapters/map/map-layer-visibility";
 import type { MapFeature } from "@/types/map-feature";
 import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { GeographicCoordinates } from "@/types/geographic-coordinates";
 
 type FeatureSelection =
   | { readonly feature: MapFeature; readonly origin: "map" }
@@ -21,7 +22,9 @@ export interface MapSelectionModel {
   readonly closeSelection: () => void;
   readonly layerVisibility: MapLayerVisibility;
   readonly mapFocused: boolean;
-  readonly milestoneFocusRequest: number;
+  readonly focusRequest: number;
+  readonly focusLocation?: GeographicCoordinates;
+  readonly focusOnLocation: (location: GeographicCoordinates) => void;
   readonly onFeaturePress: (feature: MapFeature) => void;
   readonly onMapFocusChange: (focused: boolean) => void;
   readonly onMilestoneSelect: (milestone: Milestone) => void;
@@ -39,17 +42,25 @@ export function useMapSelection(): MapSelectionModel {
     DEFAULT_MAP_LAYER_VISIBILITY,
   );
   const [mapFocused, setMapFocused] = useState(false);
-  const [milestoneFocusRequest, setMilestoneFocusRequest] = useState(0);
+  const [focusRequest, setFocusRequest] = useState(0);
+  const [focusLocation, setFocusLocation] = useState<GeographicCoordinates>();
+  const focusOnLocation = useCallback((coordinates: GeographicCoordinates) => {
+    setFocusLocation(coordinates);
+    setFocusRequest((request) => request + 1);
+  }, []);
 
   const onFeaturePress = useCallback((feature: MapFeature) => {
     setMapFocused(false);
     setSelection({ feature, origin: "map" });
   }, []);
-  const onMilestoneSelect = useCallback((milestone: Milestone) => {
-    setLayerVisibility((current) => ({ ...current, milestone: true }));
-    setSelection({ feature: milestone, origin: "search" });
-    setMilestoneFocusRequest((request) => request + 1);
-  }, []);
+  const onMilestoneSelect = useCallback(
+    (milestone: Milestone) => {
+      setLayerVisibility((current) => ({ ...current, milestone: true }));
+      setSelection({ feature: milestone, origin: "search" });
+      focusOnLocation(milestone.coordinates);
+    },
+    [focusOnLocation],
+  );
   const onVisibilityChange = useCallback(
     (layer: ToggleableMapLayer, visible: boolean) => {
       setLayerVisibility((current) => ({ ...current, [layer]: visible }));
@@ -81,7 +92,9 @@ export function useMapSelection(): MapSelectionModel {
     closeSelection,
     layerVisibility,
     mapFocused,
-    milestoneFocusRequest,
+    focusRequest,
+    focusLocation,
+    focusOnLocation,
     onFeaturePress,
     onMapFocusChange: setMapFocused,
     onMilestoneSelect,
