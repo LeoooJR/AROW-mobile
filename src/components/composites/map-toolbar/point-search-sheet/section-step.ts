@@ -1,6 +1,6 @@
 import Step from "@/components/composites/map-toolbar/point-search-sheet/step";
-import type { Railway } from "@/features/railways/domain/railway";
-import type { RailwaySection } from "@/features/railways/domain/railway-section";
+import type { Railway } from "@shared/railway-domain/railway";
+import type { RailwaySection } from "@shared/railway-domain/railway-section";
 
 export default class SectionStep extends Step {
   readonly #selectedLine: Railway | undefined;

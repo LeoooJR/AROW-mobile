@@ -7,7 +7,7 @@ import type {
 import MapLayersSheet from "@/components/composites/map-toolbar/map-layers-sheet";
 import MapToolbarActions from "@/components/composites/map-toolbar/map-toolbar-actions";
 import PointSearchSheet from "@/components/composites/map-toolbar/point-search-sheet";
-import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { Milestone } from "@shared/railway-domain/milestone";
 import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
 
 export interface MapToolbarProps {

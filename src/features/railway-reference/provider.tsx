@@ -9,8 +9,8 @@ import {
 } from "react";
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 
-import type { Milestone } from "@/features/milestones/domain/milestone";
-import type { MilestoneLookupInput } from "@/features/milestones/search/contracts";
+import type { Milestone } from "@shared/railway-domain/milestone";
+import type { MilestoneId } from "@shared/railway-domain/milestone-id";
 import type { RailwaySearchState } from "@/features/railways/search/contracts";
 import {
   RailwayReferenceContext,
@@ -22,7 +22,7 @@ import {
   loadSearchableRailways,
 } from "@/features/railway-reference/repository";
 import railwayReferenceDatabaseAsset from "@/statics/railway_reference.sqlite";
-import type { RailwaySectionKey } from "@shared/railway-reference/values";
+import type { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 
 export interface RailwayReferenceProviderProps {
   readonly children: ReactNode;
@@ -64,12 +64,12 @@ function RailwayReferenceDataProvider({
     );
   }, [database]);
   const findMilestone = useCallback(
-    (input: MilestoneLookupInput): Promise<Milestone | undefined> =>
+    (input: MilestoneId): Promise<Milestone | undefined> =>
       findMilestoneInDatabase(database, input),
     [database],
   );
   const findRailwayMilestoneBounds = useCallback(
-    (section: RailwaySectionKey) => findBoundsInDatabase(database, section),
+    (section: RailwaySectionId) => findBoundsInDatabase(database, section),
     [database],
   );
   const value = useMemo<RailwayReferenceModel>(

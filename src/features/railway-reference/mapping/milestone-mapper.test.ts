@@ -1,4 +1,4 @@
-import { Milestone } from "@/features/milestones/domain/milestone";
+import { Milestone } from "@shared/railway-domain/milestone";
 import {
   milestoneFromDatabaseRow,
   milestoneRowsToBounds,
@@ -17,7 +17,7 @@ test("maps a validated row to a complete milestone without changing the row", ()
   const row = Object.freeze({ ...ROW });
   const milestone = milestoneFromDatabaseRow(row, "lookup result");
   expect(milestone).toBeInstanceOf(Milestone);
-  expect(milestone.id).toBe("893000:2:99000");
+  expect(milestone.id.value).toBe("893000:2:99000");
   expect(milestone.label).toBe("99+000");
   expect(milestone.positionMeters).toBe(99_000);
   expect(milestone.coordinates).toEqual({

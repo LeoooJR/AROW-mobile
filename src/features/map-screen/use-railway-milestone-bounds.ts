@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type {
-  RailwayMilestoneBounds,
-  RailwayReferenceModel,
-} from "@/features/railway-reference/context";
-import type { RailwaySection } from "@/features/railways/domain/railway-section";
-import type { GeographicCoordinates } from "@/types/geographic-coordinates";
+import type { RailwayMilestoneBounds } from "@shared/railway-domain/railway-milestone-bounds";
+import type { RailwayReferenceModel } from "@/features/railway-reference/context";
+import type { RailwaySection } from "@shared/railway-domain/railway-section";
+import type { GeographicCoordinates } from "@shared/geographic-coordinates";
 
 type Boundary = "first" | "last";
 type BoundsState =
@@ -38,16 +36,16 @@ export function useRailwayMilestoneBounds(
       if (section === undefined || pending.current) return;
       const request = ++operation.current;
       pending.current = true;
-      setState({ id: section.id, status: "loading" });
+      setState({ id: section.id.value, status: "loading" });
       try {
-        const bounds = await findBounds(section.key);
+        const bounds = await findBounds(section.id);
         if (operation.current !== request) return;
-        setState({ id: section.id, status: "ready", bounds });
+        setState({ id: section.id.value, status: "ready", bounds });
         const point = boundary === undefined ? undefined : bounds[boundary];
         if (point !== undefined) onFocus(point.coordinates);
       } catch {
         if (operation.current !== request) return;
-        setState({ id: section.id, status: "error" });
+        setState({ id: section.id.value, status: "error" });
         onFailure();
       } finally {
         if (operation.current === request) pending.current = false;
@@ -69,7 +67,7 @@ export function useRailwayMilestoneBounds(
     };
   }, [load]);
 
-  const current = state?.id === section?.id ? state : undefined;
+  const current = state?.id === section?.id.value ? state : undefined;
   const bounds = current?.status === "ready" ? current.bounds : undefined;
   const focus = (boundary: Boundary) => {
     if (current?.status === "error") void load(boundary);

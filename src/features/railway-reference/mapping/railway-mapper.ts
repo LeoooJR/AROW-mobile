@@ -1,15 +1,15 @@
-import { Railway } from "@/features/railways/domain/railway";
+import { Railway } from "@shared/railway-domain/railway";
 import type {
   RailwaySectionGeometry,
   RailwaySectionInput,
-} from "@/features/railways/domain/railway-section";
+} from "@shared/railway-domain/railway-section";
 import {
   isNonEmptyString,
   isRecord,
   isUnsignedInteger,
 } from "@shared/value-validation";
 import { decodeRailwaySectionDatabaseRow } from "@shared/railway-reference/records";
-import { isMilestoneLabelForPosition } from "@shared/railway-reference/values";
+import { isMilestoneLabelForPosition } from "@shared/railway-domain/kilometric-position";
 
 interface DecodedSearchableRailwaySection {
   readonly lineCode: string;

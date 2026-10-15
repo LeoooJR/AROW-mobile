@@ -1,3 +1,5 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import {
   act,
   fireEvent,
@@ -8,7 +10,7 @@ import {
 import { fetch } from "expo/fetch";
 import * as ReactNative from "react-native";
 
-import { Milestone } from "@/features/milestones/domain/milestone";
+import { Milestone } from "@shared/railway-domain/milestone";
 import { useMapStartup } from "@/hooks/features/use-map-startup";
 import {
   type AppStartupResult,
@@ -23,11 +25,9 @@ jest.mock("expo/fetch", () => ({ fetch: jest.fn() }));
 jest.mock("expo-splash-screen", () => ({ hide: jest.fn() }));
 
 const MILESTONE = new Milestone({
+  id: new MilestoneId(new RailwaySectionId("001000", 1), 241_000),
   coordinates: { latitude: 45.74, longitude: 4.86 },
   label: "241+000",
-  lineCode: "001000",
-  positionMeters: 241_000,
-  sectionRank: 1,
 });
 jest.mock("@maplibre/maplibre-react-native", () => {
   const { View: MockView } =
@@ -350,7 +350,7 @@ describe("Map", () => {
     );
     expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
       "selectedSection",
-      MILESTONE.key,
+      MILESTONE.id.sectionId,
     );
     expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
       "onFeaturePress",

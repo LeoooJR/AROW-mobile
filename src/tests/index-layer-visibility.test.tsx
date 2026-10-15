@@ -1,8 +1,10 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { act, render, screen, userEvent } from "@testing-library/react-native";
 import { BackHandler } from "react-native";
 
-import { Milestone } from "@/features/milestones/domain/milestone";
-import { Railway } from "@/features/railways/domain/railway";
+import { Milestone } from "@shared/railway-domain/milestone";
+import { Railway } from "@shared/railway-domain/railway";
 
 import Index from "@/app/index";
 const mockFindBounds = jest.fn().mockResolvedValue({});
@@ -12,11 +14,9 @@ jest.mock("@/components/adapters/toast", () => ({
 }));
 
 const mockMilestone = new Milestone({
+  id: new MilestoneId(new RailwaySectionId("893000", 1), 509_000),
   coordinates: { latitude: 45.74744, longitude: 4.85933 },
   label: "509+000",
-  lineCode: "893000",
-  positionMeters: 509_000,
-  sectionRank: 1,
 });
 const mockRailwayLine = new Railway({
   code: "893000",

@@ -1,4 +1,6 @@
-import { Milestone } from "@/features/milestones/domain/milestone";
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
+import { Milestone } from "@shared/railway-domain/milestone";
 
 import { findMilestone, loadSearchableRailways } from "./repository";
 import {
@@ -56,7 +58,7 @@ describe("railway reference database", () => {
     const getFirstAsync = jest.fn().mockResolvedValue(MILESTONE_RECORD);
     const milestone = await findMilestone(
       { getFirstAsync },
-      { lineCode: "893000", positionMeters: 509_000, sectionRank: 1 },
+      new MilestoneId(new RailwaySectionId("893000", 1), 509_000),
     );
 
     expect(milestone).toBeInstanceOf(Milestone);
@@ -72,7 +74,7 @@ describe("railway reference database", () => {
     await expect(
       findMilestone(
         { getFirstAsync: jest.fn().mockResolvedValue(null) },
-        { lineCode: "893000", positionMeters: 508_500, sectionRank: 1 },
+        new MilestoneId(new RailwaySectionId("893000", 1), 508_500),
       ),
     ).resolves.toBeUndefined();
   });
@@ -85,7 +87,7 @@ describe("railway reference database", () => {
             .fn()
             .mockResolvedValue({ ...MILESTONE_RECORD, label: null }),
         },
-        { lineCode: "893000", positionMeters: 509_000, sectionRank: 1 },
+        new MilestoneId(new RailwaySectionId("893000", 1), 509_000),
       ),
     ).rejects.toThrow("Invalid milestone lookup result");
   });

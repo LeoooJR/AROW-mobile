@@ -1,5 +1,5 @@
 import { View } from "react-native";
-import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { Milestone } from "@shared/railway-domain/milestone";
 import Divider from "@/components/primitives/divider";
 import { formatGeographicCoordinates } from "@/utils/location-format";
 import MapFeatureDetailsFrame from "./map-feature-details-frame";

@@ -2,8 +2,8 @@ import {
   parsePastedMilestone,
   sanitizeMilestonePart,
 } from "@/features/milestones/search/milestone-input";
-import type { Railway } from "@/features/railways/domain/railway";
-import type { RailwaySection } from "@/features/railways/domain/railway-section";
+import type { Railway } from "@shared/railway-domain/railway";
+import type { RailwaySection } from "@shared/railway-domain/railway-section";
 
 export interface MilestoneInput {
   readonly kilometer: string;

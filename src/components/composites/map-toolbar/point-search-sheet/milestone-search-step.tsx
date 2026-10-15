@@ -6,8 +6,8 @@ import MilestoneStep from "@/components/composites/map-toolbar/point-search-shee
 import PointSearchStepHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-step-header";
 import TextField from "@/components/primitives/text-field";
 import type { MilestoneResolution } from "@/features/milestones/search/contracts";
-import type { Railway } from "@/features/railways/domain/railway";
-import type { RailwaySection } from "@/features/railways/domain/railway-section";
+import type { Railway } from "@shared/railway-domain/railway";
+import type { RailwaySection } from "@shared/railway-domain/railway-section";
 
 interface MilestoneSearchStepProps {
   readonly kilometer: string;

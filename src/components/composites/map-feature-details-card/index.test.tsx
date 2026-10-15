@@ -1,7 +1,9 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { render, screen, userEvent } from "@testing-library/react-native";
 
-import { Milestone } from "@/features/milestones/domain/milestone";
-import { Railway } from "@/features/railways/domain/railway";
+import { Milestone } from "@shared/railway-domain/milestone";
+import { Railway } from "@shared/railway-domain/railway";
 
 import RailwayDetailsCard from "./railway-details-card";
 import MilestoneDetailsCard from "./milestone-details-card";
@@ -29,11 +31,9 @@ const railwayLine = new Railway({
 const railway = railwayLine.sections[0];
 
 const milestone = new Milestone({
+  id: new MilestoneId(new RailwaySectionId("001000", 1), 241_000),
   coordinates: { latitude: 45.74491, longitude: 4.86234 },
   label: "241+000",
-  lineCode: "001000",
-  positionMeters: 241_000,
-  sectionRank: 1,
 });
 
 describe("MapFeatureDetailsCard", () => {
@@ -116,11 +116,12 @@ describe("MapFeatureDetailsCard", () => {
       <MilestoneDetailsCard
         feature={
           new Milestone({
+            id: new MilestoneId(
+              new RailwaySectionId(milestone.lineCode, milestone.sectionRank),
+              milestone.positionMeters,
+            ),
             coordinates: { latitude: -12.5, longitude: -3.25 },
             label: milestone.label,
-            lineCode: milestone.lineCode,
-            positionMeters: milestone.positionMeters,
-            sectionRank: milestone.sectionRank,
           })
         }
         onClose={jest.fn()}

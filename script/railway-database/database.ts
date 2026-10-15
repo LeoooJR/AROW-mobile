@@ -10,7 +10,7 @@ import {
   KILOMETRIC_POINTS_TABLE,
   RAILWAY_SECTIONS_TABLE,
 } from "../../shared/railway-reference/schema";
-import { railwaySectionId } from "../../shared/railway-reference/values";
+import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
 
 import {
   BEGIN_TRANSACTION,
@@ -64,12 +64,12 @@ export function completeRailwaySections(
 ): readonly RailwaySection[] {
   const sections = new Map<string, RailwaySection>(
     geojsonSections.map((section) => [
-      railwaySectionId(section.code, section.rank),
+      new RailwaySectionId(section.code, section.rank).value,
       section,
     ]),
   );
   for (const milestone of milestones) {
-    const id = railwaySectionId(milestone.code, milestone.rank);
+    const id = new RailwaySectionId(milestone.code, milestone.rank).value;
     if (!sections.has(id)) {
       sections.set(id, fallbackRailwaySection(milestone));
     }

@@ -41,7 +41,9 @@ describe("Railway", () => {
     expect(first?.railway).toBe(railway);
     expect(second?.railway).toBe(railway);
     expect(first?.kind).toBe("railway-section");
-    expect(first?.id).toBe("340311:1");
+    expect(first?.id.value).toBe("340311:1");
+    expect(first?.id.lineCode).toBe(railway.code);
+    expect(first?.id.sectionRank).toBe(1);
     expect(first?.geometry).toEqual(GEOMETRY);
     expect(second?.geometry).toEqual({ status: "absent" });
   });

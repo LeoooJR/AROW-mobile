@@ -1,4 +1,4 @@
-import type { Railway } from "@/features/railways/domain/railway";
+import type { Railway } from "@shared/railway-domain/railway";
 
 export type RailwaySearchState =
   | { readonly status: "idle" }

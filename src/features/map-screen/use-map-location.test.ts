@@ -1,7 +1,9 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { act, renderHook } from "@testing-library/react-native";
 
 import getLocationPresentation from "@/components/composites/location-bar/location-presentation";
-import { Milestone } from "@/features/milestones/domain/milestone";
+import { Milestone } from "@shared/railway-domain/milestone";
 import { useMapLocation } from "@/features/map-screen/use-map-location";
 import type { SimulationState } from "@/features/simulation/simulation-state";
 import type { LocationState } from "@/features/real-location/real-location-state";
@@ -33,11 +35,9 @@ jest.mock("@/hooks/features/use-real-location", () => ({
 }));
 
 const milestone = new Milestone({
+  id: new MilestoneId(new RailwaySectionId("893000", 1), 509_000),
   coordinates: { latitude: 45.74744, longitude: 4.85933 },
   label: "509+000",
-  lineCode: "893000",
-  positionMeters: 509_000,
-  sectionRank: 1,
 });
 const position = {
   accuracy: null,

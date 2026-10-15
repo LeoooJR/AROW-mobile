@@ -18,12 +18,15 @@ flowchart LR
     Select --> Card
 ```
 
+See the [railway domain glossary](railway-domain.md) for shared models, identity
+rules, and the difference between geometry metadata and recorded milestone bounds.
+
 ## Follow a milestone tap
 
 1. [`Map`](../src/components/adapters/map/map.tsx) renders the milestone GeoJSON source and forwards its `onFeaturePress` callback. Milestone dots appear from zoom 10; their labels appear from zoom 13.
 2. [`MilestoneLayer`](../src/components/adapters/map/milestone-layer.tsx) receives the MapLibre press event. It takes the first valid pressed point, checks its railway identity and label, validates its coordinates, builds a `Milestone`, and checks that the GeoJSON feature ID matches the domain ID. Invalid hits do nothing.
 3. For a valid hit, the layer stops event propagation and calls `onFeaturePress(milestone)`.
-4. [`useMapSelection`](../src/features/map-screen/use-map-selection.ts) stores `{ feature: milestone, origin: "map" }` and exits map-only mode if it was active. The route passes the same selected feature back to the map and to [`MapFeatureDetailsCard`](../src/components/composites/map-feature-details-card/index.tsx).
+4. [`useMapSelection`](../src/features/map-screen/use-map-selection.ts) stores `{ feature: milestone, origin: "map" }` and exits map-only mode if it was active. The route passes the same selected feature back to the map and to [`MilestoneDetailsCard`](../src/components/composites/map-feature-details-card/milestone-details-card.tsx).
 5. The map highlights the selected milestone dot **and** its parent railway section. The card shows the milestone's railway metadata and coordinates.
 
 For example, tapping **PK 509+000** on line **893000**, section **1**, opens a card like this:

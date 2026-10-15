@@ -8,7 +8,7 @@ import RailwayLineResult from "@/components/composites/map-toolbar/point-search-
 import Button from "@/components/primitives/button";
 import TextField from "@/components/primitives/text-field";
 import type { RailwaySearchState } from "@/features/railways/search/contracts";
-import type { Railway } from "@/features/railways/domain/railway";
+import type { Railway } from "@shared/railway-domain/railway";
 
 interface RailwayLineStepProps {
   readonly onQueryChange: (query: string) => void;

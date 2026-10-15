@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from "expo-sqlite";
 
-import type { MilestoneLookupInput } from "@/features/milestones/search/contracts";
-import type { RailwaySectionKey } from "@shared/railway-reference/values";
+import type { MilestoneId } from "@shared/railway-domain/milestone-id";
+import type { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import {
   FIND_MILESTONE_QUERY,
   FIND_RAILWAY_MILESTONE_BOUNDS_QUERY,
@@ -16,7 +16,7 @@ export function readSearchableRailwayRows(
 
 export function readMilestoneRow(
   database: Pick<SQLiteDatabase, "getFirstAsync">,
-  input: MilestoneLookupInput,
+  input: MilestoneId,
 ): Promise<unknown | null> {
   return database.getFirstAsync<unknown>(
     FIND_MILESTONE_QUERY,
@@ -28,7 +28,7 @@ export function readMilestoneRow(
 
 export function readRailwayMilestoneBoundRows(
   database: Pick<SQLiteDatabase, "getAllAsync">,
-  section: RailwaySectionKey,
+  section: RailwaySectionId,
 ): Promise<readonly unknown[]> {
   return database.getAllAsync<unknown>(
     FIND_RAILWAY_MILESTONE_BOUNDS_QUERY,

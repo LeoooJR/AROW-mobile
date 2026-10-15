@@ -4,7 +4,7 @@ import {
   requireNonEmptyString,
   requirePositiveInteger,
 } from "./validation";
-import { railwaySectionId } from "../../shared/railway-reference/values";
+import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
 import { isRecord } from "../../shared/value-validation";
 import type {
   GeoJsonPosition,
@@ -119,7 +119,7 @@ function railwaySectionFromFeature(
     properties.rg_troncon,
     `${context} rg_troncon`,
   );
-  const id = railwaySectionId(code, rank);
+  const id = new RailwaySectionId(code, rank).value;
   if (value.id !== id) {
     throw new Error(`${context} id must be ${id}`);
   }
@@ -149,7 +149,7 @@ function normalizedFeature(value: unknown, index: number): RailwayFeature {
   if (!isRecord(value) || !isRecord(value.properties)) {
     throw new Error(`${context} must be a GeoJSON feature with properties`);
   }
-  const normalizedId = railwaySectionId(
+  const normalizedId = new RailwaySectionId(
     requireCanonicalLineCode(
       value.properties.code_ligne,
       `${context} code_ligne`,
@@ -158,7 +158,7 @@ function normalizedFeature(value: unknown, index: number): RailwayFeature {
       value.properties.rg_troncon,
       `${context} rg_troncon`,
     ),
-  );
+  ).value;
   const section = railwaySectionFromFeature(
     {
       ...value,
@@ -212,7 +212,7 @@ function requireUniqueSections(
 ): void {
   const ids = new Set<string>();
   for (const section of sections) {
-    const id = railwaySectionId(section.code, section.rank);
+    const id = new RailwaySectionId(section.code, section.rank).value;
     if (ids.has(id)) {
       throw new Error(`Duplicate railway section ${id}`);
     }

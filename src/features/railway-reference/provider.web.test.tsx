@@ -1,3 +1,5 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { renderHook } from "@testing-library/react-native";
 
 import { useRailwayReference } from "@/hooks/features/use-railway-reference";
@@ -16,11 +18,9 @@ describe("RailwayReferenceProvider web fallback", () => {
       view.result.current.milestoneSearch.loadRailways(),
     ).not.toThrow();
     await expect(
-      view.result.current.milestoneSearch.findMilestone({
-        lineCode: "893000",
-        positionMeters: 509_000,
-        sectionRank: 1,
-      }),
+      view.result.current.milestoneSearch.findMilestone(
+        new MilestoneId(new RailwaySectionId("893000", 1), 509_000),
+      ),
     ).resolves.toBeUndefined();
   });
 });

@@ -1,4 +1,5 @@
-import { RailwaySectionKey } from "@shared/railway-reference/values";
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import {
   readMilestoneRow,
   readRailwayMilestoneBoundRows,
@@ -10,8 +11,8 @@ import {
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
 } from "./queries";
 
-const lookup = { lineCode: "893000", sectionRank: 2, positionMeters: 509_000 };
-const section = new RailwaySectionKey(lookup.lineCode, lookup.sectionRank);
+const section = new RailwaySectionId("893000", 2);
+const lookup = new MilestoneId(section, 509_000);
 
 test("returns searchable rows unchanged without validating or assembling them", async () => {
   const rows = [{ unrecognised: true }, null];

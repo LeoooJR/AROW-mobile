@@ -1,8 +1,11 @@
-import { AbstractRailwayNetworkFeature } from "@/features/map-features/abstract-railway-network-feature";
-import type { Railway } from "@/features/railways/domain/railway";
-import { isNonEmptyString, isUnsignedInteger } from "@shared/value-validation";
-import { isMilestoneLabelForPosition } from "@shared/railway-reference/values";
+import { AbstractRailwayNetworkFeature } from "./abstract-railway-network-feature";
+import type { Railway } from "./railway";
+import type { RailwayMilestoneRange } from "./railway-milestone-range";
+import { isNonEmptyString, isUnsignedInteger } from "../value-validation";
+import { isMilestoneLabelForPosition } from "./kilometric-position";
+import { RailwaySectionId } from "./railway-section-id";
 
+/** Geometry metadata; its PK limits can differ from recorded milestone bounds. */
 export type RailwaySectionGeometry =
   | {
       readonly endMilestone: string;
@@ -12,13 +15,6 @@ export type RailwaySectionGeometry =
       readonly status: "present";
     }
   | { readonly status: "absent" };
-
-export interface RailwayMilestoneRange {
-  readonly maximumLabel: string;
-  readonly maximumPositionMeters: number;
-  readonly minimumLabel: string;
-  readonly minimumPositionMeters: number;
-}
 
 export interface RailwaySectionInput {
   readonly geometry: RailwaySectionGeometry;
@@ -80,7 +76,10 @@ function validateMilestoneRange(
   return Object.freeze({ ...range });
 }
 
-export class RailwaySection extends AbstractRailwayNetworkFeature<"railway-section"> {
+export class RailwaySection extends AbstractRailwayNetworkFeature<
+  "railway-section",
+  RailwaySectionId
+> {
   public readonly kind = "railway-section";
 
   readonly #geometry: RailwaySectionGeometry;
@@ -88,7 +87,7 @@ export class RailwaySection extends AbstractRailwayNetworkFeature<"railway-secti
   readonly #railway: Railway;
 
   public constructor(railway: Railway, input: RailwaySectionInput) {
-    super(railway.code, input.sectionRank);
+    super(new RailwaySectionId(railway.code, input.sectionRank));
     this.#railway = railway;
     this.#geometry = validateGeometry(input.geometry);
     this.#milestoneRange = validateMilestoneRange(input.milestoneRange);
@@ -96,10 +95,6 @@ export class RailwaySection extends AbstractRailwayNetworkFeature<"railway-secti
 
   public get geometry(): RailwaySectionGeometry {
     return this.#geometry;
-  }
-
-  public get id(): string {
-    return this.key.id;
   }
 
   public get milestoneRange(): RailwayMilestoneRange | undefined {

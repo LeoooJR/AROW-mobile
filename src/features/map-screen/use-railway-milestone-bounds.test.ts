@@ -1,8 +1,10 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { act, renderHook, waitFor } from "@testing-library/react-native";
-import { Milestone } from "@/features/milestones/domain/milestone";
-import { Railway } from "@/features/railways/domain/railway";
+import { Milestone } from "@shared/railway-domain/milestone";
+import { Railway } from "@shared/railway-domain/railway";
 import { useRailwayMilestoneBounds } from "./use-railway-milestone-bounds";
-import type { RailwayMilestoneBounds } from "@/features/railway-reference/context";
+import type { RailwayMilestoneBounds } from "@shared/railway-domain/railway-milestone-bounds";
 
 const section = new Railway({
   code: "893000",
@@ -10,20 +12,16 @@ const section = new Railway({
   sections: [{ sectionRank: 1, geometry: { status: "absent" } }],
 }).sections[0];
 const point = new Milestone({
+  id: new MilestoneId(new RailwaySectionId("893000", 1), 1000),
   coordinates: { latitude: 45, longitude: 4 },
-  lineCode: "893000",
-  sectionRank: 1,
   label: "1+000",
-  positionMeters: 1000,
 });
 
 test("loads endpoints and focuses repeatedly without duplicate lookups", async () => {
   const last = new Milestone({
+    id: new MilestoneId(new RailwaySectionId("893000", 1), 2000),
     coordinates: { latitude: 46, longitude: 5 },
-    lineCode: "893000",
-    sectionRank: 1,
     label: "2+000",
-    positionMeters: 2000,
   });
   const find = jest.fn().mockResolvedValue({ first: point, last });
   const focus = jest.fn(),
@@ -44,6 +42,7 @@ test("loads endpoints and focuses repeatedly without duplicate lookups", async (
     [last.coordinates],
   ]);
   expect(find).toHaveBeenCalledTimes(1);
+  expect(find.mock.calls[0]?.[0]).toBe(section?.id);
 });
 
 test("allows an endpoint to retry after failure and ignores concurrent presses", async () => {

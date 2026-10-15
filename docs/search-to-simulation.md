@@ -16,6 +16,9 @@ flowchart LR
     Fix --> Running[Running]
 ```
 
+The [railway domain glossary](railway-domain.md) defines the shared models,
+identities, PK units, and the distinction between ranges and located bounds.
+
 ## 1. Search for a railway point
 
 The map toolbar opens the point-search sheet and asks the railway-reference provider to load its searchable lines. The provider reads the bundled SQLite railway reference; the map itself does not perform the search.

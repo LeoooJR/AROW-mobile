@@ -1,7 +1,7 @@
 /** @jest-environment node */
 import { DatabaseSync } from "node:sqlite";
 import type { SQLiteDatabase } from "expo-sqlite";
-import { RailwaySectionKey } from "@shared/railway-reference/values";
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import { findRailwayMilestoneBounds } from "./repository";
 
 test("uses numeric PK bounds within the exact section, including empty and single-point sections", async () => {
@@ -26,27 +26,27 @@ test("uses numeric PK bounds within the exact section, including empty and singl
   try {
     const bounds = await findRailwayMilestoneBounds(
       source,
-      new RailwaySectionKey("893000", 1),
+      new RailwaySectionId("893000", 1),
     );
     expect(bounds.first?.label).toBe("99+000");
     expect(bounds.last?.label).toBe("100+000");
     expect(bounds.first?.coordinates).toEqual({ latitude: 45, longitude: 4 });
     const single = await findRailwayMilestoneBounds(
       source,
-      new RailwaySectionKey("893000", 2),
+      new RailwaySectionId("893000", 2),
     );
     expect(single.first).toBe(single.last);
     expect(
       await findRailwayMilestoneBounds(
         source,
-        new RailwaySectionKey("893000", 3),
+        new RailwaySectionId("893000", 3),
       ),
     ).toEqual({ first: undefined, last: undefined });
     database.exec(
       "UPDATE kilometric_points SET latitude = 100 WHERE rg_troncon = 2",
     );
     await expect(
-      findRailwayMilestoneBounds(source, new RailwaySectionKey("893000", 2)),
+      findRailwayMilestoneBounds(source, new RailwaySectionId("893000", 2)),
     ).rejects.toThrow();
   } finally {
     database.close();

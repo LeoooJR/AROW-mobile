@@ -2,8 +2,8 @@ import { useState } from "react";
 import { Text, useColorScheme, View } from "react-native";
 import RailwayBoundaryIcon from "@/components/primitives/icons/railway-boundary-icon";
 import Button from "@/components/primitives/button";
-import type { RailwaySection } from "@/features/railways/domain/railway-section";
-import type { RailwayMilestoneBounds } from "@/features/railway-reference/context";
+import type { RailwaySection } from "@shared/railway-domain/railway-section";
+import type { RailwayMilestoneBounds } from "@shared/railway-domain/railway-milestone-bounds";
 import MapFeatureDetailsFrame from "./map-feature-details-frame";
 import MapFeatureDetailsFacts from "./map-feature-details-facts";
 

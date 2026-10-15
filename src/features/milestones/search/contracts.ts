@@ -1,15 +1,10 @@
-import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { Milestone } from "@shared/railway-domain/milestone";
 import type { RailwaySearchState } from "@/features/railways/search/contracts";
-
-export interface MilestoneLookupInput {
-  readonly lineCode: string;
-  readonly positionMeters: number;
-  readonly sectionRank: number;
-}
+import type { MilestoneId } from "@shared/railway-domain/milestone-id";
 
 export interface MilestoneSearchModel {
   readonly findMilestone: (
-    input: MilestoneLookupInput,
+    input: MilestoneId,
   ) => Promise<Milestone | undefined>;
   readonly loadRailways: () => void;
   readonly state: RailwaySearchState;

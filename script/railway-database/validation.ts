@@ -1,8 +1,8 @@
 import {
   canonicalRailwayLineCode,
   isCanonicalRailwayLineCode,
-  parseMilestoneLabel,
-} from "../../shared/railway-reference/values";
+} from "../../shared/railway-domain/line-code";
+import { parseMilestoneLabel } from "../../shared/railway-domain/kilometric-position";
 import {
   isFiniteNumberInRange,
   isNonEmptyString,

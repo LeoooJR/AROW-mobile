@@ -1,35 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
 
-import type { Milestone } from "@/features/milestones/domain/milestone";
-import {
-  type MilestoneLookupInput,
-  type MilestoneResolution,
-} from "@/features/milestones/search/contracts";
+import type { Milestone } from "@shared/railway-domain/milestone";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
+import { type MilestoneResolution } from "@/features/milestones/search/contracts";
 import { validateMilestoneInput } from "@/features/milestones/search/milestone-input";
 import {
   milestoneLookupErrorResolution,
   unavailableMilestoneResolution,
 } from "@/features/milestones/search/resolution-messages";
-import type { Railway } from "@/features/railways/domain/railway";
-import type { RailwaySection } from "@/features/railways/domain/railway-section";
+import type { Railway } from "@shared/railway-domain/railway";
+import type { RailwaySection } from "@shared/railway-domain/railway-section";
 
 interface LookupResult {
-  readonly key: string;
+  readonly idValue: string;
   readonly resolution: MilestoneResolution;
 }
 
 interface UseMilestoneResolutionInput {
-  readonly findMilestone: (
-    input: MilestoneLookupInput,
-  ) => Promise<Milestone | undefined>;
+  readonly findMilestone: (id: MilestoneId) => Promise<Milestone | undefined>;
   readonly kilometer: string;
   readonly line?: Railway;
   readonly metric: string;
   readonly section?: RailwaySection;
-}
-
-function lookupKey(input: MilestoneLookupInput): string {
-  return `${input.lineCode}:${input.sectionRank}:${input.positionMeters}`;
 }
 
 export default function useMilestoneResolution({
@@ -44,7 +36,7 @@ export default function useMilestoneResolution({
     inputResolution.status === "ready"
       ? inputResolution.positionMeters
       : undefined;
-  const lookup = useMemo<MilestoneLookupInput | undefined>(() => {
+  const lookup = useMemo<MilestoneId | undefined>(() => {
     if (
       positionMeters === undefined ||
       line === undefined ||
@@ -53,22 +45,18 @@ export default function useMilestoneResolution({
       return undefined;
     }
 
-    return {
-      lineCode: line.code,
-      positionMeters,
-      sectionRank: section.sectionRank,
-    };
+    return new MilestoneId(section.id, positionMeters);
   }, [line, positionMeters, section]);
-  const key = lookup === undefined ? undefined : lookupKey(lookup);
+  const idValue = lookup?.value;
   const [result, setResult] = useState<LookupResult>();
 
   useEffect(() => {
-    if (lookup === undefined || key === undefined) {
+    if (lookup === undefined || idValue === undefined) {
       return;
     }
 
     const pendingLookup = lookup;
-    const pendingKey = key;
+    const pendingIdValue = idValue;
     let active = true;
     async function resolve(): Promise<void> {
       try {
@@ -78,7 +66,7 @@ export default function useMilestoneResolution({
         }
 
         setResult({
-          key: pendingKey,
+          idValue: pendingIdValue,
           resolution:
             milestone === undefined
               ? unavailableMilestoneResolution(kilometer, metric)
@@ -87,7 +75,7 @@ export default function useMilestoneResolution({
       } catch {
         if (active) {
           setResult({
-            key: pendingKey,
+            idValue: pendingIdValue,
             resolution: milestoneLookupErrorResolution(),
           });
         }
@@ -98,15 +86,15 @@ export default function useMilestoneResolution({
     return () => {
       active = false;
     };
-  }, [findMilestone, key, kilometer, lookup, metric]);
+  }, [findMilestone, idValue, kilometer, lookup, metric]);
 
   if (inputResolution.status !== "ready") {
     return inputResolution;
   }
-  if (lookup === undefined || key === undefined) {
+  if (lookup === undefined || idValue === undefined) {
     return { status: "incomplete" };
   }
-  if (result?.key === key) {
+  if (result?.idValue === idValue) {
     return result.resolution;
   }
 

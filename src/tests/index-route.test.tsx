@@ -7,7 +7,7 @@ import {
 } from "@testing-library/react-native";
 
 import type { MapFeature } from "@/types/map-feature";
-import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { Milestone } from "@shared/railway-domain/milestone";
 import type { SimulationState } from "@/features/simulation/simulation-state";
 
 import Index from "@/app/index";
@@ -79,12 +79,18 @@ jest.mock("@/hooks/features/use-real-location", () => ({
 }));
 
 jest.mock("@/components/adapters/map/map", () => {
+  const { MilestoneId: MockMilestoneId } = jest.requireActual<
+    typeof import("@shared/railway-domain/milestone-id")
+  >("@shared/railway-domain/milestone-id");
+  const { RailwaySectionId: MockRailwaySectionId } = jest.requireActual<
+    typeof import("@shared/railway-domain/railway-section-id")
+  >("@shared/railway-domain/railway-section-id");
   const { Milestone: MockMilestone } = jest.requireActual<
-    typeof import("@/features/milestones/domain/milestone")
-  >("@/features/milestones/domain/milestone");
+    typeof import("@shared/railway-domain/milestone")
+  >("@shared/railway-domain/milestone");
   const { Railway: MockRailway } = jest.requireActual<
-    typeof import("@/features/railways/domain/railway")
-  >("@/features/railways/domain/railway");
+    typeof import("@shared/railway-domain/railway")
+  >("@shared/railway-domain/railway");
   const {
     Pressable: MockPressable,
     Text: MockText,
@@ -122,9 +128,7 @@ jest.mock("@/components/adapters/map/map", () => {
       const milestone = new MockMilestone({
         coordinates: { latitude: 45.74491, longitude: 4.86234 },
         label: "241+000",
-        lineCode: "001000",
-        positionMeters: 241_000,
-        sectionRank: 1,
+        id: new MockMilestoneId(new MockRailwaySectionId("001000", 1), 241_000),
       });
 
       return (
@@ -194,17 +198,21 @@ jest.mock("@/components/composites/location-bar", () => {
 });
 
 jest.mock("@/components/composites/map-toolbar", () => {
+  const { MilestoneId: MockMilestoneId } = jest.requireActual<
+    typeof import("@shared/railway-domain/milestone-id")
+  >("@shared/railway-domain/milestone-id");
+  const { RailwaySectionId: MockRailwaySectionId } = jest.requireActual<
+    typeof import("@shared/railway-domain/railway-section-id")
+  >("@shared/railway-domain/railway-section-id");
   const { Milestone: MockMilestone } = jest.requireActual<
-    typeof import("@/features/milestones/domain/milestone")
-  >("@/features/milestones/domain/milestone");
+    typeof import("@shared/railway-domain/milestone")
+  >("@shared/railway-domain/milestone");
   const { Pressable: MockPressable, Text: MockText } =
     jest.requireActual<typeof import("react-native")>("react-native");
   const milestone = new MockMilestone({
     coordinates: { latitude: 45.74744, longitude: 4.85933 },
     label: "509+000",
-    lineCode: "893000",
-    positionMeters: 509_000,
-    sectionRank: 1,
+    id: new MockMilestoneId(new MockRailwaySectionId("893000", 1), 509_000),
   });
   return {
     __esModule: true,

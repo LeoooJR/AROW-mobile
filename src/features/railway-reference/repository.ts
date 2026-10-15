@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from "expo-sqlite";
 
-import type { Milestone } from "@/features/milestones/domain/milestone";
-import type { MilestoneLookupInput } from "@/features/milestones/search/contracts";
+import type { Milestone } from "@shared/railway-domain/milestone";
+import type { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { searchableSectionRowsToRailways } from "./mapping/railway-mapper";
 import {
   milestoneFromDatabaseRow,
@@ -12,13 +12,13 @@ import {
   readRailwayMilestoneBoundRows,
   readSearchableRailwayRows,
 } from "./sqlite/reader";
-import type { Railway } from "@/features/railways/domain/railway";
-import type { RailwaySectionKey } from "@shared/railway-reference/values";
-import type { RailwayMilestoneBounds } from "@/features/railway-reference/context";
+import type { Railway } from "@shared/railway-domain/railway";
+import type { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import type { RailwayMilestoneBounds } from "@shared/railway-domain/railway-milestone-bounds";
 
 export async function findRailwayMilestoneBounds(
   database: Pick<SQLiteDatabase, "getAllAsync">,
-  section: RailwaySectionKey,
+  section: RailwaySectionId,
 ): Promise<RailwayMilestoneBounds> {
   const records = await readRailwayMilestoneBoundRows(database, section);
   return milestoneRowsToBounds(records);
@@ -33,7 +33,7 @@ export async function loadSearchableRailways(
 
 export async function findMilestone(
   database: Pick<SQLiteDatabase, "getFirstAsync">,
-  input: MilestoneLookupInput,
+  input: MilestoneId,
 ): Promise<Milestone | undefined> {
   const record = await readMilestoneRow(database, input);
   return record === null

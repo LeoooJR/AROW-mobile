@@ -3,7 +3,7 @@ import type { MapFeature } from "@/types/map-feature";
 import type {
   GeographicCoordinates,
   GeographicCoordinatesWithHeading,
-} from "@/types/geographic-coordinates";
+} from "@shared/geographic-coordinates";
 
 export type MapLocation = GeographicCoordinatesWithHeading;
 

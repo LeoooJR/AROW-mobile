@@ -13,7 +13,7 @@ import {
   isRailwayQueryReady,
   searchRailways,
 } from "@/features/railways/search/railway-search";
-import type { Railway } from "@/features/railways/domain/railway";
+import type { Railway } from "@shared/railway-domain/railway";
 
 const EMPTY_RAILWAYS: readonly Railway[] = [];
 

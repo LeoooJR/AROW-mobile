@@ -7,8 +7,8 @@ import {
   type ToggleableMapLayer,
 } from "@/components/adapters/map/map-layer-visibility";
 import type { MapFeature } from "@/types/map-feature";
-import type { Milestone } from "@/features/milestones/domain/milestone";
-import type { GeographicCoordinates } from "@/types/geographic-coordinates";
+import type { Milestone } from "@shared/railway-domain/milestone";
+import type { GeographicCoordinates } from "@shared/geographic-coordinates";
 
 type FeatureSelection =
   | { readonly feature: MapFeature; readonly origin: "map" }

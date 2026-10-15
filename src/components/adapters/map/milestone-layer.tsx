@@ -1,3 +1,5 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import {
   GeoJSONSource,
   Layer,
@@ -11,11 +13,9 @@ import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 import { geographicCoordinatesFromPosition } from "@/components/adapters/map/geojson-validation";
 import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
 import type { MapFeature } from "@/types/map-feature";
-import {
-  isCanonicalRailwayLineCode,
-  isMilestoneLabelForPosition,
-} from "@shared/railway-reference/values";
-import { Milestone } from "@/features/milestones/domain/milestone";
+import { isCanonicalRailwayLineCode } from "@shared/railway-domain/line-code";
+import { isMilestoneLabelForPosition } from "@shared/railway-domain/kilometric-position";
+import { Milestone } from "@shared/railway-domain/milestone";
 import {
   isNonEmptyString,
   isPositiveInteger,
@@ -126,14 +126,18 @@ function milestoneFromFeature(feature: GeoJSON.Feature): Milestone | undefined {
   }
 
   const milestone = new Milestone({
+    id: new MilestoneId(
+      new RailwaySectionId(
+        feature.properties.lineCode,
+        feature.properties.sectionRank,
+      ),
+      feature.properties.positionMeters,
+    ),
     coordinates,
     label: feature.properties.label,
-    lineCode: feature.properties.lineCode,
-    positionMeters: feature.properties.positionMeters,
-    sectionRank: feature.properties.sectionRank,
   });
 
-  return feature.id === milestone.id ? milestone : undefined;
+  return feature.id === milestone.id.value ? milestone : undefined;
 }
 
 export default function MilestoneLayer({
@@ -182,7 +186,7 @@ export default function MilestoneLayer({
       />
       {selectedMilestone === undefined ? null : (
         <Layer
-          filter={["==", ["id"], selectedMilestone.id]}
+          filter={["==", ["id"], selectedMilestone.id.value]}
           id={MAP_LAYER_IDS.milestone.selected}
           key={MAP_LAYER_IDS.milestone.selected}
           layout={{ visibility: visible ? "visible" : "none" }}

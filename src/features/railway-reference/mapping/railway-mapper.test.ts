@@ -1,4 +1,4 @@
-import { Railway } from "@/features/railways/domain/railway";
+import { Railway } from "@shared/railway-domain/railway";
 
 import { searchableSectionRowsToRailways } from "./railway-mapper";
 
