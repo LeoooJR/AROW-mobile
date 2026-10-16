@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "target": "ES2023",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "skipLibCheck": true
+  },
+  "include": ["shared/**/*.ts"],
+  "exclude": [
+    "shared/**/*.test.ts",
+    "shared/**/*.spec.ts",
+    "shared/**/__tests__/**",
+    "shared/**/__mocks__/**"
+  ]
+}

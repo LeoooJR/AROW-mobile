@@ -170,6 +170,28 @@ compatibility, design, and accessibility requirements. Review any proposed
 dependency changes explicitly; manually copied components may still depend on
 the existing `@gluestack-ui/core` and `@gluestack-ui/utils` runtime packages.
 
+## Enforced code-quality boundaries
+
+Run `npm run check` for architecture, formatting, lint, application types, and
+isolated shared types. Run `npm run test:ci` for asset-independent code tests;
+ordinary `npm test` retains its dataset precheck and production-asset suites.
+
+- `shared` contains `.ts` source only and imports only other shared modules or
+  Node built-ins, including type-only imports. Computed imports are prohibited.
+- `src/utils` uses `.ts` source only. Its existing application and framework
+  imports are permitted.
+- `src/components/primitives` uses `.tsx` source only, including helpers and
+  tests. Primitives cannot import routes, composites, feature implementations,
+  feature hooks, or application contexts.
+- UI/platform hooks cannot import feature or railway-domain/reference modules,
+  or components. Platform hooks cannot import UI hooks.
+- Gluestack package imports belong in component adapters; MapLibre package
+  imports belong in the map adapter. Integration-test mocks are permitted.
+
+Filename rules and shared restrictions also cover tests. Other dependency rules
+apply to production code. CI does not prepare production datasets or export
+bundles; local validation requirements above remain applicable.
+
 ## Scoped source contexts
 
 Before creating, moving, or modifying files in these directories, read and

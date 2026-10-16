@@ -78,7 +78,13 @@ Thumbs.db
 **/__mocks__/
 /src/tests/
 /jest.config.*
+/jest.ci.config.js
 /eslint.config.*
+/.github/
+/.prettierignore
+/tsconfig.shared.json
+/script/check-architecture.ts
+/script/architecture/
 
 # Generated local-module outputs; keep native sources and resources
 /modules/**/android/build/

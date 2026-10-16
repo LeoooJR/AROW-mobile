@@ -161,6 +161,8 @@ runtime packages and must not trigger automatic dependency installation.
 ## File and API conventions
 
 - Use TypeScript and keep strict typing enabled.
+- Under `primitives`, use `.tsx` for every source file, including styles, types,
+  platform variants, and tests. The architecture check enforces this convention.
 - Use kebab-case filenames and PascalCase component exports.
 - Export each component as its module's default export. Keep reusable component
   prop types as explicit named exports.

@@ -24,6 +24,27 @@ AROW Mobile is the companion to AROW Desktop. Communication between the two apps
 is planned; the [communication contract](docs/HOW_TO_communication_contract)
 describes that future integration.
 
+## Code quality
+
+Use Node.js 24 and install dependencies with `npm ci`. From the repository root:
+
+```bash
+npm run check
+npm run test:ci
+```
+
+`check` runs architecture rules, source/configuration formatting, lint, the
+application type check, and an independent Node-only shared type check.
+`test:ci` runs code tests without production datasets or the asset-dependent
+`pretest` hook. It explicitly excludes the production GeoJSON snapshot and bundled
+SQLite schema suites. Fixture-based tooling and in-memory repository tests remain
+included. Ordinary `npm test` retains the full local suite and asset precheck.
+
+GitHub Actions runs these commands for pull requests and pushes to `main`.
+Production dataset preparation/validation and Android/web exports are outside
+this CI pass. Formatting excludes Markdown, prototypes, generated assets, and
+vendored material; changed documentation still needs its own Prettier check.
+
 ## Get started
 
 You need **Node.js 24 or newer**, npm, and an Android development environment with
