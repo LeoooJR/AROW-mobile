@@ -27,20 +27,20 @@ tags:
 - extendedWaitUntil:
     visible: "(Connectée|Active)"
     timeout: 30000
+- tapOn:
+    id: "center-location"
 - waitForAnimationToEnd
 # The 509+000 milestone is visible northwest of the centered fix after the
 # fresh-start status bar settles.
 - tapOn:
     point: "16%,32%"
-    retryTapIfNoChange: true
-# Android system bars can shift this map target down before the camera settles.
+# Android system bars can shift this map target before the camera settles.
 - runFlow:
     when:
       notVisible: "PK 509\\+000"
     commands:
       - tapOn:
           point: "16%,33%"
-          retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "PK 509\\+000"
     timeout: 10000
@@ -49,10 +49,49 @@ tags:
 - assertVisible: "1"
 - assertVisible: "509\\+000"
 - assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
+# Browse the adjacent recorded points and both section boundaries without wrapping.
+- extendedWaitUntil:
+    visible: "10 sur 12"
+    timeout: 10000
+- tapOn:
+    id: "previous-milestone"
+- assertVisible: "PK 508\\+000"
+- assertVisible: "9 sur 12"
+- tapOn:
+    id: "next-milestone"
+- assertVisible: "PK 509\\+000"
+- repeat:
+    times: 2
+    commands:
+      - tapOn:
+          id: "next-milestone"
+          enabled: true
+      - waitForAnimationToEnd
+- assertVisible: "PK 511\\+000"
+- assertVisible: "12 sur 12"
+- assertVisible:
+    id: "next-milestone"
+    enabled: false
+- repeat:
+    times: 11
+    commands:
+      - tapOn:
+          id: "previous-milestone"
+          enabled: true
+      - waitForAnimationToEnd
+- assertVisible: "PK 500\\+000"
+- assertVisible: "1 sur 12"
+- assertVisible:
+    id: "previous-milestone"
+    enabled: false
+- assertNotVisible:
+    id: "simulation-play-pause"
+- tapOn:
+    id: "center-location"
+- waitForAnimationToEnd
 # Replace the milestone selection with its parent railway section.
 - tapOn:
     point: "24%,13%"
-    retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
     timeout: 10000
@@ -81,14 +120,12 @@ tags:
 # press dispatch, so the milestone can replace the railway selection.
 - tapOn:
     point: "16%,32%"
-    retryTapIfNoChange: true
 - runFlow:
     when:
       notVisible: "PK 509\\+000"
     commands:
       - tapOn:
           point: "16%,33%"
-          retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "PK 509\\+000"
     timeout: 10000

@@ -5,8 +5,11 @@ import { formatGeographicCoordinates } from "@/utils/location-format";
 import MapFeatureDetailsFrame from "./map-feature-details-frame";
 import MapFeatureDetailsFacts from "./map-feature-details-facts";
 import MapFeatureDetailsFact from "./map-feature-details-fact";
+import MilestoneNavigation, {
+  type MilestoneNavigationProps,
+} from "./milestone-navigation";
 
-export interface MilestoneDetailsCardProps {
+export interface MilestoneDetailsCardProps extends MilestoneNavigationProps {
   readonly bottomOffset?: number;
   readonly feature: Milestone;
   readonly onClose: () => void;
@@ -15,6 +18,11 @@ export interface MilestoneDetailsCardProps {
 
 export default function MilestoneDetailsCard({
   feature,
+  neighbours,
+  loading,
+  retryable,
+  onPrevious,
+  onNext,
   ...props
 }: MilestoneDetailsCardProps) {
   return (
@@ -22,6 +30,15 @@ export default function MilestoneDetailsCard({
       {...props}
       eyebrow="Point kilométrique"
       title={`PK ${feature.label}`}
+      footer={
+        <MilestoneNavigation
+          neighbours={neighbours}
+          loading={loading}
+          retryable={retryable}
+          onPrevious={onPrevious}
+          onNext={onNext}
+        />
+      }
     >
       <MapFeatureDetailsFacts
         lineCode={feature.lineCode}

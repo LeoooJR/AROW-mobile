@@ -8,6 +8,7 @@ import { Railway } from "@shared/railway-domain/railway";
 
 import Index from "@/app/index";
 const mockFindBounds = jest.fn().mockResolvedValue({});
+const mockFindNeighbours = jest.fn().mockResolvedValue(undefined);
 const mockToast = { show: jest.fn(), close: jest.fn() };
 jest.mock("@/components/adapters/toast", () => ({
   useToast: () => mockToast,
@@ -70,6 +71,7 @@ jest.mock("@/hooks/features/use-real-location", () => ({
 jest.mock("@/hooks/features/use-railway-reference", () => ({
   useRailwayReference: () => ({
     findRailwayMilestoneBounds: mockFindBounds,
+    findMilestoneNeighbours: mockFindNeighbours,
     milestoneSearch: {
       findMilestone: jest.fn(),
       loadRailways: jest.fn(),

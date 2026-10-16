@@ -8,12 +8,16 @@ import {
 
 import type { MapFeature } from "@/types/map-feature";
 import type { Milestone } from "@shared/railway-domain/milestone";
+import { Milestone as RecordedMilestone } from "@shared/railway-domain/milestone";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import type { SimulationState } from "@/features/simulation/simulation-state";
 
 import Index from "@/app/index";
 import { useAssets } from "expo-asset";
 import { AppStartupContext } from "@/contexts/app-startup-context";
 const mockFindBounds = jest.fn().mockResolvedValue({});
+const mockFindNeighbours = jest.fn().mockResolvedValue(undefined);
 jest.mock("@/components/adapters/toast", () => ({
   useToast: () => mockToast,
 }));
@@ -57,6 +61,7 @@ const defaultRailwayAssets = jest.mocked(useAssets).getMockImplementation()?.(
 jest.mock("@/hooks/features/use-railway-reference", () => ({
   useRailwayReference: () => ({
     findRailwayMilestoneBounds: mockFindBounds,
+    findMilestoneNeighbours: mockFindNeighbours,
     milestoneSearch: {
       findMilestone: jest.fn(),
       loadRailways: jest.fn(),
@@ -299,12 +304,68 @@ describe("Index map feature selection", () => {
     expect(onFailure).toHaveBeenCalledTimes(1);
   });
   beforeEach(() => {
+    mockFindNeighbours.mockReset().mockResolvedValue(undefined);
     if (defaultRailwayAssets)
       jest.mocked(useAssets).mockReturnValue(defaultRailwayAssets);
     mockSimulationState = { status: "idle" };
     mockStartSimulation.mockReset();
     mockStopSimulation.mockReset();
   });
+
+  test.each([false, true])(
+    "neighbour browsing clears the pending Start target and preserves running simulation (%s)",
+    async (running) => {
+      const next = new RecordedMilestone({
+        id: new MilestoneId(new RailwaySectionId("893000", 1), 510000),
+        label: "510+000",
+        coordinates: { latitude: 45.75, longitude: 4.86 },
+      });
+      mockFindNeighbours.mockResolvedValueOnce({
+        next,
+        current: new RecordedMilestone({
+          id: new MilestoneId(new RailwaySectionId("893000", 1), 509000),
+          label: "509+000",
+          coordinates: { latitude: 45.74744, longitude: 4.85933 },
+        }),
+        positionInSection: 10,
+        total: 12,
+      });
+      const user = userEvent.setup();
+      const view = await render(<Index />);
+      await user.press(
+        screen.getByRole("button", { name: "Choisir un repère recherché" }),
+      );
+      if (running) {
+        mockSimulationState = {
+          status: "running",
+          position: {
+            accuracy: null,
+            heading: null,
+            latitude: 45.74744,
+            longitude: 4.85933,
+          },
+        };
+        await view.rerender(<Index />);
+      }
+      await user.press(
+        await screen.findByRole("button", {
+          name: "Afficher le point kilométrique suivant, 510+000",
+        }),
+      );
+      expect(screen.getByText("PK 510+000")).toBeOnTheScreen();
+      expect(mockStartSimulation).not.toHaveBeenCalled();
+      expect(mockStopSimulation).not.toHaveBeenCalled();
+      if (running) {
+        await user.press(
+          screen.getByRole("button", { name: "Action de simulation" }),
+        );
+        expect(mockStopSimulation).toHaveBeenCalledTimes(1);
+      } else
+        expect(
+          screen.queryByRole("button", { name: "Action de simulation" }),
+        ).toBeNull();
+    },
+  );
 
   test("shows, replaces, and closes shared feature details", async () => {
     const user = userEvent.setup();

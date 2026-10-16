@@ -13,6 +13,17 @@ const milestone = new Milestone({
 });
 
 describe("useMapSelection", () => {
+  test("neighbour selection updates camera and removes the pending search target", async () => {
+    const { result } = await renderHook(useMapSelection);
+    await act(async () => result.current.onMilestoneSelect(milestone));
+    const visibility = result.current.layerVisibility;
+    await act(async () => result.current.onMilestoneNavigate(milestone));
+    expect(result.current.selectedFeature).toBe(milestone);
+    expect(result.current.selectedSimulationMilestone).toBeUndefined();
+    expect(result.current.focusRequest).toBe(2);
+    expect(result.current.focusLocation).toBe(milestone.coordinates);
+    expect(result.current.layerVisibility).toBe(visibility);
+  });
   test("camera focus is repeatable and independent from selected feature and layers", async () => {
     const { result } = await renderHook(useMapSelection);
     await act(async () => result.current.onFeaturePress(milestone));

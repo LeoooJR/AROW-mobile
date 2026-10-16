@@ -69,6 +69,16 @@ substituted for one another. Endpoint controls use located recorded bounds.
 
 ## Ownership and use
 
+`MilestoneNeighbours` in
+[`milestone-neighbours.ts`](../shared/railway-domain/milestone-neighbours.ts)
+describes the nearest recorded lower and higher numeric PKs in the same section,
+plus the recorded `current` milestone, its one-based `positionInSection`, and the
+section's recorded `total`. The position is separate from the milestone's PK:
+gaps mean its place among recorded points cannot be inferred from its metre value.
+Navigation never wraps. A single-point section has position and total equal to
+one and no neighbours. An absent current record returns no
+descriptor. Loading, retries, camera focus, and selection remain application-owned.
+
 - Import individual modules directly. Domain code uses relative imports and only
   framework-independent shared dependencies.
 - Keep classes, constructor inputs, and existing validation together. Do not add

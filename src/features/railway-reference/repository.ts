@@ -1,4 +1,6 @@
 import type { SQLiteDatabase } from "expo-sqlite";
+import type { MilestoneNeighbours } from "@shared/railway-domain/milestone-neighbours";
+import { milestoneRowsToNeighbours } from "./mapping/milestone-neighbours-mapper";
 
 import type { Milestone } from "@shared/railway-domain/milestone";
 import type { MilestoneId } from "@shared/railway-domain/milestone-id";
@@ -9,12 +11,27 @@ import {
 } from "./mapping/milestone-mapper";
 import {
   readMilestoneRow,
+  readPreviousMilestoneRow,
+  readNextMilestoneRow,
+  readCurrentMilestoneRow,
   readRailwayMilestoneBoundRows,
   readSearchableRailwayRows,
 } from "./sqlite/reader";
 import type { Railway } from "@shared/railway-domain/railway";
 import type { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import type { RailwayMilestoneBounds } from "@shared/railway-domain/railway-milestone-bounds";
+
+export async function findMilestoneNeighbours(
+  database: Pick<SQLiteDatabase, "getFirstAsync">,
+  id: MilestoneId,
+): Promise<MilestoneNeighbours | undefined> {
+  const [currentRow, previousRow, nextRow] = await Promise.all([
+    readCurrentMilestoneRow(database, id),
+    readPreviousMilestoneRow(database, id),
+    readNextMilestoneRow(database, id),
+  ]);
+  return milestoneRowsToNeighbours(currentRow, previousRow, nextRow);
+}
 
 export async function findRailwayMilestoneBounds(
   database: Pick<SQLiteDatabase, "getAllAsync">,

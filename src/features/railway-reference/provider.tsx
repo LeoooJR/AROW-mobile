@@ -18,6 +18,7 @@ import {
 } from "@/features/railway-reference/context";
 import {
   findMilestone as findMilestoneInDatabase,
+  findMilestoneNeighbours as findNeighboursInDatabase,
   findRailwayMilestoneBounds as findBoundsInDatabase,
   loadSearchableRailways,
 } from "@/features/railway-reference/repository";
@@ -72,12 +73,23 @@ function RailwayReferenceDataProvider({
     (section: RailwaySectionId) => findBoundsInDatabase(database, section),
     [database],
   );
+  const findMilestoneNeighbours = useCallback(
+    (id: MilestoneId) => findNeighboursInDatabase(database, id),
+    [database],
+  );
   const value = useMemo<RailwayReferenceModel>(
     () => ({
+      findMilestoneNeighbours,
       findRailwayMilestoneBounds,
       milestoneSearch: { findMilestone, loadRailways, state: searchState },
     }),
-    [findMilestone, findRailwayMilestoneBounds, loadRailways, searchState],
+    [
+      findMilestoneNeighbours,
+      findMilestone,
+      findRailwayMilestoneBounds,
+      loadRailways,
+      searchState,
+    ],
   );
 
   return (

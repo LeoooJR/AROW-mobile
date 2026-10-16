@@ -28,6 +28,7 @@ export interface MapSelectionModel {
   readonly onFeaturePress: (feature: MapFeature) => void;
   readonly onMapFocusChange: (focused: boolean) => void;
   readonly onMilestoneSelect: (milestone: Milestone) => void;
+  readonly onMilestoneNavigate: (milestone: Milestone) => void;
   readonly onVisibilityChange: (
     layer: ToggleableMapLayer,
     visible: boolean,
@@ -74,6 +75,13 @@ export function useMapSelection(): MapSelectionModel {
     },
     [],
   );
+  const onMilestoneNavigate = useCallback(
+    (milestone: Milestone) => {
+      setSelection({ feature: milestone, origin: "map" });
+      focusOnLocation(milestone.coordinates);
+    },
+    [focusOnLocation],
+  );
   const closeSelection = useCallback(() => setSelection(undefined), []);
 
   useEffect(() => {
@@ -98,6 +106,7 @@ export function useMapSelection(): MapSelectionModel {
     onFeaturePress,
     onMapFocusChange: setMapFocused,
     onMilestoneSelect,
+    onMilestoneNavigate,
     onVisibilityChange,
     selectedFeature: selection?.feature,
     selectedSimulationMilestone:

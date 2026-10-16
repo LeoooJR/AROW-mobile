@@ -9,6 +9,7 @@ import MilestoneDetailsCard from "@/components/composites/map-feature-details-ca
 import ToastMessage from "@/components/composites/toast-message";
 import { useToast } from "@/components/adapters/toast";
 import { useRailwayMilestoneBounds } from "@/features/map-screen/use-railway-milestone-bounds";
+import { useMilestoneNeighbours } from "@/features/map-screen/use-milestone-neighbours";
 import MapToolbar from "@/components/composites/map-toolbar";
 import { AppStartupContext } from "@/contexts/app-startup-context";
 import { useMapStartup } from "@/hooks/features/use-map-startup";
@@ -35,7 +36,11 @@ export default function Index() {
   useEffect(() => {
     if (assetError !== undefined) onFailure?.();
   }, [assetError, onFailure]);
-  const { milestoneSearch, findRailwayMilestoneBounds } = useRailwayReference();
+  const {
+    milestoneSearch,
+    findRailwayMilestoneBounds,
+    findMilestoneNeighbours,
+  } = useRailwayReference();
   const selection = useMapSelection();
   const { show, close } = useToast();
   const reportBoundaryFailure = useCallback(() => {
@@ -52,6 +57,28 @@ export default function Index() {
       ),
     });
   }, [show, close]);
+  const reportNeighbourFailure = useCallback(() => {
+    show({
+      id: "milestone-neighbour-error",
+      placement: "top",
+      containerStyle: { marginTop: 80 },
+      render: () => (
+        <ToastMessage
+          severity="error"
+          message="Impossible de charger les repères voisins de ce point."
+          onDismiss={() => close("milestone-neighbour-error")}
+        />
+      ),
+    });
+  }, [show, close]);
+  const milestoneNavigation = useMilestoneNeighbours(
+    !selection.mapFocused && selection.selectedFeature?.kind === "milestone"
+      ? selection.selectedFeature
+      : undefined,
+    findMilestoneNeighbours,
+    selection.onMilestoneNavigate,
+    reportNeighbourFailure,
+  );
   const railwayBoundaries = useRailwayMilestoneBounds(
     selection.selectedFeature?.kind === "railway-section"
       ? selection.selectedFeature
@@ -104,6 +131,7 @@ export default function Index() {
           />
         ) : (
           <MilestoneDetailsCard
+            {...milestoneNavigation}
             bottomOffset={detailsBottomOffset}
             feature={selection.selectedFeature}
             onClose={selection.closeSelection}
