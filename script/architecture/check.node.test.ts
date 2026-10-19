@@ -193,6 +193,41 @@ test.each(["ui", "platform"])(
   },
 );
 
+describe.each(["ui", "platform"])("%s hook feature boundaries", (role) => {
+  test.each([
+    'import { useModel } from "@/hooks/features/use-model";',
+    'import type { Model } from "../features/use-model";',
+    'export { useModel } from "@/hooks/features/use-model";',
+    'const model = import("../features/use-model");',
+    'const model = require("@/hooks/features/use-model");',
+    'type Model = import("@/hooks/features/use-model").Model;',
+  ])("rejects a feature-hook dependency: %s", (source) => {
+    const file = `src/hooks/${role}/use-model.ts`;
+    expect(
+      inspect({
+        [file]: source,
+        "src/hooks/features/use-model.ts":
+          "export interface Model {} export function useModel() {}",
+      }),
+    ).toEqual([
+      expect.objectContaining({
+        file,
+        message: expect.stringContaining("feature hooks"),
+      }),
+    ]);
+  });
+
+  test("allows feature-hook dependencies in tests", () => {
+    expect(
+      inspect({
+        [`src/hooks/${role}/use-model.test.ts`]:
+          'import { useModel } from "@/hooks/features/use-model";',
+        "src/hooks/features/use-model.ts": "export function useModel() {}",
+      }),
+    ).toEqual([]);
+  });
+});
+
 test("allows UI-to-platform dependencies but prevents the reverse direction", () => {
   expect(
     inspect({

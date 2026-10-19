@@ -13,8 +13,9 @@ lint, formatting, and type checks.
 - `src/components/primitives` uses `.tsx` source only, including helpers and
   tests. Primitives cannot import routes, composites, feature implementations,
   feature hooks, or application contexts.
-- UI/platform hooks cannot import feature or railway-domain/reference modules,
-  or components. Platform hooks cannot import UI hooks.
+- UI/platform hooks cannot import feature implementations, feature hooks,
+  railway-domain/reference modules, or components. Platform hooks cannot import
+  UI hooks.
 - Gluestack package imports belong in component adapters; MapLibre package
   imports belong in the map adapter. Integration-test mocks are permitted.
 
