@@ -64,7 +64,9 @@ Railway details provide **Premier repère** and **Dernier repère** controls. Th
 
 ## A map tap is not a simulation request
 
-`useMapSelection` records where a milestone came from. A tapped map milestone has `origin: "map"` and is for inspection. A milestone chosen through point search has `origin: "search"`; that path also makes the milestone available to the simulation start control and requests camera focus. The metadata card can look the same in both cases, but tapping a map marker alone never starts a location simulation. If a simulation is already running, its stop control stays available independently of which card is open.
+`useMapSelection` records selection purpose. Tapping a map milestone sets `purpose: "browse"` for inspection. Choosing **Utiliser ce point** in its card or in point search sets `purpose: "simulation-target"`, makes the milestone available to the Start control, and requests camera focus. The card action keeps metadata open; Start remains a separate action.
+
+The card action is disabled during simulation activity and uncertain cleanup or reconciliation. An idle state or a confirmed inactive start error allows preparation, independently of neighbour loading. Closing the card, hiding its layer, or browsing another feature clears the pending target. An active simulation and its Stop control remain unchanged while browsing.
 
 ## Where to change behavior
 

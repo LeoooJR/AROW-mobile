@@ -13,6 +13,19 @@ const milestone = new Milestone({
 });
 
 describe("useMapSelection", () => {
+  test("prepares a browsed milestone repeatedly without losing its metadata and clears it on close", async () => {
+    const { result } = await renderHook(useMapSelection);
+    await act(async () => result.current.onFeaturePress(milestone));
+    await act(async () => result.current.onMilestoneSelect(milestone));
+    await act(async () => result.current.onMilestoneSelect(milestone));
+    expect(result.current.selectedFeature).toBe(milestone);
+    expect(result.current.selectedSimulationMilestone).toBe(milestone);
+    expect(result.current.focusLocation).toBe(milestone.coordinates);
+    expect(result.current.focusRequest).toBe(2);
+    await act(async () => result.current.closeSelection());
+    expect(result.current.selectedSimulationMilestone).toBeUndefined();
+    expect(result.current.selectedFeature).toBeUndefined();
+  });
   test("neighbour selection updates camera and removes the pending search target", async () => {
     const { result } = await renderHook(useMapSelection);
     await act(async () => result.current.onMilestoneSelect(milestone));

@@ -62,6 +62,7 @@ function displayedPosition(
 }
 
 export interface MapLocationModel {
+  readonly canSelectSimulationTarget: boolean;
   readonly currentLocation?: LocationDescriptor;
   readonly onCenter?: () => void;
   readonly onLocationAction?: () => void;
@@ -117,6 +118,9 @@ export function useMapLocation(
   }, [retry, running, stopped]);
 
   return {
+    canSelectSimulationTarget:
+      isSimulationStopped(simulationState) ||
+      isSimulationDismissibleError(simulationState),
     currentLocation: displayedPosition(state, simulation),
     onCenter:
       hasSimulatedPosition ||

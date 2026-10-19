@@ -1,6 +1,7 @@
 import { useAssets } from "expo-asset";
 import { use, useCallback, useEffect, useState } from "react";
 import { View, type LayoutChangeEvent } from "react-native";
+import type { Milestone } from "@shared/railway-domain/milestone";
 
 import Map from "@/components/adapters/map/map";
 import LocationBar from "@/components/composites/location-bar";
@@ -88,6 +89,14 @@ export default function Index() {
     reportBoundaryFailure,
   );
   const location = useMapLocation(selection.selectedSimulationMilestone);
+  const { canSelectSimulationTarget } = location;
+  const { onMilestoneSelect } = selection;
+  const onUsePoint = useCallback(
+    (milestone: Milestone) => {
+      if (canSelectSimulationTarget) onMilestoneSelect(milestone);
+    },
+    [canSelectSimulationTarget, onMilestoneSelect],
+  );
   const railwayData = railwayAssets?.[0]?.localUri ?? railwayAssets?.[0]?.uri;
   const milestoneData = railwayAssets?.[1]?.localUri ?? railwayAssets?.[1]?.uri;
   const showOverlays = process.env.EXPO_OS !== "web" && !selection.mapFocused;
@@ -131,6 +140,8 @@ export default function Index() {
           />
         ) : (
           <MilestoneDetailsCard
+            onUsePoint={onUsePoint}
+            usePointDisabled={!canSelectSimulationTarget}
             {...milestoneNavigation}
             bottomOffset={detailsBottomOffset}
             feature={selection.selectedFeature}

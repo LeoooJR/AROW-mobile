@@ -47,13 +47,74 @@ const position = {
 };
 
 describe("useMapLocation", () => {
+  test.each<[SimulationState, boolean]>([
+    [{ status: "idle" }, true],
+    [{ status: "checking" }, false],
+    [{ status: "starting" }, false],
+    [{ status: "canceling" }, false],
+    [{ status: "running", position }, false],
+    [{ status: "stopping", position }, false],
+    [
+      { status: "error", code: "DENIED", origin: "start", mayBeActive: false },
+      true,
+    ],
+    [
+      { status: "error", code: "UNKNOWN", origin: "start", mayBeActive: true },
+      false,
+    ],
+    [
+      {
+        status: "error",
+        code: "UNKNOWN",
+        origin: "cleanup",
+        mayBeActive: false,
+      },
+      false,
+    ],
+    [
+      {
+        status: "error",
+        code: "UNKNOWN",
+        origin: "cleanup",
+        mayBeActive: true,
+      },
+      false,
+    ],
+    [
+      {
+        status: "error",
+        code: "UNKNOWN",
+        origin: "reconciliation",
+        mayBeActive: false,
+      },
+      false,
+    ],
+    [
+      {
+        status: "error",
+        code: "UNKNOWN",
+        origin: "reconciliation",
+        mayBeActive: true,
+      },
+      false,
+    ],
+  ])(
+    "target preparation permission for %p is %s",
+    async (simulation, allowed) => {
+      mockSimulation = simulation;
+      const { result } = await renderHook(() => useMapLocation(milestone));
+      expect(result.current.canSelectSimulationTarget).toBe(allowed);
+      expect(mockStart).not.toHaveBeenCalled();
+      expect(mockStop).not.toHaveBeenCalled();
+    },
+  );
   beforeEach(() => {
     jest.clearAllMocks();
     mockSimulation = { status: "idle" };
     mockRealLocation = { status: "permissionRequired" };
   });
 
-  test("starts only a searched milestone and keeps stop after selection closes", async () => {
+  test("starts only a prepared milestone and keeps stop after selection closes", async () => {
     const { result, rerender } = await renderHook(
       ({ selected }: { selected?: Milestone }) => useMapLocation(selected),
       { initialProps: { selected: milestone } },

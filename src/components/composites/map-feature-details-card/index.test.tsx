@@ -100,7 +100,12 @@ describe("MapFeatureDetailsCard", () => {
 
   test("shows a milestone with its parent section and coordinates", async () => {
     await render(
-      <MilestoneDetailsCard feature={milestone} onClose={jest.fn()} />,
+      <MilestoneDetailsCard
+        feature={milestone}
+        onClose={jest.fn()}
+        onUsePoint={jest.fn()}
+        usePointDisabled={false}
+      />,
     );
 
     expect(screen.getByText("Point kilométrique")).toBeOnTheScreen();
@@ -114,6 +119,8 @@ describe("MapFeatureDetailsCard", () => {
   test("formats coordinates in the southern and western hemispheres", async () => {
     await render(
       <MilestoneDetailsCard
+        onUsePoint={jest.fn()}
+        usePointDisabled={false}
         feature={
           new Milestone({
             id: new MilestoneId(
@@ -154,7 +161,12 @@ describe("MapFeatureDetailsCard", () => {
 
   test("moves above an expanded simulation control bar", async () => {
     const { rerender } = await render(
-      <MilestoneDetailsCard feature={milestone} onClose={jest.fn()} />,
+      <MilestoneDetailsCard
+        feature={milestone}
+        onClose={jest.fn()}
+        onUsePoint={jest.fn()}
+        usePointDisabled={false}
+      />,
     );
 
     expect(screen.getByTestId("map-feature-details-card")).toHaveStyle({
@@ -163,6 +175,8 @@ describe("MapFeatureDetailsCard", () => {
 
     await rerender(
       <MilestoneDetailsCard
+        onUsePoint={jest.fn()}
+        usePointDisabled={false}
         feature={milestone}
         onClose={jest.fn()}
         showSimulationAction
@@ -175,6 +189,8 @@ describe("MapFeatureDetailsCard", () => {
 
     await rerender(
       <MilestoneDetailsCard
+        onUsePoint={jest.fn()}
+        usePointDisabled={false}
         feature={milestone}
         onClose={jest.fn()}
         bottomOffset={240}

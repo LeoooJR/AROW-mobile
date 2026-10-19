@@ -238,6 +238,66 @@ jest.mock("@/components/composites/map-toolbar", () => {
 });
 
 describe("Index map feature selection", () => {
+  test("prepares a map point without starting and retains the card until explicit closure", async () => {
+    const user = userEvent.setup();
+    await render(<Index />);
+    await user.press(
+      screen.getByRole("button", {
+        name: "Choisir un point kilométrique test",
+      }),
+    );
+    expect(
+      screen.queryByRole("button", { name: "Action de simulation" }),
+    ).toBeNull();
+    await user.press(screen.getByRole("button", { name: "Utiliser ce point" }));
+    await user.press(screen.getByRole("button", { name: "Utiliser ce point" }));
+    expect(screen.getByText("PK 241+000")).toBeOnTheScreen();
+    expect(mockStartSimulation).not.toHaveBeenCalled();
+    expect(mockStopSimulation).not.toHaveBeenCalled();
+    await user.press(
+      screen.getByRole("button", { name: "Action de simulation" }),
+    );
+    expect(mockStartSimulation).toHaveBeenCalledWith(
+      expect.objectContaining({ label: "241+000", kind: "milestone" }),
+    );
+    await user.press(
+      screen.getByRole("button", {
+        name: "Fermer les informations de l’élément cartographique",
+      }),
+    );
+    expect(
+      screen.queryByRole("button", { name: "Action de simulation" }),
+    ).toBeNull();
+  });
+
+  test("cannot prepare a different target while running and keeps Stop usable", async () => {
+    mockSimulationState = {
+      status: "running",
+      position: {
+        accuracy: null,
+        heading: null,
+        latitude: 45.74744,
+        longitude: 4.85933,
+      },
+    };
+    const user = userEvent.setup();
+    await render(<Index />);
+    await user.press(
+      screen.getByRole("button", {
+        name: "Choisir un point kilométrique test",
+      }),
+    );
+    expect(
+      screen.getByRole("button", { name: "Utiliser ce point" }),
+    ).toBeDisabled();
+    await user.press(screen.getByRole("button", { name: "Utiliser ce point" }));
+    expect(mockStartSimulation).not.toHaveBeenCalled();
+    expect(mockStopSimulation).not.toHaveBeenCalled();
+    await user.press(
+      screen.getByRole("button", { name: "Action de simulation" }),
+    );
+    expect(mockStopSimulation).toHaveBeenCalledTimes(1);
+  });
   test("keeps details above a location bar that grows with enlarged text", async () => {
     mockFindBounds.mockClear();
     const user = userEvent.setup();

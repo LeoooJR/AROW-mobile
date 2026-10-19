@@ -53,10 +53,20 @@ tags:
 - extendedWaitUntil:
     visible: "10 sur 12"
     timeout: 10000
+- assertVisible:
+    id: "use-map-milestone"
+- assertNotVisible:
+    id: "simulation-play-pause"
+- tapOn:
+    id: "use-map-milestone"
+- assertVisible: "PK 509\\+000"
+- assertVisible: "Démarrer la simulation"
 - tapOn:
     id: "previous-milestone"
 - assertVisible: "PK 508\\+000"
 - assertVisible: "9 sur 12"
+- assertNotVisible:
+    id: "simulation-play-pause"
 - tapOn:
     id: "next-milestone"
 - assertVisible: "PK 509\\+000"
@@ -99,6 +109,8 @@ tags:
 - assertVisible: "893000"
 - assertVisible: "1"
 - assertVisible: "499\\+752 → 511\\+605"
+- assertNotVisible:
+    id: "use-map-milestone"
 - extendedWaitUntil:
     visible: "Centrer la carte sur le premier repère, .*"
     timeout: 10000
@@ -135,5 +147,11 @@ tags:
 - assertNotVisible:
     id: "simulation-play-pause"
 - tapOn:
+    id: "use-map-milestone"
+- assertVisible: "PK 509\\+000"
+- assertVisible: "Démarrer la simulation"
+- tapOn:
     id: "close-map-feature-details"
 - assertNotVisible: "PK 509\\+000"
+- assertNotVisible:
+    id: "simulation-play-pause"

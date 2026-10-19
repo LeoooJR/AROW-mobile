@@ -39,11 +39,11 @@ Once the input is valid, [`useMilestoneResolution`](../src/components/composites
 
 The sheet shows a resolved-point summary, then enables **Utiliser ce point** only when resolution is `ready`. A missing point, out-of-range value, or lookup error does not enable that action.
 
-Pressing **Utiliser ce point** closes the sheet. [`useMapSelection`](../src/features/map-screen/use-map-selection.ts) records the feature with `origin: "search"`, makes the milestone layer visible, and requests camera focus. The selected milestone is highlighted and its [metadata card](map-interactivity.md) appears. Its search origin also makes it eligible for the simulation start control; tapping the same point directly on the map is inspection only.
+Pressing **Utiliser ce point** closes the sheet. [`useMapSelection`](../src/features/map-screen/use-map-selection.ts) records the feature with `purpose: "simulation-target"`, makes the milestone layer visible, and requests camera focus. The selected milestone is highlighted and its [metadata card](map-interactivity.md) appears with the simulation start control available. A map tap alone is inspection; the card's **Utiliser ce point** action can prepare that displayed milestone through the same selection path while keeping the card open.
 
 ## 3. Press start
 
-[`useMapLocation`](../src/features/map-screen/use-map-location.ts) passes the searched milestone to [`useSimulation`](../src/hooks/features/use-simulation.ts). Pressing **Démarrer la simulation** calls the simulation controller, which proceeds in this order:
+[`useMapLocation`](../src/features/map-screen/use-map-location.ts) passes the prepared milestone to [`useSimulation`](../src/hooks/features/use-simulation.ts). Pressing **Démarrer la simulation** calls the simulation controller, which proceeds in this order:
 
 ```text
 Check: AROW is the selected mock-location app
@@ -57,7 +57,7 @@ Report running
 Prepare notification consent and visibility without changing simulation state
 ```
 
-The search sheet performs the only milestone lookup. The selected `Milestone` already contains validated coordinates, and the bundled reference cannot change between selection and start. Readiness runs before native start, so a missing mock-app selection or disabled location services fails quickly without applying a fix. Native start also checks readiness before applying a fix. A start request alone is **not** reported as success.
+Start does not repeat the milestone lookup. The selected `Milestone` already contains validated coordinates, and the bundled reference cannot change between selection and start. Readiness runs before native start, so a missing mock-app selection or disabled location services fails quickly without applying a fix. Native start also checks readiness before applying a fix. A start request alone is **not** reported as success.
 
 For the example above, the selected `Milestone` resolves to approximately **45.74744 N, 4.85933 E**. The journey reaches its endpoint only when the native result confirms that those coordinates were applied and the UI enters `running`.
 

@@ -11,8 +11,8 @@ import type { Milestone } from "@shared/railway-domain/milestone";
 import type { GeographicCoordinates } from "@shared/geographic-coordinates";
 
 type FeatureSelection =
-  | { readonly feature: MapFeature; readonly origin: "map" }
-  | { readonly feature: Milestone; readonly origin: "search" };
+  | { readonly feature: MapFeature; readonly purpose: "browse" }
+  | { readonly feature: Milestone; readonly purpose: "simulation-target" };
 
 function layerForFeature(feature: MapFeature): ToggleableMapLayer {
   return feature.kind === "railway-section" ? "railway" : "milestone";
@@ -52,12 +52,12 @@ export function useMapSelection(): MapSelectionModel {
 
   const onFeaturePress = useCallback((feature: MapFeature) => {
     setMapFocused(false);
-    setSelection({ feature, origin: "map" });
+    setSelection({ feature, purpose: "browse" });
   }, []);
   const onMilestoneSelect = useCallback(
     (milestone: Milestone) => {
       setLayerVisibility((current) => ({ ...current, milestone: true }));
-      setSelection({ feature: milestone, origin: "search" });
+      setSelection({ feature: milestone, purpose: "simulation-target" });
       focusOnLocation(milestone.coordinates);
     },
     [focusOnLocation],
@@ -77,7 +77,7 @@ export function useMapSelection(): MapSelectionModel {
   );
   const onMilestoneNavigate = useCallback(
     (milestone: Milestone) => {
-      setSelection({ feature: milestone, origin: "map" });
+      setSelection({ feature: milestone, purpose: "browse" });
       focusOnLocation(milestone.coordinates);
     },
     [focusOnLocation],
@@ -110,6 +110,8 @@ export function useMapSelection(): MapSelectionModel {
     onVisibilityChange,
     selectedFeature: selection?.feature,
     selectedSimulationMilestone:
-      selection?.origin === "search" ? selection.feature : undefined,
+      selection?.purpose === "simulation-target"
+        ? selection.feature
+        : undefined,
   };
 }
