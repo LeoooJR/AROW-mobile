@@ -43,10 +43,11 @@ const executor = {
 };
 
 function Consumer(): ReactElement {
-  const { start, state, stop } = useSimulation();
+  const { notificationWarningId, start, state, stop } = useSimulation();
   return (
     <>
       <Text>{state.status}</Text>
+      <Text testID="notification-warning-id">{notificationWarningId}</Text>
       <Pressable
         accessibilityLabel="Start simulation"
         accessibilityRole="button"
@@ -87,6 +88,53 @@ describe("SimulationProvider", () => {
     executor.start.mockResolvedValue(runningSnapshot);
     executor.stop.mockResolvedValue({ status: "stopped" });
   });
+
+  test.each([true, false])(
+    "a background start warns only when notification visibility is false (%s)",
+    async (visible) => {
+      const previousState = AppState.currentState;
+      const actual = jest.requireActual<
+        typeof import("./simulation-notifications")
+      >("./simulation-notifications");
+      const visibility = jest.fn().mockResolvedValue(visible);
+      jest
+        .mocked(prepareSimulationNotifications)
+        .mockImplementationOnce((isCurrent) =>
+          actual.prepareSimulationNotifications(isCurrent, visibility),
+        );
+      executor.start.mockImplementationOnce(async () => {
+        AppState.currentState = "background";
+        return runningSnapshot;
+      });
+      try {
+        AppState.currentState = "active";
+        const view = await render(application(true));
+        await waitFor(() =>
+          expect(executor.getSnapshot).toHaveBeenCalledTimes(1),
+        );
+        executor.getSnapshot.mockResolvedValue(runningSnapshot);
+        await fireEvent.press(
+          screen.getByRole("button", { name: "Start simulation" }),
+        );
+        expect(await screen.findByText("running")).toBeOnTheScreen();
+        expect(visibility).toHaveBeenCalledTimes(1);
+        AppState.currentState = "active";
+        const onAppStateChange = jest.mocked(AppState.addEventListener).mock
+          .calls[0][1];
+        await act(async () => onAppStateChange("active"));
+        await waitFor(() =>
+          expect(executor.getSnapshot).toHaveBeenCalledTimes(2),
+        );
+        expect(screen.getByTestId("notification-warning-id")).toHaveTextContent(
+          visible ? "0" : "1",
+        );
+        expect(screen.getByText("running")).toBeOnTheScreen();
+        await view.unmount();
+      } finally {
+        AppState.currentState = previousState;
+      }
+    },
+  );
 
   test("keeps one start operation when the screen remounts during native start", async () => {
     let completeStart!: (result: typeof runningSnapshot) => void;

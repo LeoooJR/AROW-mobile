@@ -19,14 +19,12 @@ export async function prepareSimulationNotifications(
   isCurrent: () => boolean,
   canShowNotification: () => Promise<boolean> = canShowSimulationNotification,
 ): Promise<NotificationPreparation> {
-  if (!isCurrent() || !isAppActive(AppState.currentState))
-    return { notificationVisible: false };
-  if (isAndroidVersionAtLeast(33)) {
+  if (!isCurrent()) return { notificationVisible: false };
+  if (isAndroidVersionAtLeast(33) && isAppActive(AppState.currentState)) {
     const permission = PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS;
     const granted = await PermissionsAndroid.check(permission);
-    if (!isCurrent() || !isAppActive(AppState.currentState))
-      return { notificationVisible: false };
-    if (!granted) {
+    if (!isCurrent()) return { notificationVisible: false };
+    if (!granted && isAppActive(AppState.currentState)) {
       await PermissionsAndroid.request(permission);
     }
   }
