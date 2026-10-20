@@ -1,15 +1,16 @@
 package expo.modules.arowmocklocation
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 
 class MockLocationService : Service() {
   companion object {
@@ -20,6 +21,7 @@ class MockLocationService : Service() {
   }
 
   private val handler = Handler(Looper.getMainLooper())
+  private var notificationStartedAt = 0L
   private val refresh = object : Runnable {
     override fun run() {
       if (MockLocationEngine.snapshot() !is NativeRunningSnapshot) return
@@ -34,6 +36,20 @@ class MockLocationService : Service() {
   }
 
   override fun onBind(intent: Intent?): IBinder? = null
+
+  override fun onConfigurationChanged(newConfig: Configuration) {
+    super.onConfigurationChanged(newConfig)
+    if (MockLocationEngine.snapshot() !is NativeRunningSnapshot) return
+    try {
+      val notifications = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+      notifications.notify(
+        NOTIFICATION_ID,
+        ActiveSimulationNotification.build(this, CHANNEL_ID, NOTIFICATION_ID, notificationStartedAt),
+      )
+    } catch (exception: Exception) {
+      Log.w("AROWNotification", "Could not refresh simulation notification", exception)
+    }
+  }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
     if (intent?.action != ACTION_START) {
@@ -85,17 +101,15 @@ class MockLocationService : Service() {
       )
     }
 
-    val notification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      Notification.Builder(this, CHANNEL_ID)
-    } else {
-      @Suppress("DEPRECATION")
-      Notification.Builder(this)
+    if (notificationStartedAt == 0L) {
+      notificationStartedAt = System.currentTimeMillis()
     }
-      .setSmallIcon(android.R.drawable.ic_menu_mylocation)
-      .setContentTitle("Simulation AROW active")
-      .setContentText("Une position ferroviaire simulée est appliquée.")
-      .setOngoing(true)
-      .build()
+    val notification = ActiveSimulationNotification.build(
+      this,
+      CHANNEL_ID,
+      NOTIFICATION_ID,
+      notificationStartedAt,
+    )
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)

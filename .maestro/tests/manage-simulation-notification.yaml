@@ -15,31 +15,63 @@ tags:
       location: allow
       notifications: unset
 - runFlow: ../flows/select-simulation-milestone.yaml
-- tapOn:
-    id: "simulation-play-pause"
+- retry:
+    maxRetries: 3
+    commands:
+      - tapOn:
+          id: "simulation-play-pause"
+      - assertVisible: "Allow"
 - tapOn: "Allow"
 - extendedWaitUntil:
     visible: "Arrêter la simulation"
     timeout: 10000
-- assertNotVisible: "Notifications désactivées"
+- assertNotVisible:
+    id: "simulation-notification-warning"
 - swipe:
     start: "50%,2%"
     end: "50%,80%"
     duration: 500
-- assertVisible: "Simulation AROW active"
+- assertVisible: "Simulation de position active"
+- runFlow:
+    when:
+      visible: "La simulation continue en arrière-plan\\. Vous pouvez l’arrêter dans AROW\\."
+    commands:
+      - tapOn:
+          id: "android:id/expand_button"
+          text: "Collapse"
+          childOf:
+            id: "android:id/notification_header"
+            containsDescendants:
+              - text: "AROW-mobile"
+- assertNotVisible: "La simulation continue en arrière-plan\\. Vous pouvez l’arrêter dans AROW\\."
+- takeScreenshot: .maestro/artifacts/active-notification-collapsed
+- assertNotVisible: "Mettre en pause"
+- assertNotVisible: "Reprendre"
+- assertNotVisible: "Arrêter"
+- tapOn:
+    id: "android:id/expand_button"
+    childOf:
+      id: "android:id/expand_button_touch_container"
+      childOf:
+        id: "android:id/notification_headerless_view_row"
+        childOf:
+          id: "android:id/status_bar_latest_event_content"
+          containsDescendants:
+            - text: "Simulation de position active"
+- assertVisible: "Une position ferroviaire simulée est appliquée\\."
+- assertVisible: "La simulation continue en arrière-plan\\. Vous pouvez l’arrêter dans AROW\\."
+- takeScreenshot: .maestro/artifacts/active-notification-expanded
 - pressKey: Back
 - pressKey: Home
 - swipe:
     start: "50%,2%"
     end: "50%,80%"
     duration: 500
-- assertVisible: "Simulation AROW active"
-- pressKey: Back
-- launchApp:
-    stopApp: false
-    permissions:
-      location: allow
-      notifications: allow
+- assertVisible: "Simulation de position active"
+- tapOn: "Simulation de position active"
+- extendedWaitUntil:
+    visible: "Arrêter la simulation"
+    timeout: 10000
 - tapOn: "Arrêter la simulation"
 - extendedWaitUntil:
     visible: "Démarrer la simulation"
@@ -48,14 +80,14 @@ tags:
     start: "50%,2%"
     end: "50%,80%"
     duration: 500
-- assertNotVisible: "Simulation AROW active"
+- assertNotVisible: "Simulation de position active"
 - pressKey: Back
 - tapOn:
     id: "simulation-play-pause"
 - assertVisible: "Arrêter la simulation"
 - tapOn: "Arrêter la simulation"
 
-# Revoke consent and prove automatic continuation, expiry, and usable Stop.
+# Revoke consent and prove continuation, persistence, manual dismissal, and Stop.
 - stopApp
 - setPermissions:
     permissions:
@@ -65,17 +97,30 @@ tags:
     id: "simulation-play-pause"
 - tapOn: "Don’t allow"
 - assertVisible: "Arrêter la simulation"
-- assertVisible: "Notifications désactivées"
-- extendedWaitUntil:
-    notVisible: "Notifications désactivées"
-    timeout: 12000
+- assertVisible: "Avertissement"
+- assertVisible:
+    id: "simulation-notification-warning"
+# Keep checking visibility beyond the former eight-second deadline.
+- evalScript: ${output.warningDeadline = Date.now() + 9000}
+- repeat:
+    while:
+      true: ${Date.now() < output.warningDeadline}
+    commands:
+      - assertVisible:
+          id: "simulation-notification-warning"
+- assertVisible:
+    id: "simulation-notification-warning"
+- tapOn: "Fermer le message"
+- assertNotVisible:
+    id: "simulation-notification-warning"
 - assertVisible: "Arrêter la simulation"
 - tapOn: "Arrêter la simulation"
 - tapOn:
     id: "simulation-play-pause"
 # A repeated start after this denial returns without another system prompt.
-# Avoid a conditional prompt lookup: Maestro waits long enough to expire the toast.
-- assertVisible: "Notifications désactivées"
+- assertVisible:
+    id: "simulation-notification-warning"
 - tapOn: "Arrêter la simulation"
-- assertNotVisible: "Notifications désactivées"
+- assertNotVisible:
+    id: "simulation-notification-warning"
 - assertVisible: "Démarrer la simulation"

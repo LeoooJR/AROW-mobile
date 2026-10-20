@@ -2,7 +2,7 @@ import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
 import Button from "@/components/primitives/button";
-import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { Milestone } from "@shared/railway-domain/milestone";
 import type { MilestoneResolution } from "@/features/milestones/search/contracts";
 
 interface PointSearchFooterProps {

@@ -1,6 +1,6 @@
 import Step from "@/components/composites/map-toolbar/point-search-sheet/step";
 import type { MilestoneResolution } from "@/features/milestones/search/contracts";
-import type { RailwaySection } from "@/features/railways/railway-section";
+import type { RailwaySection } from "@shared/railway-domain/railway-section";
 
 const STATUS_BY_RESOLUTION = {
   error: "À corriger",

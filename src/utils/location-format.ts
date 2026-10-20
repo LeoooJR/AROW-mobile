@@ -1,4 +1,4 @@
-import type { GeographicCoordinates } from "@/types/geographic-coordinates";
+import type { GeographicCoordinates } from "@shared/geographic-coordinates";
 import type { LocationDescriptor } from "@/types/location-descriptor";
 
 export function formatCoordinate(

@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react-native";
 
-import type { AppStartupActions } from "@/features/app-startup/context";
+import type { AppStartupActions } from "@/contexts/app-startup-context";
 import { createBasemapStartupAttempt } from "@/features/map-screen/check-basemap-source";
 import { useMapStartup } from "./use-map-startup";
 

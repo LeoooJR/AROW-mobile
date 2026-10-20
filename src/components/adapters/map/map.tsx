@@ -52,7 +52,11 @@ export default function Map({
     "pending",
   );
   const selectedSection =
-    selectedFeature === undefined ? undefined : selectedFeature.key;
+    selectedFeature === undefined
+      ? undefined
+      : selectedFeature.kind === "milestone"
+        ? selectedFeature.id.sectionId
+        : selectedFeature.id;
   const selectedMilestone =
     selectedFeature?.kind === "milestone" ? selectedFeature : undefined;
 

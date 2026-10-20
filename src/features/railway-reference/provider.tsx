@@ -9,20 +9,21 @@ import {
 } from "react";
 import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 
-import type { Milestone } from "@/features/milestones/domain/milestone";
-import type {
-  MilestoneLookupInput,
-  MilestoneSearchState,
-} from "@/features/milestones/search/contracts";
+import type { Milestone } from "@shared/railway-domain/milestone";
+import type { MilestoneId } from "@shared/railway-domain/milestone-id";
+import type { RailwaySearchState } from "@/features/railways/search/contracts";
 import {
   RailwayReferenceContext,
   type RailwayReferenceModel,
 } from "@/features/railway-reference/context";
 import {
   findMilestone as findMilestoneInDatabase,
+  findMilestoneNeighbours as findNeighboursInDatabase,
+  findRailwayMilestoneBounds as findBoundsInDatabase,
   loadSearchableRailways,
-} from "@/features/railway-reference/sqlite/repository";
+} from "@/features/railway-reference/repository";
 import railwayReferenceDatabaseAsset from "@/statics/railway_reference.sqlite";
+import type { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 
 export interface RailwayReferenceProviderProps {
   readonly children: ReactNode;
@@ -33,7 +34,7 @@ function RailwayReferenceDataProvider({
   children,
 }: RailwayReferenceProviderProps): ReactElement {
   const database = useSQLiteContext();
-  const [searchState, setSearchState] = useState<MilestoneSearchState>({
+  const [searchState, setSearchState] = useState<RailwaySearchState>({
     status: "idle",
   });
   const catalogLoadStarted = useRef(false);
@@ -64,15 +65,31 @@ function RailwayReferenceDataProvider({
     );
   }, [database]);
   const findMilestone = useCallback(
-    (input: MilestoneLookupInput): Promise<Milestone | undefined> =>
+    (input: MilestoneId): Promise<Milestone | undefined> =>
       findMilestoneInDatabase(database, input),
+    [database],
+  );
+  const findRailwayMilestoneBounds = useCallback(
+    (section: RailwaySectionId) => findBoundsInDatabase(database, section),
+    [database],
+  );
+  const findMilestoneNeighbours = useCallback(
+    (id: MilestoneId) => findNeighboursInDatabase(database, id),
     [database],
   );
   const value = useMemo<RailwayReferenceModel>(
     () => ({
+      findMilestoneNeighbours,
+      findRailwayMilestoneBounds,
       milestoneSearch: { findMilestone, loadRailways, state: searchState },
     }),
-    [findMilestone, loadRailways, searchState],
+    [
+      findMilestoneNeighbours,
+      findMilestone,
+      findRailwayMilestoneBounds,
+      loadRailways,
+      searchState,
+    ],
   );
 
   return (

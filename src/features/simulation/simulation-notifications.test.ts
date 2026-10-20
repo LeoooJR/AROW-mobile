@@ -76,16 +76,24 @@ test.each(["ios", "web"] as const)(
   },
 );
 
-test("inactive applications skip requesting without a cancellation result", async () => {
-  AppState.currentState = "background";
-  await expect(
-    prepareSimulationNotifications(isCurrent, visibility),
-  ).resolves.toEqual({
-    notificationVisible: false,
-  });
-  expect(PermissionsAndroid.request).not.toHaveBeenCalled();
-  expect(visibility).not.toHaveBeenCalled();
-});
+describe.each(["background", "inactive"] as const)(
+  "%s preparation",
+  (state) => {
+    test.each([true, false])(
+      "reports actual visibility (%s) without prompting",
+      async (visible) => {
+        AppState.currentState = state;
+        visibility.mockResolvedValue(visible);
+        await expect(
+          prepareSimulationNotifications(isCurrent, visibility),
+        ).resolves.toEqual({ notificationVisible: visible });
+        expect(PermissionsAndroid.check).not.toHaveBeenCalled();
+        expect(PermissionsAndroid.request).not.toHaveBeenCalled();
+        expect(visibility).toHaveBeenCalledTimes(1);
+      },
+    );
+  },
+);
 
 test("a permission dialog resolving before activity resume still queries visibility", async () => {
   jest.mocked(PermissionsAndroid.request).mockImplementation(async () => {
@@ -108,10 +116,10 @@ test("leaving during the permission check never opens a background prompt", asyn
   await expect(
     prepareSimulationNotifications(isCurrent, visibility),
   ).resolves.toEqual({
-    notificationVisible: false,
+    notificationVisible: true,
   });
   expect(PermissionsAndroid.request).not.toHaveBeenCalled();
-  expect(visibility).not.toHaveBeenCalled();
+  expect(visibility).toHaveBeenCalledTimes(1);
 });
 
 test("Stop during permission checking prevents a later prompt", async () => {

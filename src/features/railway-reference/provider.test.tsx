@@ -1,3 +1,5 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import {
   act,
   render,
@@ -157,13 +159,11 @@ describe("RailwayReferenceProvider", () => {
       wrapper: RailwayReferenceProvider,
     });
 
-    const milestone = await view.result.current.milestoneSearch.findMilestone({
-      lineCode: "893000",
-      positionMeters: 509_000,
-      sectionRank: 1,
-    });
+    const milestone = await view.result.current.milestoneSearch.findMilestone(
+      new MilestoneId(new RailwaySectionId("893000", 1), 509_000),
+    );
 
-    expect(milestone?.id).toBe("893000:1:509000");
+    expect(milestone?.id.value).toBe("893000:1:509000");
     expect(getFirstAsync).toHaveBeenCalledWith(
       FIND_MILESTONE_QUERY,
       "893000",

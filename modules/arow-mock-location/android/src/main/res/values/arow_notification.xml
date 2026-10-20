@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="arow_notification_title">Simulation de position active</string>
+  <string name="arow_notification_summary">Une position ferroviaire simulée est appliquée.</string>
+  <string name="arow_notification_detail">La simulation continue en arrière-plan. Vous pouvez l’arrêter dans AROW.</string>
+  <color name="arow_notification_foreground">#0A0A0A</color>
+  <color name="arow_notification_success">#3FA66E</color>
+
+  <style name="Arow.Notification.Title.Base" parent="android:style/TextAppearance.Material.Notification.Title">
+    <item name="android:textSize">16sp</item>
+    <item name="android:fontFamily">sans-serif-medium</item>
+    <item name="android:textColor">@color/arow_notification_foreground</item>
+    <item name="android:includeFontPadding">false</item>
+    <item name="android:letterSpacing">-0.01</item>
+    <item name="android:lineSpacingExtra">3sp</item>
+  </style>
+  <style name="Arow.Notification.Title" parent="Arow.Notification.Title.Base" />
+  <style name="Arow.Notification.Body.Base" parent="android:style/TextAppearance.Material.Notification.Line2">
+    <item name="android:textSize">14sp</item>
+    <item name="android:fontFamily">sans-serif</item>
+    <item name="android:textColor">@color/arow_notification_foreground</item>
+    <item name="android:includeFontPadding">false</item>
+    <item name="android:lineSpacingExtra">3sp</item>
+  </style>
+  <style name="Arow.Notification.Body" parent="Arow.Notification.Body.Base" />
+</resources>

@@ -1,5 +1,5 @@
 import { type ReactElement } from "react";
-import { View } from "react-native";
+import { View, type LayoutChangeEvent } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import CenterLocationButton from "@/components/composites/location-bar/center-location-button";
@@ -14,9 +14,10 @@ import {
 import type {
   MockedLocationState,
   RealLocationState,
-} from "@/hooks/platform/real-location-state";
+} from "@/features/real-location/real-location-state";
 
 export interface LocationBarProps {
+  readonly onLayout?: (event: LayoutChangeEvent) => void;
   readonly onAction?: () => void;
   readonly onCenter?: () => void;
   readonly onSimulationPress?: () => void;
@@ -26,6 +27,7 @@ export interface LocationBarProps {
 }
 
 export default function LocationBar({
+  onLayout,
   onAction,
   onCenter,
   onSimulationPress,
@@ -55,6 +57,7 @@ export default function LocationBar({
 
   return (
     <View
+      onLayout={onLayout}
       className="absolute inset-x-0 bottom-0 border-t border-border-subtle bg-canvas px-4"
       style={{ paddingBottom: Math.max(10, insets.bottom) }}
     >

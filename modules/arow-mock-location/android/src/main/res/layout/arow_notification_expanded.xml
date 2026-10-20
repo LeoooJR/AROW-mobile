@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:orientation="vertical">
+  <TextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:drawablePadding="8dp"
+    android:drawableStart="@drawable/arow_notification_active_dot"
+    android:gravity="center_vertical"
+    android:text="@string/arow_notification_title"
+    android:textAppearance="@style/Arow.Notification.Title" />
+  <TextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="6dp"
+    android:text="@string/arow_notification_summary"
+    android:textAppearance="@style/Arow.Notification.Body" />
+  <TextView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:text="@string/arow_notification_detail"
+    android:textAppearance="@style/Arow.Notification.Body" />
+</LinearLayout>

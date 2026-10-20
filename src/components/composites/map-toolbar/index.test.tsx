@@ -1,3 +1,5 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import {
   fireEvent,
   render,
@@ -10,23 +12,19 @@ import {
   DEFAULT_MAP_LAYER_VISIBILITY,
   type MapLayerVisibility,
 } from "@/components/adapters/map/map-layer-visibility";
-import { Milestone } from "@/features/milestones/domain/milestone";
-import type {
-  MilestoneSearchModel,
-  MilestoneSearchState,
-} from "@/features/milestones/search/contracts";
-import { Railway } from "@/features/railways/railway";
+import { Milestone } from "@shared/railway-domain/milestone";
+import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
+import type { RailwaySearchState } from "@/features/railways/search/contracts";
+import { Railway } from "@shared/railway-domain/railway";
 
 import MapToolbar from "./index";
 
 let mockSafeAreaTop = 0;
 let mockWindowWidth = 412;
 const milestone = new Milestone({
+  id: new MilestoneId(new RailwaySectionId("893000", 1), 509_000),
   coordinates: { latitude: 45.74744, longitude: 4.85933 },
   label: "509+000",
-  lineCode: "893000",
-  positionMeters: 509_000,
-  sectionRank: 1,
 });
 const milestoneSearch = {
   railways: [
@@ -48,7 +46,7 @@ const milestoneSearch = {
     }),
   ],
   status: "ready",
-} satisfies MilestoneSearchState;
+} satisfies RailwaySearchState;
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -132,7 +130,7 @@ function ControlledToolbar({
   readonly onMapFocusChange?: jest.Mock;
   readonly onMilestoneSelect?: jest.Mock;
   readonly onVisibilityChange?: jest.Mock;
-  readonly searchState?: MilestoneSearchState;
+  readonly searchState?: RailwaySearchState;
 }) {
   const [mapFocused, setMapFocused] = useState(initiallyFocused);
   const [visibility, setVisibility] = useState<MapLayerVisibility>(
@@ -339,21 +337,20 @@ describe("MapToolbar", () => {
 
     expect(onMilestoneSelect).toHaveBeenCalledWith(milestone);
     expect(findMilestone).toHaveBeenCalledTimes(1);
-    expect(findMilestone).toHaveBeenCalledWith({
-      lineCode: "893000",
-      positionMeters: 509_000,
-      sectionRank: 1,
-    });
+    const requestedId = findMilestone.mock.calls[0]?.[0] as MilestoneId;
+    expect(requestedId).toBeInstanceOf(MilestoneId);
+    expect(requestedId.value).toBe("893000:1:509000");
     expect(screen.queryByTestId("point-search-sheet")).not.toBeOnTheScreen();
   });
 
   test("formats resolved coordinates with their actual hemispheres", async () => {
     const southernWesternMilestone = new Milestone({
+      id: new MilestoneId(
+        new RailwaySectionId(milestone.lineCode, milestone.sectionRank),
+        milestone.positionMeters,
+      ),
       coordinates: { latitude: -12.5, longitude: -3.25 },
       label: milestone.label,
-      lineCode: milestone.lineCode,
-      positionMeters: milestone.positionMeters,
-      sectionRank: milestone.sectionRank,
     });
     const user = userEvent.setup();
     await render(
@@ -430,6 +427,9 @@ describe("MapToolbar", () => {
     const user = userEvent.setup();
     await render(<ControlledToolbar />);
     await user.press(screen.getByTestId("open-point-search"));
+    expect(
+      screen.queryByRole("button", { name: "Fermer la recherche" }),
+    ).not.toBeOnTheScreen();
     await user.type(
       screen.getByLabelText("Nom de ligne ou code unique"),
       "893000",
@@ -510,8 +510,13 @@ describe("MapToolbar", () => {
       paddingBottom: 20,
     });
 
-    await user.press(
-      screen.getByRole("button", { name: "Fermer les couches" }),
+    expect(
+      screen.queryByRole("button", { name: "Fermer les couches" }),
+    ).not.toBeOnTheScreen();
+    await fireEvent.press(
+      screen.getByTestId("mock-native-sheet-dismiss", {
+        includeHiddenElements: true,
+      }),
     );
 
     expect(screen.queryByTestId("map-layers-sheet")).not.toBeOnTheScreen();

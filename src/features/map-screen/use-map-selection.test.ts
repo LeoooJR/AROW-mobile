@@ -1,24 +1,61 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { act, renderHook } from "@testing-library/react-native";
 import { BackHandler } from "react-native";
 
-import { Milestone } from "@/features/milestones/domain/milestone";
+import { Milestone } from "@shared/railway-domain/milestone";
 import { useMapSelection } from "@/features/map-screen/use-map-selection";
 
 const milestone = new Milestone({
+  id: new MilestoneId(new RailwaySectionId("893000", 1), 509_000),
   coordinates: { latitude: 45.74744, longitude: 4.85933 },
   label: "509+000",
-  lineCode: "893000",
-  positionMeters: 509_000,
-  sectionRank: 1,
 });
 
 describe("useMapSelection", () => {
+  test("prepares a browsed milestone repeatedly without losing its metadata and clears it on close", async () => {
+    const { result } = await renderHook(useMapSelection);
+    await act(async () => result.current.onFeaturePress(milestone));
+    await act(async () => result.current.onMilestoneSelect(milestone));
+    await act(async () => result.current.onMilestoneSelect(milestone));
+    expect(result.current.selectedFeature).toBe(milestone);
+    expect(result.current.selectedSimulationMilestone).toBe(milestone);
+    expect(result.current.focusLocation).toBe(milestone.coordinates);
+    expect(result.current.focusRequest).toBe(2);
+    await act(async () => result.current.closeSelection());
+    expect(result.current.selectedSimulationMilestone).toBeUndefined();
+    expect(result.current.selectedFeature).toBeUndefined();
+  });
+  test("neighbour selection updates camera and removes the pending search target", async () => {
+    const { result } = await renderHook(useMapSelection);
+    await act(async () => result.current.onMilestoneSelect(milestone));
+    const visibility = result.current.layerVisibility;
+    await act(async () => result.current.onMilestoneNavigate(milestone));
+    expect(result.current.selectedFeature).toBe(milestone);
+    expect(result.current.selectedSimulationMilestone).toBeUndefined();
+    expect(result.current.focusRequest).toBe(2);
+    expect(result.current.focusLocation).toBe(milestone.coordinates);
+    expect(result.current.layerVisibility).toBe(visibility);
+  });
+  test("camera focus is repeatable and independent from selected feature and layers", async () => {
+    const { result } = await renderHook(useMapSelection);
+    await act(async () => result.current.onFeaturePress(milestone));
+    const visibility = result.current.layerVisibility;
+    const target = { latitude: 46, longitude: 5 };
+    await act(async () => result.current.focusOnLocation(target));
+    await act(async () => result.current.focusOnLocation(target));
+    expect(result.current.focusRequest).toBe(2);
+    expect(result.current.focusLocation).toEqual(target);
+    expect(result.current.selectedFeature).toBe(milestone);
+    expect(result.current.selectedSimulationMilestone).toBeUndefined();
+    expect(result.current.layerVisibility).toBe(visibility);
+  });
   test("distinguishes searched points from map selections", async () => {
     const { result } = await renderHook(useMapSelection);
 
     await act(async () => result.current.onMilestoneSelect(milestone));
     expect(result.current.selectedSimulationMilestone).toBe(milestone);
-    expect(result.current.milestoneFocusRequest).toBe(1);
+    expect(result.current.focusRequest).toBe(1);
 
     await act(async () => result.current.onFeaturePress(milestone));
     expect(result.current.selectedFeature).toBe(milestone);

@@ -1,9 +1,12 @@
 import { render, screen } from "@testing-library/react-native";
 
 import { useRailwayReference } from "@/hooks/features/use-railway-reference";
-import { useRealLocation } from "@/hooks/platform/use-real-location";
+import { useRealLocation } from "@/hooks/features/use-real-location";
 
 import Index from "@/app/index";
+jest.mock("@/components/adapters/toast", () => ({
+  useToast: () => ({ show: jest.fn(), close: jest.fn() }),
+}));
 
 jest.mock("expo-asset", () => ({
   useAssets: () => [
@@ -23,7 +26,7 @@ jest.mock("@/hooks/features/use-simulation", () => ({
     stop: jest.fn(),
   }),
 }));
-jest.mock("@/hooks/platform/use-real-location", () => ({
+jest.mock("@/hooks/features/use-real-location", () => ({
   useRealLocation: jest.fn(),
 }));
 jest.mock("@/components/adapters/map/map", () => {
@@ -53,6 +56,8 @@ const useRealLocationMock = jest.mocked(useRealLocation);
 describe("Index", () => {
   beforeEach(() => {
     useRailwayReferenceMock.mockReturnValue({
+      findMilestoneNeighbours: async () => undefined,
+      findRailwayMilestoneBounds: async () => ({}),
       milestoneSearch: {
         findMilestone: jest.fn(),
         loadRailways: jest.fn(),

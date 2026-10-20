@@ -1,6 +1,6 @@
 import { createContext } from "react";
 
-import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { Milestone } from "@shared/railway-domain/milestone";
 import type { SimulationState } from "@/features/simulation/simulation-state";
 
 export interface SimulationModel {

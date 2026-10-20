@@ -8,13 +8,11 @@ import { type ReactElement } from "react";
 import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 
 import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
-import type { MapFeature } from "@/features/map-features/map-feature";
-import {
-  isCanonicalRailwayLineCode,
-  RailwaySectionKey,
-} from "@shared/railway-reference/values";
-import { Railway } from "@/features/railways/railway";
-import type { RailwaySection } from "@/features/railways/railway-section";
+import type { MapFeature } from "@/types/map-feature";
+import { isCanonicalRailwayLineCode } from "@shared/railway-domain/line-code";
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { Railway } from "@shared/railway-domain/railway";
+import type { RailwaySection } from "@shared/railway-domain/railway-section";
 import {
   isNonEmptyString,
   isPositiveInteger,
@@ -25,7 +23,7 @@ import { resolveColorTheme } from "@/utils/color-theme";
 export interface RailwayLinesSourceProps {
   readonly data: string;
   readonly onFeaturePress?: (feature: MapFeature) => void;
-  readonly selectedSection?: RailwaySectionKey;
+  readonly selectedSection?: RailwaySectionId;
   readonly visible?: boolean;
 }
 
@@ -135,7 +133,7 @@ function railwayFromFeature(
   });
   const section = railway.sections[0];
 
-  return section !== undefined && feature.id === section.id
+  return section !== undefined && feature.id === section.id.value
     ? section
     : undefined;
 }
@@ -192,7 +190,7 @@ export default function RailwayLinesSource({
       {selectedSection === undefined ? null : (
         <Layer
           beforeId={MAP_LAYER_IDS.milestone.dots}
-          filter={["==", ["id"], selectedSection.id]}
+          filter={["==", ["id"], selectedSection.value]}
           id={MAP_LAYER_IDS.railway.selected}
           key={MAP_LAYER_IDS.railway.selected}
           layout={{

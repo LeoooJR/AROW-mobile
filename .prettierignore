@@ -1,0 +1,26 @@
+# Check maintained code/configuration without rewriting reference material.
+**/*.md
+design-prototype/
+assets/
+.agents/
+.codex/
+.vscode/
+skills-lock.json
+
+# Dependencies and generated files.
+node_modules/
+.expo/
+expo-env.d.ts
+.cache/
+.kotlin/
+dist/
+web-build/
+coverage/
+android/
+ios/
+modules/**/android/build/
+modules/**/android/.gradle/
+modules/**/android/.cxx/
+.maestro/artifacts/
+src/statics/*.geojson
+src/statics/*.sqlite

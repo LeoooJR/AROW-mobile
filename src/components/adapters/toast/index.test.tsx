@@ -17,15 +17,15 @@ describe("Toast", () => {
 
     expect(screen.getByTestId("toast")).toHaveProp(
       "className",
-      "gap-1 rounded-md p-4 border border-border bg-popover bg-popover",
+      "gap-[10px] rounded-[8px] p-[12px] border border-[#0A0A0A] dark:border-white bg-[#0A0A0A] dark:bg-white",
     );
     expect(screen.getByText("Connexion")).toHaveProp(
       "className",
-      "text-base font-medium text-popover-foreground",
+      "mb-[2px] text-[11px] font-bold leading-[16.5px] text-white dark:text-[#0A0A0A]",
     );
     expect(screen.getByText("Position disponible")).toHaveProp(
       "className",
-      "text-base text-muted-foreground",
+      "text-[13px] leading-[19.5px] text-white dark:text-[#0A0A0A]",
     );
   });
 
@@ -67,7 +67,7 @@ describe("Toast", () => {
 
       expect(screen.getByTestId("toast")).toHaveProp(
         "className",
-        expect.stringContaining("bg-popover"),
+        expect.stringContaining("bg-[#0A0A0A] dark:bg-white"),
       );
     },
   );

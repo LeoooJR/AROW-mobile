@@ -2,7 +2,7 @@ import { formatLocationDescriptor } from "@/utils/location-format";
 import type {
   MockedLocationState,
   RealLocationState,
-} from "@/hooks/platform/real-location-state";
+} from "@/features/real-location/real-location-state";
 import {
   isSimulationStarted,
   type SimulationState,

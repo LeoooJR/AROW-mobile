@@ -4,7 +4,7 @@ import { StyleSheet, useColorScheme, View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 
 import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
-import type { GeographicCoordinatesWithHeading } from "@/types/geographic-coordinates";
+import type { GeographicCoordinatesWithHeading } from "@shared/geographic-coordinates";
 import { normalizeDegrees } from "@/utils/angle";
 import { resolveColorTheme } from "@/utils/color-theme";
 

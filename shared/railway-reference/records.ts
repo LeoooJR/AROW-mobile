@@ -1,12 +1,15 @@
-import { isNonEmptyString, isRecord } from "../value-validation";
 import {
-  isCanonicalRailwayLineCode,
+  isLatitude,
+  isLongitude,
+  isNonEmptyString,
+  isRecord,
+} from "../value-validation";
+import { isCanonicalRailwayLineCode } from "../railway-domain/line-code";
+import {
   isKilometricPosition,
   isMilestoneLabelForPosition,
-  isRailwayLatitude,
-  isRailwayLongitude,
-  isRailwaySectionRank,
-} from "./values";
+} from "../railway-domain/kilometric-position";
+import { isRailwaySectionRank } from "../railway-domain/railway-section-id";
 
 export interface KilometricPointDatabaseRow {
   readonly code_ligne: string;
@@ -54,8 +57,8 @@ export function decodeKilometricPointDatabaseRow(
     !isKilometricPosition(value.position_m) ||
     !isNonEmptyString(value.label) ||
     !isMilestoneLabelForPosition(value.label, value.position_m) ||
-    !isRailwayLatitude(value.latitude) ||
-    !isRailwayLongitude(value.longitude)
+    !isLatitude(value.latitude) ||
+    !isLongitude(value.longitude)
   ) {
     throw new Error(`Invalid milestone ${context}`);
   }

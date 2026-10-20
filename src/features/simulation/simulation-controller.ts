@@ -4,7 +4,7 @@ import type {
   NativeStartResult,
 } from "../../../modules/arow-mock-location/src/native-contracts";
 
-import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { Milestone } from "@shared/railway-domain/milestone";
 import type { MockLocationExecutor } from "@/features/simulation/mock-location";
 import { positionFromSnapshot } from "@/features/simulation/simulation-native-snapshot";
 import {

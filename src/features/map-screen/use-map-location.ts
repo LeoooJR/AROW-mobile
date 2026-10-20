@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { Milestone } from "@shared/railway-domain/milestone";
 import {
   isSimulationStopRequired,
   isSimulationStarted,
@@ -14,8 +14,8 @@ import { useSimulation } from "@/hooks/features/use-simulation";
 import {
   useRealLocation,
   type UseRealLocationResult,
-} from "@/hooks/platform/use-real-location";
-import type { LocationState } from "@/hooks/platform/real-location-state";
+} from "@/hooks/features/use-real-location";
+import type { LocationState } from "@/features/real-location/real-location-state";
 import type { LocationDescriptor } from "@/types/location-descriptor";
 
 type LocationAction = Pick<
@@ -62,6 +62,7 @@ function displayedPosition(
 }
 
 export interface MapLocationModel {
+  readonly canSelectSimulationTarget: boolean;
   readonly currentLocation?: LocationDescriptor;
   readonly onCenter?: () => void;
   readonly onLocationAction?: () => void;
@@ -117,6 +118,9 @@ export function useMapLocation(
   }, [retry, running, stopped]);
 
   return {
+    canSelectSimulationTarget:
+      isSimulationStopped(simulationState) ||
+      isSimulationDismissibleError(simulationState),
     currentLocation: displayedPosition(state, simulation),
     onCenter:
       hasSimulatedPosition ||

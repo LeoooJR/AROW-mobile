@@ -22,16 +22,16 @@ export interface ToastTitleProps extends TextProps {
 }
 
 const toastActionClassNames = {
-  error: "bg-popover",
-  info: "bg-popover",
-  muted: "bg-popover",
-  success: "bg-popover",
-  warning: "bg-popover",
+  error: "bg-[#0A0A0A] dark:bg-white",
+  info: "bg-[#0A0A0A] dark:bg-white",
+  muted: "bg-[#0A0A0A] dark:bg-white",
+  success: "bg-[#0A0A0A] dark:bg-white",
+  warning: "bg-[#0A0A0A] dark:bg-white",
 } as const satisfies Record<ToastAction, string>;
 
 const toastVariantClassNames = {
-  outline: "border border-border",
-  solid: "border border-border bg-popover",
+  outline: "border border-[#0A0A0A] dark:border-white",
+  solid: "border border-[#0A0A0A] dark:border-white",
 } as const satisfies Record<ToastVariant, string>;
 
 export const useToast = createToastHook(View);
@@ -43,11 +43,12 @@ export const Toast = forwardRef<ComponentRef<typeof View>, ToastProps>(
   ): ReactElement {
     return (
       <View
+        pointerEvents="auto"
         {...props}
         ref={ref}
         className={
           className ??
-          `gap-1 rounded-md p-4 ${toastVariantClassNames[variant]} ${toastActionClassNames[action]}`
+          `gap-[10px] rounded-[8px] p-[12px] ${toastVariantClassNames[variant]} ${toastActionClassNames[action]}`
         }
       />
     );
@@ -65,7 +66,10 @@ export const ToastTitle = forwardRef<
     <Text
       {...props}
       ref={ref}
-      className={className ?? "text-base font-medium text-popover-foreground"}
+      className={
+        className ??
+        "mb-[2px] text-[11px] font-bold leading-[16.5px] text-white dark:text-[#0A0A0A]"
+      }
     />
   );
 });
@@ -81,7 +85,10 @@ export const ToastDescription = forwardRef<
     <Text
       {...props}
       ref={ref}
-      className={className ?? "text-base text-muted-foreground"}
+      className={
+        className ??
+        "text-[13px] leading-[19.5px] text-white dark:text-[#0A0A0A]"
+      }
     />
   );
 });

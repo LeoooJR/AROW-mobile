@@ -1,10 +1,11 @@
+import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
 import {
   canonicalLineCode,
   milestonePositionMeters,
   requireCoordinate,
   requirePositiveInteger,
 } from "./validation";
-import { milestoneId } from "../../shared/railway-reference/values";
+import { MilestoneId } from "../../shared/railway-domain/milestone-id";
 import type { Milestone, ParsedMilestones, SkippedMilestone } from "./types";
 
 const EXPECTED_HEADER = Object.freeze([
@@ -130,11 +131,10 @@ export function parseMilestoneCsv(buffer: Uint8Array): ParsedMilestones {
     }
 
     const milestone = parseMilestone(fields, lineNumber);
-    const id = milestoneId(
-      milestone.code,
-      milestone.rank,
+    const id = new MilestoneId(
+      new RailwaySectionId(milestone.code, milestone.rank),
       milestone.positionMeters,
-    );
+    ).value;
     if (ids.has(id)) {
       throw new Error(`Duplicate milestone ${id} at CSV line ${lineNumber}`);
     }

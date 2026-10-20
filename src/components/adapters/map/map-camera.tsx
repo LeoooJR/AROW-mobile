@@ -6,7 +6,7 @@ import {
 import { type ReactElement, useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "react-native-reanimated";
 
-import type { GeographicCoordinates } from "@/types/geographic-coordinates";
+import type { GeographicCoordinates } from "@shared/geographic-coordinates";
 
 export interface MapCameraProps {
   readonly focusLocation?: GeographicCoordinates;

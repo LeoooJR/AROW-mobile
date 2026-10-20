@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { AppState, useWindowDimensions } from "react-native";
+import { AppState } from "react-native";
 
-import {
-  Toast,
-  ToastDescription,
-  ToastTitle,
-  useToast,
-} from "@/components/adapters/toast";
+import { useToast } from "@/components/adapters/toast";
+import ToastMessage from "@/components/composites/toast-message";
 import { useSimulation } from "@/hooks/features/use-simulation";
 import { isAppActive } from "@/utils/app-state";
 
@@ -16,12 +12,8 @@ export default function SimulationNotificationWarning() {
   const { notificationWarningId, state } = useSimulation();
   const { show, close } = useToast();
   const latestClose = useRef(close);
-  const { width } = useWindowDimensions();
   const [appState, setAppState] = useState(AppState.currentState);
   const consumedEvent = useRef(0);
-  const dismissal = useRef<ReturnType<typeof setTimeout> | undefined>(
-    undefined,
-  );
 
   useEffect(() => {
     latestClose.current = close;
@@ -37,7 +29,6 @@ export default function SimulationNotificationWarning() {
     if (state.status === "error" && state.mayBeActive) return;
     if (state.status !== "running") {
       consumedEvent.current = notificationWarningId;
-      clearTimeout(dismissal.current);
       close(TOAST_ID);
       return;
     }
@@ -47,35 +38,24 @@ export default function SimulationNotificationWarning() {
     )
       return;
     consumedEvent.current = notificationWarningId;
-    clearTimeout(dismissal.current);
     show({
       id: TOAST_ID,
       placement: "top",
-      // Own the deadline so a previous start cannot dismiss a fresh warning.
       duration: null,
-      containerStyle: { marginTop: 80, width: Math.max(0, width - 32) },
+      containerStyle: { marginTop: 80 },
       render: () => (
-        <Toast
-          action="warning"
-          accessibilityLiveRegion="polite"
-          className="gap-1 rounded-md border border-warning bg-popover p-4"
+        <ToastMessage
+          severity="warning"
+          onDismiss={() => latestClose.current(TOAST_ID)}
+          message="Notifications désactivées. La simulation continue sans rappel dans les notifications. Vous pouvez l’arrêter dans AROW ou consulter les applications actives d’Android."
           testID="simulation-notification-warning"
-        >
-          <ToastTitle>Notifications désactivées</ToastTitle>
-          <ToastDescription>
-            La simulation continue sans rappel dans les notifications. Vous
-            pouvez l’arrêter dans AROW ou consulter les applications actives
-            d’Android.
-          </ToastDescription>
-        </Toast>
+        />
       ),
     });
-    dismissal.current = setTimeout(() => latestClose.current(TOAST_ID), 8_000);
-  }, [appState, close, notificationWarningId, show, state, width]);
+  }, [appState, close, notificationWarningId, show, state]);
 
   useEffect(
     () => () => {
-      clearTimeout(dismissal.current);
       latestClose.current(TOAST_ID);
     },
     [],

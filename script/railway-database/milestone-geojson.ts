@@ -1,8 +1,7 @@
-import {
-  isCanonicalRailwayLineCode,
-  isMilestoneLabelForPosition,
-  milestoneId,
-} from "../../shared/railway-reference/values";
+import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
+import { isCanonicalRailwayLineCode } from "../../shared/railway-domain/line-code";
+import { isMilestoneLabelForPosition } from "../../shared/railway-domain/kilometric-position";
+import { MilestoneId } from "../../shared/railway-domain/milestone-id";
 import {
   isNonEmptyString,
   isLatitude,
@@ -60,11 +59,13 @@ function normalizeFeature(value: unknown): MilestoneGeoJsonFeature {
     throw new Error("Milestone GeoJSON contains an invalid feature");
   }
 
-  const expectedId = milestoneId(
-    value.properties.lineCode,
-    value.properties.sectionRank,
+  const expectedId = new MilestoneId(
+    new RailwaySectionId(
+      value.properties.lineCode,
+      value.properties.sectionRank,
+    ),
     value.properties.positionMeters,
-  );
+  ).value;
   if (value.id !== expectedId) {
     throw new Error(
       `Milestone GeoJSON feature has invalid id ${String(value.id)}`,

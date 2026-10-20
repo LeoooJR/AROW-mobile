@@ -1,6 +1,6 @@
 import type { Position } from "geojson";
 
-import type { GeographicCoordinates } from "@/types/geographic-coordinates";
+import type { GeographicCoordinates } from "@shared/geographic-coordinates";
 import { isLatitude, isLongitude } from "@shared/value-validation";
 
 export function geographicCoordinatesFromPosition(

@@ -1,9 +1,12 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { render, screen, userEvent } from "@testing-library/react-native";
 
-import { Milestone } from "@/features/milestones/domain/milestone";
-import { Railway } from "@/features/railways/railway";
+import { Milestone } from "@shared/railway-domain/milestone";
+import { Railway } from "@shared/railway-domain/railway";
 
-import MapFeatureDetailsCard from "./index";
+import RailwayDetailsCard from "./railway-details-card";
+import MilestoneDetailsCard from "./milestone-details-card";
 
 jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ bottom: 24, left: 0, right: 0, top: 0 }),
@@ -28,17 +31,61 @@ const railwayLine = new Railway({
 const railway = railwayLine.sections[0];
 
 const milestone = new Milestone({
+  id: new MilestoneId(new RailwaySectionId("001000", 1), 241_000),
   coordinates: { latitude: 45.74491, longitude: 4.86234 },
   label: "241+000",
-  lineCode: "001000",
-  positionMeters: 241_000,
-  sectionRank: 1,
 });
 
 describe("MapFeatureDetailsCard", () => {
+  test("exposes enabled endpoint labels and independent callbacks", async () => {
+    const first = jest.fn(),
+      last = jest.fn();
+    const user = userEvent.setup();
+    await render(
+      <RailwayDetailsCard
+        feature={railway}
+        onClose={jest.fn()}
+        onFirst={first}
+        onLast={last}
+        bounds={{ first: milestone, last: milestone }}
+      />,
+    );
+    await user.press(
+      screen.getByRole("button", {
+        name: "Centrer la carte sur le premier repère, 241+000",
+      }),
+    );
+    await user.press(
+      screen.getByRole("button", {
+        name: "Centrer la carte sur le dernier repère, 241+000",
+      }),
+    );
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(last).toHaveBeenCalledTimes(1);
+  });
+  test("disables missing and loading endpoints but enables error recovery", async () => {
+    const props = {
+      feature: railway,
+      onClose: jest.fn(),
+      onFirst: jest.fn(),
+      onLast: jest.fn(),
+    };
+    const { rerender } = await render(<RailwayDetailsCard {...props} />);
+    expect(screen.getByTestId("first-railway-milestone")).toBeDisabled();
+    expect(screen.getByTestId("last-railway-milestone")).toBeDisabled();
+    await rerender(<RailwayDetailsCard {...props} retryable />);
+    expect(screen.getByTestId("first-railway-milestone")).toBeEnabled();
+    await rerender(<RailwayDetailsCard {...props} retryable loading />);
+    expect(screen.getByTestId("first-railway-milestone")).toBeDisabled();
+  });
   test("shows compact operational railway metadata", async () => {
     await render(
-      <MapFeatureDetailsCard feature={railway} onClose={jest.fn()} />,
+      <RailwayDetailsCard
+        feature={railway}
+        onClose={jest.fn()}
+        onFirst={jest.fn()}
+        onLast={jest.fn()}
+      />,
     );
 
     expect(screen.getByText("Raccordement")).toBeOnTheScreen();
@@ -53,7 +100,12 @@ describe("MapFeatureDetailsCard", () => {
 
   test("shows a milestone with its parent section and coordinates", async () => {
     await render(
-      <MapFeatureDetailsCard feature={milestone} onClose={jest.fn()} />,
+      <MilestoneDetailsCard
+        feature={milestone}
+        onClose={jest.fn()}
+        onUsePoint={jest.fn()}
+        usePointDisabled={false}
+      />,
     );
 
     expect(screen.getByText("Point kilométrique")).toBeOnTheScreen();
@@ -66,14 +118,17 @@ describe("MapFeatureDetailsCard", () => {
 
   test("formats coordinates in the southern and western hemispheres", async () => {
     await render(
-      <MapFeatureDetailsCard
+      <MilestoneDetailsCard
+        onUsePoint={jest.fn()}
+        usePointDisabled={false}
         feature={
           new Milestone({
+            id: new MilestoneId(
+              new RailwaySectionId(milestone.lineCode, milestone.sectionRank),
+              milestone.positionMeters,
+            ),
             coordinates: { latitude: -12.5, longitude: -3.25 },
             label: milestone.label,
-            lineCode: milestone.lineCode,
-            positionMeters: milestone.positionMeters,
-            sectionRank: milestone.sectionRank,
           })
         }
         onClose={jest.fn()}
@@ -86,7 +141,14 @@ describe("MapFeatureDetailsCard", () => {
   test("exposes an accessible close action", async () => {
     const onClose = jest.fn();
     const user = userEvent.setup();
-    await render(<MapFeatureDetailsCard feature={railway} onClose={onClose} />);
+    await render(
+      <RailwayDetailsCard
+        feature={railway}
+        onClose={onClose}
+        onFirst={jest.fn()}
+        onLast={jest.fn()}
+      />,
+    );
 
     await user.press(
       screen.getByRole("button", {
@@ -99,7 +161,12 @@ describe("MapFeatureDetailsCard", () => {
 
   test("moves above an expanded simulation control bar", async () => {
     const { rerender } = await render(
-      <MapFeatureDetailsCard feature={milestone} onClose={jest.fn()} />,
+      <MilestoneDetailsCard
+        feature={milestone}
+        onClose={jest.fn()}
+        onUsePoint={jest.fn()}
+        usePointDisabled={false}
+      />,
     );
 
     expect(screen.getByTestId("map-feature-details-card")).toHaveStyle({
@@ -107,7 +174,9 @@ describe("MapFeatureDetailsCard", () => {
     });
 
     await rerender(
-      <MapFeatureDetailsCard
+      <MilestoneDetailsCard
+        onUsePoint={jest.fn()}
+        usePointDisabled={false}
         feature={milestone}
         onClose={jest.fn()}
         showSimulationAction
@@ -116,6 +185,19 @@ describe("MapFeatureDetailsCard", () => {
 
     expect(screen.getByTestId("map-feature-details-card")).toHaveStyle({
       bottom: 177,
+    });
+
+    await rerender(
+      <MilestoneDetailsCard
+        onUsePoint={jest.fn()}
+        usePointDisabled={false}
+        feature={milestone}
+        onClose={jest.fn()}
+        bottomOffset={240}
+      />,
+    );
+    expect(screen.getByTestId("map-feature-details-card")).toHaveStyle({
+      bottom: 240,
     });
   });
 });

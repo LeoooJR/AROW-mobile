@@ -1,9 +1,9 @@
 import type { MapLayerVisibility } from "@/components/adapters/map/map-layer-visibility";
-import type { MapFeature } from "@/features/map-features/map-feature";
+import type { MapFeature } from "@/types/map-feature";
 import type {
   GeographicCoordinates,
   GeographicCoordinatesWithHeading,
-} from "@/types/geographic-coordinates";
+} from "@shared/geographic-coordinates";
 
 export type MapLocation = GeographicCoordinatesWithHeading;
 

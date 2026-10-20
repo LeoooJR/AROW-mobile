@@ -11,7 +11,7 @@ import { AppState } from "react-native";
 
 import { isAppActive } from "@/utils/app-state";
 
-import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { Milestone } from "@shared/railway-domain/milestone";
 import {
   SimulationContext,
   type SimulationModel,

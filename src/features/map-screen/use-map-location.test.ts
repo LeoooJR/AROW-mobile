@@ -1,10 +1,12 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { act, renderHook } from "@testing-library/react-native";
 
 import getLocationPresentation from "@/components/composites/location-bar/location-presentation";
-import { Milestone } from "@/features/milestones/domain/milestone";
+import { Milestone } from "@shared/railway-domain/milestone";
 import { useMapLocation } from "@/features/map-screen/use-map-location";
 import type { SimulationState } from "@/features/simulation/simulation-state";
-import type { LocationState } from "@/hooks/platform/use-real-location";
+import type { LocationState } from "@/features/real-location/real-location-state";
 
 const mockStart = jest.fn();
 const mockStop = jest.fn();
@@ -23,7 +25,7 @@ jest.mock("@/hooks/features/use-simulation", () => ({
     stop: mockStop,
   }),
 }));
-jest.mock("@/hooks/platform/use-real-location", () => ({
+jest.mock("@/hooks/features/use-real-location", () => ({
   useRealLocation: () => ({
     openSettings: mockOpenSettings,
     requestAccess: mockRequestAccess,
@@ -33,11 +35,9 @@ jest.mock("@/hooks/platform/use-real-location", () => ({
 }));
 
 const milestone = new Milestone({
+  id: new MilestoneId(new RailwaySectionId("893000", 1), 509_000),
   coordinates: { latitude: 45.74744, longitude: 4.85933 },
   label: "509+000",
-  lineCode: "893000",
-  positionMeters: 509_000,
-  sectionRank: 1,
 });
 const position = {
   accuracy: null,
@@ -47,13 +47,74 @@ const position = {
 };
 
 describe("useMapLocation", () => {
+  test.each<[SimulationState, boolean]>([
+    [{ status: "idle" }, true],
+    [{ status: "checking" }, false],
+    [{ status: "starting" }, false],
+    [{ status: "canceling" }, false],
+    [{ status: "running", position }, false],
+    [{ status: "stopping", position }, false],
+    [
+      { status: "error", code: "DENIED", origin: "start", mayBeActive: false },
+      true,
+    ],
+    [
+      { status: "error", code: "UNKNOWN", origin: "start", mayBeActive: true },
+      false,
+    ],
+    [
+      {
+        status: "error",
+        code: "UNKNOWN",
+        origin: "cleanup",
+        mayBeActive: false,
+      },
+      false,
+    ],
+    [
+      {
+        status: "error",
+        code: "UNKNOWN",
+        origin: "cleanup",
+        mayBeActive: true,
+      },
+      false,
+    ],
+    [
+      {
+        status: "error",
+        code: "UNKNOWN",
+        origin: "reconciliation",
+        mayBeActive: false,
+      },
+      false,
+    ],
+    [
+      {
+        status: "error",
+        code: "UNKNOWN",
+        origin: "reconciliation",
+        mayBeActive: true,
+      },
+      false,
+    ],
+  ])(
+    "target preparation permission for %p is %s",
+    async (simulation, allowed) => {
+      mockSimulation = simulation;
+      const { result } = await renderHook(() => useMapLocation(milestone));
+      expect(result.current.canSelectSimulationTarget).toBe(allowed);
+      expect(mockStart).not.toHaveBeenCalled();
+      expect(mockStop).not.toHaveBeenCalled();
+    },
+  );
   beforeEach(() => {
     jest.clearAllMocks();
     mockSimulation = { status: "idle" };
     mockRealLocation = { status: "permissionRequired" };
   });
 
-  test("starts only a searched milestone and keeps stop after selection closes", async () => {
+  test("starts only a prepared milestone and keeps stop after selection closes", async () => {
     const { result, rerender } = await renderHook(
       ({ selected }: { selected?: Milestone }) => useMapLocation(selected),
       { initialProps: { selected: milestone } },

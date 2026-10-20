@@ -35,6 +35,10 @@ tags:
 # Resolve the production milestone through the route-owned point search.
 - tapOn:
     id: "open-point-search"
+    retryTapIfNoChange: true
+- extendedWaitUntil:
+    visible: "Ligne, section, puis repère kilométrique."
+    timeout: 30000
 - assertVisible: "Rechercher un point"
 - assertVisible: "Ligne, section, puis repère kilométrique."
 - tapOn:

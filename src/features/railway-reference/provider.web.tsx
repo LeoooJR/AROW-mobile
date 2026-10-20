@@ -7,6 +7,8 @@ import {
 import type { RailwayReferenceProviderProps } from "@/features/railway-reference/provider";
 
 const UNAVAILABLE_REFERENCE: RailwayReferenceModel = {
+  findMilestoneNeighbours: async () => undefined,
+  findRailwayMilestoneBounds: async () => ({}),
   milestoneSearch: {
     findMilestone: async () => undefined,
     loadRailways: () => undefined,

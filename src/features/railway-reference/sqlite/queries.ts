@@ -63,3 +63,44 @@ export const FIND_MILESTONE_QUERY = `
   WHERE ${lineCode} = ? AND ${sectionRank} = ? AND ${positionMeters} = ?
   LIMIT 1
 `;
+
+export const FIND_PREVIOUS_MILESTONE_QUERY = `
+  SELECT ${milestoneProjection} FROM ${KILOMETRIC_POINTS_TABLE.name}
+  WHERE ${lineCode} = ? AND ${sectionRank} = ? AND ${positionMeters} < ?
+  ORDER BY ${positionMeters} DESC LIMIT 1
+`;
+
+export const FIND_NEXT_MILESTONE_QUERY = `
+  SELECT ${milestoneProjection} FROM ${KILOMETRIC_POINTS_TABLE.name}
+  WHERE ${lineCode} = ? AND ${sectionRank} = ? AND ${positionMeters} > ?
+  ORDER BY ${positionMeters} ASC LIMIT 1
+`;
+
+export const FIND_CURRENT_MILESTONE_QUERY = `
+  SELECT
+    ${projection(KILOMETRIC_POINTS_TABLE, milestoneColumns, "current")},
+    (SELECT COUNT(*) FROM ${KILOMETRIC_POINTS_TABLE.name} AS preceding
+      WHERE preceding.${lineCode} = current.${lineCode}
+        AND preceding.${sectionRank} = current.${sectionRank}
+        AND preceding.${positionMeters} <= current.${positionMeters}) AS position_in_section,
+    (SELECT COUNT(*) FROM ${KILOMETRIC_POINTS_TABLE.name} AS section
+      WHERE section.${lineCode} = current.${lineCode}
+        AND section.${sectionRank} = current.${sectionRank}) AS total
+  FROM ${KILOMETRIC_POINTS_TABLE.name} AS current
+  WHERE current.${lineCode} = ? AND current.${sectionRank} = ? AND current.${positionMeters} = ?
+  LIMIT 1
+`;
+
+export const FIND_RAILWAY_MILESTONE_BOUNDS_QUERY = `
+  SELECT ${milestoneProjection}
+  FROM ${KILOMETRIC_POINTS_TABLE.name}
+  WHERE ${lineCode} = ? AND ${sectionRank} = ?
+    AND ${positionMeters} IN (
+      SELECT MIN(${positionMeters}) FROM ${KILOMETRIC_POINTS_TABLE.name}
+      WHERE ${lineCode} = ? AND ${sectionRank} = ?
+      UNION
+      SELECT MAX(${positionMeters}) FROM ${KILOMETRIC_POINTS_TABLE.name}
+      WHERE ${lineCode} = ? AND ${sectionRank} = ?
+    )
+  ORDER BY ${positionMeters} ASC
+`;

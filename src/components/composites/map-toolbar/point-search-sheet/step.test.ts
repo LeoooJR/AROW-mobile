@@ -1,17 +1,17 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import LineStep from "@/components/composites/map-toolbar/point-search-sheet/line-step";
 import MilestoneStep from "@/components/composites/map-toolbar/point-search-sheet/milestone-step";
 import SectionStep from "@/components/composites/map-toolbar/point-search-sheet/section-step";
-import { Milestone } from "@/features/milestones/domain/milestone";
+import { Milestone } from "@shared/railway-domain/milestone";
 import type { MilestoneResolution } from "@/features/milestones/search/contracts";
-import { Railway } from "@/features/railways/railway";
-import type { RailwaySection } from "@/features/railways/railway-section";
+import { Railway } from "@shared/railway-domain/railway";
+import type { RailwaySection } from "@shared/railway-domain/railway-section";
 
 const milestone = new Milestone({
+  id: new MilestoneId(new RailwaySectionId("893000", 1), 509_000),
   coordinates: { latitude: 45.74744, longitude: 4.85933 },
   label: "509+000",
-  lineCode: "893000",
-  positionMeters: 509_000,
-  sectionRank: 1,
 });
 
 const line = new Railway({

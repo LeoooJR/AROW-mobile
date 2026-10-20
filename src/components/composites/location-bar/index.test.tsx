@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react-native";
 import type {
   MockedLocationState,
   RealLocationState,
-} from "@/hooks/platform/use-real-location";
+} from "@/features/real-location/real-location-state";
 
 import LocationBar from "./index";
 import { simulationActionPalette } from "./simulation-action-theme";

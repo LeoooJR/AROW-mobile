@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
-import { RailwaySectionKey } from "@shared/railway-reference/values";
-import { RailwaySection } from "@/features/railways/railway-section";
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { RailwaySection } from "@shared/railway-domain/railway-section";
 
 import { MAP_LAYER_IDS } from "./map-layer-ids";
 import RailwayLinesSource from "./railway-lines-source";
@@ -81,7 +81,7 @@ describe("RailwayLinesSource", () => {
     await render(
       <RailwayLinesSource
         data="file:///railways.geojson"
-        selectedSection={new RailwaySectionKey("340311", 1)}
+        selectedSection={new RailwaySectionId("340311", 1)}
       />,
     );
 
@@ -104,7 +104,7 @@ describe("RailwayLinesSource", () => {
       <RailwayLinesSource
         data="file:///railways.geojson"
         onFeaturePress={jest.fn()}
-        selectedSection={new RailwaySectionKey("340311", 1)}
+        selectedSection={new RailwaySectionId("340311", 1)}
         visible={false}
       />,
     );
@@ -144,7 +144,7 @@ describe("RailwayLinesSource", () => {
     expect(stopPropagation).toHaveBeenCalledTimes(1);
     expect(onFeaturePress).toHaveBeenCalledWith(expect.any(RailwaySection));
     const pressedRailway = onFeaturePress.mock.calls[0]?.[0];
-    expect(pressedRailway?.id).toBe("340311:1");
+    expect(pressedRailway?.id.value).toBe("340311:1");
     expect(pressedRailway?.name).toBe("Raccordement de Rouen-Martainville");
     expect(pressedRailway?.geometry).toMatchObject({
       railwayType: "Raccordement",

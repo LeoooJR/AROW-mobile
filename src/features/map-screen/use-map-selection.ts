@@ -6,12 +6,13 @@ import {
   type MapLayerVisibility,
   type ToggleableMapLayer,
 } from "@/components/adapters/map/map-layer-visibility";
-import type { MapFeature } from "@/features/map-features/map-feature";
-import type { Milestone } from "@/features/milestones/domain/milestone";
+import type { MapFeature } from "@/types/map-feature";
+import type { Milestone } from "@shared/railway-domain/milestone";
+import type { GeographicCoordinates } from "@shared/geographic-coordinates";
 
 type FeatureSelection =
-  | { readonly feature: MapFeature; readonly origin: "map" }
-  | { readonly feature: Milestone; readonly origin: "search" };
+  | { readonly feature: MapFeature; readonly purpose: "browse" }
+  | { readonly feature: Milestone; readonly purpose: "simulation-target" };
 
 function layerForFeature(feature: MapFeature): ToggleableMapLayer {
   return feature.kind === "railway-section" ? "railway" : "milestone";
@@ -21,10 +22,13 @@ export interface MapSelectionModel {
   readonly closeSelection: () => void;
   readonly layerVisibility: MapLayerVisibility;
   readonly mapFocused: boolean;
-  readonly milestoneFocusRequest: number;
+  readonly focusRequest: number;
+  readonly focusLocation?: GeographicCoordinates;
+  readonly focusOnLocation: (location: GeographicCoordinates) => void;
   readonly onFeaturePress: (feature: MapFeature) => void;
   readonly onMapFocusChange: (focused: boolean) => void;
   readonly onMilestoneSelect: (milestone: Milestone) => void;
+  readonly onMilestoneNavigate: (milestone: Milestone) => void;
   readonly onVisibilityChange: (
     layer: ToggleableMapLayer,
     visible: boolean,
@@ -39,17 +43,25 @@ export function useMapSelection(): MapSelectionModel {
     DEFAULT_MAP_LAYER_VISIBILITY,
   );
   const [mapFocused, setMapFocused] = useState(false);
-  const [milestoneFocusRequest, setMilestoneFocusRequest] = useState(0);
+  const [focusRequest, setFocusRequest] = useState(0);
+  const [focusLocation, setFocusLocation] = useState<GeographicCoordinates>();
+  const focusOnLocation = useCallback((coordinates: GeographicCoordinates) => {
+    setFocusLocation(coordinates);
+    setFocusRequest((request) => request + 1);
+  }, []);
 
   const onFeaturePress = useCallback((feature: MapFeature) => {
     setMapFocused(false);
-    setSelection({ feature, origin: "map" });
+    setSelection({ feature, purpose: "browse" });
   }, []);
-  const onMilestoneSelect = useCallback((milestone: Milestone) => {
-    setLayerVisibility((current) => ({ ...current, milestone: true }));
-    setSelection({ feature: milestone, origin: "search" });
-    setMilestoneFocusRequest((request) => request + 1);
-  }, []);
+  const onMilestoneSelect = useCallback(
+    (milestone: Milestone) => {
+      setLayerVisibility((current) => ({ ...current, milestone: true }));
+      setSelection({ feature: milestone, purpose: "simulation-target" });
+      focusOnLocation(milestone.coordinates);
+    },
+    [focusOnLocation],
+  );
   const onVisibilityChange = useCallback(
     (layer: ToggleableMapLayer, visible: boolean) => {
       setLayerVisibility((current) => ({ ...current, [layer]: visible }));
@@ -62,6 +74,13 @@ export function useMapSelection(): MapSelectionModel {
       }
     },
     [],
+  );
+  const onMilestoneNavigate = useCallback(
+    (milestone: Milestone) => {
+      setSelection({ feature: milestone, purpose: "browse" });
+      focusOnLocation(milestone.coordinates);
+    },
+    [focusOnLocation],
   );
   const closeSelection = useCallback(() => setSelection(undefined), []);
 
@@ -81,13 +100,18 @@ export function useMapSelection(): MapSelectionModel {
     closeSelection,
     layerVisibility,
     mapFocused,
-    milestoneFocusRequest,
+    focusRequest,
+    focusLocation,
+    focusOnLocation,
     onFeaturePress,
     onMapFocusChange: setMapFocused,
     onMilestoneSelect,
+    onMilestoneNavigate,
     onVisibilityChange,
     selectedFeature: selection?.feature,
     selectedSimulationMilestone:
-      selection?.origin === "search" ? selection.feature : undefined,
+      selection?.purpose === "simulation-target"
+        ? selection.feature
+        : undefined,
   };
 }

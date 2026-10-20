@@ -4,9 +4,12 @@ module.exports = {
   collectCoverageFrom: [
     "src/components/**/*.{ts,tsx}",
     "src/hooks/**/*.{ts,tsx}",
-    "!src/**/*.test.{ts,tsx}",
-    "!src/**/*.d.ts",
-    "!src/**/types.ts",
+    "src/features/**/*.{ts,tsx}",
+    "shared/**/*.{ts,tsx}",
+    "!**/*.{test,spec}.{ts,tsx}",
+    "!**/{__tests__,__mocks__}/**",
+    "!**/*.d.ts",
+    "!**/types.ts",
   ],
   coverageThreshold: {
     global: {
@@ -17,7 +20,8 @@ module.exports = {
     },
   },
   moduleNameMapper: {
-    "\\.geojson$": "<rootDir>/src/test/asset-mock.ts",
+    "\\.geojson$": "<rootDir>/src/tests/asset-mock.ts",
+    "\\.sqlite$": "<rootDir>/src/tests/asset-mock.ts",
     "^@/assets/(.*)$": "<rootDir>/assets/$1",
     "^@/(.*)$": "<rootDir>/src/$1",
     "^@shared/(.*)$": "<rootDir>/shared/$1",

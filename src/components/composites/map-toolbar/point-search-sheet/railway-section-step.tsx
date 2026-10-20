@@ -4,8 +4,8 @@ import { Text, View } from "react-native";
 import PointSearchStepHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-step-header";
 import SectionStep from "@/components/composites/map-toolbar/point-search-sheet/section-step";
 import Button from "@/components/primitives/button";
-import type { Railway } from "@/features/railways/railway";
-import type { RailwaySection } from "@/features/railways/railway-section";
+import type { Railway } from "@shared/railway-domain/railway";
+import type { RailwaySection } from "@shared/railway-domain/railway-section";
 
 interface RailwaySectionStepProps {
   readonly onSelect: (section: RailwaySection) => void;

@@ -1,0 +1,67 @@
+import { Milestone } from "./milestone";
+import { MilestoneId } from "./milestone-id";
+import { RailwaySectionId } from "./railway-section-id";
+
+const INPUT = {
+  coordinates: { latitude: 45.74491, longitude: 4.86234 },
+  label: "241+000",
+  id: new MilestoneId(new RailwaySectionId(1000, 1), 241_000),
+} as const;
+
+describe("Milestone", () => {
+  test("encapsulates milestone identity and values", () => {
+    const milestone = new Milestone(INPUT);
+
+    expect(milestone.kind).toBe("milestone");
+    expect(milestone.id).toBe(INPUT.id);
+    expect(milestone.id.value).toBe("001000:1:241000");
+    expect(milestone.id.sectionId.value).toBe("001000:1");
+    expect(milestone.lineCode).toBe("001000");
+    expect(milestone.sectionRank).toBe(1);
+    expect(milestone.kilometer).toBe(241);
+    expect(milestone.positionMeters).toBe(241_000);
+    expect(milestone.label).toBe("241+000");
+    expect(milestone.coordinates).toEqual(INPUT.coordinates);
+    expect(Object.isFrozen(milestone.coordinates)).toBe(true);
+  });
+
+  test.each([
+    ["empty label", { ...INPUT, label: "" }],
+    ["mismatched label", { ...INPUT, label: "240+000" }],
+    ["malformed label", { ...INPUT, label: "241+00" }],
+    [
+      "mismatched position",
+      { ...INPUT, id: new MilestoneId(INPUT.id.sectionId, 240_000) },
+    ],
+    [
+      "invalid latitude",
+      { ...INPUT, coordinates: { latitude: 91, longitude: 0 } },
+    ],
+    [
+      "invalid longitude",
+      { ...INPUT, coordinates: { latitude: 0, longitude: 181 } },
+    ],
+  ])("rejects an invalid %s", (_description, input) => {
+    expect(() => new Milestone(input)).toThrow();
+  });
+
+  test("preserves the contextual coordinate error", () => {
+    expect(
+      () =>
+        new Milestone({
+          ...INPUT,
+          coordinates: { latitude: NaN, longitude: 0 },
+        }),
+    ).toThrow("Milestone coordinates are invalid");
+  });
+
+  test.each([
+    [-90, -180],
+    [90, 180],
+  ])("accepts boundary coordinates %s, %s", (latitude, longitude) => {
+    expect(
+      new Milestone({ ...INPUT, coordinates: { latitude, longitude } })
+        .coordinates,
+    ).toEqual({ latitude, longitude });
+  });
+});

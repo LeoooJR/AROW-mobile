@@ -1,3 +1,5 @@
+import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import {
   act,
   fireEvent,
@@ -8,7 +10,7 @@ import {
 import { type ReactElement } from "react";
 import { AppState, Pressable, Text } from "react-native";
 
-import { Milestone } from "@/features/milestones/domain/milestone";
+import { Milestone } from "@shared/railway-domain/milestone";
 import { getMockLocationExecutor } from "@/features/simulation/mock-location";
 import { prepareSimulationNotifications } from "@/features/simulation/simulation-notifications";
 
@@ -24,11 +26,9 @@ jest.mock("@/features/simulation/mock-location", () => ({
 }));
 
 const milestone = new Milestone({
+  id: new MilestoneId(new RailwaySectionId("893000", 1), 509_000),
   coordinates: { latitude: 45.74744, longitude: 4.85933 },
   label: "509+000",
-  lineCode: "893000",
-  positionMeters: 509_000,
-  sectionRank: 1,
 });
 const runningSnapshot = {
   latitude: 45.74744,
@@ -43,10 +43,11 @@ const executor = {
 };
 
 function Consumer(): ReactElement {
-  const { start, state, stop } = useSimulation();
+  const { notificationWarningId, start, state, stop } = useSimulation();
   return (
     <>
       <Text>{state.status}</Text>
+      <Text testID="notification-warning-id">{notificationWarningId}</Text>
       <Pressable
         accessibilityLabel="Start simulation"
         accessibilityRole="button"
@@ -87,6 +88,53 @@ describe("SimulationProvider", () => {
     executor.start.mockResolvedValue(runningSnapshot);
     executor.stop.mockResolvedValue({ status: "stopped" });
   });
+
+  test.each([true, false])(
+    "a background start warns only when notification visibility is false (%s)",
+    async (visible) => {
+      const previousState = AppState.currentState;
+      const actual = jest.requireActual<
+        typeof import("./simulation-notifications")
+      >("./simulation-notifications");
+      const visibility = jest.fn().mockResolvedValue(visible);
+      jest
+        .mocked(prepareSimulationNotifications)
+        .mockImplementationOnce((isCurrent) =>
+          actual.prepareSimulationNotifications(isCurrent, visibility),
+        );
+      executor.start.mockImplementationOnce(async () => {
+        AppState.currentState = "background";
+        return runningSnapshot;
+      });
+      try {
+        AppState.currentState = "active";
+        const view = await render(application(true));
+        await waitFor(() =>
+          expect(executor.getSnapshot).toHaveBeenCalledTimes(1),
+        );
+        executor.getSnapshot.mockResolvedValue(runningSnapshot);
+        await fireEvent.press(
+          screen.getByRole("button", { name: "Start simulation" }),
+        );
+        expect(await screen.findByText("running")).toBeOnTheScreen();
+        expect(visibility).toHaveBeenCalledTimes(1);
+        AppState.currentState = "active";
+        const onAppStateChange = jest.mocked(AppState.addEventListener).mock
+          .calls[0][1];
+        await act(async () => onAppStateChange("active"));
+        await waitFor(() =>
+          expect(executor.getSnapshot).toHaveBeenCalledTimes(2),
+        );
+        expect(screen.getByTestId("notification-warning-id")).toHaveTextContent(
+          visible ? "0" : "1",
+        );
+        expect(screen.getByText("running")).toBeOnTheScreen();
+        await view.unmount();
+      } finally {
+        AppState.currentState = previousState;
+      }
+    },
+  );
 
   test("keeps one start operation when the screen remounts during native start", async () => {
     let completeStart!: (result: typeof runningSnapshot) => void;

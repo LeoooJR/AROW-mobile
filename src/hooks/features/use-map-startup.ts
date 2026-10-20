@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 
-import type { AppStartupActions } from "@/features/app-startup/context";
+import type { AppStartupActions } from "@/contexts/app-startup-context";
 import { createBasemapStartupAttempt } from "@/features/map-screen/check-basemap-source";
 
 export type MapStartupInput = AppStartupActions | null;

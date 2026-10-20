@@ -9,8 +9,6 @@ import type {
 import NativeBottomSheet from "@/components/adapters/native-bottom-sheet";
 import MapLayerRow from "@/components/composites/map-toolbar/map-layer-row";
 import { MAP_TOOLBAR_PALETTES } from "@/components/composites/map-toolbar/map-toolbar-theme";
-import CloseIcon from "@/components/primitives/icons/close-icon";
-import IconButton from "@/components/primitives/icon-button";
 import { resolveColorTheme } from "@/utils/color-theme";
 
 interface MapLayersSheetProps {
@@ -48,20 +46,9 @@ export default function MapLayersSheet({
         testID="map-layers-sheet"
       >
         <View className="mb-2 h-1 w-9 self-center rounded-full bg-border-subtle" />
-        <View className="flex-row items-center justify-between gap-3">
-          <Text className="text-xl font-semibold leading-[25px] text-text-primary">
-            Couches ferroviaires
-          </Text>
-          <IconButton
-            aria-label="Fermer les couches"
-            onPress={onDismiss}
-            role="button"
-            testID="close-layers-button"
-            variant="ghost"
-          >
-            <CloseIcon color={palette.icon} />
-          </IconButton>
-        </View>
+        <Text className="text-xl font-semibold leading-[25px] text-text-primary">
+          Couches ferroviaires
+        </Text>
         <MapLayerRow
           accessibilityNoun="les voies ferrées"
           checked={visibility.railway}

@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react-native";
+import { act, render, screen, userEvent } from "@testing-library/react-native";
 import { AppState, type AppStateStatus } from "react-native";
 
 import { useToast } from "@/components/adapters/toast";
@@ -68,7 +68,7 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-test("shows one polite warning, expires at eight seconds, and never repeats reconciliation", async () => {
+test("keeps one polite warning until dismissed and never repeats reconciliation", async () => {
   const view = await render(application(0));
   expect(show).not.toHaveBeenCalled();
   await view.rerender(application(1));
@@ -80,22 +80,26 @@ test("shows one polite warning, expires at eight seconds, and never repeats reco
     duration: null,
   });
   await render(config.render());
-  expect(screen.getByTestId("simulation-notification-warning")).toHaveProp(
+  expect(screen.getByRole("status")).toHaveProp(
     "accessibilityLiveRegion",
     "polite",
   );
-  expect(screen.getByText("Notifications désactivées")).toBeOnTheScreen();
+  expect(screen.getByText(/^Notifications désactivées\./)).toBeOnTheScreen();
   close.mockClear();
-  await act(async () => jest.advanceTimersByTime(7_999));
+  await act(async () => jest.advanceTimersByTime(60_000));
   expect(close).not.toHaveBeenCalled();
-  await act(async () => jest.advanceTimersByTime(1));
+  await userEvent
+    .setup()
+    .press(screen.getByRole("button", { name: "Fermer le message" }));
   expect(close).toHaveBeenCalledWith(config.id);
   await view.rerender(application(1));
   expect(show).toHaveBeenCalledTimes(1);
 });
 
-test("changing toast callbacks preserves the deadline and uses the latest close callback", async () => {
+test("manual dismissal uses the latest close callback without replaying the event", async () => {
   const view = await render(application(1));
+  const config = show.mock.calls[0][0];
+  await render(config.render());
   close.mockClear();
   await act(async () => jest.advanceTimersByTime(4_000));
   const nextClose = jest.fn();
@@ -110,9 +114,11 @@ test("changing toast callbacks preserves the deadline and uses the latest close 
   expect(close).not.toHaveBeenCalled();
   expect(nextClose).not.toHaveBeenCalled();
   expect(nextShow).not.toHaveBeenCalled();
-  await act(async () => jest.advanceTimersByTime(3_999));
+  await act(async () => jest.advanceTimersByTime(60_000));
   expect(nextClose).not.toHaveBeenCalled();
-  await act(async () => jest.advanceTimersByTime(1));
+  await userEvent
+    .setup()
+    .press(screen.getByRole("button", { name: "Fermer le message" }));
   expect(nextClose).toHaveBeenCalledWith("simulation-notifications-disabled");
   expect(close).not.toHaveBeenCalled();
   nextClose.mockClear();
@@ -124,7 +130,7 @@ test("changing toast callbacks preserves the deadline and uses the latest close 
   expect(nextClose).toHaveBeenCalledTimes(1);
 });
 
-test("new starts reuse one identifier and reset the deadline; Stop and unmount close it", async () => {
+test("new starts reuse one identifier; Stop and unmount close it", async () => {
   const view = await render(application(1));
   await act(async () => jest.advanceTimersByTime(4_000));
   await view.rerender(application(1, false));
@@ -144,7 +150,7 @@ test("new starts reuse one identifier and reset the deadline; Stop and unmount c
   expect(close).toHaveBeenCalledTimes(1);
 });
 
-test("uncertain reconciliation preserves the warning and its original deadline", async () => {
+test("uncertain reconciliation preserves the warning until manual dismissal", async () => {
   const view = await render(application(1));
   close.mockClear();
   await act(async () => jest.advanceTimersByTime(4_000));
@@ -157,8 +163,8 @@ test("uncertain reconciliation preserves the warning and its original deadline",
     }),
   );
   expect(close).not.toHaveBeenCalled();
-  await act(async () => jest.advanceTimersByTime(4_000));
-  expect(close).toHaveBeenCalledTimes(1);
+  await act(async () => jest.advanceTimersByTime(60_000));
+  expect(close).not.toHaveBeenCalled();
   await view.rerender(application(1));
   expect(show).toHaveBeenCalledTimes(1);
 });

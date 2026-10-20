@@ -18,16 +18,16 @@ export default function MapFeatureDetailsHeader({
   title,
 }: MapFeatureDetailsHeaderProps): ReactElement {
   return (
-    <View className="flex-row items-start justify-between gap-3">
-      <View className="min-w-0 flex-1 gap-1">
+    <View className="flex-row items-start justify-between gap-[12px]">
+      <View className="min-w-0 flex-1 gap-[4px]">
         <Text
-          className="font-mono text-[11px] font-bold uppercase leading-[14px] tracking-[0.88px] text-text-primary"
+          className="font-mono text-[11px] font-bold uppercase leading-[14px] tracking-[0.88px] text-text-primary dark:text-white"
           selectable
         >
           {eyebrow}
         </Text>
         <Text
-          className="text-lg font-semibold leading-[23px] text-text-primary"
+          className="text-[18px] font-semibold leading-[23px] text-text-primary dark:text-white"
           selectable
         >
           {title}

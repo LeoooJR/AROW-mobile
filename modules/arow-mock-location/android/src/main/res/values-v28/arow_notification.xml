@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <style name="Arow.Notification.Title" parent="Arow.Notification.Title.Base">
+    <item name="android:fontFamily">sans-serif</item>
+    <item name="android:textFontWeight">600</item>
+    <item name="android:lineSpacingExtra">0sp</item>
+    <item name="android:lineHeight">22sp</item>
+  </style>
+  <style name="Arow.Notification.Body" parent="Arow.Notification.Body.Base">
+    <item name="android:lineSpacingExtra">0sp</item>
+    <item name="android:lineHeight">20sp</item>
+  </style>
+</resources>
