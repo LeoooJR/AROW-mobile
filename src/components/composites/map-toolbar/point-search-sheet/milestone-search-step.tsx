@@ -20,6 +20,19 @@ interface MilestoneSearchStepProps {
   readonly selectedSection?: RailwaySection;
 }
 
+function availableRangeMessage(section: RailwaySection | undefined): string {
+  if (section === undefined) {
+    return "Sélectionnez une section pour connaître les repères disponibles.";
+  }
+
+  const geometry = section.geometry;
+  if (geometry.status === "absent") {
+    return "Plage de repères indisponible pour cette section.";
+  }
+
+  return `Repères disponibles : ${geometry.startMilestone} à ${geometry.endMilestone}.`;
+}
+
 export default function MilestoneSearchStep({
   kilometer,
   metric,
@@ -42,6 +55,13 @@ export default function MilestoneSearchStep({
       testID="search-step-milestone"
     >
       <PointSearchStepHeader step={step} />
+      <Text
+        aria-live="polite"
+        className="mt-1.5 text-[11px] leading-4 text-text-muted"
+        testID="milestone-available-range"
+      >
+        {availableRangeMessage(selectedSection)}
+      </Text>
       <View className="flex-row items-end gap-2">
         <View className="min-w-0 flex-1">
           <Text className="mb-1.5 text-xs font-semibold text-text-primary">
