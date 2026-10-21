@@ -9,6 +9,7 @@ const MILESTONE = {
   latitude: 45.74491,
   longitude: 4.86234,
   position_m: 241_000,
+  position_in_section: 1,
   rg_troncon: 1,
 };
 
@@ -17,6 +18,7 @@ const SECTION = {
   has_geometry: 1,
   idgaia: "gaia-id",
   lib_ligne: "Ligne de test",
+  milestone_count: 12,
   pkd: "499+752",
   pkf: "511+605",
   rg_troncon: 1,
@@ -38,6 +40,9 @@ describe("railway reference database rows", () => {
     { ...MILESTONE, label: "240+000" },
     { ...MILESTONE, label: "241+00" },
     { ...MILESTONE, position_m: -1 },
+    { ...MILESTONE, position_in_section: 0 },
+    { ...MILESTONE, position_in_section: 1.5 },
+    { ...MILESTONE, position_in_section: undefined },
     { ...MILESTONE, position_m: 240_000 },
     { ...MILESTONE, latitude: 91 },
     { ...MILESTONE, longitude: -181 },
@@ -58,6 +63,7 @@ describe("railway reference database rows", () => {
           has_geometry: 0,
           idgaia: null,
           lib_ligne: "Ligne 008000",
+          milestone_count: 0,
           pkd: null,
           pkf: null,
           rg_troncon: 1,
@@ -72,6 +78,9 @@ describe("railway reference database rows", () => {
     { ...SECTION, idgaia: null },
     { ...SECTION, has_geometry: 0, idgaia: null },
     { ...SECTION, lib_ligne: "" },
+    { ...SECTION, milestone_count: -1 },
+    { ...SECTION, milestone_count: 1.5 },
+    { ...SECTION, milestone_count: undefined },
   ])("rejects malformed section %#", (value) => {
     expect(() => decodeRailwaySectionDatabaseRow(value, "at row 0")).toThrow(
       "Invalid railway section at row 0",

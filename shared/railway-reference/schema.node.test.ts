@@ -25,6 +25,7 @@ const VALID_SECTION = [
   "499+752",
   "511+605",
   1,
+  3,
 ] as const;
 const VALID_POINT = [
   "893000",
@@ -33,6 +34,7 @@ const VALID_POINT = [
   "509+000",
   45.74744,
   4.85933,
+  3,
 ] as const;
 
 describe("generated railway reference DDL", () => {
@@ -48,20 +50,24 @@ describe("generated railway reference DDL", () => {
 
   test("accepts geometric and fallback sections with valid points", () => {
     database
-      .prepare("INSERT INTO railway_sections VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+      .prepare(
+        "INSERT INTO railway_sections VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      )
       .run(...VALID_SECTION);
     database
-      .prepare("INSERT INTO railway_sections VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-      .run("008000", 1, null, "Ligne 008000", null, null, null, 0);
+      .prepare(
+        "INSERT INTO railway_sections VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      )
+      .run("008000", 1, null, "Ligne 008000", null, null, null, 0, 0);
     database
-      .prepare("INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?)")
+      .prepare("INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?, ?)")
       .run(...VALID_POINT);
     database
-      .prepare("INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?)")
-      .run("893000", 1, 1_000, "001+000", 45.74744, 4.85933);
+      .prepare("INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?, ?)")
+      .run("893000", 1, 1_000, "001+000", 45.74744, 4.85933, 2);
     database
-      .prepare("INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?)")
-      .run("893000", 1, 0, "0+000", 45.74744, 4.85933);
+      .prepare("INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?, ?)")
+      .run("893000", 1, 0, "0+000", 45.74744, 4.85933, 1);
     expect(database.prepare("PRAGMA integrity_check").get()).toEqual({
       integrity_check: "ok",
     });
@@ -74,7 +80,9 @@ describe("generated railway reference DDL", () => {
       "line name",
       [...VALID_SECTION.slice(0, 3), "", ...VALID_SECTION.slice(4)],
     ],
-    ["geometry flag", [...VALID_SECTION.slice(0, 7), 2]],
+    ["geometry flag", [...VALID_SECTION.slice(0, 7), 2, VALID_SECTION[8]]],
+    ["negative count", [...VALID_SECTION.slice(0, 8), -1]],
+    ["null count", [...VALID_SECTION.slice(0, 8), null]],
     [
       "partial geometry",
       [...VALID_SECTION.slice(0, 2), null, ...VALID_SECTION.slice(3)],
@@ -82,7 +90,9 @@ describe("generated railway reference DDL", () => {
   ])("rejects invalid section %s", (_description, values) => {
     expect(() =>
       database
-        .prepare("INSERT INTO railway_sections VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+        .prepare(
+          "INSERT INTO railway_sections VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        )
         .run(...values),
     ).toThrow();
   });
@@ -104,31 +114,37 @@ describe("generated railway reference DDL", () => {
       "mismatched position",
       [...VALID_POINT.slice(0, 2), 508_000, ...VALID_POINT.slice(3)],
     ],
-    ["latitude", [...VALID_POINT.slice(0, 4), 91, VALID_POINT[5]]],
-    ["longitude", [...VALID_POINT.slice(0, 5), 181]],
+    ["latitude", [...VALID_POINT.slice(0, 4), 91, ...VALID_POINT.slice(5)]],
+    ["longitude", [...VALID_POINT.slice(0, 5), 181, VALID_POINT[6]]],
+    ["zero ordinal", [...VALID_POINT.slice(0, 6), 0]],
+    ["null ordinal", [...VALID_POINT.slice(0, 6), null]],
   ])("rejects invalid point %s", (_description, values) => {
     database
-      .prepare("INSERT INTO railway_sections VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+      .prepare(
+        "INSERT INTO railway_sections VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      )
       .run(...VALID_SECTION);
     expect(() =>
       database
-        .prepare("INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?)")
+        .prepare("INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?, ?)")
         .run(...values),
     ).toThrow();
   });
 
   test("enforces composite keys and the section foreign key", () => {
     const insertSection = database.prepare(
-      "INSERT INTO railway_sections VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO railway_sections VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
     );
     insertSection.run(...VALID_SECTION);
     expect(() => insertSection.run(...VALID_SECTION)).toThrow();
 
     const insertPoint = database.prepare(
-      "INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?)",
+      "INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?, ?)",
     );
     insertPoint.run(...VALID_POINT);
     expect(() => insertPoint.run(...VALID_POINT)).toThrow();
-    expect(() => insertPoint.run("001000", 1, 1_000, "1+000", 45, 4)).toThrow();
+    expect(() =>
+      insertPoint.run("001000", 1, 1_000, "1+000", 45, 4, 1),
+    ).toThrow();
   });
 });

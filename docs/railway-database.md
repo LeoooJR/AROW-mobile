@@ -2,7 +2,7 @@
 
 UML class view of the tables in the bundled
 [`railway_reference.sqlite`](../src/statics/railway_reference.sqlite) asset,
-verified against SQLite schema version **2** (`PRAGMA user_version`). The
+verified against SQLite schema version **3** (`PRAGMA user_version`). The
 authoritative schema definitions live in
 [`shared/railway-reference/schema.ts`](../shared/railway-reference/schema.ts).
 
@@ -23,6 +23,7 @@ classDiagram
         TEXT pkd nullable
         TEXT pkf nullable
         INTEGER has_geometry
+        INTEGER milestone_count
     }
 
     class kilometric_points {
@@ -33,6 +34,7 @@ classDiagram
         TEXT label
         REAL latitude
         REAL longitude
+        INTEGER position_in_section
     }
 
     railway_sections "1" -- "0..*" kilometric_points : contains recorded points
@@ -69,6 +71,16 @@ Updates and deletes use `NO ACTION`; there is no cascade.
   value must match `position_m`. For example, `509+007` represents `509007` metres.
 - `latitude` and `longitude` are WGS84 coordinates in degrees, constrained to
   `[-90, 90]` and `[-180, 180]` respectively.
+- `milestone_count` is the precomputed number of recorded points in the exact
+  section, including zero for geometry-only sections.
+- `position_in_section` is the precomputed one-based ordinal of a recorded point,
+  ordered by numeric `position_m` within its exact section. Gaps in PK values do
+  not create gaps in ordinals. The current-point query joins its parent section
+  to retrieve the stored total without runtime counting.
+
+The generator computes both values before insertion. Asset validation independently
+recomputes every section count and numeric-PK ordinal before promotion. No runtime
+updates or triggers maintain these values; regenerate the asset when its points change.
 
 The section's `pkd` and `pkf` describe geometry metadata, not the first and last
 recorded points. Recorded milestone ranges are derived from `position_m` for the
@@ -77,6 +89,12 @@ not stored in these tables. See the [railway domain glossary](railway-domain.md)
 for the distinction between geometry limits, recorded ranges, and located bounds.
 
 ## Maintenance
+
+The native app imports this asset into `railway_reference_v3.sqlite` on the device.
+Its filename derives from the shared schema version, ensuring an existing
+version-2 copy is not reused. Subsequent launches reuse the version-3 copy without
+overwriting it. The bundled asset keeps its original filename; no on-device SQL
+migration or application-data reset is required.
 
 Update this diagram when the bundled schema changes. Inspect the asset with
 `sqlite3 -readonly src/statics/railway_reference.sqlite '.schema'` and

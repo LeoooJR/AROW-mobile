@@ -7,6 +7,7 @@ const BASE_ROW = {
   has_geometry: 1,
   idgaia: "gaia-id",
   lib_ligne: "Ligne de Collonges-Fontaines à Lyon-Guillotière",
+  milestone_count: 4,
   maximum_label: "511+000",
   maximum_position_m: 511_000,
   minimum_label: "508+000",

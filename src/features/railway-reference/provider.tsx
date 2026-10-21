@@ -23,6 +23,7 @@ import {
   loadSearchableRailways,
 } from "@/features/railway-reference/repository";
 import railwayReferenceDatabaseAsset from "@/statics/railway_reference.sqlite";
+import { RAILWAY_REFERENCE_DATABASE_NAME } from "@shared/railway-reference/database-version";
 import type { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 
 export interface RailwayReferenceProviderProps {
@@ -114,7 +115,7 @@ export default function RailwayReferenceProvider({
   return (
     <SQLiteProvider
       assetSource={{ assetId: railwayReferenceDatabaseAsset }}
-      databaseName="railway_reference.sqlite"
+      databaseName={RAILWAY_REFERENCE_DATABASE_NAME}
       onError={onError === undefined ? undefined : reportError}
     >
       <RailwayReferenceDataProvider>{children}</RailwayReferenceDataProvider>

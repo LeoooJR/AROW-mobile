@@ -14,6 +14,7 @@ const MILESTONE_RECORD = {
   latitude: 45.74744,
   longitude: 4.85933,
   position_m: 509_000,
+  position_in_section: 10,
   rg_troncon: 1,
 };
 
@@ -22,6 +23,7 @@ const SECTION_RECORD = {
   has_geometry: 1,
   idgaia: "gaia-id",
   lib_ligne: "Ligne de Collonges-Fontaines à Lyon-Guillotière",
+  milestone_count: 12,
   maximum_label: "509+000",
   maximum_position_m: 509_000,
   minimum_label: "499+000",

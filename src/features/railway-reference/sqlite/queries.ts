@@ -17,6 +17,7 @@ const milestoneColumns = [
   "label",
   "latitude",
   "longitude",
+  "position_in_section",
 ] as const;
 
 const milestoneProjection = projection(
@@ -38,7 +39,7 @@ export const LOAD_SEARCHABLE_RAILWAYS_QUERY = `
     GROUP BY ${lineCode}, ${sectionRank}
   )
   SELECT
-    ${projection(RAILWAY_SECTIONS_TABLE, ["code_ligne", "lib_ligne", "rg_troncon", "has_geometry", "idgaia", "type_ligne", "pkd", "pkf"], railwayAlias)},
+    ${projection(RAILWAY_SECTIONS_TABLE, ["code_ligne", "lib_ligne", "rg_troncon", "has_geometry", "idgaia", "type_ligne", "pkd", "pkf", "milestone_count"], railwayAlias)},
     ${boundsAlias}.minimum_position_m,
     ${columnReference(KILOMETRIC_POINTS_TABLE, "label", minimumPointAlias)} AS minimum_label,
     ${boundsAlias}.maximum_position_m,
@@ -79,14 +80,11 @@ export const FIND_NEXT_MILESTONE_QUERY = `
 export const FIND_CURRENT_MILESTONE_QUERY = `
   SELECT
     ${projection(KILOMETRIC_POINTS_TABLE, milestoneColumns, "current")},
-    (SELECT COUNT(*) FROM ${KILOMETRIC_POINTS_TABLE.name} AS preceding
-      WHERE preceding.${lineCode} = current.${lineCode}
-        AND preceding.${sectionRank} = current.${sectionRank}
-        AND preceding.${positionMeters} <= current.${positionMeters}) AS position_in_section,
-    (SELECT COUNT(*) FROM ${KILOMETRIC_POINTS_TABLE.name} AS section
-      WHERE section.${lineCode} = current.${lineCode}
-        AND section.${sectionRank} = current.${sectionRank}) AS total
+    ${columnReference(RAILWAY_SECTIONS_TABLE, "milestone_count", "section")} AS total
   FROM ${KILOMETRIC_POINTS_TABLE.name} AS current
+  INNER JOIN ${RAILWAY_SECTIONS_TABLE.name} AS section
+    ON section.${lineCode} = current.${lineCode}
+    AND section.${sectionRank} = current.${sectionRank}
   WHERE current.${lineCode} = ? AND current.${sectionRank} = ? AND current.${positionMeters} = ?
   LIMIT 1
 `;

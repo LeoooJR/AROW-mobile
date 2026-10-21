@@ -69,6 +69,12 @@ describe("railway reference schema descriptors", () => {
         primaryKeyPosition: undefined,
         type: "INTEGER",
       },
+      {
+        name: "milestone_count",
+        nullable: false,
+        primaryKeyPosition: undefined,
+        type: "INTEGER",
+      },
     ]);
     expect(
       primaryKeyColumns(RAILWAY_SECTIONS_TABLE).map(({ name }) => name),

@@ -10,6 +10,7 @@ const ROW = {
   latitude: 45.74744,
   longitude: 4.85933,
   position_m: 99_000,
+  position_in_section: 1,
   rg_troncon: 2,
 };
 

@@ -6,7 +6,7 @@ import {
 describe("railway reference queries", () => {
   test("uses the complete milestone projection for exact lookup", () => {
     const columns =
-      "code_ligne, rg_troncon, position_m, label, latitude, longitude";
+      "code_ligne, rg_troncon, position_m, label, latitude, longitude, position_in_section";
 
     expect(FIND_MILESTONE_QUERY).toContain(`SELECT ${columns}`);
   });

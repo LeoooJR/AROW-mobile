@@ -42,6 +42,7 @@ const MILESTONE_RECORD = {
   latitude: 45.74744,
   longitude: 4.85933,
   position_m: 509_000,
+  position_in_section: 10,
   rg_troncon: 1,
 };
 const SECTION_RECORD = {
@@ -49,6 +50,7 @@ const SECTION_RECORD = {
   has_geometry: 1,
   idgaia: "gaia-id",
   lib_ligne: "Ligne test",
+  milestone_count: 12,
   maximum_label: "509+000",
   maximum_position_m: 509_000,
   minimum_label: "499+000",
@@ -60,6 +62,20 @@ const SECTION_RECORD = {
 };
 
 describe("RailwayReferenceProvider", () => {
+  test("imports the versioned asset without overwriting it on each mount", async () => {
+    useSQLiteContextMock.mockReturnValue(
+      asDatabase({ getAllAsync: jest.fn(), getFirstAsync: jest.fn() }),
+    );
+    await render(<RailwayReferenceProvider>{null}</RailwayReferenceProvider>);
+    expect(jest.mocked(SQLiteProvider).mock.lastCall?.[0]).toMatchObject({
+      databaseName: "railway_reference_v3.sqlite",
+      assetSource: { assetId: "database-asset" },
+    });
+    expect(
+      jest.mocked(SQLiteProvider).mock.lastCall?.[0].assetSource
+        ?.forceOverwrite,
+    ).toBeUndefined();
+  });
   test("forwards database initialization failure outside the render phase", async () => {
     const error = new Error("database failed");
     const onError = jest.fn();

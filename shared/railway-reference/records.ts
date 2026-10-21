@@ -3,6 +3,8 @@ import {
   isLongitude,
   isNonEmptyString,
   isRecord,
+  isPositiveInteger,
+  isUnsignedInteger,
 } from "../value-validation";
 import { isCanonicalRailwayLineCode } from "../railway-domain/line-code";
 import {
@@ -17,12 +19,14 @@ export interface KilometricPointDatabaseRow {
   readonly latitude: number;
   readonly longitude: number;
   readonly position_m: number;
+  readonly position_in_section: number;
   readonly rg_troncon: number;
 }
 
 interface RailwaySectionDatabaseRowBase {
   readonly code_ligne: string;
   readonly lib_ligne: string;
+  readonly milestone_count: number;
   readonly rg_troncon: number;
 }
 
@@ -55,6 +59,7 @@ export function decodeKilometricPointDatabaseRow(
     !isCanonicalRailwayLineCode(value.code_ligne) ||
     !isRailwaySectionRank(value.rg_troncon) ||
     !isKilometricPosition(value.position_m) ||
+    !isPositiveInteger(value.position_in_section) ||
     !isNonEmptyString(value.label) ||
     !isMilestoneLabelForPosition(value.label, value.position_m) ||
     !isLatitude(value.latitude) ||
@@ -69,6 +74,7 @@ export function decodeKilometricPointDatabaseRow(
     latitude: value.latitude,
     longitude: value.longitude,
     position_m: value.position_m,
+    position_in_section: value.position_in_section,
     rg_troncon: value.rg_troncon,
   });
 }
@@ -81,6 +87,7 @@ export function decodeRailwaySectionDatabaseRow(
     !isRecord(value) ||
     !isCanonicalRailwayLineCode(value.code_ligne) ||
     !isNonEmptyString(value.lib_ligne) ||
+    !isUnsignedInteger(value.milestone_count) ||
     !isRailwaySectionRank(value.rg_troncon)
   ) {
     throw new Error(`Invalid railway section ${context}`);
@@ -89,6 +96,7 @@ export function decodeRailwaySectionDatabaseRow(
   const base = {
     code_ligne: value.code_ligne,
     lib_ligne: value.lib_ligne,
+    milestone_count: value.milestone_count,
     rg_troncon: value.rg_troncon,
   };
   if (

@@ -129,6 +129,14 @@ export const RAILWAY_SECTIONS_TABLE = table({
       nullable: false,
       type: "INTEGER",
     }),
+    column({
+      checkLayout: "inline",
+      checks: ["milestone_count >= 0"],
+      description: "Total recorded milestones in this exact section",
+      name: "milestone_count",
+      nullable: false,
+      type: "INTEGER",
+    }),
   ] as const,
   foreignKeys: [],
   name: "railway_sections",
@@ -198,6 +206,15 @@ export const KILOMETRIC_POINTS_TABLE = table({
       name: "longitude",
       nullable: false,
       type: "REAL",
+    }),
+    column({
+      checkLayout: "inline",
+      checks: ["position_in_section > 0"],
+      description:
+        "One-based recorded milestone ordinal ordered by numeric PK within its section",
+      name: "position_in_section",
+      nullable: false,
+      type: "INTEGER",
     }),
   ] as const,
   foreignKeys: [
