@@ -30,11 +30,12 @@ physical CSV order, before sorting. The importer validates supported identities
 before deduplication and validates coordinates on retained rows; later duplicate
 coordinates are recorded as raw source text and ignored.
 
-`npm run database:setup` generates SQLite and a full point GeoJSON validation/export
-artifact from the same retained points. The mobile map queries SQLite for points
-in the visible viewport at zoom 10 and above instead of loading the entire point
-GeoJSON into MapLibre at startup. Search and navigation still use every recorded
-point. It also writes
+`npm run database:setup` generates SQLite and the railway-line GeoJSON. Before
+promotion, SQLite point identities, labels and coordinates are checked directly
+against the accepted CSV records. The mobile map queries SQLite for points in the
+visible viewport at zoom 10 and above, then converts those points to GeoJSON in
+memory for MapLibre. Search and navigation still use every recorded point.
+Generation also writes
 `src/statics/railway_reference.import-report.json`, containing source SHA-256
 hashes, format version, policy, summary, unsupported rows, and each discarded
 duplicate with both source rows' line numbers, types, labels and coordinates.

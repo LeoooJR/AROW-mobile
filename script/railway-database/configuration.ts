@@ -8,9 +8,6 @@ export const DEFAULT_RAILWAY_GEOJSON_PATH = resolve(
 export const DEFAULT_RAILWAY_DATABASE_PATH = resolve(
   "src/statics/railway_reference.sqlite",
 );
-export const DEFAULT_MILESTONE_GEOJSON_PATH = resolve(
-  "src/statics/milestones.geojson",
-);
 
 export const EXPECTED_RAILWAY_SNAPSHOT: GenerationSummary = Object.freeze({
   duplicateMilestoneCount: 908,

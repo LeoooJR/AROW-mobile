@@ -1,15 +1,18 @@
 import { DatabaseSync } from "node:sqlite";
-import type { MilestoneFeatureCollection } from "./types";
+import type { Milestone } from "./types";
 
-export function validatePointConsistency(
+export function validateImportedMilestones(
   databasePath: string,
-  geojson: MilestoneFeatureCollection,
+  milestones: readonly Milestone[],
 ): void {
-  const features = new Map(
-    geojson.features.map((feature) => [feature.id, feature]),
+  const expected = new Map(
+    milestones.map((point) => [
+      `${point.code}:${point.rank}:${point.positionMeters}`,
+      point,
+    ]),
   );
-  if (features.size !== geojson.features.length)
-    throw new Error("Milestone GeoJSON contains duplicate identities");
+  if (expected.size !== milestones.length)
+    throw new Error("Accepted milestones contain duplicate identities");
   const database = new DatabaseSync(databasePath, { readOnly: true });
   try {
     let count = 0;
@@ -19,20 +22,20 @@ export function validatePointConsistency(
       )
       .iterate()) {
       const id = `${row.code_ligne}:${row.rg_troncon}:${row.position_m}`;
-      const feature = features.get(id);
+      const point = expected.get(id);
       if (
-        feature === undefined ||
-        feature.properties.label !== row.label ||
-        feature.geometry.coordinates[0] !== row.longitude ||
-        feature.geometry.coordinates[1] !== row.latitude
+        point === undefined ||
+        point.label !== row.label ||
+        point.longitude !== row.longitude ||
+        point.latitude !== row.latitude
       ) {
-        throw new Error(`Milestone GeoJSON disagrees with SQLite for ${id}`);
+        throw new Error(`SQLite disagrees with accepted CSV milestone ${id}`);
       }
       count++;
     }
-    if (count !== features.size)
+    if (count !== expected.size)
       throw new Error(
-        "Milestone GeoJSON and SQLite have different point counts",
+        "SQLite and accepted CSV milestones have different point counts",
       );
   } finally {
     database.close();

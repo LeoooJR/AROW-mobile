@@ -30,19 +30,17 @@ test("warns in red and bold, preserves plain output, and respects NO_COLOR", () 
   }
 });
 
-test("rolls back all four outputs when promotion fails partway through", () => {
+test("rolls back all three outputs when promotion fails partway through", () => {
   const directory = mkdtempSync(join(tmpdir(), "arow-promotion-"));
   const workspace = createStagingWorkspace({
     databasePath: join(directory, "reference.sqlite"),
     geojsonPath: join(directory, "railways.geojson"),
-    milestoneGeojsonPath: join(directory, "points.geojson"),
     resources: RAILWAY_RESOURCES,
   });
   const outputs = [
     workspace.targetImportReportPath,
     workspace.targetGeojsonPath,
     workspace.targetDatabasePath,
-    workspace.targetMilestoneGeojsonPath,
   ];
   try {
     for (const path of outputs) writeFileSync(path, `previous:${path}`);
@@ -76,7 +74,6 @@ test("validates detailed audit counts and filtering policy", async () => {
     const summary = await setupRailwayDatabase({
       databasePath: join(directory, "reference.sqlite"),
       geojsonPath: join(directory, "railways.geojson"),
-      milestoneGeojsonPath: join(directory, "points.geojson"),
       expectedSnapshot: {
         duplicateMilestoneCount: 1,
         fallbackSectionCount: 1,

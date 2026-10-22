@@ -52,4 +52,21 @@ export class Milestone extends AbstractRailwayNetworkFeature<
   public get positionMeters(): number {
     return this.id.positionMeters;
   }
+
+  public toGeoJSON() {
+    return {
+      type: "Feature" as const,
+      id: this.id.value,
+      geometry: {
+        type: "Point" as const,
+        coordinates: [this.coordinates.longitude, this.coordinates.latitude],
+      },
+      properties: {
+        label: this.label,
+        lineCode: this.lineCode,
+        sectionRank: this.sectionRank,
+        positionMeters: this.positionMeters,
+      },
+    };
+  }
 }

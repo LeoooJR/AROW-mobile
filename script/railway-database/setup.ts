@@ -3,7 +3,6 @@ import { readFileSync, writeFileSync } from "node:fs";
 import {
   DEFAULT_RAILWAY_DATABASE_PATH,
   DEFAULT_RAILWAY_GEOJSON_PATH,
-  DEFAULT_MILESTONE_GEOJSON_PATH,
   EXPECTED_RAILWAY_SNAPSHOT,
 } from "./configuration";
 import { parseMilestoneCsv } from "./csv";
@@ -13,8 +12,7 @@ import {
   validateRailwayDatabase,
 } from "./database";
 import { normalizeRailwayGeoJson } from "./geojson";
-import { createMilestoneGeoJson } from "./milestone-geojson";
-import { validatePointConsistency } from "./asset-consistency";
+import { validateImportedMilestones } from "./asset-consistency";
 import {
   createImportReport,
   duplicateFilterWarning,
@@ -152,11 +150,6 @@ function buildStagedAssets(
   validateExpectedSnapshot(summary, expectedSnapshot);
 
   writeFileSync(workspace.stagedGeojsonPath, JSON.stringify(geojson));
-  const milestoneGeojson = createMilestoneGeoJson(milestones);
-  writeFileSync(
-    workspace.stagedMilestoneGeojsonPath,
-    JSON.stringify(milestoneGeojson),
-  );
   writeFileSync(
     workspace.stagedImportReportPath,
     JSON.stringify(createImportReport(workspace, sources, summary), null, 2) +
@@ -164,7 +157,7 @@ function buildStagedAssets(
   );
   createRailwayDatabase(workspace.stagedDatabasePath, sections, milestones);
   validateRailwayDatabase(workspace.stagedDatabasePath, summary);
-  validatePointConsistency(workspace.stagedDatabasePath, milestoneGeojson);
+  validateImportedMilestones(workspace.stagedDatabasePath, milestones);
   validateImportReport(workspace.stagedImportReportPath, summary);
   return Object.freeze({ skipped, summary });
 }
@@ -193,13 +186,11 @@ export async function setupRailwayDatabase({
   fetchImplementation = fetch,
   geojsonPath = DEFAULT_RAILWAY_GEOJSON_PATH,
   logger = console,
-  milestoneGeojsonPath = DEFAULT_MILESTONE_GEOJSON_PATH,
   resources = RAILWAY_RESOURCES,
 }: SetupOptions = {}): Promise<GenerationSummary> {
   const workspace = createStagingWorkspace({
     databasePath,
     geojsonPath,
-    milestoneGeojsonPath,
     resources,
   });
   try {
