@@ -24,6 +24,10 @@ constructed IDs. Object reference equality does not express domain identity.
 
 Serialize `.value` explicitly for GeoJSON IDs, map filters, and string-indexed
 collections. Existing serialized formats and database columns remain unchanged.
+`Milestone.toGeoJSON()` produces a point feature with its serialized ID,
+preserved PK label, section identity, numeric PK, and longitude-first coordinates.
+It has no map-library dependency; the map adapter assembles these features into
+its source collection.
 Exact milestone lookups accept `MilestoneId`; section-bound lookups accept
 `RailwaySectionId`. These objects identify a possible record, so a valid ID does
 not guarantee that a recorded point exists. Ordinary React keys, collection keys,
@@ -64,7 +68,7 @@ preserve their written digits, while `positionMeters` supplies the numeric value
 | Located milestone bounds | First/last recorded `Milestone` objects ordered by numeric PK within the exact section. `first` and `last` are optional: empty sections return neither; one-point sections return the same point as both. Loading and failures belong to application state. | [`railway-milestone-bounds.ts`](../shared/railway-domain/railway-milestone-bounds.ts)           |
 
 For example, geometry metadata can declare `499+752 → 511+605` while recorded
-milestones cover `499+000 → 511+000`. These describe different data and must not be
+milestones cover `499+752 → 511+600`. These describe different data and must not be
 substituted for one another. Endpoint controls use located recorded bounds.
 
 ## Ownership and use
@@ -78,6 +82,13 @@ gaps mean its place among recorded points cannot be inferred from its metre valu
 Navigation never wraps. A single-point section has position and total equal to
 one and no neighbours. An absent current record returns no
 descriptor. Loading, retries, camera focus, and selection remain application-owned.
+
+The generated reference accepts all marker types with supported numerical PKs.
+It keeps the first source CSV row for each section and numerical position before
+computing totals and ordinals. This is an import policy, not a preference for
+one marker type or an assessment of coordinate accuracy; the
+[database documentation](railway-database.md#import-policy-and-audit-trail)
+and generated import report preserve its audit trail.
 
 - Import individual modules directly. Domain code uses relative imports and only
   framework-independent shared dependencies.

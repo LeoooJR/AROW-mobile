@@ -68,7 +68,7 @@ describe("RailwayReferenceProvider", () => {
     );
     await render(<RailwayReferenceProvider>{null}</RailwayReferenceProvider>);
     expect(jest.mocked(SQLiteProvider).mock.lastCall?.[0]).toMatchObject({
-      databaseName: "railway_reference_v3.sqlite",
+      databaseName: "railway_reference_v3_r2.sqlite",
       assetSource: { assetId: "database-asset" },
     });
     expect(

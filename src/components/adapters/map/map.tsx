@@ -41,6 +41,7 @@ export default function Map({
   onFeaturePress,
   onReady,
   onLoadError,
+  onViewportChange,
   railwayData,
   recenterRequest,
   selectedFeature,
@@ -63,8 +64,12 @@ export default function Map({
   const onRegionDidChange = useCallback(
     (event: NativeSyntheticEvent<ViewStateChangeEvent>) => {
       setBearing(event.nativeEvent.bearing);
+      onViewportChange?.({
+        bounds: event.nativeEvent.bounds,
+        zoom: event.nativeEvent.zoom,
+      });
     },
-    [],
+    [onViewportChange],
   );
 
   const reportReady = () => {

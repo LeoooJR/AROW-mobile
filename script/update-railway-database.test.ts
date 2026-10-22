@@ -45,7 +45,8 @@ const FIXTURE_SNAPSHOT = Object.freeze({
   fallbackSectionCount: 1,
   geometryCount: 1,
   geometryWithoutMilestoneCount: 0,
-  milestoneCount: 2,
+  milestoneCount: 3,
+  duplicateMilestoneCount: 1,
   railwaySectionCount: 2,
   skippedMilestoneCount: 1,
 });
@@ -92,6 +93,7 @@ const RAW_CSV = [
   "Kilomètre;001+000;001000-1;1000;1;48.0;2.0",
   "Kilomètre;D+000;001000-1;1000;1;48.1;2.1",
   "Kilomètre;2+000;008000-2;8000;;47,5;1,25",
+  "Y - Bif;1+000;001000-1;1000;1;49;3",
   "",
 ].join("\n");
 
@@ -104,6 +106,17 @@ const RAW_MILESTONE_GEOJSON = {
         label: "001+000",
         lineCode: "001000",
         positionMeters: 1000,
+        sectionRank: 1,
+      },
+      type: "Feature",
+    },
+    {
+      geometry: { coordinates: [2.01, 48.01], type: "Point" },
+      id: "001000:1:1100",
+      properties: {
+        label: "001+100",
+        lineCode: "001000",
+        positionMeters: 1100,
         sectionRank: 1,
       },
       type: "Feature",
@@ -447,15 +460,12 @@ describe("bounded resource downloads", () => {
   );
 });
 
-function fixtureResources(
-  milestoneGeojson = Buffer.from(JSON.stringify(RAW_MILESTONE_GEOJSON)),
-): RailwayFixtures {
+function fixtureResources(): RailwayFixtures {
   const geojson = Buffer.from(JSON.stringify(RAW_GEOJSON));
   const milestones = Buffer.from(RAW_CSV, "latin1");
   return {
     buffers: new Map([
       ["https://example.test/railways", geojson],
-      ["https://example.test/milestone-geojson", milestoneGeojson],
       ["https://example.test/milestones", milestones],
     ]),
     manifest: {
@@ -465,13 +475,6 @@ function fixtureResources(
         name: "railways.geojson",
         sha256: checksum(geojson),
         url: "https://example.test/railways",
-      },
-      milestoneGeojson: {
-        maxBytes: milestoneGeojson.length,
-        timeoutMs: 1000,
-        name: "milestones.geojson",
-        sha256: checksum(milestoneGeojson),
-        url: "https://example.test/milestone-geojson",
       },
       milestones: {
         maxBytes: milestones.length,
@@ -542,6 +545,10 @@ describe("railway database setup", () => {
     writeFileSync(geojsonPath, "existing geojson");
     writeFileSync(milestoneGeojsonPath, "existing milestone geojson");
     writeFileSync(databasePath, "existing database");
+    writeFileSync(
+      join(directory, "railway_reference.import-report.json"),
+      "existing report",
+    );
 
     await expect(
       setupRailwayDatabase({
@@ -558,6 +565,12 @@ describe("railway database setup", () => {
       "existing milestone geojson",
     );
     expect(readFileSync(databasePath, "utf8")).toBe("existing database");
+    expect(
+      readFileSync(
+        join(directory, "railway_reference.import-report.json"),
+        "utf8",
+      ),
+    ).toBe("existing report");
     expect(
       readdirSync(directory).some((name) =>
         name.startsWith(".railway-database-"),
@@ -588,34 +601,20 @@ describe("railway database setup", () => {
     const milestoneGeojson = normalizeMilestoneGeoJson(
       JSON.parse(readFileSync(milestoneGeojsonPath, "utf8")),
     );
-    expect(readFileSync(milestoneGeojsonPath)).toEqual(
-      Buffer.from(JSON.stringify(RAW_MILESTONE_GEOJSON)),
+    expect(JSON.parse(readFileSync(milestoneGeojsonPath, "utf8"))).toEqual(
+      RAW_MILESTONE_GEOJSON,
     );
     expect(
       milestoneGeojson.features.map(({ id, properties }) => ({
         id,
         properties,
       })),
-    ).toEqual([
-      {
-        id: "001000:1:1000",
-        properties: {
-          label: "001+000",
-          lineCode: "001000",
-          positionMeters: 1000,
-          sectionRank: 1,
-        },
-      },
-      {
-        id: "008000:2:2000",
-        properties: {
-          label: "2+000",
-          lineCode: "008000",
-          positionMeters: 2000,
-          sectionRank: 2,
-        },
-      },
-    ]);
+    ).toEqual(
+      RAW_MILESTONE_GEOJSON.features.map(({ id, properties }) => ({
+        id,
+        properties,
+      })),
+    );
 
     const database = new DatabaseSync(databasePath, { readOnly: true });
     expect(
@@ -623,7 +622,7 @@ describe("railway database setup", () => {
     ).toEqual({ count: 2 });
     expect(
       database.prepare("SELECT COUNT(*) AS count FROM kilometric_points").get(),
-    ).toEqual({ count: 2 });
+    ).toEqual({ count: 3 });
     expect(
       database
         .prepare(
@@ -645,11 +644,14 @@ describe("railway database setup", () => {
     const firstGeojson = readFileSync(geojsonPath);
     const firstMilestoneGeojson = readFileSync(milestoneGeojsonPath);
     const firstDatabase = readFileSync(databasePath);
+    const reportPath = join(directory, "railway_reference.import-report.json");
+    const firstReport = readFileSync(reportPath);
     await setupRailwayDatabase(options);
     expect(readFileSync(geojsonPath)).toEqual(firstGeojson);
     expect(readFileSync(milestoneGeojsonPath)).toEqual(firstMilestoneGeojson);
     expect(readFileSync(databasePath)).toEqual(firstDatabase);
-    expect(fetchImplementation).toHaveBeenCalledTimes(6);
+    expect(readFileSync(reportPath)).toEqual(firstReport);
+    expect(fetchImplementation).toHaveBeenCalledTimes(4);
   });
 
   test("validates prepared railway assets without modifying them", async () => {
@@ -671,6 +673,61 @@ describe("railway database setup", () => {
       originalMilestoneGeojson,
     );
     expect(readFileSync(databasePath)).toEqual(originalDatabase);
+  });
+
+  test.each(["coordinates", "duplicate identity"])(
+    "rejects equal-count point assets with inconsistent %s",
+    async (corruption) => {
+      await generateValidFixtureAssets();
+      const points = structuredClone(RAW_MILESTONE_GEOJSON);
+      const corrupted =
+        corruption === "coordinates"
+          ? {
+              ...points,
+              features: points.features.map((point, index) =>
+                index === 0
+                  ? {
+                      ...point,
+                      geometry: { type: "Point", coordinates: [3, 49] },
+                    }
+                  : point,
+              ),
+            }
+          : {
+              ...points,
+              features: [
+                points.features[0],
+                points.features[0],
+                points.features[2],
+              ],
+            };
+      writeFileSync(milestoneGeojsonPath, JSON.stringify(corrupted));
+      expect(() =>
+        validateRailwayAssets({
+          databasePath,
+          geojsonPath,
+          milestoneGeojsonPath,
+          expectedSnapshot: FIXTURE_SNAPSHOT,
+        }),
+      ).toThrow(
+        corruption === "coordinates"
+          ? "disagrees with SQLite"
+          : "duplicate identities",
+      );
+    },
+  );
+
+  test("rejects a missing import report with setup guidance", async () => {
+    await generateValidFixtureAssets();
+    rmSync(join(directory, "railway_reference.import-report.json"));
+    expect(() =>
+      validateRailwayAssets({
+        databasePath,
+        geojsonPath,
+        milestoneGeojsonPath,
+        expectedSnapshot: FIXTURE_SNAPSHOT,
+      }),
+    ).toThrow("Run `npm run database:setup`");
   });
 
   test("reports a missing GeoJSON asset with setup guidance", async () => {
@@ -772,12 +829,12 @@ describe("railway database setup", () => {
     expect(() =>
       validateRailwayAssets({
         databasePath,
-        expectedSnapshot: { ...FIXTURE_SNAPSHOT, milestoneCount: 3 },
+        expectedSnapshot: { ...FIXTURE_SNAPSHOT, milestoneCount: 4 },
         geojsonPath,
         milestoneGeojsonPath,
       }),
     ).toThrow(
-      "Milestone GeoJSON asset is missing or invalid. Expected 3 milestone features, received 2",
+      "Milestone GeoJSON asset is missing or invalid. Expected 4 milestone features, received 3",
     );
   });
 
@@ -823,8 +880,8 @@ describe("railway database setup", () => {
     const { buffers, manifest } = fixtureResources();
     const invalidManifest: RailwayResources = {
       ...manifest,
-      milestoneGeojson: {
-        ...manifest.milestoneGeojson,
+      milestones: {
+        ...manifest.milestones,
         sha256: "0".repeat(64),
       },
     };
@@ -843,14 +900,14 @@ describe("railway database setup", () => {
       let failedBodyCancelled = false;
       const manifest: RailwayResources = {
         ...fixtures.manifest,
-        milestoneGeojson: {
-          ...fixtures.manifest.milestoneGeojson,
+        railwayGeojson: {
+          ...fixtures.manifest.railwayGeojson,
           maxBytes: 1,
           timeoutMs: 20,
         },
       };
       const fetchImplementation: FetchImplementation = async (input) => {
-        if (input.toString() === manifest.milestoneGeojson.url) {
+        if (input.toString() === manifest.railwayGeojson.url) {
           return new Response(
             new ReadableStream<Uint8Array>({
               start(controller) {
@@ -887,62 +944,6 @@ describe("railway database setup", () => {
     },
   );
 
-  test("rejects malformed, invalid, and incomplete milestone GeoJSON", async () => {
-    await expectSetupFailurePreservesOutputs(
-      fixtureResources(Buffer.from("not JSON")),
-      "Unexpected token",
-    );
-
-    const invalidFeature = {
-      ...RAW_MILESTONE_GEOJSON,
-      features: [
-        { ...RAW_MILESTONE_GEOJSON.features[0], id: "wrong-id" },
-        RAW_MILESTONE_GEOJSON.features[1],
-      ],
-    };
-    await expectSetupFailurePreservesOutputs(
-      fixtureResources(Buffer.from(JSON.stringify(invalidFeature))),
-      "Milestone GeoJSON feature has invalid id wrong-id",
-    );
-
-    await expectSetupFailurePreservesOutputs(
-      fixtureResources(
-        Buffer.from(JSON.stringify(milestoneGeojsonWithMismatchedLabel())),
-      ),
-      "Milestone GeoJSON contains an invalid feature",
-    );
-
-    const wrongCount = {
-      ...RAW_MILESTONE_GEOJSON,
-      features: RAW_MILESTONE_GEOJSON.features.slice(0, 1),
-    };
-    await expectSetupFailurePreservesOutputs(
-      fixtureResources(Buffer.from(JSON.stringify(wrongCount))),
-      "Expected 2 milestone features, received 1",
-    );
-  });
-
-  test("rejects an HTML milestone GeoJSON response transactionally", async () => {
-    const fixtures = fixtureResources();
-    const fetchImplementation = fixtureFetch(fixtures.buffers);
-    fetchImplementation.mockImplementation(async (input: string | URL) => {
-      if (input.toString() === "https://example.test/milestone-geojson") {
-        return new Response("<html></html>", {
-          headers: { "content-type": "text/html" },
-        });
-      }
-      const body = fixtures.buffers.get(input.toString());
-      return body === undefined
-        ? new Response("Not found", { status: 404 })
-        : new Response(Uint8Array.from(body).buffer);
-    });
-    await expectSetupFailurePreservesOutputs(
-      fixtures,
-      "Google Drive returned HTML instead of the resource",
-      fetchImplementation,
-    );
-  });
-
   test("rejects HTML responses instead of saving a Drive error page", async () => {
     const destinationPath = join(directory, "download");
     await expect(
@@ -963,22 +964,31 @@ describe("railway database setup", () => {
     ).rejects.toThrow("returned HTML instead of the resource");
   });
 
-  test("rejects duplicate and unexpected malformed milestone rows", () => {
-    const duplicate = Buffer.from(
-      `${RAW_CSV.trim()}\nKilomètre;001+000;001000-1;1000;1;48;2\n`,
-      "latin1",
-    );
-    expect(() => parseMilestoneCsv(duplicate)).toThrow(
-      "Duplicate milestone 001000:1:1000",
-    );
-
-    const malformed = Buffer.from(
-      RAW_CSV.replace("D+000", "unknown"),
-      "latin1",
-    );
-    expect(() => parseMilestoneCsv(malformed)).toThrow(
-      "PK must use the kilometre+metric format",
-    );
+  test("retains the first duplicate and skips unsupported PK formats", () => {
+    const parsed = parseMilestoneCsv(Buffer.from(RAW_CSV, "latin1"));
+    expect(parsed.milestones).toHaveLength(3);
+    expect(parsed.duplicates).toEqual([
+      {
+        id: "001000:1:1000",
+        kept: {
+          lineNumber: 3,
+          label: "001+000",
+          type: "Kilomètre",
+          latitude: "48.0",
+          longitude: "2.0",
+        },
+        discarded: {
+          lineNumber: 6,
+          label: "1+000",
+          type: "Y - Bif",
+          latitude: "49",
+          longitude: "3",
+        },
+      },
+    ]);
+    expect(parsed.skipped).toEqual([
+      { label: "D+000", lineNumber: 4, reason: "unsupported-pk" },
+    ]);
   });
 
   test("rejects unexpected GeoJSON properties", () => {

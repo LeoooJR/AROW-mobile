@@ -14,11 +14,21 @@ workflows. Add future map inputs and callbacks through narrow, explicitly typed
 props when a product requirement needs them.
 
 The map accepts optional immutable `Milestone` domain instances from its owning
-screen and converts them to GeoJSON only inside this adapter boundary. It keeps
+screen and assembles their `toGeoJSON()` features inside this adapter boundary. It keeps
 an empty milestone source mounted while data is unavailable so its dot layer can
 act as the stable ordering anchor. It renders no points in that state and does
 not query SQLite or interpret loading and failure states. Milestone dots appear
 from zoom 10 and collision-aware labels from zoom 13.
+
+For the expanded reference, the owning screen requests only the visible
+viewport's points from the railway-reference feature, debounced after camera
+changes and only from zoom 10 while points are visible. It does not load the
+whole-country point GeoJSON at startup. The adapter reports bounds and zoom via
+`onViewportChange`, converts the supplied immutable points to GeoJSON, and keeps
+the source mounted across updates. Selected points remain represented during
+viewport transitions. All points stay available in SQLite for search and
+navigation; this is a rendering/loading policy, not a dataset filter. An empty
+point array is a ready source and does not delay basemap startup.
 
 ## Layout
 

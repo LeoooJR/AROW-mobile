@@ -25,7 +25,6 @@ export type RailwayResource = Readonly<
 
 export interface RailwayResources {
   readonly railwayGeojson: RailwayResource;
-  readonly milestoneGeojson: RailwayResource;
   readonly milestones: RailwayResource;
 }
 
@@ -41,11 +40,27 @@ export interface Milestone {
 export interface SkippedMilestone {
   readonly label: string;
   readonly lineNumber: number;
+  readonly reason: "unsupported-pk";
+}
+
+export interface MilestoneSourceRow {
+  readonly lineNumber: number;
+  readonly label: string;
+  readonly type: string;
+  readonly latitude: string;
+  readonly longitude: string;
+}
+
+export interface DuplicateMilestone {
+  readonly id: string;
+  readonly kept: MilestoneSourceRow;
+  readonly discarded: MilestoneSourceRow;
 }
 
 export interface ParsedMilestones {
   readonly milestones: readonly Milestone[];
   readonly skipped: readonly SkippedMilestone[];
+  readonly duplicates: readonly DuplicateMilestone[];
 }
 
 interface RailwaySectionBase {
@@ -136,6 +151,7 @@ export interface NormalizedRailwayData {
 }
 
 export interface GenerationSummary {
+  readonly duplicateMilestoneCount: number;
   readonly fallbackSectionCount: number;
   readonly geometryCount: number;
   readonly geometryWithoutMilestoneCount: number;
@@ -151,9 +167,11 @@ export interface StagingWorkspace {
   readonly stagedDatabasePath: string;
   readonly stagedGeojsonPath: string;
   readonly stagedMilestoneGeojsonPath: string;
+  readonly stagedImportReportPath: string;
   readonly targetDatabasePath: string;
   readonly targetGeojsonPath: string;
   readonly targetMilestoneGeojsonPath: string;
+  readonly targetImportReportPath: string;
 }
 
 export interface SetupOptions {

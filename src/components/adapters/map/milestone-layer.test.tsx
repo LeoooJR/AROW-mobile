@@ -63,6 +63,23 @@ describe("MilestoneLayer", () => {
     ).toHaveProp("minzoom", 13);
   });
 
+  test("renders viewport points with exact identities and coordinates without duplicating a selected point", async () => {
+    const view = await render(
+      <MilestoneLayer data={[]} selectedMilestone={MILESTONE} />,
+    );
+    expect(screen.getByTestId("mock-milestone-source")).toHaveProp("data", {
+      type: "FeatureCollection",
+      features: [FEATURE],
+    });
+    await view.rerender(
+      <MilestoneLayer data={[MILESTONE]} selectedMilestone={MILESTONE} />,
+    );
+    expect(screen.getByTestId("mock-milestone-source")).toHaveProp("data", {
+      type: "FeatureCollection",
+      features: [FEATURE],
+    });
+  });
+
   test("keeps an empty source mounted until the asset URI is ready", async () => {
     const view = await render(<MilestoneLayer />);
 

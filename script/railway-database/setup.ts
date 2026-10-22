@@ -13,7 +13,13 @@ import {
   validateRailwayDatabase,
 } from "./database";
 import { normalizeRailwayGeoJson } from "./geojson";
-import { normalizeMilestoneGeoJson } from "./milestone-geojson";
+import { createMilestoneGeoJson } from "./milestone-geojson";
+import { validatePointConsistency } from "./asset-consistency";
+import {
+  createImportReport,
+  duplicateFilterWarning,
+  validateImportReport,
+} from "./import-report";
 import { downloadResource, RAILWAY_RESOURCES } from "./resources";
 import {
   createStagingWorkspace,
@@ -24,6 +30,7 @@ import type {
   GenerationLogger,
   GenerationSummary,
   Milestone,
+  ParsedMilestones,
   RailwayFeatureCollection,
   RailwayResources,
   RailwaySection,
@@ -34,6 +41,7 @@ import type {
 } from "./types";
 
 const SUMMARY_KEYS = [
+  "duplicateMilestoneCount",
   "fallbackSectionCount",
   "geometryCount",
   "geometryWithoutMilestoneCount",
@@ -42,7 +50,7 @@ const SUMMARY_KEYS = [
   "skippedMilestoneCount",
 ] as const satisfies readonly (keyof GenerationSummary)[];
 
-interface RailwaySources {
+interface RailwaySources extends ParsedMilestones {
   readonly geojson: RailwayFeatureCollection;
   readonly geojsonSections: readonly RailwaySectionWithGeometry[];
   readonly milestones: readonly Milestone[];
@@ -70,30 +78,10 @@ async function downloadRailwaySources(
       workspace.rawMilestonesPath,
       fetchImplementation,
     ),
-    downloadResource(
-      resources.milestoneGeojson,
-      workspace.stagedMilestoneGeojsonPath,
-      fetchImplementation,
-    ),
   ]);
   const failure = results.find((result) => result.status === "rejected");
   if (failure !== undefined) {
     throw failure.reason;
-  }
-}
-
-function validateMilestoneGeoJson(
-  workspace: StagingWorkspace,
-  expectedMilestoneCount: number,
-): void {
-  const rawMilestoneGeojson: unknown = JSON.parse(
-    readFileSync(workspace.stagedMilestoneGeojsonPath, "utf8"),
-  );
-  const milestoneGeojson = normalizeMilestoneGeoJson(rawMilestoneGeojson);
-  if (milestoneGeojson.features.length !== expectedMilestoneCount) {
-    throw new Error(
-      `Expected ${expectedMilestoneCount} milestone features, received ${milestoneGeojson.features.length}`,
-    );
   }
 }
 
@@ -103,10 +91,8 @@ function readRailwaySources(workspace: StagingWorkspace): RailwaySources {
   );
   const { geojson, sections: geojsonSections } =
     normalizeRailwayGeoJson(rawGeojson);
-  const { milestones, skipped } = parseMilestoneCsv(
-    readFileSync(workspace.rawMilestonesPath),
-  );
-  return Object.freeze({ geojson, geojsonSections, milestones, skipped });
+  const parsed = parseMilestoneCsv(readFileSync(workspace.rawMilestonesPath));
+  return Object.freeze({ geojson, geojsonSections, ...parsed });
 }
 
 function summarizeRailwayData(
@@ -114,11 +100,13 @@ function summarizeRailwayData(
   sections: readonly RailwaySection[],
   milestones: readonly Milestone[],
   skipped: readonly SkippedMilestone[],
+  duplicateCount: number,
 ): GenerationSummary {
   const milestoneSectionIds = new Set(
     milestones.map((milestone) => `${milestone.code}:${milestone.rank}`),
   );
   return Object.freeze({
+    duplicateMilestoneCount: duplicateCount,
     fallbackSectionCount: sections.length - geojsonSections.length,
     geometryCount: geojsonSections.length,
     geometryWithoutMilestoneCount: geojsonSections.filter(
@@ -151,28 +139,44 @@ function buildStagedAssets(
   workspace: StagingWorkspace,
   expectedSnapshot: GenerationSummary | undefined,
 ): GenerationResult {
-  const { geojson, geojsonSections, milestones, skipped } =
-    readRailwaySources(workspace);
+  const sources = readRailwaySources(workspace);
+  const { geojson, geojsonSections, milestones, skipped, duplicates } = sources;
   const sections = completeRailwaySections(geojsonSections, milestones);
   const summary = summarizeRailwayData(
     geojsonSections,
     sections,
     milestones,
     skipped,
+    duplicates.length,
   );
   validateExpectedSnapshot(summary, expectedSnapshot);
 
   writeFileSync(workspace.stagedGeojsonPath, JSON.stringify(geojson));
-  validateMilestoneGeoJson(workspace, summary.milestoneCount);
+  const milestoneGeojson = createMilestoneGeoJson(milestones);
+  writeFileSync(
+    workspace.stagedMilestoneGeojsonPath,
+    JSON.stringify(milestoneGeojson),
+  );
+  writeFileSync(
+    workspace.stagedImportReportPath,
+    JSON.stringify(createImportReport(workspace, sources, summary), null, 2) +
+      "\n",
+  );
   createRailwayDatabase(workspace.stagedDatabasePath, sections, milestones);
   validateRailwayDatabase(workspace.stagedDatabasePath, summary);
+  validatePointConsistency(workspace.stagedDatabasePath, milestoneGeojson);
+  validateImportReport(workspace.stagedImportReportPath, summary);
   return Object.freeze({ skipped, summary });
 }
 
 function reportGeneration(
   { skipped, summary }: GenerationResult,
   logger: GenerationLogger,
+  reportPath: string,
 ): void {
+  logger.warn(
+    duplicateFilterWarning(summary.duplicateMilestoneCount, reportPath),
+  );
   for (const skippedMilestone of skipped) {
     logger.warn(
       `Skipped unsupported milestone ${skippedMilestone.label} at CSV line ${skippedMilestone.lineNumber}`,
@@ -202,7 +206,7 @@ export async function setupRailwayDatabase({
     await downloadRailwaySources(workspace, resources, fetchImplementation);
     const result = buildStagedAssets(workspace, expectedSnapshot);
     promoteStagedOutputs(workspace);
-    reportGeneration(result, logger);
+    reportGeneration(result, logger, workspace.targetImportReportPath);
     return result.summary;
   } finally {
     removeStagingWorkspace(workspace);

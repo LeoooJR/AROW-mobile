@@ -49,6 +49,7 @@ const milestones = Object.freeze([
 ]);
 const sections = completeRailwaySections(geometrySections, milestones);
 const summary: GenerationSummary = {
+  duplicateMilestoneCount: 0,
   fallbackSectionCount: 1,
   geometryCount: 3,
   geometryWithoutMilestoneCount: 1,
@@ -58,6 +59,16 @@ const summary: GenerationSummary = {
 };
 
 describe("generated section milestone metadata", () => {
+  test("fallback ranks inherit their known line name", () => {
+    const completed = completeRailwaySections(geometrySections, [
+      point("001000", 4, 100_000),
+    ]);
+    expect(completed.find((section) => section.rank === 4)).toMatchObject({
+      code: "001000",
+      name: "Test railway",
+      hasGeometry: 0,
+    });
+  });
   let directory: string;
   let path: string;
 
@@ -154,6 +165,17 @@ describe("generated section milestone metadata", () => {
     } finally {
       database.close();
     }
+  });
+
+  test("rejects names that would prevent loading the searchable catalogue", () => {
+    const database = new DatabaseSync(path);
+    database.exec(
+      "UPDATE railway_sections SET lib_ligne = 'Conflicting name' WHERE code_ligne = '001000' AND rg_troncon = 2",
+    );
+    database.close();
+    expect(() => validateRailwayDatabase(path, summary)).toThrow(
+      "conflicting railway line names",
+    );
   });
 
   test("reads stored metadata using two primary-key searches without aggregates", () => {

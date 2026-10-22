@@ -16,6 +16,9 @@ import type { SimulationState } from "@/features/simulation/simulation-state";
 import Index from "@/app/index";
 import { useAssets } from "expo-asset";
 import { AppStartupContext } from "@/contexts/app-startup-context";
+jest.mock("@/features/railway-reference/use-visible-milestones", () => ({
+  useVisibleMilestones: () => [],
+}));
 const mockFindBounds = jest.fn().mockResolvedValue({});
 const mockFindNeighbours = jest.fn().mockResolvedValue(undefined);
 jest.mock("@/components/adapters/toast", () => ({

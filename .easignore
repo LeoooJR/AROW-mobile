@@ -32,6 +32,7 @@ expo-env.d.ts
 /src/statics/lignes-par-type.geojson
 /src/statics/milestones.geojson
 /src/statics/railway_reference.sqlite
+/src/statics/railway_reference.import-report.json
 /src/statics/.railway-database-*
 
 # Local security audit
@@ -106,3 +107,4 @@ Thumbs.db
 !/src/statics/lignes-par-type.geojson
 !/src/statics/milestones.geojson
 !/src/statics/railway_reference.sqlite
+!/src/statics/railway_reference.import-report.json

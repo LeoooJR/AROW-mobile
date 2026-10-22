@@ -9,7 +9,11 @@ import {
   createTableSql,
   type RailwayReferenceTableDescriptor,
 } from "@shared/railway-reference/schema";
-import { FIND_MILESTONE_QUERY } from "@/features/railway-reference/sqlite/queries";
+import {
+  FIND_MILESTONE_QUERY,
+  LOAD_SEARCHABLE_RAILWAYS_QUERY,
+} from "@/features/railway-reference/sqlite/queries";
+import { searchableSectionRowsToRailways } from "@/features/railway-reference/mapping/railway-mapper";
 
 const databasePath = path.join(
   __dirname,
@@ -131,5 +135,42 @@ describe("railway reference schema synchronization", () => {
         }),
       ]),
     );
+  });
+
+  test("the full searchable catalogue includes fallback ranks under their known line name", () => {
+    const railways = searchableSectionRowsToRailways(
+      getDatabase().prepare(LOAD_SEARCHABLE_RAILWAYS_QUERY).all(),
+    );
+    const railway = railways.find((line) => line.code === "830356");
+    expect(railway?.name).toBe("Raccordement sud de Tarascon");
+    expect(
+      railway?.sections.find((section) => section.sectionRank === 2)?.geometry
+        .status,
+    ).toBe("absent");
+  });
+
+  test("retains precise endpoints and the first source coordinates in the expanded asset", () => {
+    const database = getDatabase();
+    const lookup = database.prepare(FIND_MILESTONE_QUERY);
+    expect(lookup.get("340311", 1, 136_772)).toMatchObject({
+      label: "136+772",
+      latitude: 49.4364444712341,
+      longitude: 1.121872877785761,
+    });
+    expect(lookup.get("340311", 1, 137_980)).toMatchObject({
+      label: "137+980",
+    });
+    expect(lookup.get("001000", 1, 88_000)).toMatchObject({
+      label: "088+000",
+      latitude: 48.514806709249875,
+      longitude: 3.248754757164401,
+    });
+    expect(
+      database
+        .prepare(
+          "SELECT COUNT(*) AS count, MIN(position_m) AS minimum, MAX(position_m) AS maximum FROM kilometric_points WHERE code_ligne = '893000' AND rg_troncon = 1",
+        )
+        .get(),
+    ).toEqual({ count: 124, minimum: 499752, maximum: 511600 });
   });
 });

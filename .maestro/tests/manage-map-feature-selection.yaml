@@ -12,8 +12,8 @@ tags:
     permissions:
       location: allow
 - openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
-# Re-deliver the URL if Android consumes the first intent during a cold start.
-- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+# Wait for this cold launch; a second immediate URL can restart React while
+# the Expo native runtime is still initializing.
 - extendedWaitUntil:
     visible:
       id: "arow-map"
@@ -51,7 +51,7 @@ tags:
 - assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
 # Browse the adjacent recorded points and both section boundaries without wrapping.
 - extendedWaitUntil:
-    visible: "10 sur 12"
+    visible: "96 sur 124"
     timeout: 10000
 - assertVisible:
     id: "use-map-milestone"
@@ -63,34 +63,37 @@ tags:
 - assertVisible: "Démarrer la simulation"
 - tapOn:
     id: "previous-milestone"
-- assertVisible: "PK 508\\+000"
-- assertVisible: "9 sur 12"
+- assertVisible: "PK 508\\+900"
+- assertVisible: "95 sur 124"
 - assertNotVisible:
     id: "simulation-play-pause"
 - tapOn:
     id: "next-milestone"
 - assertVisible: "PK 509\\+000"
-- repeat:
-    times: 2
-    commands:
-      - tapOn:
-          id: "next-milestone"
-          enabled: true
-      - waitForAnimationToEnd
-- assertVisible: "PK 511\\+000"
-- assertVisible: "12 sur 12"
+# Search near each boundary rather than traversing all 124 recorded points.
+- runFlow:
+    file: ../flows/resolve-milestone.yaml
+    env:
+      KILOMETER: "511"
+      METRIC: "500"
+- assertVisible: "123 sur 124"
+- tapOn:
+    id: "next-milestone"
+- assertVisible: "PK 511\\+600"
+- assertVisible: "124 sur 124"
 - assertVisible:
     id: "next-milestone"
     enabled: false
-- repeat:
-    times: 11
-    commands:
-      - tapOn:
-          id: "previous-milestone"
-          enabled: true
-      - waitForAnimationToEnd
-- assertVisible: "PK 500\\+000"
-- assertVisible: "1 sur 12"
+- runFlow:
+    file: ../flows/resolve-milestone.yaml
+    env:
+      KILOMETER: "499"
+      METRIC: "800"
+- assertVisible: "2 sur 124"
+- tapOn:
+    id: "previous-milestone"
+- assertVisible: "PK 499\\+752"
+- assertVisible: "1 sur 124"
 - assertVisible:
     id: "previous-milestone"
     enabled: false
@@ -99,12 +102,29 @@ tags:
 - tapOn:
     id: "center-location"
 - waitForAnimationToEnd
-# Replace the milestone selection with its parent railway section.
+# Dense hectometre dots correctly take press priority. Hide them while selecting
+# the parent railway, then restore them to verify overlap priority below.
+- tapOn:
+    id: "map-layers-button"
+- tapOn:
+    id: "milestones-layer-switch"
+- swipe:
+    start: "50%,84%"
+    end: "50%,98%"
+- waitForAnimationToEnd
 - tapOn:
     point: "24%,13%"
 - extendedWaitUntil:
     visible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
     timeout: 10000
+- tapOn:
+    id: "map-layers-button"
+- tapOn:
+    id: "milestones-layer-switch"
+- swipe:
+    start: "50%,84%"
+    end: "50%,98%"
+- waitForAnimationToEnd
 - assertNotVisible: "PK 509\\+000"
 - assertVisible: "893000"
 - assertVisible: "1"

@@ -61,6 +61,11 @@ export function createStagingWorkspace({
     stagedDatabasePath: join(directory, "railway_reference.generated"),
     stagedGeojsonPath: join(directory, "lignes-par-type.generated"),
     stagedMilestoneGeojsonPath: join(directory, "milestones.generated"),
+    stagedImportReportPath: join(directory, "import-report.generated"),
+    targetImportReportPath: join(
+      outputDirectory,
+      "railway_reference.import-report.json",
+    ),
     targetDatabasePath,
     targetGeojsonPath,
     targetMilestoneGeojsonPath,
@@ -69,6 +74,10 @@ export function createStagingWorkspace({
 
 export function promoteStagedOutputs(workspace: StagingWorkspace): void {
   const outputs = [
+    {
+      stagingPath: workspace.stagedImportReportPath,
+      targetPath: workspace.targetImportReportPath,
+    },
     {
       stagingPath: workspace.stagedGeojsonPath,
       targetPath: workspace.targetGeojsonPath,

@@ -13,10 +13,11 @@ export const DEFAULT_MILESTONE_GEOJSON_PATH = resolve(
 );
 
 export const EXPECTED_RAILWAY_SNAPSHOT: GenerationSummary = Object.freeze({
-  fallbackSectionCount: 2,
+  duplicateMilestoneCount: 908,
+  fallbackSectionCount: 13,
   geometryCount: 1043,
-  geometryWithoutMilestoneCount: 27,
-  milestoneCount: 36812,
-  railwaySectionCount: 1045,
-  skippedMilestoneCount: 1,
+  geometryWithoutMilestoneCount: 3,
+  milestoneCount: 371734,
+  railwaySectionCount: 1056,
+  skippedMilestoneCount: 181,
 });

@@ -9,6 +9,51 @@ authoritative schema definitions live in
 Each recorded kilometric point belongs to exactly one railway section. A section
 can have zero or more recorded points.
 
+> [!WARNING]
+> **WARNING: DUPLICATE FILTER APPLIED — FIRST CSV OCCURRENCE WINS.**
+> Generation discards later CSV rows with the same line, section rank and
+> numerical PK position. It keeps the first row's original label and coordinates,
+> without marker-type priority, averaging or geographic accuracy comparison.
+> This filter has been applied to the generated assets. Reordering a future
+> source CSV can change the coordinates retained for a duplicated position.
+
+## Import policy and audit trail
+
+The importer accepts every `TYPE_REPER`. It retains only PKs with digits before
+`+` and exactly three digits after it, representing a non-negative safe integer
+metre position. Leading zeroes are preserved. Lettered PKs, minus notation and
+four-digit metric parts are skipped with an explicit reason.
+
+Duplicate identity is `(code_ligne, rg_troncon, position_m)`: `001+100` and
+`1+100` refer to the same position in the same section. First occurrence means
+physical CSV order, before sorting. The importer validates supported identities
+before deduplication and validates coordinates on retained rows; later duplicate
+coordinates are recorded as raw source text and ignored.
+
+`npm run database:setup` generates SQLite and a full point GeoJSON validation/export
+artifact from the same retained points. The mobile map queries SQLite for points
+in the visible viewport at zoom 10 and above instead of loading the entire point
+GeoJSON into MapLibre at startup. Search and navigation still use every recorded
+point. It also writes
+`src/statics/railway_reference.import-report.json`, containing source SHA-256
+hashes, format version, policy, summary, unsupported rows, and each discarded
+duplicate with both source rows' line numbers, types, labels and coordinates.
+The report and assets are staged, validated and promoted together with rollback
+on failure. The report is ignored by Git and included for build validation;
+the application does not import it.
+
+Generation prints a **duplicate-filter warning** with counts and the report
+path, in red and bold when terminal colors are supported. `NO_COLOR` disables
+color; the warning remains explicit in plain output.
+
+For the pinned sources, 372,823 CSV rows become **371,734 points** after skipping
+**181 unsupported PKs** and discarding **908 duplicate rows**. Totals and ordinals
+are computed only after these filters. The assets contain 1,056 sections,
+including 13 without geometry and three geometry-only sections. See the
+[numerical-PK audit](railway-endpoint-numeric-audit.md) for source-level examples.
+
+## Database UML
+
 ```mermaid
 classDiagram
     direction TB
@@ -90,11 +135,20 @@ for the distinction between geometry limits, recorded ranges, and located bounds
 
 ## Maintenance
 
-The native app imports this asset into `railway_reference_v3.sqlite` on the device.
-Its filename derives from the shared schema version, ensuring an existing
-version-2 copy is not reused. Subsequent launches reuse the version-3 copy without
-overwriting it. The bundled asset keeps its original filename; no on-device SQL
-migration or application-data reset is required.
+The native app imports this asset into `railway_reference_v3_r2.sqlite` on the
+device. Its filename combines schema version **3** and data revision **2**,
+defined together in the shared version module. This avoids reusing earlier
+kilometre-only device copies even though the schema is unchanged. Subsequent
+launches reuse the new copy without overwriting it. Increment the data revision
+when changing the bundled dataset without a schema change. The bundled asset
+keeps its original filename; no on-device SQL migration or application-data
+reset is required.
+
+Fallback sections without geometry reuse the known line name from another
+section of the same line. Unknown lines use `Ligne {code}`. Asset validation
+rejects conflicting names across searchable sections so the catalogue cannot
+be published with an unresolvable line identity. Data revision 2 includes this
+correction; schema version remains 3.
 
 Update this diagram when the bundled schema changes. Inspect the asset with
 `sqlite3 -readonly src/statics/railway_reference.sqlite '.schema'` and

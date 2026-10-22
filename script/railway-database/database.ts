@@ -23,6 +23,7 @@ import {
   ENABLE_FOREIGN_KEYS,
   FIND_INVALID_SECTION_COUNT,
   FIND_INVALID_MILESTONE_ORDINAL,
+  FIND_CONFLICTING_LINE_NAMES,
   INSERT_KILOMETRIC_POINT,
   INSERT_RAILWAY_SECTION,
   ROLLBACK_TRANSACTION,
@@ -48,13 +49,14 @@ interface DatabaseCounts {
 
 function fallbackRailwaySection(
   milestone: Milestone,
+  lineName?: string,
 ): RailwaySectionWithoutGeometry {
   return Object.freeze({
     code: milestone.code,
     endMilestone: null,
     gaiaId: null,
     hasGeometry: 0,
-    name: `Ligne ${milestone.code}`,
+    name: lineName ?? `Ligne ${milestone.code}`,
     railwayType: null,
     rank: milestone.rank,
     startMilestone: null,
@@ -65,6 +67,9 @@ export function completeRailwaySections(
   geojsonSections: readonly RailwaySectionWithGeometry[],
   milestones: readonly Milestone[],
 ): readonly RailwaySection[] {
+  const lineNames = new Map(
+    geojsonSections.map((section) => [section.code, section.name]),
+  );
   const sections = new Map<string, RailwaySection>(
     geojsonSections.map((section) => [
       new RailwaySectionId(section.code, section.rank).value,
@@ -74,7 +79,10 @@ export function completeRailwaySections(
   for (const milestone of milestones) {
     const id = new RailwaySectionId(milestone.code, milestone.rank).value;
     if (!sections.has(id)) {
-      sections.set(id, fallbackRailwaySection(milestone));
+      sections.set(
+        id,
+        fallbackRailwaySection(milestone, lineNames.get(milestone.code)),
+      );
     }
   }
   return [...sections.values()].sort(
@@ -238,6 +246,11 @@ export function validateRailwayDatabase(
     }
     if (database.prepare(CHECK_FOREIGN_KEYS).get() !== undefined) {
       throw new Error("Generated database contains an invalid foreign key");
+    }
+    if (database.prepare(FIND_CONFLICTING_LINE_NAMES).get() !== undefined) {
+      throw new Error(
+        "Generated database contains conflicting railway line names",
+      );
     }
     if (database.prepare(FIND_INVALID_SECTION_COUNT).get() !== undefined) {
       throw new Error(

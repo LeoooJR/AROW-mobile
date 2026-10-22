@@ -1,0 +1,37 @@
+appId: com.leooojrrr.AROWmobile
+---
+- tapOn:
+    id: "open-point-search"
+- extendedWaitUntil:
+    visible:
+      id: "point-search-sheet"
+    timeout: 30000
+- runFlow:
+    when:
+      visible:
+        id: "change-line"
+    commands:
+      - tapOn:
+          id: "change-line"
+- tapOn:
+    id: "line-search-input"
+- eraseText
+- inputText: "893000"
+- tapOn:
+    id: "line-result-893000"
+- tapOn:
+    id: "milestone-kilometer-input"
+- eraseText
+- inputText: "${KILOMETER}"
+- tapOn:
+    id: "milestone-metric-input"
+- eraseText
+- inputText: "${METRIC}"
+- pressKey: Enter
+- extendedWaitUntil:
+    visible: "Point résolu"
+    timeout: 15000
+- tapOn:
+    id: "use-selected-point"
+- assertNotVisible:
+    id: "point-search-sheet"

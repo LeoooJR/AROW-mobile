@@ -16,6 +16,12 @@ export const CHECK_SCHEMA_VERSION = "PRAGMA user_version";
 export const VACUUM_DATABASE = "VACUUM";
 export const CHECK_DATABASE_INTEGRITY = "PRAGMA integrity_check";
 export const CHECK_FOREIGN_KEYS = "PRAGMA foreign_key_check";
+export const FIND_CONFLICTING_LINE_NAMES = `
+  SELECT code_ligne FROM railway_sections
+  WHERE milestone_count > 0
+  GROUP BY code_ligne HAVING COUNT(DISTINCT lib_ligne) > 1
+  LIMIT 1
+`;
 
 export const INSERT_RAILWAY_SECTION = `
   INSERT INTO ${RAILWAY_SECTIONS_TABLE.name} (

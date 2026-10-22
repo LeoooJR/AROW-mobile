@@ -7,6 +7,9 @@ import { Milestone } from "@shared/railway-domain/milestone";
 import { Railway } from "@shared/railway-domain/railway";
 
 import Index from "@/app/index";
+jest.mock("@/features/railway-reference/use-visible-milestones", () => ({
+  useVisibleMilestones: () => [],
+}));
 const mockFindBounds = jest.fn().mockResolvedValue({});
 const mockFindNeighbours = jest.fn().mockResolvedValue(undefined);
 const mockToast = { show: jest.fn(), close: jest.fn() };

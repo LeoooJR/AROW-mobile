@@ -75,7 +75,7 @@ tags:
     end: "50%,98%"
 - waitForAnimationToEnd
 - tapOn:
-    point: "16%,34%"
+    point: "16%,32%"
     retryTapIfNoChange: true
 # A system-bar change can satisfy the generic UI-change check before selection.
 - runFlow:
@@ -83,13 +83,22 @@ tags:
       notVisible: "PK 509\\+000"
     commands:
       - tapOn:
-          point: "16%,34%"
+          point: "16%,33%"
           retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "PK 509\\+000"
     timeout: 10000
 - tapOn:
     id: "close-map-feature-details"
+# Hide dense point targets to select their parent line unambiguously.
+- tapOn:
+    id: "map-layers-button"
+- tapOn:
+    id: "milestones-layer-switch"
+- swipe:
+    start: "50%,84%"
+    end: "50%,98%"
+- waitForAnimationToEnd
 - tapOn:
     point: "24%,13%"
     retryTapIfNoChange: true
@@ -98,3 +107,10 @@ tags:
     timeout: 10000
 - tapOn:
     id: "close-map-feature-details"
+- tapOn:
+    id: "map-layers-button"
+- tapOn:
+    id: "milestones-layer-switch"
+- swipe:
+    start: "50%,84%"
+    end: "50%,98%"

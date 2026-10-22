@@ -12,9 +12,35 @@ import {
 } from "../../shared/value-validation";
 
 import type {
+  Milestone,
   MilestoneFeatureCollection,
   MilestoneGeoJsonFeature,
 } from "./types";
+
+export function createMilestoneGeoJson(
+  milestones: readonly Milestone[],
+): MilestoneFeatureCollection {
+  return {
+    type: "FeatureCollection",
+    features: milestones.map((point) => ({
+      type: "Feature",
+      id: new MilestoneId(
+        new RailwaySectionId(point.code, point.rank),
+        point.positionMeters,
+      ).value,
+      geometry: {
+        type: "Point",
+        coordinates: [point.longitude, point.latitude],
+      },
+      properties: {
+        label: point.label,
+        lineCode: point.code,
+        sectionRank: point.rank,
+        positionMeters: point.positionMeters,
+      },
+    })),
+  };
+}
 
 const COLLECTION_KEYS = new Set(["features", "type"]);
 const FEATURE_KEYS = new Set(["geometry", "id", "properties", "type"]);

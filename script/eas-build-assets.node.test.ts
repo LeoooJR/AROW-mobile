@@ -10,6 +10,7 @@ const EAS_ASSET_INCLUSIONS = [
   "!/src/statics/lignes-par-type.geojson",
   "!/src/statics/milestones.geojson",
   "!/src/statics/railway_reference.sqlite",
+  "!/src/statics/railway_reference.import-report.json",
 ].join("\n");
 
 describe("EAS build asset inclusion", () => {
@@ -78,6 +79,7 @@ describe("EAS build asset inclusion", () => {
       "src/statics/lignes-par-type.geojson",
       "src/statics/milestones.geojson",
       "src/statics/railway_reference.sqlite",
+      "src/statics/railway_reference.import-report.json",
       "assets/images/icon.png",
       "assets/images/favicon.png",
       "assets/images/android-icon.png",

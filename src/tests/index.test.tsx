@@ -4,6 +4,9 @@ import { useRailwayReference } from "@/hooks/features/use-railway-reference";
 import { useRealLocation } from "@/hooks/features/use-real-location";
 
 import Index from "@/app/index";
+jest.mock("@/features/railway-reference/use-visible-milestones", () => ({
+  useVisibleMilestones: () => [],
+}));
 jest.mock("@/components/adapters/toast", () => ({
   useToast: () => ({ show: jest.fn(), close: jest.fn() }),
 }));
@@ -80,17 +83,14 @@ describe("Index", () => {
     });
   });
 
-  test("passes generated asset URIs and location data to the map", async () => {
+  test("passes railway geometry, viewport points and location data to the map", async () => {
     await render(<Index />);
 
     expect(screen.getByTestId("mock-map")).toHaveProp(
       "railwayData",
       "file:///railways.geojson",
     );
-    expect(screen.getByTestId("mock-map")).toHaveProp(
-      "milestoneData",
-      "file:///milestones.geojson",
-    );
+    expect(screen.getByTestId("mock-map")).toHaveProp("milestoneData", []);
     expect(screen.getByTestId("mock-map")).toHaveProp(
       "location",
       expect.objectContaining({ latitude: 45.74, longitude: 4.86 }),

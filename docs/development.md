@@ -22,6 +22,16 @@ Generated assets stay outside version control. If startup reports missing or
 invalid assets, rerun `npm run database:setup`. Prepare these assets before an EAS
 build too: the upload includes them and the remote build validates them.
 
+The CSV import accepts every marker type with a supported numerical PK. It
+keeps the first source occurrence of each section/position and writes the
+detailed `src/statics/railway_reference.import-report.json` alongside the assets.
+**Duplicate filtering has been applied: first CSV occurrence wins.** See the
+[import policy and audit trail](railway-database.md#import-policy-and-audit-trail)
+before changing how points are selected. The full point GeoJSON is generated from
+the same retained rows as SQLite for validation/export. The app renders points
+queried from SQLite for the current viewport, from zoom 10 while the point layer
+is visible; it does not load the entire point GeoJSON at startup.
+
 Start and boot your Android emulator, then build and open the development client:
 
 ```bash

@@ -7,7 +7,7 @@ import {
   type SymbolLayerSpecification,
 } from "@maplibre/maplibre-react-native";
 import type { FeatureCollection, Point } from "geojson";
-import { type ReactElement } from "react";
+import { type ReactElement, useMemo } from "react";
 import { type NativeSyntheticEvent, useColorScheme } from "react-native";
 
 import { geographicCoordinatesFromPosition } from "@/components/adapters/map/geojson-validation";
@@ -25,7 +25,7 @@ import {
 import { resolveColorTheme } from "@/utils/color-theme";
 
 export interface MilestoneLayerProps {
-  readonly data?: string;
+  readonly data?: string | readonly Milestone[];
   readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly selectedMilestone?: Milestone;
   readonly visible?: boolean;
@@ -148,6 +148,20 @@ export default function MilestoneLayer({
 }: MilestoneLayerProps): ReactElement {
   const colorScheme = useColorScheme();
   const palette = MILESTONE_PALETTES[resolveColorTheme(colorScheme)];
+  const sourceData = useMemo(() => {
+    if (typeof data === "string") return data;
+    const points = data ?? [];
+    const displayed =
+      selectedMilestone !== undefined &&
+      !points.some((point) => point.id.value === selectedMilestone.id.value)
+        ? [...points, selectedMilestone]
+        : points;
+    if (displayed.length === 0) return EMPTY_MILESTONES;
+    return {
+      type: "FeatureCollection" as const,
+      features: displayed.map((point) => point.toGeoJSON()),
+    };
+  }, [data, selectedMilestone]);
 
   const onPress = (
     event: NativeSyntheticEvent<PressEventWithFeatures>,
@@ -166,9 +180,9 @@ export default function MilestoneLayer({
 
   return (
     <GeoJSONSource
-      data={data ?? EMPTY_MILESTONES}
+      data={sourceData}
       id="railway-milestones-source"
-      key={data === undefined ? "empty-milestones" : data}
+      key={typeof data === "string" ? data : "viewport-milestones"}
       onPress={visible ? onPress : undefined}
     >
       <Layer

@@ -65,6 +65,18 @@ export const FIND_MILESTONE_QUERY = `
   LIMIT 1
 `;
 
+export const FIND_VISIBLE_MILESTONES_QUERY = `
+  SELECT ${milestoneProjection} FROM ${KILOMETRIC_POINTS_TABLE.name}
+  WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?
+  ORDER BY ${lineCode}, ${sectionRank}, ${positionMeters}
+`;
+
+export const FIND_WRAPPED_VISIBLE_MILESTONES_QUERY = `
+  SELECT ${milestoneProjection} FROM ${KILOMETRIC_POINTS_TABLE.name}
+  WHERE latitude BETWEEN ? AND ? AND (longitude >= ? OR longitude <= ?)
+  ORDER BY ${lineCode}, ${sectionRank}, ${positionMeters}
+`;
+
 export const FIND_PREVIOUS_MILESTONE_QUERY = `
   SELECT ${milestoneProjection} FROM ${KILOMETRIC_POINTS_TABLE.name}
   WHERE ${lineCode} = ? AND ${sectionRank} = ? AND ${positionMeters} < ?

@@ -92,6 +92,31 @@ jest.mock("./railway-lines-source", () => {
 });
 
 describe("Map", () => {
+  test("reports viewport bounds while an empty point array permits startup", async () => {
+    const onViewportChange = jest.fn(),
+      onReady = jest.fn();
+    await render(
+      <Map
+        milestoneData={[]}
+        railwayData="file:///railways.geojson"
+        onViewportChange={onViewportChange}
+        onReady={onReady}
+      />,
+    );
+    await fireEvent(screen.getByTestId("arow-map"), "regionDidChange", {
+      nativeEvent: { bearing: 0, bounds: [4, 45, 5, 46], zoom: 14 },
+    });
+    expect(onViewportChange).toHaveBeenCalledWith({
+      bounds: [4, 45, 5, 46],
+      zoom: 14,
+    });
+    await fireEvent(screen.getByTestId("arow-map"), "didFinishLoadingStyle");
+    await fireEvent(
+      screen.getByTestId("arow-map"),
+      "didFinishRenderingFrameFully",
+    );
+    expect(onReady).toHaveBeenCalledTimes(1);
+  });
   test("a reported render still permits one subsequent loading failure", async () => {
     const onReady = jest.fn();
     const onLoadError = jest.fn();

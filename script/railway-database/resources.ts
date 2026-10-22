@@ -34,13 +34,6 @@ export const RAILWAY_RESOURCES: RailwayResources = Object.freeze({
     name: "lignes-par-type.geojson",
     sha256: "931b0f0917b8be71c0f97d6bb90d4c34c9d9ff9d4a389b01a4de9a58c9c62066",
   }),
-  milestoneGeojson: Object.freeze({
-    maxBytes: 32 * 1024 * 1024,
-    timeoutMs: 120_000,
-    fileId: "1JP5YqqHin5xU8zB4fO7A2b8vcpKx6rpt",
-    name: "milestones.geojson",
-    sha256: "b4cf15764472faae850bcbd003a10d0e18c86bf7123491a9b45990907a05229f",
-  }),
   milestones: Object.freeze({
     maxBytes: 64 * 1024 * 1024,
     timeoutMs: 120_000,

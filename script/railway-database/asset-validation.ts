@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 
 import { isRecord } from "../../shared/value-validation";
 
@@ -11,6 +12,8 @@ import {
 import { validateRailwayDatabase } from "./database";
 import { normalizeRailwayGeoJson } from "./geojson";
 import { normalizeMilestoneGeoJson } from "./milestone-geojson";
+import { validatePointConsistency } from "./asset-consistency";
+import { validateImportReport } from "./import-report";
 import type { GenerationSummary } from "./types";
 
 const SETUP_INSTRUCTION =
@@ -26,7 +29,7 @@ export interface RailwayAssetValidationOptions {
 function validateMilestoneGeoJson(
   milestoneGeojsonPath: string,
   expectedSnapshot: GenerationSummary,
-): void {
+) {
   try {
     const value: unknown = JSON.parse(
       readFileSync(milestoneGeojsonPath, "utf8"),
@@ -37,6 +40,7 @@ function validateMilestoneGeoJson(
         `Expected ${expectedSnapshot.milestoneCount} milestone features, received ${geojson.features.length}.`,
       );
     }
+    return geojson;
   } catch (cause) {
     throw validationFailure("Milestone GeoJSON asset", cause);
   }
@@ -95,6 +99,21 @@ export function validateRailwayAssets({
   milestoneGeojsonPath = DEFAULT_MILESTONE_GEOJSON_PATH,
 }: RailwayAssetValidationOptions = {}): void {
   validateRailwayGeoJson(geojsonPath, expectedSnapshot);
-  validateMilestoneGeoJson(milestoneGeojsonPath, expectedSnapshot);
+  const points = validateMilestoneGeoJson(
+    milestoneGeojsonPath,
+    expectedSnapshot,
+  );
   validateRailwaySqlite(databasePath, expectedSnapshot);
+  try {
+    validatePointConsistency(databasePath, points);
+    validateImportReport(
+      join(dirname(databasePath), "railway_reference.import-report.json"),
+      expectedSnapshot,
+    );
+  } catch (cause) {
+    throw validationFailure(
+      "Railway asset consistency or import report",
+      cause,
+    );
+  }
 }
