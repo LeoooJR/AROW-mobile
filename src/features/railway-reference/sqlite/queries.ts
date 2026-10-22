@@ -68,12 +68,14 @@ export const FIND_MILESTONE_QUERY = `
 export const FIND_VISIBLE_MILESTONES_QUERY = `
   SELECT ${milestoneProjection} FROM ${KILOMETRIC_POINTS_TABLE.name}
   WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?
+    AND ${positionMeters} % ? = 0
   ORDER BY ${lineCode}, ${sectionRank}, ${positionMeters}
 `;
 
 export const FIND_WRAPPED_VISIBLE_MILESTONES_QUERY = `
   SELECT ${milestoneProjection} FROM ${KILOMETRIC_POINTS_TABLE.name}
   WHERE latitude BETWEEN ? AND ? AND (longitude >= ? OR longitude <= ?)
+    AND ${positionMeters} % ? = 0
   ORDER BY ${lineCode}, ${sectionRank}, ${positionMeters}
 `;
 

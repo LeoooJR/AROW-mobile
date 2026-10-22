@@ -1,7 +1,11 @@
 import type { SQLiteDatabase } from "expo-sqlite";
 import type { MapViewport } from "@/types/map-viewport";
 import { normalizeLongitude } from "@/utils/angle";
-import { hasValidViewportBounds } from "@/utils/map-viewport";
+import { hasValidViewportBounds } from "@/components/adapters/map/map-viewport";
+import {
+  milestoneDisplayInterval,
+  type MilestoneDisplayInterval,
+} from "./milestone-display";
 import type { Milestone } from "@shared/railway-domain/milestone";
 import { milestoneFromDatabaseRow } from "./mapping/milestone-mapper";
 import {
@@ -14,8 +18,7 @@ export function markerBounds(
 ): MapViewport["bounds"] | undefined {
   const [west, south, east, north] = viewport.bounds;
   if (
-    !Number.isFinite(viewport.zoom) ||
-    viewport.zoom < 10 ||
+    milestoneDisplayInterval(viewport.zoom) === undefined ||
     !hasValidViewportBounds(viewport.bounds)
   )
     return undefined;
@@ -26,6 +29,7 @@ export function markerBounds(
 export async function findVisibleMilestones(
   database: Pick<SQLiteDatabase, "getAllAsync">,
   bounds: MapViewport["bounds"],
+  intervalMeters: MilestoneDisplayInterval,
 ): Promise<readonly Milestone[]> {
   const [west, south, east, north] = bounds;
   const rows = await database.getAllAsync<unknown>(
@@ -36,6 +40,7 @@ export async function findVisibleMilestones(
     north,
     west,
     east,
+    intervalMeters,
   );
   return rows.map((row) => milestoneFromDatabaseRow(row, "visible map point"));
 }

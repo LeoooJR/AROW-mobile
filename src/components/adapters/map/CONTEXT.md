@@ -30,6 +30,18 @@ viewport transitions. All points stay available in SQLite for search and
 navigation; this is a rendering/loading policy, not a dataset filter. An empty
 point array is a ready source and does not delay basemap startup.
 
+`src/features/railway-reference/milestone-display.ts` owns the numerical PK display bands shared by
+the viewport query and native layers: whole kilometres at zoom 10, 500-metre
+positions at 12, 100-metre positions at 14, and every recorded PK at 15. Native
+layers use mutually exclusive zoom ranges so stale finer data is hidden during
+zoom-out before the debounced SQLite response. The first dot layer remains the
+stable railway ordering anchor. Labels start at 13 and follow the active band.
+Only the selected milestone bypasses the PK filter, from zoom 10; it still
+respects layer visibility. Section endpoints have no display exception.
+Navigation and counters use all recorded points regardless of display density;
+navigation and endpoint focus retain zoom 15. No domain or source GeoJSON fields
+encode this presentation policy.
+
 ## Layout
 
 The map fills the complete bounds supplied by its parent. Screen routes own the

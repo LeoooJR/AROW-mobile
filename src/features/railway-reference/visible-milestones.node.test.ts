@@ -37,15 +37,71 @@ test("viewport SQL includes boundary points and both sides of the antimeridian",
       getAllAsync: async (sql: string, ...params: number[]) =>
         database.prepare(sql).all(...params),
     } as unknown as Pick<SQLiteDatabase, "getAllAsync">;
-    const visible = await findVisibleMilestones(adapter, [4, 45, 5, 46]);
+    const visible = await findVisibleMilestones(adapter, [4, 45, 5, 46], 1);
     expect(visible.map((point) => point.label)).toEqual(["000+000", "000+100"]);
     expect(visible[0].coordinates).toEqual({ latitude: 45, longitude: 4 });
-    const wrapped = await findVisibleMilestones(adapter, [179, -1, -179, 1]);
+    const wrapped = await findVisibleMilestones(adapter, [179, -1, -179, 1], 1);
     expect(wrapped.map((point) => point.id.value)).toEqual([
       "002000:1:0",
       "002000:1:100",
     ]);
-    expect(await findVisibleMilestones(adapter, [10, 10, 11, 11])).toEqual([]);
+    expect(await findVisibleMilestones(adapter, [10, 10, 11, 11], 1)).toEqual(
+      [],
+    );
+    for (const interval of [1000, 500, 100, 1] as const) {
+      insert.run(
+        "003000",
+        1,
+        interval,
+        `${Math.floor(interval / 1000)}+${String(interval % 1000).padStart(3, "0")}`,
+        45.5,
+        4.5,
+        1,
+      );
+      insert.run(
+        "004000",
+        1,
+        interval,
+        `${Math.floor(interval / 1000)}+${String(interval % 1000).padStart(3, "0")}`,
+        0,
+        -179.5,
+        1,
+      );
+    }
+    insert.run("005000", 1, 772, "000+772", 45.5, 4.5, 1);
+    for (const interval of [1000, 500, 100, 1] as const) {
+      const ordinary = await findVisibleMilestones(
+        adapter,
+        [4, 45, 5, 46],
+        interval,
+      );
+      const crossing = await findVisibleMilestones(
+        adapter,
+        [179, -1, -179, 1],
+        interval,
+      );
+      const expected = [1, 100, 500, 1000].filter(
+        (position) => position % interval === 0,
+      );
+      expect(
+        ordinary
+          .filter((point) => point.lineCode === "003000")
+          .map((point) => point.positionMeters),
+      ).toEqual(expected);
+      expect(
+        crossing
+          .filter((point) => point.lineCode === "004000")
+          .map((point) => point.positionMeters),
+      ).toEqual(expected);
+      expect(ordinary.find((point) => point.positionMeters === 0)?.label).toBe(
+        "000+000",
+      );
+      expect(
+        ordinary
+          .filter((point) => point.lineCode === "005000")
+          .map((point) => point.label),
+      ).toEqual(interval === 1 ? ["000+772"] : []);
+    }
   } finally {
     database.close();
   }

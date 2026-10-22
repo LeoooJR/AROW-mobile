@@ -23,6 +23,31 @@ rules, and the difference between geometry metadata and recorded milestone bound
 
 ## Follow a milestone tap
 
+Passive markers follow a numerical PK hierarchy, defined in
+[`milestone-display.ts`](../src/features/railway-reference/milestone-display.ts). Original marker type
+and label padding do not affect eligibility.
+
+| Zoom     | Passive markers                                  |
+| -------- | ------------------------------------------------ |
+| Below 10 | None                                             |
+| 10–<12   | Whole kilometres (position divisible by 1,000 m) |
+| 12–<14   | Whole and half kilometres (divisible by 500 m)   |
+| 14–<15   | Hectometre positions (divisible by 100 m)        |
+| 15+      | Every recorded point                             |
+
+SQLite applies this rule inside the viewport query. Native layer bands apply the
+same rule to already-loaded data during zoom transitions. Labels begin at zoom
+13 and retain collision avoidance. The selected point remains highlighted from
+zoom 10 even when its PK does not match the passive tier; closing the selection
+removes this exception. Hiding the marker layer hides the selection too.
+
+Display density does not change search, totals, or navigation. Previous/Next
+traverse every recorded point in the same section and focus the destination at
+zoom 15. Go to start/end focuses the first/last recorded point at zoom 15 while
+keeping the section selected. Endpoints have no passive visibility exception and
+never derive from PKD/PKF. A section without whole-kilometre points can show no
+passive markers at low zoom. No representative points are synthesized.
+
 1. [`Map`](../src/components/adapters/map/map.tsx) renders the milestone GeoJSON source and forwards its `onFeaturePress` callback. Milestone dots appear from zoom 10; their labels appear from zoom 13.
 2. [`MilestoneLayer`](../src/components/adapters/map/milestone-layer.tsx) receives the MapLibre press event. It takes the first valid pressed point, checks its railway identity and label, validates its coordinates, builds a `Milestone`, and checks that the GeoJSON feature ID matches the domain ID. Invalid hits do nothing.
 3. For a valid hit, the layer stops event propagation and calls `onFeaturePress(milestone)`.

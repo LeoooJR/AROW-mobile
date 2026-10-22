@@ -5,6 +5,7 @@ import {
   Layer,
   type PressEventWithFeatures,
   type SymbolLayerSpecification,
+  type CircleLayerSpecification,
 } from "@maplibre/maplibre-react-native";
 import type { FeatureCollection, Point } from "geojson";
 import { type ReactElement, useMemo } from "react";
@@ -23,6 +24,7 @@ import {
   isUnsignedInteger,
 } from "@shared/value-validation";
 import { resolveColorTheme } from "@/utils/color-theme";
+import { MILESTONE_DISPLAY_BANDS } from "@/features/railway-reference/milestone-display";
 
 export interface MilestoneLayerProps {
   readonly data?: string | readonly Milestone[];
@@ -185,26 +187,38 @@ export default function MilestoneLayer({
       key={typeof data === "string" ? data : "viewport-milestones"}
       onPress={visible ? onPress : undefined}
     >
-      <Layer
-        id={MAP_LAYER_IDS.milestone.dots}
-        key={MAP_LAYER_IDS.milestone.dots}
-        layout={{ visibility: visible ? "visible" : "none" }}
-        minzoom={10}
-        paint={{
-          "circle-color": palette.label,
-          "circle-radius": 4,
-          "circle-stroke-color": palette.border,
-          "circle-stroke-width": 1,
-        }}
-        type="circle"
-      />
+      {MILESTONE_DISPLAY_BANDS.map((band, index) => (
+        <Layer
+          id={
+            index === 0
+              ? MAP_LAYER_IDS.milestone.dots
+              : `${MAP_LAYER_IDS.milestone.dots}-${band.intervalMeters}`
+          }
+          key={band.intervalMeters}
+          filter={[
+            "==",
+            ["%", ["get", "positionMeters"], band.intervalMeters],
+            0,
+          ]}
+          layout={{ visibility: visible ? "visible" : "none" }}
+          minzoom={band.minZoom}
+          maxzoom={band.maxZoom}
+          paint={{
+            "circle-color": palette.label,
+            "circle-radius": 4,
+            "circle-stroke-color": palette.border,
+            "circle-stroke-width": 1,
+          }}
+          type="circle"
+        />
+      ))}
       {selectedMilestone === undefined ? null : (
         <Layer
           filter={["==", ["id"], selectedMilestone.id.value]}
           id={MAP_LAYER_IDS.milestone.selected}
           key={MAP_LAYER_IDS.milestone.selected}
           layout={{ visibility: visible ? "visible" : "none" }}
-          minzoom={10}
+          minzoom={MILESTONE_DISPLAY_BANDS[0].minZoom}
           paint={{
             "circle-color": palette.selected,
             "circle-radius": 7,
@@ -214,22 +228,43 @@ export default function MilestoneLayer({
           type="circle"
         />
       )}
-      <Layer
-        id={MAP_LAYER_IDS.milestone.labels}
-        key={MAP_LAYER_IDS.milestone.labels}
-        layout={{
-          ...LABEL_LAYOUT,
-          visibility: visible ? "visible" : "none",
-        }}
-        minzoom={13}
-        paint={{
-          "text-color": palette.label,
-          "text-halo-blur": 0.25,
-          "text-halo-color": palette.surface,
-          "text-halo-width": 4,
-        }}
-        type="symbol"
-      />
+      {MILESTONE_DISPLAY_BANDS.filter(
+        (band) => (band.maxZoom ?? Infinity) > 13,
+      ).map((band, index) => {
+        const eligible: CircleLayerSpecification["filter"] = [
+          "==",
+          ["%", ["get", "positionMeters"], band.intervalMeters],
+          0,
+        ];
+        return (
+          <Layer
+            id={
+              index === 0
+                ? MAP_LAYER_IDS.milestone.labels
+                : `${MAP_LAYER_IDS.milestone.labels}-${band.intervalMeters}`
+            }
+            key={band.intervalMeters}
+            filter={
+              selectedMilestone === undefined
+                ? eligible
+                : ["any", eligible, ["==", ["id"], selectedMilestone.id.value]]
+            }
+            layout={{
+              ...LABEL_LAYOUT,
+              visibility: visible ? "visible" : "none",
+            }}
+            minzoom={Math.max(13, band.minZoom)}
+            maxzoom={band.maxZoom}
+            paint={{
+              "text-color": palette.label,
+              "text-halo-blur": 0.25,
+              "text-halo-color": palette.surface,
+              "text-halo-width": 4,
+            }}
+            type="symbol"
+          />
+        );
+      })}
     </GeoJSONSource>
   );
 }

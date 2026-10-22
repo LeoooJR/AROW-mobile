@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import type { Milestone } from "@shared/railway-domain/milestone";
 import type { MapViewport } from "@/types/map-viewport";
+import { milestoneDisplayInterval } from "./milestone-display";
 import { findVisibleMilestones, markerBounds } from "./visible-milestones";
 
 const EMPTY_POINTS: readonly Milestone[] = [];
@@ -15,12 +16,16 @@ export function useVisibleMilestones(
   useEffect(() => {
     const bounds =
       viewport === undefined || !visible ? undefined : markerBounds(viewport);
-    if (bounds === undefined) {
+    const interval =
+      viewport === undefined
+        ? undefined
+        : milestoneDisplayInterval(viewport.zoom);
+    if (bounds === undefined || interval === undefined) {
       return;
     }
     let active = true;
     const timer = setTimeout(() => {
-      void findVisibleMilestones(database, bounds).then(
+      void findVisibleMilestones(database, bounds, interval).then(
         (rows) => {
           if (active) setPoints(rows);
         },

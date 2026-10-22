@@ -43,7 +43,7 @@ test("does not load the whole reference before a visible marker viewport exists"
   await view.rerender({ area: viewport, visible: true });
   await act(async () => jest.advanceTimersByTime(151));
   expect(view.result.current).toEqual([point]);
-  expect(find).toHaveBeenCalledWith(expect.anything(), viewport.bounds);
+  expect(find).toHaveBeenCalledWith(expect.anything(), viewport.bounds, 100);
   await view.rerender({ area: viewport, visible: false });
   expect(view.result.current).toEqual([]);
 });
@@ -84,4 +84,41 @@ test("a failed request clears stale points without failing basemap startup", asy
   } finally {
     warn.mockRestore();
   }
+});
+
+test("changes SQL precision at zoom thresholds and ignores a pending finer result", async () => {
+  let finish!: (rows: readonly Milestone[]) => void;
+  find.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  );
+  const view = await renderHook(
+    ({ zoom }: { zoom: number }) =>
+      useVisibleMilestones({ ...viewport, zoom }, true),
+    { initialProps: { zoom: 15 } },
+  );
+  await act(async () => jest.advanceTimersByTime(151));
+  expect(find).toHaveBeenLastCalledWith(expect.anything(), viewport.bounds, 1);
+  for (const [zoom, interval] of [
+    [14, 100],
+    [12, 500],
+    [10, 1000],
+  ]) {
+    find.mockResolvedValueOnce([]);
+    await view.rerender({ zoom });
+    await act(async () => jest.advanceTimersByTime(151));
+    expect(find).toHaveBeenLastCalledWith(
+      expect.anything(),
+      viewport.bounds,
+      interval,
+    );
+  }
+  await act(async () => finish([point]));
+  expect(view.result.current).toEqual([]);
+  await view.rerender({ zoom: 9.999 });
+  await act(async () => jest.advanceTimersByTime(151));
+  expect(find).toHaveBeenCalledTimes(4);
+  expect(view.result.current).toEqual([]);
 });

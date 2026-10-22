@@ -2,6 +2,10 @@ import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { fireEvent, render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
+import {
+  featureFilter,
+  type FilterSpecification,
+} from "@maplibre/maplibre-gl-style-spec";
 
 import { Milestone } from "@shared/railway-domain/milestone";
 
@@ -193,5 +197,91 @@ describe("MilestoneLayer", () => {
         expect.objectContaining({ visibility: "none" }),
       );
     }
+  });
+
+  test.each([
+    [9.999, []],
+    [10, [0, 1000]],
+    [11.999, [0, 1000]],
+    [12, [0, 500, 1000]],
+    [13.999, [0, 500, 1000]],
+    [14, [0, 100, 500, 1000]],
+    [14.999, [0, 100, 500, 1000]],
+    [15, [0, 1, 100, 500, 772, 1000]],
+  ])("filters already-loaded dots at zoom %s", async (zoom, expected) => {
+    await render(<MilestoneLayer />);
+    const layers = screen.getAllByTestId(/^mock-railway-milestone-dots/);
+    const displayed = [0, 1, 100, 500, 772, 1000].filter((position) =>
+      layers.some(
+        (layer) =>
+          zoom >= layer.props.minzoom &&
+          zoom < (layer.props.maxzoom ?? Infinity) &&
+          featureFilter(layer.props.filter as FilterSpecification).filter(
+            { zoom },
+            { type: "Point", properties: { positionMeters: position } },
+          ),
+      ),
+    );
+    expect(displayed).toEqual(expected);
+    expect(
+      layers.filter(
+        (layer) =>
+          zoom >= layer.props.minzoom &&
+          zoom < (layer.props.maxzoom ?? Infinity),
+      ),
+    ).toHaveLength(zoom < 10 ? 0 : 1);
+  });
+
+  test("retains only the selected irregular point and removes its label exception on close", async () => {
+    const irregular = new Milestone({
+      id: new MilestoneId(MILESTONE.id.sectionId, 136_772),
+      label: "136+772",
+      coordinates: MILESTONE.coordinates,
+    });
+    const view = await render(
+      <MilestoneLayer data={[]} selectedMilestone={irregular} />,
+    );
+    const label = () =>
+      screen.getByTestId(`mock-${MAP_LAYER_IDS.milestone.labels}`);
+    const selectedFilter = featureFilter(
+      label().props.filter as FilterSpecification,
+    );
+    expect(
+      selectedFilter.filter(
+        { zoom: 13 },
+        {
+          id: irregular.id.value,
+          type: "Point",
+          properties: { positionMeters: 136_772 },
+        },
+      ),
+    ).toBe(true);
+    expect(
+      selectedFilter.filter(
+        { zoom: 13 },
+        { id: "other", type: "Point", properties: { positionMeters: 136_772 } },
+      ),
+    ).toBe(false);
+    expect(
+      screen.getByTestId(`mock-${MAP_LAYER_IDS.milestone.selected}`),
+    ).toHaveProp("minzoom", 10);
+    await view.rerender(<MilestoneLayer data={[]} />);
+    expect(
+      screen.queryByTestId(`mock-${MAP_LAYER_IDS.milestone.selected}`),
+    ).not.toBeOnTheScreen();
+    expect(screen.getByTestId("mock-milestone-source")).toHaveProp("data", {
+      type: "FeatureCollection",
+      features: [],
+    });
+    expect(
+      featureFilter(label().props.filter as FilterSpecification).filter(
+        { zoom: 13 },
+        {
+          id: irregular.id.value,
+          type: "Point",
+          properties: { positionMeters: 136_772 },
+        },
+      ),
+    ).toBe(false);
   });
 });
