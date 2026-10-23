@@ -4,6 +4,7 @@ import {
   projection,
   RAILWAY_SECTIONS_TABLE,
 } from "@shared/railway-reference/schema";
+import type { MilestoneVisibilityClass } from "@shared/railway-reference/milestone-visibility-class";
 
 const railwayAlias = "railway";
 const boundsAlias = "bounds";
@@ -18,6 +19,7 @@ const milestoneColumns = [
   "latitude",
   "longitude",
   "position_in_section",
+  "visibility_class",
 ] as const;
 
 const milestoneProjection = projection(
@@ -65,19 +67,17 @@ export const FIND_MILESTONE_QUERY = `
   LIMIT 1
 `;
 
-export const FIND_VISIBLE_MILESTONES_QUERY = `
+export function visibleMilestonesQuery(
+  classes: readonly MilestoneVisibilityClass[],
+  wrapped: boolean,
+): string {
+  return `
   SELECT ${milestoneProjection} FROM ${KILOMETRIC_POINTS_TABLE.name}
-  WHERE latitude BETWEEN ? AND ? AND longitude BETWEEN ? AND ?
-    AND ${positionMeters} % ? = 0
+  WHERE latitude BETWEEN ? AND ? AND ${wrapped ? "(longitude >= ? OR longitude <= ?)" : "longitude BETWEEN ? AND ?"}
+    AND visibility_class IN (${classes.map(() => "?").join(", ")})
   ORDER BY ${lineCode}, ${sectionRank}, ${positionMeters}
 `;
-
-export const FIND_WRAPPED_VISIBLE_MILESTONES_QUERY = `
-  SELECT ${milestoneProjection} FROM ${KILOMETRIC_POINTS_TABLE.name}
-  WHERE latitude BETWEEN ? AND ? AND (longitude >= ? OR longitude <= ?)
-    AND ${positionMeters} % ? = 0
-  ORDER BY ${lineCode}, ${sectionRank}, ${positionMeters}
-`;
+}
 
 export const FIND_PREVIOUS_MILESTONE_QUERY = `
   SELECT ${milestoneProjection} FROM ${KILOMETRIC_POINTS_TABLE.name}

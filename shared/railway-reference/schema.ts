@@ -216,6 +216,15 @@ export const KILOMETRIC_POINTS_TABLE = table({
       nullable: false,
       type: "INTEGER",
     }),
+    column({
+      checkLayout: "inline",
+      checks: ["visibility_class BETWEEN 0 AND 3"],
+      description:
+        "Passive map visibility tier from numerical PK: 0 kilometre, 1 half kilometre, 2 hectometre, 3 other",
+      name: "visibility_class",
+      nullable: false,
+      type: "INTEGER",
+    }),
   ] as const,
   foreignKeys: [
     {

@@ -12,6 +12,10 @@ import {
   isMilestoneLabelForPosition,
 } from "../railway-domain/kilometric-position";
 import { isRailwaySectionRank } from "../railway-domain/railway-section-id";
+import {
+  isMilestoneVisibilityClass,
+  type MilestoneVisibilityClass,
+} from "./milestone-visibility-class";
 
 export interface KilometricPointDatabaseRow {
   readonly code_ligne: string;
@@ -20,6 +24,7 @@ export interface KilometricPointDatabaseRow {
   readonly longitude: number;
   readonly position_m: number;
   readonly position_in_section: number;
+  readonly visibility_class: MilestoneVisibilityClass;
   readonly rg_troncon: number;
 }
 
@@ -60,6 +65,7 @@ export function decodeKilometricPointDatabaseRow(
     !isRailwaySectionRank(value.rg_troncon) ||
     !isKilometricPosition(value.position_m) ||
     !isPositiveInteger(value.position_in_section) ||
+    !isMilestoneVisibilityClass(value.visibility_class) ||
     !isNonEmptyString(value.label) ||
     !isMilestoneLabelForPosition(value.label, value.position_m) ||
     !isLatitude(value.latitude) ||
@@ -75,6 +81,7 @@ export function decodeKilometricPointDatabaseRow(
     longitude: value.longitude,
     position_m: value.position_m,
     position_in_section: value.position_in_section,
+    visibility_class: value.visibility_class,
     rg_troncon: value.rg_troncon,
   });
 }

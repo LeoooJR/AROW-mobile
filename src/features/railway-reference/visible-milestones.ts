@@ -4,14 +4,12 @@ import { normalizeLongitude } from "@/utils/angle";
 import { hasValidViewportBounds } from "@/components/adapters/map/map-viewport";
 import {
   milestoneDisplayInterval,
+  MILESTONE_DISPLAY_CLASSES,
   type MilestoneDisplayInterval,
 } from "./milestone-display";
 import type { Milestone } from "@shared/railway-domain/milestone";
 import { milestoneFromDatabaseRow } from "./mapping/milestone-mapper";
-import {
-  FIND_VISIBLE_MILESTONES_QUERY,
-  FIND_WRAPPED_VISIBLE_MILESTONES_QUERY,
-} from "./sqlite/queries";
+import { visibleMilestonesQuery } from "./sqlite/queries";
 
 export function markerBounds(
   viewport: MapViewport,
@@ -32,15 +30,14 @@ export async function findVisibleMilestones(
   intervalMeters: MilestoneDisplayInterval,
 ): Promise<readonly Milestone[]> {
   const [west, south, east, north] = bounds;
+  const classes = MILESTONE_DISPLAY_CLASSES[intervalMeters];
   const rows = await database.getAllAsync<unknown>(
-    west <= east
-      ? FIND_VISIBLE_MILESTONES_QUERY
-      : FIND_WRAPPED_VISIBLE_MILESTONES_QUERY,
+    visibleMilestonesQuery(classes, west > east),
     south,
     north,
     west,
     east,
-    intervalMeters,
+    ...classes,
   );
   return rows.map((row) => milestoneFromDatabaseRow(row, "visible map point"));
 }

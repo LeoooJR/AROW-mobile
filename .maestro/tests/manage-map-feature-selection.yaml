@@ -40,6 +40,12 @@ tags:
       notVisible: "PK 509\\+000"
     commands:
       - tapOn:
+          point: "16%,31.7%"
+- runFlow:
+    when:
+      notVisible: "PK 509\\+000"
+    commands:
+      - tapOn:
           point: "16%,33%"
 - extendedWaitUntil:
     visible: "PK 509\\+000"
@@ -152,6 +158,12 @@ tags:
 # press dispatch, so the milestone can replace the railway selection.
 - tapOn:
     point: "16%,32%"
+- runFlow:
+    when:
+      notVisible: "PK 509\\+000"
+    commands:
+      - tapOn:
+          point: "16%,31.7%"
 - runFlow:
     when:
       notVisible: "PK 509\\+000"

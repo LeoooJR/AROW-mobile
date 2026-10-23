@@ -15,6 +15,7 @@ const MILESTONE_RECORD = {
   longitude: 4.85933,
   position_m: 509_000,
   position_in_section: 10,
+  visibility_class: 0,
   rg_troncon: 1,
 };
 

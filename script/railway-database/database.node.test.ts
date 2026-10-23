@@ -84,7 +84,7 @@ describe("generated section milestone metadata", () => {
     const database = new DatabaseSync(path, { readOnly: true });
     try {
       expect(database.prepare("PRAGMA user_version").get()).toEqual({
-        user_version: 3,
+        user_version: 4,
       });
       expect(
         database
@@ -118,6 +118,23 @@ describe("generated section milestone metadata", () => {
 
   test.each([
     [
+      "class",
+      "UPDATE kilometric_points SET visibility_class = 2 WHERE position_m = 99000",
+    ],
+    ["index", "DROP INDEX kilometric_points_display_idx"],
+    [
+      "index",
+      "DROP INDEX kilometric_points_display_idx; CREATE INDEX kilometric_points_display_idx ON kilometric_points(visibility_class, latitude, longitude)",
+    ],
+    [
+      "index",
+      "DROP INDEX kilometric_points_display_idx; CREATE INDEX kilometric_points_display_idx ON kilometric_points(visibility_class, longitude, latitude, label)",
+    ],
+    [
+      "index",
+      "DROP INDEX kilometric_points_display_idx; CREATE INDEX kilometric_points_display_idx ON kilometric_points(visibility_class, longitude, latitude) WHERE visibility_class = 0",
+    ],
+    [
       "count",
       "UPDATE railway_sections SET milestone_count = 1 WHERE code_ligne = '001000' AND rg_troncon = 3",
     ],
@@ -142,7 +159,11 @@ describe("generated section milestone metadata", () => {
       expect(() => validateRailwayDatabase(path, summary)).toThrow(
         kind === "count"
           ? "invalid section milestone count"
-          : "invalid milestone section position",
+          : kind === "class"
+            ? "invalid point visibility class"
+            : kind === "index"
+              ? "missing or invalid point display index"
+              : "invalid milestone section position",
       );
     },
   );
@@ -162,6 +183,41 @@ describe("generated section milestone metadata", () => {
           .prepare("SELECT name FROM sqlite_schema WHERE type = 'table'")
           .all(),
       ).toEqual([]);
+    } finally {
+      database.close();
+    }
+  });
+
+  test("enforces class constraints and creates planner statistics after bulk insertion", () => {
+    const database = new DatabaseSync(path);
+    try {
+      for (const value of ["NULL", "-1", "4", "0.5"]) {
+        expect(() =>
+          database.exec(
+            `UPDATE kilometric_points SET visibility_class = ${value}`,
+          ),
+        ).toThrow();
+      }
+      expect(
+        database
+          .prepare(
+            "SELECT stat FROM sqlite_stat1 WHERE idx = 'kilometric_points_display_idx'",
+          )
+          .get(),
+      ).toBeDefined();
+      expect(
+        database
+          .prepare(
+            "SELECT position_m, visibility_class FROM kilometric_points ORDER BY code_ligne, rg_troncon, position_m",
+          )
+          .all(),
+      ).toEqual([
+        { position_m: 99000, visibility_class: 0 },
+        { position_m: 100000, visibility_class: 0 },
+        { position_m: 150000, visibility_class: 0 },
+        { position_m: 100000, visibility_class: 0 },
+        { position_m: 99500, visibility_class: 1 },
+      ]);
     } finally {
       database.close();
     }

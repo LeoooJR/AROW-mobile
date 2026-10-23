@@ -43,6 +43,7 @@ const MILESTONE_RECORD = {
   longitude: 4.85933,
   position_m: 509_000,
   position_in_section: 10,
+  visibility_class: 0,
   rg_troncon: 1,
 };
 const SECTION_RECORD = {
@@ -68,7 +69,7 @@ describe("RailwayReferenceProvider", () => {
     );
     await render(<RailwayReferenceProvider>{null}</RailwayReferenceProvider>);
     expect(jest.mocked(SQLiteProvider).mock.lastCall?.[0]).toMatchObject({
-      databaseName: "railway_reference_v3_r2.sqlite",
+      databaseName: "railway_reference_v4_r2.sqlite",
       assetSource: { assetId: "database-asset" },
     });
     expect(

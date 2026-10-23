@@ -7,14 +7,14 @@ import { findRailwayMilestoneBounds } from "./repository";
 test("uses numeric PK bounds within the exact section, including empty and single-point sections", async () => {
   const database = new DatabaseSync(":memory:");
   database.exec(
-    "CREATE TABLE kilometric_points (code_ligne TEXT, rg_troncon INTEGER, position_m INTEGER, label TEXT, latitude REAL, longitude REAL, position_in_section INTEGER)",
+    "CREATE TABLE kilometric_points (code_ligne TEXT, rg_troncon INTEGER, position_m INTEGER, label TEXT, latitude REAL, longitude REAL, position_in_section INTEGER, visibility_class INTEGER)",
   );
   database.exec(`INSERT INTO kilometric_points VALUES
-    ('893000', 1, 99000, '99+000', 45, 4, 1),
-    ('893000', 1, 100000, '100+000', 46, 5, 3),
-    ('893000', 1, 99500, '99+500', 45.5, 4.5, 2),
-    ('893000', 2, 1000, '1+000', 47, 6, 1),
-    ('894000', 1, 0, '0+000', 48, 7, 1)`);
+    ('893000', 1, 99000, '99+000', 45, 4, 1, 0),
+    ('893000', 1, 100000, '100+000', 46, 5, 3, 0),
+    ('893000', 1, 99500, '99+500', 45.5, 4.5, 2, 1),
+    ('893000', 2, 1000, '1+000', 47, 6, 1, 0),
+    ('894000', 1, 0, '0+000', 48, 7, 1, 0)`);
   const source: Pick<SQLiteDatabase, "getAllAsync"> = {
     getAllAsync: jest
       .fn()

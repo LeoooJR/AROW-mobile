@@ -1,4 +1,4 @@
-export const DATABASE_SCHEMA_VERSION = 3;
+export const DATABASE_SCHEMA_VERSION = 4;
 export const DATABASE_DATA_REVISION = 2;
 
 export const RAILWAY_REFERENCE_DATABASE_NAME = `railway_reference_v${DATABASE_SCHEMA_VERSION}_r${DATABASE_DATA_REVISION}.sqlite`;

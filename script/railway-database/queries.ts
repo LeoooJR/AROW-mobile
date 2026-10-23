@@ -14,6 +14,11 @@ export const ROLLBACK_TRANSACTION = "ROLLBACK";
 export const SET_SCHEMA_VERSION = `PRAGMA user_version = ${DATABASE_SCHEMA_VERSION}`;
 export const CHECK_SCHEMA_VERSION = "PRAGMA user_version";
 export const VACUUM_DATABASE = "VACUUM";
+export const ANALYZE_DATABASE = "ANALYZE";
+export const CREATE_POINT_DISPLAY_INDEX = `
+  CREATE INDEX kilometric_points_display_idx
+  ON ${KILOMETRIC_POINTS_TABLE.name} (visibility_class, longitude, latitude)
+`;
 export const CHECK_DATABASE_INTEGRITY = "PRAGMA integrity_check";
 export const CHECK_FOREIGN_KEYS = "PRAGMA foreign_key_check";
 export const FIND_CONFLICTING_LINE_NAMES = `
@@ -31,8 +36,8 @@ export const INSERT_RAILWAY_SECTION = `
 
 export const INSERT_KILOMETRIC_POINT = `
   INSERT INTO ${KILOMETRIC_POINTS_TABLE.name} (
-    ${projection(KILOMETRIC_POINTS_TABLE, ["code_ligne", "rg_troncon", "position_m", "label", "latitude", "longitude", "position_in_section"])}
-  ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    ${projection(KILOMETRIC_POINTS_TABLE, ["code_ligne", "rg_troncon", "position_m", "label", "latitude", "longitude", "position_in_section", "visibility_class"])}
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `;
 
 export const FIND_INVALID_SECTION_COUNT = `

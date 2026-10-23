@@ -45,9 +45,7 @@ tags:
 - tapOn:
     id: "milestones-layer-switch"
 - assertVisible: "Afficher les points kilométriques"
-- swipe:
-    start: "50%,84%"
-    end: "50%,98%"
+- pressKey: Back
 - assertNotVisible: "Couches ferroviaires"
 - waitForAnimationToEnd
 - tapOn:
@@ -70,14 +68,18 @@ tags:
 - tapOn:
     id: "milestones-layer-switch"
 - assertVisible: "Masquer les points kilométriques"
-- swipe:
-    start: "50%,84%"
-    end: "50%,98%"
+- pressKey: Back
 - waitForAnimationToEnd
 - tapOn:
     point: "16%,32%"
     retryTapIfNoChange: true
 # A system-bar change can satisfy the generic UI-change check before selection.
+- runFlow:
+    when:
+      notVisible: "PK 509\\+000"
+    commands:
+      - tapOn:
+          point: "16%,31.7%"
 - runFlow:
     when:
       notVisible: "PK 509\\+000"
@@ -95,9 +97,7 @@ tags:
     id: "map-layers-button"
 - tapOn:
     id: "milestones-layer-switch"
-- swipe:
-    start: "50%,84%"
-    end: "50%,98%"
+- pressKey: Back
 - waitForAnimationToEnd
 - tapOn:
     point: "24%,13%"
@@ -111,6 +111,4 @@ tags:
     id: "map-layers-button"
 - tapOn:
     id: "milestones-layer-switch"
-- swipe:
-    start: "50%,84%"
-    end: "50%,98%"
+- pressKey: Back

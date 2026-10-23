@@ -10,6 +10,7 @@ const MILESTONE = {
   longitude: 4.86234,
   position_m: 241_000,
   position_in_section: 1,
+  visibility_class: 0,
   rg_troncon: 1,
 };
 
@@ -43,6 +44,10 @@ describe("railway reference database rows", () => {
     { ...MILESTONE, position_in_section: 0 },
     { ...MILESTONE, position_in_section: 1.5 },
     { ...MILESTONE, position_in_section: undefined },
+    { ...MILESTONE, visibility_class: undefined },
+    { ...MILESTONE, visibility_class: -1 },
+    { ...MILESTONE, visibility_class: 4 },
+    { ...MILESTONE, visibility_class: 0.5 },
     { ...MILESTONE, position_m: 240_000 },
     { ...MILESTONE, latitude: 91 },
     { ...MILESTONE, longitude: -181 },

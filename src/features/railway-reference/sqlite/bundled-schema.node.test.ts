@@ -2,6 +2,8 @@
 
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { MILESTONE_DISPLAY_CLASSES } from "../milestone-display";
+import { validatePointDisplayMetadata } from "../../../../script/railway-database/point-display-metadata";
 
 import {
   KILOMETRIC_POINTS_TABLE,
@@ -12,6 +14,7 @@ import {
 import {
   FIND_MILESTONE_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
+  visibleMilestonesQuery,
 } from "@/features/railway-reference/sqlite/queries";
 import { searchableSectionRowsToRailways } from "@/features/railway-reference/mapping/railway-mapper";
 
@@ -102,6 +105,48 @@ describe("railway reference schema synchronization", () => {
     expect(new Set(rows.map((row) => row.table))).toEqual(
       new Set([foreignKey?.referencedTableName]),
     );
+  });
+
+  test("stored classes and the narrow index match the pinned dataset", () => {
+    const database = getDatabase();
+    expect(() => validatePointDisplayMetadata(database)).not.toThrow();
+    expect(database.prepare("PRAGMA user_version").get()).toEqual({
+      user_version: 4,
+    });
+    expect(
+      database
+        .prepare(
+          "SELECT visibility_class, COUNT(*) AS count FROM kilometric_points GROUP BY visibility_class ORDER BY visibility_class",
+        )
+        .all(),
+    ).toEqual([
+      { visibility_class: 0, count: 36946 },
+      { visibility_class: 1, count: 36800 },
+      { visibility_class: 2, count: 294130 },
+      { visibility_class: 3, count: 3858 },
+    ]);
+    for (const classes of Object.values(MILESTONE_DISPLAY_CLASSES)) {
+      const sql = visibleMilestonesQuery(classes, false);
+      const parameters = [45.7, 45.8, 4.8, 4.9, ...classes];
+      const plan = database
+        .prepare(`EXPLAIN QUERY PLAN ${sql}`)
+        .all(...parameters)
+        .map((row) => String(row.detail));
+      expect(
+        plan.some((detail) =>
+          detail.includes("USING INDEX kilometric_points_display_idx"),
+        ),
+      ).toBe(true);
+      expect(
+        plan.some((detail) => detail.includes("SCAN kilometric_points")),
+      ).toBe(false);
+      expect(
+        database
+          .prepare(`EXPLAIN ${sql}`)
+          .all(...parameters)
+          .some((row) => row.opcode === "Remainder"),
+      ).toBe(false);
+    }
   });
 
   test("bundled database passes integrity and foreign-key checks", () => {

@@ -45,7 +45,7 @@ test.each([
 test("numeric adjacency skips gaps, isolates sections and lines, and counts only recorded PKs", async () => {
   const database = new DatabaseSync(":memory:");
   database.exec(
-    "CREATE TABLE kilometric_points (code_ligne TEXT, rg_troncon INTEGER, position_m INTEGER, label TEXT, latitude REAL, longitude REAL, position_in_section INTEGER, PRIMARY KEY (code_ligne, rg_troncon, position_m))",
+    "CREATE TABLE kilometric_points (code_ligne TEXT, rg_troncon INTEGER, position_m INTEGER, label TEXT, latitude REAL, longitude REAL, position_in_section INTEGER, visibility_class INTEGER, PRIMARY KEY (code_ligne, rg_troncon, position_m))",
   );
   database.exec(
     "CREATE TABLE railway_sections (code_ligne TEXT, rg_troncon INTEGER, milestone_count INTEGER, PRIMARY KEY (code_ligne, rg_troncon))",
@@ -54,11 +54,11 @@ test("numeric adjacency skips gaps, isolates sections and lines, and counts only
     "INSERT INTO railway_sections VALUES ('001000',1,3), ('001000',2,1), ('002000',1,1)",
   );
   database.exec(`INSERT INTO kilometric_points VALUES
-    ('001000',1,99000,'99+000',45,4,1),
-    ('001000',1,100000,'100+000',46,5,2),
-    ('001000',1,150000,'150+000',47,6,3),
-    ('001000',2,100000,'100+000',48,7,1),
-    ('002000',1,99500,'99+500',49,8,1)`);
+    ('001000',1,99000,'99+000',45,4,1,0),
+    ('001000',1,100000,'100+000',46,5,2,0),
+    ('001000',1,150000,'150+000',47,6,3,0),
+    ('001000',2,100000,'100+000',48,7,1,0),
+    ('002000',1,99500,'99+500',49,8,1,1)`);
   const source: Pick<SQLiteDatabase, "getFirstAsync"> = {
     getFirstAsync: jest
       .fn()
@@ -134,6 +134,7 @@ test("missing current records do not map unrelated neighbours", () => {
         latitude: 46,
         longitude: 5,
         position_in_section: 2,
+        visibility_class: 0,
         total: 3,
       },
       {},

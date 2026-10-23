@@ -2,6 +2,8 @@
 import { DatabaseSync } from "node:sqlite";
 import type { SQLiteDatabase } from "expo-sqlite";
 import { findVisibleMilestones, markerBounds } from "./visible-milestones";
+import { milestoneVisibilityClassForPosition } from "@shared/railway-reference/milestone-visibility-class";
+import { milestoneFromDatabaseRow } from "./mapping/milestone-mapper";
 
 test("marker requests are zoom-gated, validated and normalize wrapped longitudes", () => {
   expect(markerBounds({ bounds: [4, 45, 5, 46], zoom: 9.9 })).toBeUndefined();
@@ -23,11 +25,32 @@ test("viewport SQL includes boundary points and both sides of the antimeridian",
   const database = new DatabaseSync(":memory:");
   try {
     database.exec(
-      "CREATE TABLE kilometric_points(code_ligne TEXT, rg_troncon INTEGER, position_m INTEGER, label TEXT, latitude REAL, longitude REAL, position_in_section INTEGER)",
+      "CREATE TABLE kilometric_points(code_ligne TEXT, rg_troncon INTEGER, position_m INTEGER, label TEXT, latitude REAL, longitude REAL, position_in_section INTEGER, visibility_class INTEGER)",
     );
-    const insert = database.prepare(
-      "INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?, ?)",
+    const statement = database.prepare(
+      "INSERT INTO kilometric_points VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     );
+    const insert = {
+      run: (
+        code: string,
+        rank: number,
+        position: number,
+        label: string,
+        latitude: number,
+        longitude: number,
+        ordinal: number,
+      ) =>
+        statement.run(
+          code,
+          rank,
+          position,
+          label,
+          latitude,
+          longitude,
+          ordinal,
+          milestoneVisibilityClassForPosition(position),
+        ),
+    };
     insert.run("001000", 1, 0, "000+000", 45, 4, 1);
     insert.run("001000", 1, 100, "000+100", 46, 5, 2);
     insert.run("001000", 1, 200, "000+200", 46.1, 5.1, 3);
@@ -80,6 +103,24 @@ test("viewport SQL includes boundary points and both sides of the antimeridian",
         [179, -1, -179, 1],
         interval,
       );
+      for (const [points, bounds, longitudePredicate] of [
+        [ordinary, [45, 46, 4, 5], "longitude BETWEEN ? AND ?"],
+        [crossing, [-1, 1, 179, -179], "(longitude >= ? OR longitude <= ?)"],
+      ] as const) {
+        const previousRows = database
+          .prepare(
+            `
+          SELECT * FROM kilometric_points
+          WHERE latitude BETWEEN ? AND ? AND ${longitudePredicate}
+            AND position_m % ? = 0
+          ORDER BY code_ligne, rg_troncon, position_m
+        `,
+          )
+          .all(...bounds, interval);
+        expect(points).toEqual(
+          previousRows.map((row) => milestoneFromDatabaseRow(row, "baseline")),
+        );
+      }
       const expected = [1, 100, 500, 1000].filter(
         (position) => position % interval === 0,
       );

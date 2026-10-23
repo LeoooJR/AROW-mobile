@@ -2,7 +2,7 @@
 
 UML class view of the tables in the bundled
 [`railway_reference.sqlite`](../src/statics/railway_reference.sqlite) asset,
-verified against SQLite schema version **3** (`PRAGMA user_version`). The
+verified against SQLite schema version **4** (`PRAGMA user_version`). The
 authoritative schema definitions live in
 [`shared/railway-reference/schema.ts`](../shared/railway-reference/schema.ts).
 
@@ -81,6 +81,7 @@ classDiagram
         REAL latitude
         REAL longitude
         INTEGER position_in_section
+        INTEGER visibility_class
     }
 
     railway_sections "1" -- "0..*" kilometric_points : contains recorded points
@@ -128,6 +129,60 @@ The generator computes both values before insertion. Asset validation independen
 recomputes every section count and numeric-PK ordinal before promotion. No runtime
 updates or triggers maintain these values; regenerate the asset when its points change.
 
+## Point visibility classes and geographic index
+
+`visibility_class` defines the minimum passive map visibility tier for a recorded
+point. It is a stored, non-null integer between 0 and 3, calculated after CSV
+filtering and deduplication from the retained numerical PK. It is independent of
+`TYPE_REPER` and label padding. The first matching rule applies:
+
+| Class | Numerical position                        | Passive display zoom |
+| ----- | ----------------------------------------- | -------------------- |
+| 0     | Divisible by 1,000 metres, including zero | 10 and above         |
+| 1     | Otherwise divisible by 500 metres         | 12 and above         |
+| 2     | Otherwise divisible by 100 metres         | 14 and above         |
+| 3     | All remaining positions                   | 15 and above         |
+
+The stored class expresses map eligibility based on numerical precision; the
+application owns the zoom thresholds.
+Viewport queries bind the eligible classes using `visibility_class IN (...)` rather than
+calculating a modulo for each candidate row. Native map filters continue checking
+numerical eligibility to hide stale dense results immediately during zoom-out.
+Below zoom 10, or when markers are disabled, all points are hidden. From zoom 10,
+a selected point remains highlighted regardless of its passive class. Labels start
+at zoom 13 and remain collision-aware.
+
+Search, Previous/Next, counters and section endpoints still use **every recorded
+point**, regardless of zoom. Navigation and endpoint focus centre the destination
+at zoom 15. Geometry PKD/PKF do not replace recorded bounds.
+
+Generation creates one secondary index after bulk insertion:
+
+```sql
+CREATE INDEX kilometric_points_display_idx
+ON kilometric_points (visibility_class, longitude, latitude);
+```
+
+Because the table uses `WITHOUT ROWID`, SQLite automatically includes its primary
+key `(code_ligne, rg_troncon, position_m)` in the index. Labels and ordinals remain
+in the primary table and are retrieved for matching points. Generation runs
+`ANALYZE` to package planner statistics; the application does not maintain the index
+or statistics. Validation independently recomputes every class and checks the full
+index layout, including the implicit primary-key suffix.
+
+**Decision: start with the smaller index.** The exploratory desktop SQLite tests
+measured approximately **29.48 MiB** for this database versus **33.34 MiB** with a
+covering index that also stored `label` and `position_in_section`. On the dense
+zoom-10 viewport, median full-result lookup was 2.52 ms with the smaller index,
+0.81 ms with covering, and 31.37 ms with the original unindexed query. These are
+desktop measurements, not Android performance guarantees. The chosen index
+provides a substantial improvement with straightforward SQL and less duplication.
+
+If Android profiling later justifies the extra size, **replace** this index with
+`(visibility_class, longitude, latitude, label, position_in_section)` to avoid primary-table
+reads. Do not keep both redundant indexes. A covering index is the documented next
+step, not part of the current asset.
+
 The section's `pkd` and `pkf` describe geometry metadata, not the first and last
 recorded points. Recorded milestone ranges are derived from `position_m` for the
 exact section; gaps between recorded points are allowed. Geometry vertices are
@@ -136,20 +191,26 @@ for the distinction between geometry limits, recorded ranges, and located bounds
 
 ## Maintenance
 
-The native app imports this asset into `railway_reference_v3_r2.sqlite` on the
-device. Its filename combines schema version **3** and data revision **2**,
-defined together in the shared version module. This avoids reusing earlier
-kilometre-only device copies even though the schema is unchanged. Subsequent
+The native app imports this asset into `railway_reference_v4_r2.sqlite` on the
+device. Its filename combines schema version **4** and data revision **2**,
+defined together in the shared version module. This avoids reusing device copies
+without the stored class and geographic index. Subsequent
 launches reuse the new copy without overwriting it. Increment the data revision
 when changing the bundled dataset without a schema change. The bundled asset
 keeps its original filename; no on-device SQL migration or application-data
 reset is required.
 
+When revising an unreleased schema without changing its device filename,
+regenerate the asset and replace previously imported generated database copies on
+development devices while the app is stopped. Preserve other application data;
+keep normal asset imports configured to reuse existing copies on later launches.
+
 Fallback sections without geometry reuse the known line name from another
 section of the same line. Unknown lines use `Ligne {code}`. Asset validation
 rejects conflicting names across searchable sections so the catalogue cannot
 be published with an unresolvable line identity. Data revision 2 includes this
-correction; schema version remains 3.
+correction. Schema version 4 adds stored classes and the geographic index while
+keeping data revision 2 because the accepted records have not changed.
 
 Update this diagram when the bundled schema changes. Inspect the asset with
 `sqlite3 -readonly src/statics/railway_reference.sqlite '.schema'` and

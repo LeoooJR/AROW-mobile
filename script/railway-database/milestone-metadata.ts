@@ -1,6 +1,7 @@
 import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
 import type { KilometricPointDatabaseRow } from "../../shared/railway-reference/records";
 import type { Milestone } from "./types";
+import { milestoneVisibilityClassForPosition } from "../../shared/railway-reference/milestone-visibility-class";
 
 export function milestoneRowsBySection(
   milestones: readonly Milestone[],
@@ -24,6 +25,9 @@ export function milestoneRowsBySection(
           latitude: milestone.latitude,
           longitude: milestone.longitude,
           position_in_section: index + 1,
+          visibility_class: milestoneVisibilityClassForPosition(
+            milestone.positionMeters,
+          ),
           position_m: milestone.positionMeters,
           rg_troncon: milestone.rank,
         })),

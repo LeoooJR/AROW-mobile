@@ -12,9 +12,12 @@ import {
 } from "../../shared/railway-reference/schema";
 import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
 import { milestoneRowsBySection } from "./milestone-metadata";
+import { validatePointDisplayMetadata } from "./point-display-metadata";
 
 import {
   BEGIN_TRANSACTION,
+  ANALYZE_DATABASE,
+  CREATE_POINT_DISPLAY_INDEX,
   CHECK_DATABASE_INTEGRITY,
   CHECK_FOREIGN_KEYS,
   CHECK_SCHEMA_VERSION,
@@ -154,6 +157,7 @@ function insertMilestones(
         row.latitude,
         row.longitude,
         row.position_in_section,
+        row.visibility_class,
       );
     }
   }
@@ -171,6 +175,8 @@ function populateDatabase(
     database.exec(createTableSql(KILOMETRIC_POINTS_TABLE));
     insertRailwaySections(database, sections, points);
     insertMilestones(database, points);
+    database.exec(CREATE_POINT_DISPLAY_INDEX);
+    database.exec(ANALYZE_DATABASE);
     database.exec(SET_SCHEMA_VERSION);
     database.exec(COMMIT_TRANSACTION);
   } catch (cause) {
@@ -263,6 +269,7 @@ export function validateRailwayDatabase(
       );
     }
 
+    validatePointDisplayMetadata(database);
     const counts = databaseCounts(
       database.prepare(SELECT_DATABASE_COUNTS).get(),
     );
