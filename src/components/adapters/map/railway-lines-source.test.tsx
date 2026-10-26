@@ -35,8 +35,6 @@ const railwayFeature = {
     code_ligne: "340311",
     idgaia: "4718490e-6665-11e3-afff-01f464e0362d",
     lib_ligne: "Raccordement de Rouen-Martainville",
-    pkd: "136+772",
-    pkf: "137+980",
     rg_troncon: 1,
     type_ligne: "Raccordement",
   },

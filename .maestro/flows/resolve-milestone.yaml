@@ -19,6 +19,7 @@ appId: com.leooojrrr.AROWmobile
 - inputText: "893000"
 - tapOn:
     id: "line-result-893000"
+- assertVisible: "Repères disponibles : 499\\+752 à 511\\+600."
 - tapOn:
     id: "milestone-kilometer-input"
 - eraseText

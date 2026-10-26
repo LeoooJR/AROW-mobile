@@ -5,13 +5,11 @@ import { isNonEmptyString, isUnsignedInteger } from "../value-validation";
 import { isMilestoneLabelForPosition } from "./kilometric-position";
 import { RailwaySectionId } from "./railway-section-id";
 
-/** Geometry metadata; its PK limits can differ from recorded milestone bounds. */
+/** Geometry availability and infrastructure metadata, independent of recorded points. */
 export type RailwaySectionGeometry =
   | {
-      readonly endMilestone: string;
       readonly gaiaId: string;
       readonly railwayType: string;
-      readonly startMilestone: string;
       readonly status: "present";
     }
   | { readonly status: "absent" };
@@ -26,12 +24,7 @@ function validateGeometry(
   geometry: RailwaySectionGeometry,
 ): RailwaySectionGeometry {
   if (geometry.status === "absent") {
-    if (
-      "gaiaId" in geometry ||
-      "railwayType" in geometry ||
-      "startMilestone" in geometry ||
-      "endMilestone" in geometry
-    ) {
+    if ("gaiaId" in geometry || "railwayType" in geometry) {
       throw new Error(
         "Railway section without geometry must not contain geometry metadata",
       );
@@ -41,9 +34,7 @@ function validateGeometry(
 
   if (
     !isNonEmptyString(geometry.gaiaId) ||
-    !isNonEmptyString(geometry.railwayType) ||
-    !isNonEmptyString(geometry.startMilestone) ||
-    !isNonEmptyString(geometry.endMilestone)
+    !isNonEmptyString(geometry.railwayType)
   ) {
     throw new Error("Railway section geometry metadata must be complete");
   }

@@ -2,7 +2,7 @@
 
 UML class view of the tables in the bundled
 [`railway_reference.sqlite`](../src/statics/railway_reference.sqlite) asset,
-verified against SQLite schema version **4** (`PRAGMA user_version`). The
+verified against SQLite schema version **5** (`PRAGMA user_version`). The
 authoritative schema definitions live in
 [`shared/railway-reference/schema.ts`](../shared/railway-reference/schema.ts).
 
@@ -66,8 +66,8 @@ classDiagram
         TEXT idgaia nullable
         TEXT lib_ligne
         TEXT type_ligne nullable
-        TEXT pkd nullable
-        TEXT pkf nullable
+        INTEGER first_recorded_position_m nullable, FK
+        INTEGER last_recorded_position_m nullable, FK
         INTEGER has_geometry
         INTEGER milestone_count
     }
@@ -85,6 +85,8 @@ classDiagram
     }
 
     railway_sections "1" -- "0..*" kilometric_points : contains recorded points
+    railway_sections --> "0..1" kilometric_points : first recorded point, deferred FK
+    railway_sections --> "0..1" kilometric_points : last recorded point, deferred FK
 ```
 
 `PK` marks a member of a composite primary key; `FK` marks a member of the
@@ -102,6 +104,13 @@ The foreign key is
 `kilometric_points(code_ligne, rg_troncon) -> railway_sections(code_ligne, rg_troncon)`.
 Updates and deletes use `NO ACTION`; there is no cascade.
 
+Each section also references its first and last point through composite foreign
+keys `(code_ligne, rg_troncon, first_recorded_position_m)` and
+`(code_ligne, rg_troncon, last_recorded_position_m)`, targeting the point primary
+key. Both are `DEFERRABLE INITIALLY DEFERRED`: generation inserts sections first,
+then their points, and checks the complete relationship at transaction commit.
+Failure rolls back the transaction. No additional endpoint index is required.
+
 ## Column meaning and constraints
 
 - `code_ligne` is a six-digit railway line code stored as text to preserve leading
@@ -109,8 +118,7 @@ Updates and deletes use `NO ACTION`; there is no cascade.
 - `lib_ligne` is the nonempty railway line display name, stored on each section.
   There is no separate railway-line table in this asset.
 - `has_geometry` is either `0` or `1`. When it is `1`, `idgaia` (GAIA identifier),
-  `type_ligne` (infrastructure type), `pkd` (geometry start PK), and `pkf` (geometry
-  end PK) must all be non-null. The database generator writes null metadata for
+  `type_ligne` (infrastructure type) must both be non-null. The database generator writes null metadata for
   fallback sections with `has_geometry = 0`; the SQL check itself only enforces
   the implication for `has_geometry = 1`.
 - `position_m` is a non-negative integer railway position in metres. `label` is
@@ -120,13 +128,20 @@ Updates and deletes use `NO ACTION`; there is no cascade.
   `[-90, 90]` and `[-180, 180]` respectively.
 - `milestone_count` is the precomputed number of recorded points in the exact
   section, including zero for geometry-only sections.
+- `first_recorded_position_m` and `last_recorded_position_m` reference the lowest
+  and highest numerical recorded PK in that exact section. Empty sections require
+  both to be null; nonempty sections require non-negative, ordered endpoints.
+  One-point sections reference the same point twice. Labels and coordinates remain
+  on the points, preserving source label padding without cached duplicates.
 - `position_in_section` is the precomputed one-based ordinal of a recorded point,
   ordered by numeric `position_m` within its exact section. Gaps in PK values do
   not create gaps in ordinals. The current-point query joins its parent section
   to retrieve the stored total without runtime counting.
 
-The generator computes both values before insertion. Asset validation independently
-recomputes every section count and numeric-PK ordinal before promotion. No runtime
+The generator computes these values before insertion. Asset validation independently
+recomputes every section count, extrema and numeric-PK ordinal before promotion.
+It verifies foreign keys and the schema's deferred declarations. Referencing an
+existing interior point passes a foreign key but fails the independent extrema check. No runtime
 updates or triggers maintain these values; regenerate the asset when its points change.
 
 ## Point visibility classes and geographic index
@@ -154,7 +169,7 @@ at zoom 13 and remain collision-aware.
 
 Search, Previous/Next, counters and section endpoints still use **every recorded
 point**, regardless of zoom. Navigation and endpoint focus centre the destination
-at zoom 15. Geometry PKD/PKF do not replace recorded bounds.
+at zoom 15. Display density never changes recorded bounds.
 
 Generation creates one secondary index after bulk insertion:
 
@@ -183,18 +198,35 @@ If Android profiling later justifies the extra size, **replace** this index with
 reads. Do not keep both redundant indexes. A covering index is the documented next
 step, not part of the current asset.
 
-The section's `pkd` and `pkf` describe geometry metadata, not the first and last
-recorded points. Recorded milestone ranges are derived from `position_m` for the
-exact section; gaps between recorded points are allowed. Geometry vertices are
-not stored in these tables. See the [railway domain glossary](railway-domain.md)
-for the distinction between geometry limits, recorded ranges, and located bounds.
+Schema 5 removes declared geometry `pkd` and `pkf` from SQLite, bundled line
+GeoJSON and runtime geometry metadata. Their values are not reliable recorded-point
+references; original source files retain them. Search and map details now display
+recorded limits from SQLite. This includes sections without geometry.
+
+The catalogue scans sections and joins the first/last points using their existing
+composite primary key, avoiding a global point aggregation. Located endpoint
+queries look up the section once and retrieve its referenced points directly.
+Line GeoJSON carries no recorded endpoint duplicates; map details use their
+existing asynchronous SQLite bounds load, including loading, error and empty states.
+Recorded limits do not redefine line geometry or guarantee intermediate points
+exist. Geometry vertices remain in GeoJSON. See the
+[railway domain glossary](railway-domain.md).
+
+Desktop verification with identical complete projections measured catalogue
+loading at **65.38 ms before / 5.27 ms after**, approximately **12.4 times faster**.
+Individual section bounds were already indexed: their median changed from
+15.50 to 13.44 microseconds. The schema-5 asset measures **29.47 MiB**, 8 KiB
+smaller after replacing geometry labels with numerical references. Measurements
+used Node 24.18.0, SQLite 3.53.1, a 2 MiB connection cache and 30 alternating
+rounds, including row materialization; they are desktop results, not Android
+latency guarantees. Catalogue loading happens once per provider lifetime.
 
 ## Maintenance
 
-The native app imports this asset into `railway_reference_v4_r2.sqlite` on the
-device. Its filename combines schema version **4** and data revision **2**,
+The native app imports this asset into `railway_reference_v5_r2.sqlite` on the
+device. Its filename combines schema version **5** and data revision **2**,
 defined together in the shared version module. This avoids reusing device copies
-without the stored class and geographic index. Subsequent
+without the recorded endpoint schema. Subsequent
 launches reuse the new copy without overwriting it. Increment the data revision
 when changing the bundled dataset without a schema change. The bundled asset
 keeps its original filename; no on-device SQL migration or application-data
@@ -209,8 +241,9 @@ Fallback sections without geometry reuse the known line name from another
 section of the same line. Unknown lines use `Ligne {code}`. Asset validation
 rejects conflicting names across searchable sections so the catalogue cannot
 be published with an unresolvable line identity. Data revision 2 includes this
-correction. Schema version 4 adds stored classes and the geographic index while
-keeping data revision 2 because the accepted records have not changed.
+correction. Schema version 5 adds recorded endpoint references and removes
+declared geometry PK labels, keeping data revision 2 because accepted records
+have not changed. Stored classes and the geographic index remain unchanged.
 
 Update this diagram when the bundled schema changes. Inspect the asset with
 `sqlite3 -readonly src/statics/railway_reference.sqlite '.schema'` and

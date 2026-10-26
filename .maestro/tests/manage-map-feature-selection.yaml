@@ -134,7 +134,7 @@ tags:
 - assertNotVisible: "PK 509\\+000"
 - assertVisible: "893000"
 - assertVisible: "1"
-- assertVisible: "499\\+752 → 511\\+605"
+- assertVisible: "499\\+752 → 511\\+600"
 - assertNotVisible:
     id: "use-map-milestone"
 - extendedWaitUntil:
@@ -149,7 +149,7 @@ tags:
 - tapOn:
     id: "last-railway-milestone"
 - assertVisible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
-- assertVisible: "499\\+752 → 511\\+605"
+- assertVisible: "499\\+752 → 511\\+600"
 # Restore the live-position camera before checking overlapping feature presses.
 - tapOn:
     id: "center-location"

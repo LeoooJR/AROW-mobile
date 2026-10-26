@@ -31,8 +31,6 @@ interface RailwayLineProperties {
   readonly code_ligne: string;
   readonly idgaia: string;
   readonly lib_ligne: string;
-  readonly pkd: string;
-  readonly pkf: string;
   readonly rg_troncon: number;
   readonly type_ligne: string;
 }
@@ -95,8 +93,6 @@ function hasRailwayMetadata(properties: Record<string, unknown>): boolean {
   return (
     isNonEmptyString(properties.idgaia) &&
     isNonEmptyString(properties.lib_ligne) &&
-    isNonEmptyString(properties.pkd) &&
-    isNonEmptyString(properties.pkf) &&
     isNonEmptyString(properties.type_ligne)
   );
 }
@@ -121,10 +117,8 @@ function railwayFromFeature(
     sections: [
       {
         geometry: {
-          endMilestone: feature.properties.pkf,
           gaiaId: feature.properties.idgaia,
           railwayType: feature.properties.type_ligne,
-          startMilestone: feature.properties.pkd,
           status: "present",
         },
         sectionRank: feature.properties.rg_troncon,

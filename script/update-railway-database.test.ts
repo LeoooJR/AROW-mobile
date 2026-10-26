@@ -693,7 +693,7 @@ describe("railway database setup", () => {
     await generateValidFixtureAssets();
     const database = new DatabaseSync(databasePath);
     try {
-      database.exec("PRAGMA user_version = 3");
+      database.exec("PRAGMA user_version = 4");
     } finally {
       database.close();
     }
@@ -704,7 +704,7 @@ describe("railway database setup", () => {
         expectedSnapshot: FIXTURE_SNAPSHOT,
         geojsonPath,
       }),
-    ).toThrow(/schema version must be 4.*npm run database:setup/);
+    ).toThrow(/schema version must be 5.*npm run database:setup/);
   });
 
   test("preserves existing outputs when a download checksum fails", async () => {

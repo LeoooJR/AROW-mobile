@@ -13,6 +13,7 @@ import {
 } from "@shared/railway-reference/schema";
 import {
   FIND_MILESTONE_QUERY,
+  FIND_RAILWAY_MILESTONE_BOUNDS_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
   visibleMilestonesQuery,
 } from "@/features/railway-reference/sqlite/queries";
@@ -56,6 +57,55 @@ describe("railway reference schema synchronization", () => {
 
   afterAll(() => {
     database?.close();
+  });
+
+  test("stored bounds match independent numeric extrema for every section", () => {
+    const database = getDatabase();
+    const lookup = database.prepare(FIND_RAILWAY_MILESTONE_BOUNDS_QUERY);
+    const reference = database.prepare(`SELECT * FROM kilometric_points
+      WHERE code_ligne = ? AND rg_troncon = ? AND position_m IN (
+        SELECT MIN(position_m) FROM kilometric_points WHERE code_ligne = ? AND rg_troncon = ?
+        UNION SELECT MAX(position_m) FROM kilometric_points WHERE code_ligne = ? AND rg_troncon = ?
+      ) ORDER BY position_m`);
+    for (const section of database
+      .prepare("SELECT code_ligne, rg_troncon FROM railway_sections")
+      .all()) {
+      const identity = [section.code_ligne, section.rg_troncon];
+      expect(lookup.all(...identity)).toEqual(
+        reference.all(...identity, ...identity, ...identity),
+      );
+    }
+    expect(lookup.all("999999", 1)).toEqual([]);
+    const catalogue = database.prepare(LOAD_SEARCHABLE_RAILWAYS_QUERY).all();
+    const aggregated = database
+      .prepare(
+        `
+      WITH bounds AS (SELECT code_ligne, rg_troncon, MIN(position_m) AS first, MAX(position_m) AS last
+        FROM kilometric_points GROUP BY code_ligne, rg_troncon)
+      SELECT section.*, bounds.first AS minimum_position_m, lo.label AS minimum_label,
+        bounds.last AS maximum_position_m, hi.label AS maximum_label
+      FROM railway_sections AS section
+      JOIN bounds USING(code_ligne, rg_troncon)
+      JOIN kilometric_points AS lo ON lo.code_ligne = section.code_ligne AND lo.rg_troncon = section.rg_troncon AND lo.position_m = bounds.first
+      JOIN kilometric_points AS hi ON hi.code_ligne = section.code_ligne AND hi.rg_troncon = section.rg_troncon AND hi.position_m = bounds.last
+      ORDER BY section.lib_ligne, section.code_ligne, section.rg_troncon
+    `,
+      )
+      .all();
+    expect(catalogue).toEqual(aggregated);
+    const plan = database
+      .prepare(`EXPLAIN QUERY PLAN ${FIND_RAILWAY_MILESTONE_BOUNDS_QUERY}`)
+      .all("893000", 1);
+    expect(plan.map((row) => row.detail)).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("SEARCH section USING PRIMARY KEY"),
+        expect.stringContaining("SEARCH point USING PRIMARY KEY"),
+      ]),
+    );
+    expect(plan.some((row) => /SCAN|SUBQUERY/.test(String(row.detail)))).toBe(
+      false,
+    );
+    expect(LOAD_SEARCHABLE_RAILWAYS_QUERY).not.toMatch(/MIN\(|MAX\(|GROUP BY/);
   });
 
   test.each([RAILWAY_SECTIONS_TABLE, KILOMETRIC_POINTS_TABLE])(
@@ -111,7 +161,7 @@ describe("railway reference schema synchronization", () => {
     const database = getDatabase();
     expect(() => validatePointDisplayMetadata(database)).not.toThrow();
     expect(database.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: 4,
+      user_version: 5,
     });
     expect(
       database

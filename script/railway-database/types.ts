@@ -70,19 +70,15 @@ interface RailwaySectionBase {
 }
 
 export interface RailwaySectionWithGeometry extends RailwaySectionBase {
-  readonly endMilestone: string;
   readonly gaiaId: string;
   readonly hasGeometry: 1;
   readonly railwayType: string;
-  readonly startMilestone: string;
 }
 
 export interface RailwaySectionWithoutGeometry extends RailwaySectionBase {
-  readonly endMilestone: null;
   readonly gaiaId: null;
   readonly hasGeometry: 0;
   readonly railwayType: null;
-  readonly startMilestone: null;
 }
 
 export type RailwaySection =
@@ -105,8 +101,6 @@ export interface RailwayProperties {
   readonly code_ligne: string;
   readonly idgaia: string;
   readonly lib_ligne: string;
-  readonly pkd: string;
-  readonly pkf: string;
   readonly rg_troncon: number;
   readonly type_ligne: string;
 }

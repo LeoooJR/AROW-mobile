@@ -15,6 +15,10 @@ test("uses numeric PK bounds within the exact section, including empty and singl
     ('893000', 1, 99500, '99+500', 45.5, 4.5, 2, 1),
     ('893000', 2, 1000, '1+000', 47, 6, 1, 0),
     ('894000', 1, 0, '0+000', 48, 7, 1, 0)`);
+  database.exec(`CREATE TABLE railway_sections (code_ligne TEXT, rg_troncon INTEGER, first_recorded_position_m INTEGER, last_recorded_position_m INTEGER);
+    INSERT INTO railway_sections VALUES
+      ('893000', 1, 99000, 100000), ('893000', 2, 1000, 1000),
+      ('893000', 3, NULL, NULL), ('894000', 1, 0, 0)`);
   const source: Pick<SQLiteDatabase, "getAllAsync"> = {
     getAllAsync: jest
       .fn()

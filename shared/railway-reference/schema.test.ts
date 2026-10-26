@@ -52,16 +52,16 @@ describe("railway reference schema descriptors", () => {
         type: "TEXT",
       },
       {
-        name: "pkd",
+        name: "first_recorded_position_m",
         nullable: true,
         primaryKeyPosition: undefined,
-        type: "TEXT",
+        type: "INTEGER",
       },
       {
-        name: "pkf",
+        name: "last_recorded_position_m",
         nullable: true,
         primaryKeyPosition: undefined,
-        type: "TEXT",
+        type: "INTEGER",
       },
       {
         name: "has_geometry",

@@ -7,9 +7,6 @@ import {
 import type { MilestoneVisibilityClass } from "@shared/railway-reference/milestone-visibility-class";
 
 const railwayAlias = "railway";
-const boundsAlias = "bounds";
-const minimumPointAlias = "minimum_point";
-const maximumPointAlias = "maximum_point";
 
 const milestoneColumns = [
   "code_ligne",
@@ -31,33 +28,22 @@ const sectionRank = "rg_troncon";
 const positionMeters = "position_m";
 
 export const LOAD_SEARCHABLE_RAILWAYS_QUERY = `
-  WITH section_bounds AS (
-    SELECT
-      ${lineCode},
-      ${sectionRank},
-      MIN(${positionMeters}) AS minimum_position_m,
-      MAX(${positionMeters}) AS maximum_position_m
-    FROM ${KILOMETRIC_POINTS_TABLE.name}
-    GROUP BY ${lineCode}, ${sectionRank}
-  )
   SELECT
-    ${projection(RAILWAY_SECTIONS_TABLE, ["code_ligne", "lib_ligne", "rg_troncon", "has_geometry", "idgaia", "type_ligne", "pkd", "pkf", "milestone_count"], railwayAlias)},
-    ${boundsAlias}.minimum_position_m,
-    ${columnReference(KILOMETRIC_POINTS_TABLE, "label", minimumPointAlias)} AS minimum_label,
-    ${boundsAlias}.maximum_position_m,
-    ${columnReference(KILOMETRIC_POINTS_TABLE, "label", maximumPointAlias)} AS maximum_label
-  FROM ${RAILWAY_SECTIONS_TABLE.name} AS ${railwayAlias}
-  INNER JOIN section_bounds AS ${boundsAlias}
-    USING (${lineCode}, ${sectionRank})
-  INNER JOIN ${KILOMETRIC_POINTS_TABLE.name} AS ${minimumPointAlias}
-    ON ${columnReference(KILOMETRIC_POINTS_TABLE, lineCode, minimumPointAlias)} = ${boundsAlias}.${lineCode}
-    AND ${columnReference(KILOMETRIC_POINTS_TABLE, sectionRank, minimumPointAlias)} = ${boundsAlias}.${sectionRank}
-    AND ${columnReference(KILOMETRIC_POINTS_TABLE, positionMeters, minimumPointAlias)} = ${boundsAlias}.minimum_position_m
-  INNER JOIN ${KILOMETRIC_POINTS_TABLE.name} AS ${maximumPointAlias}
-    ON ${columnReference(KILOMETRIC_POINTS_TABLE, lineCode, maximumPointAlias)} = ${boundsAlias}.${lineCode}
-    AND ${columnReference(KILOMETRIC_POINTS_TABLE, sectionRank, maximumPointAlias)} = ${boundsAlias}.${sectionRank}
-    AND ${columnReference(KILOMETRIC_POINTS_TABLE, positionMeters, maximumPointAlias)} = ${boundsAlias}.maximum_position_m
-  ORDER BY ${columnReference(RAILWAY_SECTIONS_TABLE, "lib_ligne", railwayAlias)}, ${columnReference(RAILWAY_SECTIONS_TABLE, lineCode, railwayAlias)}, ${columnReference(RAILWAY_SECTIONS_TABLE, sectionRank, railwayAlias)}
+    ${projection(RAILWAY_SECTIONS_TABLE, ["code_ligne", "lib_ligne", "rg_troncon", "has_geometry", "idgaia", "type_ligne", "first_recorded_position_m", "last_recorded_position_m", "milestone_count"], railwayAlias)},
+    railway.first_recorded_position_m AS minimum_position_m,
+    minimum_point.label AS minimum_label,
+    railway.last_recorded_position_m AS maximum_position_m,
+    maximum_point.label AS maximum_label
+  FROM railway_sections AS railway
+  INNER JOIN kilometric_points AS minimum_point
+    ON minimum_point.code_ligne = railway.code_ligne
+    AND minimum_point.rg_troncon = railway.rg_troncon
+    AND minimum_point.position_m = railway.first_recorded_position_m
+  INNER JOIN kilometric_points AS maximum_point
+    ON maximum_point.code_ligne = railway.code_ligne
+    AND maximum_point.rg_troncon = railway.rg_troncon
+    AND maximum_point.position_m = railway.last_recorded_position_m
+  ORDER BY railway.lib_ligne, railway.code_ligne, railway.rg_troncon
 `;
 
 export const FIND_MILESTONE_QUERY = `
@@ -104,15 +90,12 @@ export const FIND_CURRENT_MILESTONE_QUERY = `
 `;
 
 export const FIND_RAILWAY_MILESTONE_BOUNDS_QUERY = `
-  SELECT ${milestoneProjection}
-  FROM ${KILOMETRIC_POINTS_TABLE.name}
-  WHERE ${lineCode} = ? AND ${sectionRank} = ?
-    AND ${positionMeters} IN (
-      SELECT MIN(${positionMeters}) FROM ${KILOMETRIC_POINTS_TABLE.name}
-      WHERE ${lineCode} = ? AND ${sectionRank} = ?
-      UNION
-      SELECT MAX(${positionMeters}) FROM ${KILOMETRIC_POINTS_TABLE.name}
-      WHERE ${lineCode} = ? AND ${sectionRank} = ?
-    )
-  ORDER BY ${positionMeters} ASC
+  SELECT ${projection(KILOMETRIC_POINTS_TABLE, milestoneColumns, "point")}
+  FROM railway_sections AS section
+  INNER JOIN kilometric_points AS point
+    ON point.code_ligne = section.code_ligne
+    AND point.rg_troncon = section.rg_troncon
+    AND point.position_m IN (section.first_recorded_position_m, section.last_recorded_position_m)
+  WHERE section.code_ligne = ? AND section.rg_troncon = ?
+  ORDER BY point.position_m ASC
 `;

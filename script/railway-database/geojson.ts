@@ -21,10 +21,10 @@ const RAILWAY_PROPERTIES = Object.freeze([
   "code_ligne",
   "lib_ligne",
   "rg_troncon",
-  "pkd",
-  "pkf",
 ]);
 const REMOVED_PROPERTIES = new Set([
+  "pkd",
+  "pkf",
   "x_d_l93",
   "y_d_l93",
   "x_f_l93",
@@ -124,14 +124,8 @@ function railwaySectionFromFeature(
     throw new Error(`${context} id must be ${id}`);
   }
 
-  const startMilestone = requireNonEmptyString(
-    properties.pkd,
-    `${context} pkd`,
-  );
-  const endMilestone = requireNonEmptyString(properties.pkf, `${context} pkf`);
   return Object.freeze({
     code,
-    endMilestone,
     gaiaId: requireNonEmptyString(properties.idgaia, `${context} idgaia`),
     hasGeometry: 1,
     name: requireNonEmptyString(properties.lib_ligne, `${context} lib_ligne`),
@@ -140,7 +134,6 @@ function railwaySectionFromFeature(
       `${context} type_ligne`,
     ),
     rank,
-    startMilestone,
   });
 }
 
@@ -188,8 +181,6 @@ function normalizedFeature(value: unknown, index: number): RailwayFeature {
       code_ligne: section.code,
       lib_ligne: section.name,
       rg_troncon: section.rank,
-      pkd: section.startMilestone,
-      pkf: section.endMilestone,
     }),
     id: normalizedId,
   });

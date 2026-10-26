@@ -73,9 +73,5 @@ export function readRailwayMilestoneBoundRows(
     FIND_RAILWAY_MILESTONE_BOUNDS_QUERY,
     section.lineCode,
     section.sectionRank,
-    section.lineCode,
-    section.sectionRank,
-    section.lineCode,
-    section.sectionRank,
   );
 }

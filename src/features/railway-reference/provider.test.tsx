@@ -56,8 +56,8 @@ const SECTION_RECORD = {
   maximum_position_m: 509_000,
   minimum_label: "499+000",
   minimum_position_m: 499_000,
-  pkd: "499+752",
-  pkf: "511+605",
+  first_recorded_position_m: 499_000,
+  last_recorded_position_m: 509_000,
   rg_troncon: 1,
   type_ligne: "Ligne",
 };
@@ -69,7 +69,7 @@ describe("RailwayReferenceProvider", () => {
     );
     await render(<RailwayReferenceProvider>{null}</RailwayReferenceProvider>);
     expect(jest.mocked(SQLiteProvider).mock.lastCall?.[0]).toMatchObject({
-      databaseName: "railway_reference_v4_r2.sqlite",
+      databaseName: "railway_reference_v5_r2.sqlite",
       assetSource: { assetId: "database-asset" },
     });
     expect(

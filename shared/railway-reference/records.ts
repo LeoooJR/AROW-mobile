@@ -12,6 +12,7 @@ import {
   isMilestoneLabelForPosition,
 } from "../railway-domain/kilometric-position";
 import { isRailwaySectionRank } from "../railway-domain/railway-section-id";
+import { areValidRecordedSectionEndpoints } from "../railway-domain/railway-section-endpoints";
 import {
   isMilestoneVisibilityClass,
   type MilestoneVisibilityClass,
@@ -29,6 +30,8 @@ export interface KilometricPointDatabaseRow {
 }
 
 interface RailwaySectionDatabaseRowBase {
+  readonly first_recorded_position_m: number | null;
+  readonly last_recorded_position_m: number | null;
   readonly code_ligne: string;
   readonly lib_ligne: string;
   readonly milestone_count: number;
@@ -38,16 +41,12 @@ interface RailwaySectionDatabaseRowBase {
 export interface RailwaySectionDatabaseRowWithGeometry extends RailwaySectionDatabaseRowBase {
   readonly has_geometry: 1;
   readonly idgaia: string;
-  readonly pkd: string;
-  readonly pkf: string;
   readonly type_ligne: string;
 }
 
 export interface RailwaySectionDatabaseRowWithoutGeometry extends RailwaySectionDatabaseRowBase {
   readonly has_geometry: 0;
   readonly idgaia: null;
-  readonly pkd: null;
-  readonly pkf: null;
   readonly type_ligne: null;
 }
 
@@ -100,7 +99,18 @@ export function decodeRailwaySectionDatabaseRow(
     throw new Error(`Invalid railway section ${context}`);
   }
 
+  const endpoints = [
+    value.first_recorded_position_m,
+    value.last_recorded_position_m,
+  ] as const;
+  if (!areValidRecordedSectionEndpoints(endpoints, value.milestone_count)) {
+    throw new Error(`Invalid railway section ${context}`);
+  }
+  const [first, last] = endpoints;
+
   const base = {
+    first_recorded_position_m: first,
+    last_recorded_position_m: last,
     code_ligne: value.code_ligne,
     lib_ligne: value.lib_ligne,
     milestone_count: value.milestone_count,
@@ -109,16 +119,12 @@ export function decodeRailwaySectionDatabaseRow(
   if (
     value.has_geometry === 0 &&
     value.idgaia === null &&
-    value.type_ligne === null &&
-    value.pkd === null &&
-    value.pkf === null
+    value.type_ligne === null
   ) {
     return Object.freeze({
       ...base,
       has_geometry: 0,
       idgaia: null,
-      pkd: null,
-      pkf: null,
       type_ligne: null,
     });
   }
@@ -126,16 +132,12 @@ export function decodeRailwaySectionDatabaseRow(
   if (
     value.has_geometry === 1 &&
     isNonEmptyString(value.idgaia) &&
-    isNonEmptyString(value.type_ligne) &&
-    isNonEmptyString(value.pkd) &&
-    isNonEmptyString(value.pkf)
+    isNonEmptyString(value.type_ligne)
   ) {
     return Object.freeze({
       ...base,
       has_geometry: 1,
       idgaia: value.idgaia,
-      pkd: value.pkd,
-      pkf: value.pkf,
       type_ligne: value.type_ligne,
     });
   }

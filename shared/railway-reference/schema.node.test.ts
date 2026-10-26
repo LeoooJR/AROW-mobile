@@ -13,6 +13,7 @@ function createDatabase(): DatabaseSync {
   database.exec("PRAGMA foreign_keys = ON");
   database.exec(createTableSql(RAILWAY_SECTIONS_TABLE));
   database.exec(createTableSql(KILOMETRIC_POINTS_TABLE));
+  database.exec("BEGIN");
   return database;
 }
 
@@ -22,8 +23,8 @@ const VALID_SECTION = [
   "gaia-id",
   "Ligne de test",
   "Ligne",
-  "499+752",
-  "511+605",
+  0,
+  509_000,
   1,
   3,
 ] as const;
@@ -72,6 +73,8 @@ describe("generated railway reference DDL", () => {
     expect(database.prepare("PRAGMA integrity_check").get()).toEqual({
       integrity_check: "ok",
     });
+    expect(() => database.exec("COMMIT")).not.toThrow();
+    expect(database.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
   });
 
   test.each([
@@ -154,4 +157,61 @@ describe("generated railway reference DDL", () => {
       insertPoint.run("001000", 1, 1_000, "1+000", 45, 4, 1, 0),
     ).toThrow();
   });
+
+  test.each([
+    ["missing", "893000", 1, 999_000],
+    ["different line", "894000", 1, 509_000],
+    ["different rank", "893000", 2, 509_000],
+  ])(
+    "rejects a %s endpoint at commit and allows rollback",
+    (_kind, code, rank, position) => {
+      database
+        .prepare(
+          "INSERT INTO railway_sections VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        )
+        .run("893000", 1, "gaia", "Test", "Ligne", 509000, 509000, 1, 1);
+      if (code !== "893000" || rank !== 1) {
+        database
+          .prepare(
+            "INSERT INTO railway_sections VALUES (?, ?, NULL, ?, NULL, NULL, NULL, 0, 0)",
+          )
+          .run(code, rank, "Other section");
+      }
+      database
+        .prepare(
+          "INSERT INTO kilometric_points VALUES (?, ?, ?, ?, 45, 4, 1, 0)",
+        )
+        .run(
+          code,
+          rank,
+          position,
+          `${Math.floor(Number(position) / 1000)}+000`,
+        );
+      expect(() => database.exec("COMMIT")).toThrow(/FOREIGN KEY/);
+      database.exec("ROLLBACK");
+      expect(database.prepare("SELECT * FROM railway_sections").all()).toEqual(
+        [],
+      );
+    },
+  );
+
+  test.each([
+    [null, 509000, 3],
+    [0, null, 3],
+    [1000, 0, 3],
+    [-1, 1000, 3],
+    [0, 1000, 0],
+    [0, 1000, 1],
+  ])(
+    "rejects inconsistent endpoints %j / %j with count %j",
+    (first, last, count) => {
+      expect(() =>
+        database
+          .prepare(
+            "INSERT INTO railway_sections VALUES ('893000', 1, NULL, 'Test', NULL, ?, ?, 0, ?)",
+          )
+          .run(first, last, count),
+      ).toThrow();
+    },
+  );
 });

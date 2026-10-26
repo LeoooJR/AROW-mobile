@@ -30,7 +30,7 @@ export const FIND_CONFLICTING_LINE_NAMES = `
 
 export const INSERT_RAILWAY_SECTION = `
   INSERT INTO ${RAILWAY_SECTIONS_TABLE.name} (
-    ${projection(RAILWAY_SECTIONS_TABLE, ["code_ligne", "rg_troncon", "idgaia", "lib_ligne", "type_ligne", "pkd", "pkf", "has_geometry", "milestone_count"])}
+    ${projection(RAILWAY_SECTIONS_TABLE, ["code_ligne", "rg_troncon", "idgaia", "lib_ligne", "type_ligne", "first_recorded_position_m", "last_recorded_position_m", "has_geometry", "milestone_count"])}
   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 `;
 

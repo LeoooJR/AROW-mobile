@@ -13,7 +13,7 @@ describe("railway reference queries", () => {
 
   test("loads searchable section bounds with geometry metadata", () => {
     expect(LOAD_SEARCHABLE_RAILWAYS_QUERY).toContain(
-      "INNER JOIN section_bounds",
+      "INNER JOIN kilometric_points AS minimum_point",
     );
     expect(LOAD_SEARCHABLE_RAILWAYS_QUERY).toContain("railway.has_geometry");
     expect(LOAD_SEARCHABLE_RAILWAYS_QUERY).toContain("railway.idgaia");

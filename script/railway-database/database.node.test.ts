@@ -19,13 +19,11 @@ import type {
 const geometrySections: readonly RailwaySectionWithGeometry[] = [1, 2, 3].map(
   (rank) => ({
     code: "001000",
-    endMilestone: "150+000",
     gaiaId: `gaia-${rank}`,
     hasGeometry: 1,
     name: "Test railway",
     railwayType: "Ligne",
     rank,
-    startMilestone: "99+000",
   }),
 );
 
@@ -84,7 +82,7 @@ describe("generated section milestone metadata", () => {
     const database = new DatabaseSync(path, { readOnly: true });
     try {
       expect(database.prepare("PRAGMA user_version").get()).toEqual({
-        user_version: 4,
+        user_version: 5,
       });
       expect(
         database
@@ -136,7 +134,7 @@ describe("generated section milestone metadata", () => {
     ],
     [
       "count",
-      "UPDATE railway_sections SET milestone_count = 1 WHERE code_ligne = '001000' AND rg_troncon = 3",
+      "UPDATE railway_sections SET milestone_count = 4 WHERE code_ligne = '001000' AND rg_troncon = 1",
     ],
     [
       "count",
@@ -186,6 +184,49 @@ describe("generated section milestone metadata", () => {
     } finally {
       database.close();
     }
+  });
+
+  test("stores exact endpoints for unsorted, empty, single and fallback sections", () => {
+    const database = new DatabaseSync(path, { readOnly: true });
+    try {
+      expect(
+        database
+          .prepare(
+            "SELECT first_recorded_position_m, last_recorded_position_m FROM railway_sections ORDER BY code_ligne, rg_troncon",
+          )
+          .all(),
+      ).toEqual([
+        { first_recorded_position_m: 99000, last_recorded_position_m: 150000 },
+        { first_recorded_position_m: 100000, last_recorded_position_m: 100000 },
+        { first_recorded_position_m: null, last_recorded_position_m: null },
+        { first_recorded_position_m: 99500, last_recorded_position_m: 99500 },
+      ]);
+    } finally {
+      database.close();
+    }
+  });
+
+  test("rejects a referenced interior point as an endpoint", () => {
+    const database = new DatabaseSync(path);
+    database.exec(
+      "PRAGMA foreign_keys = ON; UPDATE railway_sections SET last_recorded_position_m = 100000 WHERE code_ligne = '001000' AND rg_troncon = 1",
+    );
+    expect(database.prepare("PRAGMA foreign_key_check").all()).toEqual([]);
+    database.close();
+    expect(() => validateRailwayDatabase(path, summary)).toThrow(
+      "invalid recorded section endpoints",
+    );
+  });
+
+  test("rejects endpoint constraints changed from deferred to immediate", () => {
+    const database = new DatabaseSync(path, { defensive: false });
+    database.exec(
+      "PRAGMA writable_schema = ON; UPDATE sqlite_schema SET sql = replace(sql, 'DEFERRABLE INITIALLY DEFERRED', 'NOT DEFERRABLE INITIALLY IMMEDIATE') WHERE name = 'railway_sections'; PRAGMA writable_schema = OFF",
+    );
+    database.close();
+    expect(() => validateRailwayDatabase(path, summary)).toThrow(
+      "invalid section endpoint schema",
+    );
   });
 
   test("enforces class constraints and creates planner statistics after bulk insertion", () => {

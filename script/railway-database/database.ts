@@ -13,6 +13,7 @@ import {
 import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
 import { milestoneRowsBySection } from "./milestone-metadata";
 import { validatePointDisplayMetadata } from "./point-display-metadata";
+import { validateSectionEndpoints } from "./section-endpoints";
 
 import {
   BEGIN_TRANSACTION,
@@ -56,13 +57,11 @@ function fallbackRailwaySection(
 ): RailwaySectionWithoutGeometry {
   return Object.freeze({
     code: milestone.code,
-    endMilestone: null,
     gaiaId: null,
     hasGeometry: 0,
     name: lineName ?? `Ligne ${milestone.code}`,
     railwayType: null,
     rank: milestone.rank,
-    startMilestone: null,
   });
 }
 
@@ -101,9 +100,13 @@ function insertRailwaySections(
 ): void {
   const statement = database.prepare(INSERT_RAILWAY_SECTION);
   for (const section of sections) {
-    const milestoneCount =
-      points.get(new RailwaySectionId(section.code, section.rank).value)
-        ?.length ?? 0;
+    const sectionPoints =
+      points.get(new RailwaySectionId(section.code, section.rank).value) ?? [];
+    const milestoneCount = sectionPoints.length;
+    const endpoints = {
+      first_recorded_position_m: sectionPoints[0]?.position_m ?? null,
+      last_recorded_position_m: sectionPoints.at(-1)?.position_m ?? null,
+    };
     const row: RailwaySectionDatabaseRow =
       section.hasGeometry === 1
         ? {
@@ -112,8 +115,7 @@ function insertRailwaySections(
             idgaia: section.gaiaId,
             lib_ligne: section.name,
             milestone_count: milestoneCount,
-            pkd: section.startMilestone,
-            pkf: section.endMilestone,
+            ...endpoints,
             rg_troncon: section.rank,
             type_ligne: section.railwayType,
           }
@@ -123,8 +125,7 @@ function insertRailwaySections(
             idgaia: null,
             lib_ligne: section.name,
             milestone_count: milestoneCount,
-            pkd: null,
-            pkf: null,
+            ...endpoints,
             rg_troncon: section.rank,
             type_ligne: null,
           };
@@ -134,8 +135,8 @@ function insertRailwaySections(
       row.idgaia,
       row.lib_ligne,
       row.type_ligne,
-      row.pkd,
-      row.pkf,
+      row.first_recorded_position_m,
+      row.last_recorded_position_m,
       row.has_geometry,
       row.milestone_count,
     );
@@ -270,6 +271,7 @@ export function validateRailwayDatabase(
     }
 
     validatePointDisplayMetadata(database);
+    validateSectionEndpoints(database);
     const counts = databaseCounts(
       database.prepare(SELECT_DATABASE_COUNTS).get(),
     );

@@ -25,12 +25,12 @@ function availableRangeMessage(section: RailwaySection | undefined): string {
     return "Sélectionnez une section pour connaître les repères disponibles.";
   }
 
-  const geometry = section.geometry;
-  if (geometry.status === "absent") {
+  const range = section.milestoneRange;
+  if (range === undefined) {
     return "Plage de repères indisponible pour cette section.";
   }
 
-  return `Repères disponibles : ${geometry.startMilestone} à ${geometry.endMilestone}.`;
+  return `Repères disponibles : ${range.minimumLabel} à ${range.maximumLabel}.`;
 }
 
 export default function MilestoneSearchStep({

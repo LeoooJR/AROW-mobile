@@ -10,10 +10,8 @@ const railway = new Railway({
   sections: [
     {
       geometry: {
-        endMilestone: "511+605",
         gaiaId: "section-one",
         railwayType: "Ligne classique",
-        startMilestone: "499+752",
         status: "present",
       },
       milestoneRange: {
@@ -26,11 +24,15 @@ const railway = new Railway({
     },
     {
       geometry: {
-        endMilestone: "009+007",
         gaiaId: "section-two",
         railwayType: "Ligne classique",
-        startMilestone: "000+005",
         status: "present",
+      },
+      milestoneRange: {
+        minimumLabel: "000+005",
+        minimumPositionMeters: 5,
+        maximumLabel: "009+007",
+        maximumPositionMeters: 9007,
       },
       sectionRank: 2,
     },
@@ -68,15 +70,14 @@ describe("MilestoneSearchStep range hint", () => {
     expect(screen.getByLabelText("Kilomètre")).toBeDisabled();
   });
 
-  test("shows geometry limits rather than recorded bounds and announces updates politely", async () => {
+  test("shows recorded bounds and announces updates politely", async () => {
     await render(
       <MilestoneSearchStep {...props} selectedSection={railway.sections[0]} />,
     );
 
     expect(
-      screen.getByText("Repères disponibles : 499+752 à 511+605."),
+      screen.getByText("Repères disponibles : 499+000 à 511+000."),
     ).toHaveProp("aria-live", "polite");
-    expect(screen.queryByText(/499\+000 à 511\+000/)).not.toBeOnTheScreen();
   });
 
   test("updates on section changes, preserves leading zeroes, and resets", async () => {
@@ -103,15 +104,27 @@ describe("MilestoneSearchStep range hint", () => {
     expect(screen.queryByText(/000\+005/)).not.toBeOnTheScreen();
   });
 
-  test("reports missing geometry without falling back to recorded bounds", async () => {
+  test("shows recorded bounds even without geometry", async () => {
     await render(
       <MilestoneSearchStep {...props} selectedSection={railway.sections[2]} />,
     );
 
     expect(
+      screen.getByText("Repères disponibles : 509+000 à 509+000."),
+    ).toBeOnTheScreen();
+    expect(screen.getByLabelText("Kilomètre")).toBeEnabled();
+  });
+  test("reports unavailable recorded bounds", async () => {
+    const empty = new Railway({
+      code: "001000",
+      name: "Empty",
+      sections: [{ geometry: { status: "absent" }, sectionRank: 1 }],
+    });
+    await render(
+      <MilestoneSearchStep {...props} selectedSection={empty.sections[0]} />,
+    );
+    expect(
       screen.getByText("Plage de repères indisponible pour cette section."),
     ).toBeOnTheScreen();
-    expect(screen.queryByText(/509\+000 à 509\+000/)).not.toBeOnTheScreen();
-    expect(screen.getByLabelText("Kilomètre")).toBeEnabled();
   });
 });

@@ -59,17 +59,27 @@ Location accuracy and application location state remain application-owned.
 `ParsedMilestoneLabel` is the PK parser's result: kilometre and metric strings
 preserve their written digits, while `positionMeters` supplies the numeric value.
 
-## Three different section limits
+## Geometry and recorded section limits
 
 | Concept                  | Meaning and absence                                                                                                                                                                                                                                         | Authoritative module                                                                            |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| Geometry metadata        | Declared start/end PK labels, GAIA ID, and railway type. Contains metadata, not vertices. `status: "absent"` carries no metadata; `status: "present"` requires all four nonempty fields. Its PK labels can differ from recorded limits.                     | `RailwaySectionGeometry` in [`railway-section.ts`](../shared/railway-domain/railway-section.ts) |
+| Geometry metadata        | GAIA ID and railway type, independent of recorded points. Contains metadata, not vertices. `status: "absent"` carries no metadata; `status: "present"` requires both nonempty fields.                                                                       | `RailwaySectionGeometry` in [`railway-section.ts`](../shared/railway-domain/railway-section.ts) |
 | Recorded milestone range | Lowest/highest recorded PK values and matching labels for the exact section, without coordinates. The section's range may be undefined; a single recorded PK has equal minimum and maximum values. Does not imply every intermediate point exists.          | [`railway-milestone-range.ts`](../shared/railway-domain/railway-milestone-range.ts)             |
 | Located milestone bounds | First/last recorded `Milestone` objects ordered by numeric PK within the exact section. `first` and `last` are optional: empty sections return neither; one-point sections return the same point as both. Loading and failures belong to application state. | [`railway-milestone-bounds.ts`](../shared/railway-domain/railway-milestone-bounds.ts)           |
 
-For example, geometry metadata can declare `499+752 → 511+605` while recorded
-milestones cover `499+752 → 511+600`. These describe different data and must not be
-substituted for one another. Endpoint controls use located recorded bounds.
+Section ranges and endpoint controls use recorded points. For example, `893000:1`
+has recorded limits `499+752 → 511+600`. Declared geometry PKD/PKF are removed from
+runtime data because they need not correspond to recorded points. SQLite stores
+the numerical first/last recorded positions on each section, with deferred composite
+foreign keys to the points. Empty sections have null references, and one-point
+sections reference the same point twice. Ranges do not guarantee intermediate
+points exist or describe the limits of the line's geographic shape.
+
+[`railway-section-endpoints.ts`](../shared/railway-domain/railway-section-endpoints.ts)
+owns validation of recorded endpoint positions against a section's milestone count.
+It checks absent endpoints for empty sections, ordered numerical PKs for nonempty
+sections, and coincident endpoints for single-point sections. Database row decoders
+translate their column values to this domain check.
 
 ## Ownership and use
 

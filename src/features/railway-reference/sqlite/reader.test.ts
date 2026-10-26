@@ -44,7 +44,7 @@ test("preserves null when no exact point exists", async () => {
   ).toBeNull();
 });
 
-test("binds the same section to every bounds subquery and preserves row order", async () => {
+test("binds the section once and preserves endpoint row order", async () => {
   const rows = [{ position_m: 99_000 }, { position_m: 100_000 }];
   const getAllAsync = jest.fn().mockResolvedValue(rows);
 
@@ -53,10 +53,6 @@ test("binds the same section to every bounds subquery and preserves row order", 
   );
   expect(getAllAsync).toHaveBeenCalledWith(
     FIND_RAILWAY_MILESTONE_BOUNDS_QUERY,
-    "893000",
-    2,
-    "893000",
-    2,
     "893000",
     2,
   );

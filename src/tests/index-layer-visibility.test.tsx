@@ -28,10 +28,8 @@ const mockRailwayLine = new Railway({
   sections: [
     {
       geometry: {
-        endMilestone: "511+605",
         gaiaId: "railway-gaia-id",
         railwayType: "Ligne",
-        startMilestone: "499+752",
         status: "present",
       },
       sectionRank: 1,

@@ -30,10 +30,8 @@ function geometryFromDatabaseRow(
   }
 
   return {
-    endMilestone: row.pkf,
     gaiaId: row.idgaia,
     railwayType: row.type_ligne,
-    startMilestone: row.pkd,
     status: "present",
   };
 }
