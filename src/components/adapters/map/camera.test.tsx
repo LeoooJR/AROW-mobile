@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react-native";
 
-import MapCamera from "./map-camera";
+import MapCamera from "./camera";
 
 const mockEaseTo = jest.fn();
 let mockReduceMotion = false;

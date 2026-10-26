@@ -1,10 +1,7 @@
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { Milestone } from "@shared/railway-domain/milestone";
 import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
-import {
-  milestoneFromFeature,
-  railwayFromFeature,
-} from "./map-feature-parsing";
+import { milestoneFromFeature, railwayFromFeature } from "./feature-parsing";
 
 const milestone = new Milestone({
   id: new MilestoneId(new RailwaySectionId("001000", 1), 241000),

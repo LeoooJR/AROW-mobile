@@ -1,6 +1,6 @@
 import type { StyleSpecification } from "@maplibre/maplibre-react-native";
 
-import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
+import { MAP_LAYER_IDS } from "@/components/adapters/map/layer-ids";
 import { BASEMAP_SOURCE_URL } from "@/features/map-screen/basemap-config";
 
 interface MapStylePalette {

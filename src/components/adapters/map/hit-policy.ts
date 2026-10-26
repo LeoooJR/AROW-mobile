@@ -2,7 +2,7 @@ import {
   milestoneDisplayInterval,
   type MilestoneDisplayInterval,
 } from "@/features/railway-reference/milestone-display";
-import { MAP_LAYER_IDS } from "./map-layer-ids";
+import { MAP_LAYER_IDS } from "./layer-ids";
 
 export const MILESTONE_CIRCLES = {
   normal: { radius: 4, stroke: 1 },

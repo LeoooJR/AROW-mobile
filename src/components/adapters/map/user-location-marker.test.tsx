@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 
-import { MAP_LAYER_IDS } from "./map-layer-ids";
+import { MAP_LAYER_IDS } from "./layer-ids";
 import UserLocationMarker from "./user-location-marker";
 
 jest.mock("@maplibre/maplibre-react-native", () => {

@@ -5,7 +5,7 @@ import {
   DEFAULT_MAP_LAYER_VISIBILITY,
   type MapLayerVisibility,
   type ToggleableMapLayer,
-} from "@/components/adapters/map/map-layer-visibility";
+} from "@/components/adapters/map/layer-visibility";
 import type { MapFeature } from "@/types/map-feature";
 import type { Milestone } from "@shared/railway-domain/milestone";
 import type { GeographicCoordinates } from "@shared/geographic-coordinates";

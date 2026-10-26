@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from "expo-sqlite";
 import type { MapViewport } from "@/types/map-viewport";
 import { normalizeLongitude } from "@/utils/angle";
-import { hasValidViewportBounds } from "@/components/adapters/map/map-viewport";
+import { hasValidViewportBounds } from "@/components/adapters/map/viewport";
 import {
   milestoneDisplayInterval,
   MILESTONE_DISPLAY_CLASSES,

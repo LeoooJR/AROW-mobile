@@ -7,9 +7,9 @@ import type { MapFeature } from "@/types/map-feature";
 import type { Milestone } from "@shared/railway-domain/milestone";
 import type { RailwaySection } from "@shared/railway-domain/railway-section";
 import { milestoneDisplayInterval } from "@/features/railway-reference/milestone-display";
-import type { MapLayerVisibility } from "./map-layer-visibility";
-import { MAP_LAYER_IDS } from "./map-layer-ids";
-import { railwayFromFeature } from "./map-feature-parsing";
+import type { MapLayerVisibility } from "./layer-visibility";
+import { MAP_LAYER_IDS } from "./layer-ids";
+import { railwayFromFeature } from "./feature-parsing";
 import {
   eligibleMilestoneCandidates,
   nearestMilestoneWithinTarget,
@@ -19,7 +19,7 @@ import {
   milestoneDotLayerId,
   milestoneHitRadius,
   RAILWAY_HIT_PADDING,
-} from "./map-hit-policy";
+} from "./hit-policy";
 
 export type FeatureQueryMap = Pick<
   MapRef,

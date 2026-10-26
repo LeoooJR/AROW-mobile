@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type {
   MapLayerVisibility,
   ToggleableMapLayer,
-} from "@/components/adapters/map/map-layer-visibility";
+} from "@/components/adapters/map/layer-visibility";
 import NativeBottomSheet from "@/components/adapters/native-bottom-sheet";
 import MapLayerRow from "@/components/composites/map-toolbar/map-layer-row";
 import { MAP_TOOLBAR_PALETTES } from "@/components/composites/map-toolbar/map-toolbar-theme";

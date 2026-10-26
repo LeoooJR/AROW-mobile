@@ -50,7 +50,7 @@ above the map.
 
 ## Base map
 
-`map-style-light.ts` and `map-style-dark.ts` are the authorities for the light
+`style-light.ts` and `style-dark.ts` are the authorities for the light
 and dark base-map designs. They follow their respective design prototypes, with
 main railway infrastructure as the strongest passive feature. Brand orange
 remains reserved for active routes, selections, markers, and simulation state.
@@ -82,7 +82,7 @@ the marker and the user-controlled viewport and does not start a new camera
 acquisition cycle. Initial acquisition without a fix and explicit unavailable or
 error states still remove the input and restore the world view.
 
-`map-camera.tsx` owns the native camera constants, acquisition and loss
+`camera.tsx` owns the native camera constants, acquisition and loss
 lifecycle, explicit recenter requests, and reduced-motion transitions.
 `user-location-marker.tsx` owns the marker annotation, theme, artwork, heading,
 and map-bearing compensation. `map.tsx` coordinates the map container and
@@ -119,14 +119,14 @@ source loading order. Tap priority is controlled independently by the map picker
 
 ## Feature hit testing
 
-`map-hit-policy.ts` owns the marker circle dimensions and extra tap tolerance.
+`hit-policy.ts` owns the marker circle dimensions and extra tap tolerance.
 Normal circles occupy a 5 dp radius including their stroke. Extra tolerance is
 2 dp at zoom 10–<12, 6 dp at 12–<14, 3 dp at 14–<15 and 1 dp at 15+; below 10,
 markers cannot be selected. The selected circle uses its own visible radius and
 stroke with the same extra tolerance. These are initial fixed policy values.
 
 Both GeoJSON sources are presentation-only. `Map` handles presses centrally;
-`map-feature-picker.ts` queries rendered features only in the active dot layer
+`feature-picker.ts` queries rendered features only in the active dot layer
 and mounted selected-circle layer, projects nearby candidates, and chooses the
 nearest eligible centre inside its circular target. Duplicate IDs are projected
 once. Exact distance ties use serialized milestone ID order. Labels remain
@@ -137,9 +137,9 @@ existing 44×44 dp window and chooses the first valid railway in rendered order.
 Thus a dot hit wins, while nearby line taps can select the line without hiding
 markers. Use MapLibre screen coordinates directly; Android's native bridge
 already handles display density. Feature validation stays in the adapter's
-`map-feature-parsing.ts` helpers, independent of source rendering and SQLite.
+`feature-parsing.ts` helpers, independent of source rendering and SQLite.
 
-`use-map-feature-press.ts` cancels stale results after newer taps, camera movement,
+`use-feature-press.ts` cancels stale results after newer taps, camera movement,
 selection/source/visibility changes, style reloads and unmount. Query failures and
 empty map taps leave the selection unchanged. No public map callback, marker
 display tier, navigation behaviour or reference asset changes with this policy.

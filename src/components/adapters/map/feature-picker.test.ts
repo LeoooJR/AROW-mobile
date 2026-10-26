@@ -1,11 +1,8 @@
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { Milestone } from "@shared/railway-domain/milestone";
 import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
-import {
-  pickMapFeature,
-  type MapFeaturePickOptions,
-} from "./map-feature-picker";
-import { MAP_LAYER_IDS } from "./map-layer-ids";
+import { pickMapFeature, type MapFeaturePickOptions } from "./feature-picker";
+import { MAP_LAYER_IDS } from "./layer-ids";
 
 function point(position: number, longitude = 0) {
   return new Milestone({

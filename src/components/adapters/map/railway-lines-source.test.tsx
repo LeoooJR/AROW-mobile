@@ -3,7 +3,7 @@ import * as ReactNative from "react-native";
 
 import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 
-import { MAP_LAYER_IDS } from "./map-layer-ids";
+import { MAP_LAYER_IDS } from "./layer-ids";
 import RailwayLinesSource from "./railway-lines-source";
 
 jest.mock("@maplibre/maplibre-react-native", () => {

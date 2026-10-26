@@ -1,4 +1,4 @@
-import { milestoneDotLayerId, milestoneHitRadius } from "./map-hit-policy";
+import { milestoneDotLayerId, milestoneHitRadius } from "./hit-policy";
 
 test.each([
   [9.999, undefined],

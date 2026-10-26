@@ -1,8 +1,8 @@
 import type { PixelPoint } from "@maplibre/maplibre-react-native";
 import type { Milestone } from "@shared/railway-domain/milestone";
 import type { MilestoneDisplayInterval } from "@/features/railway-reference/milestone-display";
-import { milestoneFromFeature } from "./map-feature-parsing";
-import { milestoneHitRadius } from "./map-hit-policy";
+import { milestoneFromFeature } from "./feature-parsing";
+import { milestoneHitRadius } from "./hit-policy";
 
 export interface ProjectedMilestone {
   readonly milestone: Milestone;

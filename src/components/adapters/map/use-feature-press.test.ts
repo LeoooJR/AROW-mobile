@@ -4,7 +4,7 @@ import type { PressEvent } from "@maplibre/maplibre-react-native";
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { Milestone } from "@shared/railway-domain/milestone";
 import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
-import { useMapFeaturePress } from "./use-map-feature-press";
+import { useMapFeaturePress } from "./use-feature-press";
 
 const milestone = new Milestone({
   id: new MilestoneId(new RailwaySectionId("001000", 1), 1000),

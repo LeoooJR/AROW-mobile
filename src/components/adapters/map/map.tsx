@@ -10,15 +10,15 @@ import {
   useColorScheme,
 } from "react-native";
 
-import MapCamera from "@/components/adapters/map/map-camera";
-import { DEFAULT_MAP_LAYER_VISIBILITY } from "@/components/adapters/map/map-layer-visibility";
+import MapCamera from "@/components/adapters/map/camera";
+import { DEFAULT_MAP_LAYER_VISIBILITY } from "@/components/adapters/map/layer-visibility";
 import type { MapProps } from "@/components/adapters/map/map-props";
-import { DARK_MAP_STYLE } from "@/components/adapters/map/map-style-dark";
-import { LIGHT_MAP_STYLE } from "@/components/adapters/map/map-style-light";
+import { DARK_MAP_STYLE } from "@/components/adapters/map/style-dark";
+import { LIGHT_MAP_STYLE } from "@/components/adapters/map/style-light";
 import MilestoneLayer from "@/components/adapters/map/milestone-layer";
 import RailwayLinesSource from "@/components/adapters/map/railway-lines-source";
 import UserLocationMarker from "@/components/adapters/map/user-location-marker";
-import { useMapFeaturePress } from "./use-map-feature-press";
+import { useMapFeaturePress } from "./use-feature-press";
 import { resolveColorTheme } from "@/utils/color-theme";
 
 export type {

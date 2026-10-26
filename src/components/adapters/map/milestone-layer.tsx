@@ -1,5 +1,5 @@
-import type { MilestoneFeatureCollection } from "./map-feature-parsing";
-import { MILESTONE_CIRCLES, milestoneDotLayerId } from "./map-hit-policy";
+import type { MilestoneFeatureCollection } from "./feature-parsing";
+import { MILESTONE_CIRCLES, milestoneDotLayerId } from "./hit-policy";
 import {
   GeoJSONSource,
   Layer,
@@ -9,7 +9,7 @@ import {
 import { type ReactElement, useMemo } from "react";
 import { useColorScheme } from "react-native";
 
-import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
+import { MAP_LAYER_IDS } from "@/components/adapters/map/layer-ids";
 import type { Milestone } from "@shared/railway-domain/milestone";
 import { resolveColorTheme } from "@/utils/color-theme";
 import { MILESTONE_DISPLAY_BANDS } from "@/features/railway-reference/milestone-display";

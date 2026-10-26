@@ -1,5 +1,5 @@
 import type { MapViewport } from "@/types/map-viewport";
-import { hasValidViewportBounds } from "./map-viewport";
+import { hasValidViewportBounds } from "./viewport";
 
 test.each<readonly [MapViewport["bounds"], boolean]>([
   [[4, 45, 5, 46], true],

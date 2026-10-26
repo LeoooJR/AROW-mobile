@@ -3,7 +3,7 @@ import { type ReactElement, useState } from "react";
 import type {
   MapLayerVisibility,
   ToggleableMapLayer,
-} from "@/components/adapters/map/map-layer-visibility";
+} from "@/components/adapters/map/layer-visibility";
 import MapLayersSheet from "@/components/composites/map-toolbar/map-layers-sheet";
 import MapToolbarActions from "@/components/composites/map-toolbar/map-toolbar-actions";
 import PointSearchSheet from "@/components/composites/map-toolbar/point-search-sheet";

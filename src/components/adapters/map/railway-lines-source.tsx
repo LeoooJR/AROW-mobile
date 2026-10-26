@@ -6,7 +6,7 @@ import {
 import { type ReactElement } from "react";
 import { useColorScheme } from "react-native";
 
-import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
+import { MAP_LAYER_IDS } from "@/components/adapters/map/layer-ids";
 import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import { resolveColorTheme } from "@/utils/color-theme";
 

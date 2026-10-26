@@ -18,8 +18,8 @@ import {
   useAppStartup,
 } from "@/hooks/platform/use-app-startup";
 
-import { DARK_MAP_STYLE } from "./map-style-dark";
-import { LIGHT_MAP_STYLE } from "./map-style-light";
+import { DARK_MAP_STYLE } from "./style-dark";
+import { LIGHT_MAP_STYLE } from "./style-light";
 import Map from "./map";
 
 jest.mock("expo/fetch", () => ({ fetch: jest.fn() }));
@@ -55,7 +55,7 @@ jest.mock("@maplibre/maplibre-react-native", () => {
   };
 });
 
-jest.mock("./map-camera", () => {
+jest.mock("./camera", () => {
   const { View: MockView } =
     jest.requireActual<typeof import("react-native")>("react-native");
 

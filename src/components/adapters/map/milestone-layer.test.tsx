@@ -9,7 +9,7 @@ import {
 
 import { Milestone } from "@shared/railway-domain/milestone";
 
-import { MAP_LAYER_IDS } from "./map-layer-ids";
+import { MAP_LAYER_IDS } from "./layer-ids";
 import MilestoneLayer from "./milestone-layer";
 
 jest.mock("@maplibre/maplibre-react-native", () => {

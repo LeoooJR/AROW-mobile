@@ -10,7 +10,7 @@ import {
   pickMapFeature,
   type FeatureQueryMap,
   type MapFeaturePickOptions,
-} from "./map-feature-picker";
+} from "./feature-picker";
 
 interface MapFeaturePressOptions extends Omit<MapFeaturePickOptions, "point"> {
   readonly map: RefObject<FeatureQueryMap | null>;
