@@ -92,13 +92,7 @@ tags:
     timeout: 10000
 - tapOn:
     id: "close-map-feature-details"
-# Hide dense point targets to select their parent line unambiguously.
-- tapOn:
-    id: "map-layers-button"
-- tapOn:
-    id: "milestones-layer-switch"
-- pressKey: Back
-- waitForAnimationToEnd
+# The line remains selectable between visible dots.
 - tapOn:
     point: "24%,13%"
     retryTapIfNoChange: true
@@ -107,8 +101,3 @@ tags:
     timeout: 10000
 - tapOn:
     id: "close-map-feature-details"
-- tapOn:
-    id: "map-layers-button"
-- tapOn:
-    id: "milestones-layer-switch"
-- pressKey: Back

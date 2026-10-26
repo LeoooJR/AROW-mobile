@@ -1,6 +1,7 @@
 import {
   Map as MapLibreMap,
   type ViewStateChangeEvent,
+  type MapRef,
 } from "@maplibre/maplibre-react-native";
 import { type ReactElement, useCallback, useRef, useState } from "react";
 import {
@@ -17,6 +18,7 @@ import { LIGHT_MAP_STYLE } from "@/components/adapters/map/map-style-light";
 import MilestoneLayer from "@/components/adapters/map/milestone-layer";
 import RailwayLinesSource from "@/components/adapters/map/railway-lines-source";
 import UserLocationMarker from "@/components/adapters/map/user-location-marker";
+import { useMapFeaturePress } from "./use-map-feature-press";
 import { resolveColorTheme } from "@/utils/color-theme";
 
 export type {
@@ -49,6 +51,7 @@ export default function Map({
   const colorScheme = useColorScheme();
   const [bearing, setBearing] = useState(0);
   const styleLoaded = useRef(false);
+  const map = useRef<MapRef | null>(null);
   const initialRenderState = useRef<"pending" | "reported" | "failed">(
     "pending",
   );
@@ -60,16 +63,30 @@ export default function Map({
         : selectedFeature.id;
   const selectedMilestone =
     selectedFeature?.kind === "milestone" ? selectedFeature : undefined;
+  const { onPress: onMapPress, invalidate: invalidateFeaturePress } =
+    useMapFeaturePress({
+      map,
+      ready: styleLoaded,
+      visibility: layerVisibility,
+      railwayAvailable: railwayData !== undefined,
+      selectedSection: selectedSection !== undefined,
+      selectedMilestone,
+      selectedFeature,
+      milestoneData,
+      railwayData,
+      onFeaturePress,
+    });
 
   const onRegionDidChange = useCallback(
     (event: NativeSyntheticEvent<ViewStateChangeEvent>) => {
+      invalidateFeaturePress();
       setBearing(event.nativeEvent.bearing);
       onViewportChange?.({
         bounds: event.nativeEvent.bounds,
         zoom: event.nativeEvent.zoom,
       });
     },
-    [onViewportChange],
+    [onViewportChange, invalidateFeaturePress],
   );
 
   const reportReady = () => {
@@ -86,15 +103,20 @@ export default function Map({
 
   return (
     <MapLibreMap
+      ref={map}
       accessibilityLabel="Carte ferroviaire interactive AROW"
       androidView="texture"
       mapStyle={MAP_STYLES[resolveColorTheme(colorScheme)]}
       onWillStartLoadingMap={() => {
+        invalidateFeaturePress();
         styleLoaded.current = false;
       }}
       onDidFinishLoadingStyle={() => {
         styleLoaded.current = true;
       }}
+      onPress={onMapPress}
+      onRegionWillChange={invalidateFeaturePress}
+      onRegionIsChanging={invalidateFeaturePress}
       onDidFinishRenderingMapFully={
         onReady === undefined ? undefined : reportReady
       }
@@ -123,14 +145,12 @@ export default function Map({
       />
       <MilestoneLayer
         data={milestoneData}
-        onFeaturePress={onFeaturePress}
         selectedMilestone={selectedMilestone}
         visible={layerVisibility.milestone}
       />
       {railwayData === undefined ? null : (
         <RailwayLinesSource
           data={railwayData}
-          onFeaturePress={onFeaturePress}
           selectedSection={selectedSection}
           visible={layerVisibility.railway}
         />

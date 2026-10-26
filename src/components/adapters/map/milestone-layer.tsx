@@ -1,49 +1,24 @@
-import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
-import { MilestoneId } from "@shared/railway-domain/milestone-id";
+import type { MilestoneFeatureCollection } from "./map-feature-parsing";
+import { MILESTONE_CIRCLES, milestoneDotLayerId } from "./map-hit-policy";
 import {
   GeoJSONSource,
   Layer,
-  type PressEventWithFeatures,
   type SymbolLayerSpecification,
   type CircleLayerSpecification,
 } from "@maplibre/maplibre-react-native";
-import type { FeatureCollection, Point } from "geojson";
 import { type ReactElement, useMemo } from "react";
-import { type NativeSyntheticEvent, useColorScheme } from "react-native";
+import { useColorScheme } from "react-native";
 
-import { geographicCoordinatesFromPosition } from "@/components/adapters/map/geojson-validation";
 import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
-import type { MapFeature } from "@/types/map-feature";
-import { isCanonicalRailwayLineCode } from "@shared/railway-domain/line-code";
-import { isMilestoneLabelForPosition } from "@shared/railway-domain/kilometric-position";
-import { Milestone } from "@shared/railway-domain/milestone";
-import {
-  isNonEmptyString,
-  isPositiveInteger,
-  isRecord,
-  isUnsignedInteger,
-} from "@shared/value-validation";
+import type { Milestone } from "@shared/railway-domain/milestone";
 import { resolveColorTheme } from "@/utils/color-theme";
 import { MILESTONE_DISPLAY_BANDS } from "@/features/railway-reference/milestone-display";
 
 export interface MilestoneLayerProps {
   readonly data?: string | readonly Milestone[];
-  readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly selectedMilestone?: Milestone;
   readonly visible?: boolean;
 }
-
-interface MilestoneGeoJSONProperties {
-  readonly label: string;
-  readonly lineCode: string;
-  readonly positionMeters: number;
-  readonly sectionRank: number;
-}
-
-type MilestoneFeatureCollection = FeatureCollection<
-  Point,
-  MilestoneGeoJSONProperties
->;
 
 interface MilestonePalette {
   readonly border: string;
@@ -86,65 +61,8 @@ const EMPTY_MILESTONES: MilestoneFeatureCollection = {
 Object.freeze(EMPTY_MILESTONES.features);
 Object.freeze(EMPTY_MILESTONES);
 
-function isMilestoneProperties(
-  properties: GeoJSON.GeoJsonProperties,
-): properties is MilestoneGeoJSONProperties {
-  if (!isRecord(properties)) {
-    return false;
-  }
-
-  return (
-    hasMilestoneIdentity(properties) &&
-    hasMilestoneMetadata(properties) &&
-    isMilestoneLabelForPosition(properties.label, properties.positionMeters)
-  );
-}
-
-function hasMilestoneIdentity(properties: Record<string, unknown>): boolean {
-  return (
-    isCanonicalRailwayLineCode(properties.lineCode) &&
-    isPositiveInteger(properties.sectionRank) &&
-    isUnsignedInteger(properties.positionMeters)
-  );
-}
-
-function hasMilestoneMetadata(properties: Record<string, unknown>): boolean {
-  return isNonEmptyString(properties.label);
-}
-
-function milestoneFromFeature(feature: GeoJSON.Feature): Milestone | undefined {
-  if (
-    feature.geometry.type !== "Point" ||
-    !isMilestoneProperties(feature.properties)
-  ) {
-    return undefined;
-  }
-
-  const coordinates = geographicCoordinatesFromPosition(
-    feature.geometry.coordinates,
-  );
-  if (coordinates === undefined) {
-    return undefined;
-  }
-
-  const milestone = new Milestone({
-    id: new MilestoneId(
-      new RailwaySectionId(
-        feature.properties.lineCode,
-        feature.properties.sectionRank,
-      ),
-      feature.properties.positionMeters,
-    ),
-    coordinates,
-    label: feature.properties.label,
-  });
-
-  return feature.id === milestone.id.value ? milestone : undefined;
-}
-
 export default function MilestoneLayer({
   data,
-  onFeaturePress,
   selectedMilestone,
   visible = true,
 }: MilestoneLayerProps): ReactElement {
@@ -165,35 +83,15 @@ export default function MilestoneLayer({
     };
   }, [data, selectedMilestone]);
 
-  const onPress = (
-    event: NativeSyntheticEvent<PressEventWithFeatures>,
-  ): void => {
-    const milestone = event.nativeEvent.features
-      .map(milestoneFromFeature)
-      .find((feature) => feature !== undefined);
-
-    if (milestone === undefined) {
-      return;
-    }
-
-    event.stopPropagation();
-    onFeaturePress?.(milestone);
-  };
-
   return (
     <GeoJSONSource
       data={sourceData}
       id="railway-milestones-source"
       key={typeof data === "string" ? data : "viewport-milestones"}
-      onPress={visible ? onPress : undefined}
     >
-      {MILESTONE_DISPLAY_BANDS.map((band, index) => (
+      {MILESTONE_DISPLAY_BANDS.map((band) => (
         <Layer
-          id={
-            index === 0
-              ? MAP_LAYER_IDS.milestone.dots
-              : `${MAP_LAYER_IDS.milestone.dots}-${band.intervalMeters}`
-          }
+          id={milestoneDotLayerId(band.intervalMeters)}
           key={band.intervalMeters}
           filter={[
             "==",
@@ -205,9 +103,9 @@ export default function MilestoneLayer({
           maxzoom={band.maxZoom}
           paint={{
             "circle-color": palette.label,
-            "circle-radius": 4,
+            "circle-radius": MILESTONE_CIRCLES.normal.radius,
             "circle-stroke-color": palette.border,
-            "circle-stroke-width": 1,
+            "circle-stroke-width": MILESTONE_CIRCLES.normal.stroke,
           }}
           type="circle"
         />
@@ -221,9 +119,9 @@ export default function MilestoneLayer({
           minzoom={MILESTONE_DISPLAY_BANDS[0].minZoom}
           paint={{
             "circle-color": palette.selected,
-            "circle-radius": 7,
+            "circle-radius": MILESTONE_CIRCLES.selected.radius,
             "circle-stroke-color": palette.label,
-            "circle-stroke-width": 2,
+            "circle-stroke-width": MILESTONE_CIRCLES.selected.stroke,
           }}
           type="circle"
         />

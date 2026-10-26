@@ -6,6 +6,7 @@ import {
   render,
   screen,
   userEvent,
+  waitFor,
 } from "@testing-library/react-native";
 import { fetch } from "expo/fetch";
 import * as ReactNative from "react-native";
@@ -29,17 +30,28 @@ const MILESTONE = new Milestone({
   coordinates: { latitude: 45.74, longitude: 4.86 },
   label: "241+000",
 });
+const mockNativeMap = {
+  getZoom: jest.fn().mockResolvedValue(15),
+  project: jest.fn().mockResolvedValue([100, 100]),
+  queryRenderedFeatures: jest.fn(),
+};
 jest.mock("@maplibre/maplibre-react-native", () => {
+  const { useImperativeHandle } =
+    jest.requireActual<typeof import("react")>("react");
   const { View: MockView } =
     jest.requireActual<typeof import("react-native")>("react-native");
 
   return {
     Map: ({
       children,
+      ref,
       ...props
-    }: React.PropsWithChildren<Record<string, unknown>>) => (
-      <MockView {...props}>{children}</MockView>
-    ),
+    }: React.PropsWithChildren<Record<string, unknown>> & {
+      ref?: React.Ref<typeof mockNativeMap>;
+    }) => {
+      useImperativeHandle(ref, () => mockNativeMap);
+      return <MockView {...props}>{children}</MockView>;
+    },
   };
 });
 
@@ -353,7 +365,7 @@ describe("Map", () => {
     );
   });
 
-  test("forwards a shared callback and derives linked milestone selection", async () => {
+  test("owns presses centrally and derives linked milestone selection", async () => {
     const onFeaturePress = jest.fn();
 
     await render(
@@ -369,21 +381,32 @@ describe("Map", () => {
       "data",
       "file:///railways.geojson",
     );
-    expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
+    expect(screen.getByTestId("mock-railway-lines-source")).not.toHaveProp(
       "onFeaturePress",
-      onFeaturePress,
     );
     expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
       "selectedSection",
       MILESTONE.id.sectionId,
     );
-    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+    expect(screen.getByTestId("mock-milestone-layer")).not.toHaveProp(
       "onFeaturePress",
-      onFeaturePress,
     );
     expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
       "selectedMilestone",
       MILESTONE,
+    );
+    mockNativeMap.getZoom.mockResolvedValue(15);
+    mockNativeMap.project.mockResolvedValue([100, 100]);
+    mockNativeMap.queryRenderedFeatures.mockResolvedValue([
+      MILESTONE.toGeoJSON(),
+    ]);
+    await fireEvent(screen.getByTestId("arow-map"), "didFinishLoadingStyle");
+    await fireEvent(screen.getByTestId("arow-map"), "press", {
+      nativeEvent: { point: [100, 100], lngLat: [4.86, 45.74] },
+    });
+    await waitFor(() => expect(onFeaturePress).toHaveBeenCalledTimes(1));
+    expect(onFeaturePress).toHaveBeenCalledWith(
+      expect.objectContaining({ id: MILESTONE.id }),
     );
   });
 });

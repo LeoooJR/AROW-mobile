@@ -1,6 +1,6 @@
 import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
-import { fireEvent, render, screen } from "@testing-library/react-native";
+import { render, screen } from "@testing-library/react-native";
 import * as ReactNative from "react-native";
 import {
   featureFilter,
@@ -99,75 +99,11 @@ describe("MilestoneLayer", () => {
     );
   });
 
-  test("emits a validated milestone and stops press propagation", async () => {
-    const onFeaturePress = jest.fn();
-    const stopPropagation = jest.fn();
-    await render(<MilestoneLayer onFeaturePress={onFeaturePress} />);
-
-    await fireEvent(screen.getByTestId("mock-milestone-source"), "press", {
-      nativeEvent: { features: [FEATURE] },
-      stopPropagation,
-    });
-
-    expect(stopPropagation).toHaveBeenCalledTimes(1);
-    expect(onFeaturePress).toHaveBeenCalledWith(expect.any(Milestone));
-    expect(onFeaturePress.mock.calls[0]?.[0].id.value).toBe(MILESTONE.id.value);
-  });
-
-  test("accepts altitude in a pressed milestone position", async () => {
-    const onFeaturePress = jest.fn();
-    await render(<MilestoneLayer onFeaturePress={onFeaturePress} />);
-
-    await fireEvent(screen.getByTestId("mock-milestone-source"), "press", {
-      nativeEvent: {
-        features: [
-          {
-            ...FEATURE,
-            geometry: { ...FEATURE.geometry, coordinates: [4.86, 45.74, 172] },
-          },
-        ],
-      },
-      stopPropagation: jest.fn(),
-    });
-
-    expect(onFeaturePress.mock.calls[0]?.[0].coordinates).toEqual(
-      MILESTONE.coordinates,
+  test("leaves feature presses to the map", async () => {
+    await render(<MilestoneLayer data={[MILESTONE]} />);
+    expect(screen.getByTestId("mock-milestone-source")).not.toHaveProp(
+      "onPress",
     );
-  });
-
-  test("ignores incorrectly identified features", async () => {
-    const onFeaturePress = jest.fn();
-    const stopPropagation = jest.fn();
-    await render(<MilestoneLayer onFeaturePress={onFeaturePress} />);
-
-    await fireEvent(screen.getByTestId("mock-milestone-source"), "press", {
-      nativeEvent: { features: [{ ...FEATURE, id: "wrong-id" }] },
-      stopPropagation,
-    });
-
-    expect(stopPropagation).not.toHaveBeenCalled();
-    expect(onFeaturePress).not.toHaveBeenCalled();
-  });
-
-  test("ignores a pressed milestone whose label disagrees with its position", async () => {
-    const onFeaturePress = jest.fn();
-    const stopPropagation = jest.fn();
-    await render(<MilestoneLayer onFeaturePress={onFeaturePress} />);
-
-    await fireEvent(screen.getByTestId("mock-milestone-source"), "press", {
-      nativeEvent: {
-        features: [
-          {
-            ...FEATURE,
-            properties: { ...FEATURE.properties, label: "240+000" },
-          },
-        ],
-      },
-      stopPropagation,
-    });
-
-    expect(stopPropagation).not.toHaveBeenCalled();
-    expect(onFeaturePress).not.toHaveBeenCalled();
   });
 
   test("highlights the selected milestone", async () => {

@@ -114,12 +114,39 @@ railway section. The adapter does not load files, query persistence, or own
 selection state.
 
 All railway layers are explicitly inserted below the milestone-dot anchor.
-Consequently milestone dots, selected points, and labels retain visual and press
-priority over passive and selected railways regardless of source loading order.
+Milestone dots, selected points, and labels retain visual priority regardless of
+source loading order. Tap priority is controlled independently by the map picker.
+
+## Feature hit testing
+
+`map-hit-policy.ts` owns the marker circle dimensions and extra tap tolerance.
+Normal circles occupy a 5 dp radius including their stroke. Extra tolerance is
+2 dp at zoom 10–<12, 6 dp at 12–<14, 3 dp at 14–<15 and 1 dp at 15+; below 10,
+markers cannot be selected. The selected circle uses its own visible radius and
+stroke with the same extra tolerance. These are initial fixed policy values.
+
+Both GeoJSON sources are presentation-only. `Map` handles presses centrally;
+`map-feature-picker.ts` queries rendered features only in the active dot layer
+and mounted selected-circle layer, projects nearby candidates, and chooses the
+nearest eligible centre inside its circular target. Duplicate IDs are projected
+once. Exact distance ties use serialized milestone ID order. Labels remain
+collision-aware and visible but never participate in hit testing.
+
+If no dot qualifies, the picker queries the visible railway layers within the
+existing 44×44 dp window and chooses the first valid railway in rendered order.
+Thus a dot hit wins, while nearby line taps can select the line without hiding
+markers. Use MapLibre screen coordinates directly; Android's native bridge
+already handles display density. Feature validation stays in the adapter's
+`map-feature-parsing.ts` helpers, independent of source rendering and SQLite.
+
+`use-map-feature-press.ts` cancels stale results after newer taps, camera movement,
+selection/source/visibility changes, style reloads and unmount. Query failures and
+empty map taps leave the selection unchanged. No public map callback, marker
+display tier, navigation behaviour or reference asset changes with this policy.
 
 The owning screen controls visibility for exactly the railway and milestone
 feature families. Both are visible by default. Visibility applies to passive,
-selected, and label layers and disables source press handling while hidden, but
+selected, and label layers and excludes hidden families from central hit testing, but
 sources and the milestone-dot ordering anchor remain mounted. The base-map style
 is permanent and is not part of this visibility contract.
 

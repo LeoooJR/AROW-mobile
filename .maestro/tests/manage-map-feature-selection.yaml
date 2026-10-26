@@ -108,29 +108,12 @@ tags:
 - tapOn:
     id: "center-location"
 - waitForAnimationToEnd
-# Dense hectometre dots correctly take press priority. Hide them while selecting
-# the parent railway, then restore them to verify overlap priority below.
-- tapOn:
-    id: "map-layers-button"
-- tapOn:
-    id: "milestones-layer-switch"
-- swipe:
-    start: "50%,84%"
-    end: "50%,98%"
-- waitForAnimationToEnd
+# Select the railway between dots while all markers remain enabled.
 - tapOn:
     point: "24%,13%"
 - extendedWaitUntil:
     visible: "Ligne de Collonges-Fontaines à Lyon-Guillotière"
     timeout: 10000
-- tapOn:
-    id: "map-layers-button"
-- tapOn:
-    id: "milestones-layer-switch"
-- swipe:
-    start: "50%,84%"
-    end: "50%,98%"
-- waitForAnimationToEnd
 - assertNotVisible: "PK 509\\+000"
 - assertVisible: "893000"
 - assertVisible: "1"
@@ -154,8 +137,7 @@ tags:
 - tapOn:
     id: "center-location"
 - waitForAnimationToEnd
-# A selected railway remains below overlapping milestones for rendering and
-# press dispatch, so the milestone can replace the railway selection.
+# A direct dot hit can replace the railway selection.
 - tapOn:
     point: "16%,32%"
 - runFlow:
