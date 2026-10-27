@@ -15,7 +15,7 @@ import { type PropsWithChildren } from "react";
 
 import { useRailwayReference } from "@/features/use-railway-reference";
 import RailwayReferenceProvider from "./provider";
-import { FIND_MILESTONE_QUERY } from "./sqlite/queries";
+import { FIND_MILESTONE_QUERY, visibleMilestonesQuery } from "./sqlite/queries";
 
 jest.mock("expo-sqlite", () => ({
   SQLiteProvider: jest.fn(({ children }: PropsWithChildren) => children),
@@ -63,6 +63,33 @@ const SECTION_RECORD = {
 };
 
 describe("RailwayReferenceProvider", () => {
+  test("retrieves visible points through the provider without loading the catalogue", async () => {
+    const getAllAsync = jest.fn().mockResolvedValue([MILESTONE_RECORD]);
+    useSQLiteContextMock.mockReturnValue(
+      asDatabase({ getAllAsync, getFirstAsync: jest.fn() }),
+    );
+    const view = await renderHook(() => useRailwayReference(), {
+      wrapper: RailwayReferenceProvider,
+    });
+    const find = view.result.current.findVisibleMilestones;
+    const points = await find([4, 45, 5, 46], 500);
+    expect(points.map((point) => point.id.value)).toEqual(["893000:1:509000"]);
+    expect(getAllAsync).toHaveBeenCalledTimes(1);
+    expect(getAllAsync).toHaveBeenCalledWith(
+      visibleMilestonesQuery([0, 1], false),
+      45,
+      46,
+      4,
+      5,
+      0,
+      1,
+    );
+    await view.rerender({});
+    expect(view.result.current.findVisibleMilestones).toBe(find);
+    expect(view.result.current.milestoneSearch.state).toEqual({
+      status: "idle",
+    });
+  });
   test("imports the versioned asset without overwriting it on each mount", async () => {
     useSQLiteContextMock.mockReturnValue(
       asDatabase({ getAllAsync: jest.fn(), getFirstAsync: jest.fn() }),

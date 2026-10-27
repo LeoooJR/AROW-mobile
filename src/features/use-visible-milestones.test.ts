@@ -3,18 +3,15 @@ import { Milestone } from "@shared/railway-domain/milestone";
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import type { MapViewport } from "@/types/map-viewport";
-import { findVisibleMilestones } from "./railway-reference/visible-milestones";
+import type { RailwayReferenceModel } from "./railway-reference/context";
+import { useRailwayReference } from "./use-railway-reference";
 import { useVisibleMilestones } from "./use-visible-milestones";
 
-jest.mock("expo-sqlite", () => {
-  const database = {};
-  return { useSQLiteContext: () => database };
-});
-jest.mock("./railway-reference/visible-milestones", () => ({
-  ...jest.requireActual("./railway-reference/visible-milestones"),
-  findVisibleMilestones: jest.fn(),
-}));
-const find = jest.mocked(findVisibleMilestones);
+jest.mock("./use-railway-reference");
+const find = jest.fn<
+  ReturnType<RailwayReferenceModel["findVisibleMilestones"]>,
+  Parameters<RailwayReferenceModel["findVisibleMilestones"]>
+>();
 const viewport: MapViewport = { bounds: [4, 45, 5, 46], zoom: 14 };
 const point = new Milestone({
   id: new MilestoneId(new RailwaySectionId("001000", 1), 100),
@@ -24,10 +21,35 @@ const point = new Milestone({
 
 beforeEach(() => {
   jest.useFakeTimers();
+  jest.mocked(useRailwayReference).mockReturnValue({
+    findVisibleMilestones: find,
+    findMilestoneNeighbours: jest.fn(),
+    findRailwayMilestoneBounds: jest.fn(),
+    milestoneSearch: {
+      findMilestone: jest.fn(),
+      loadRailways: jest.fn(),
+      state: { status: "idle" },
+    },
+  });
   find.mockReset();
   find.mockResolvedValue([point]);
 });
 afterEach(() => jest.useRealTimers());
+
+test("normalizes wrapped bounds before calling the reference provider", async () => {
+  await renderHook(() =>
+    useVisibleMilestones({ bounds: [179, -1, 181, 1], zoom: 15 }, true),
+  );
+  await act(async () => jest.advanceTimersByTime(151));
+  expect(find).toHaveBeenCalledWith([179, -1, -179, 1], 1);
+});
+
+test("cancels a queued request when the hook unmounts", async () => {
+  const view = await renderHook(() => useVisibleMilestones(viewport, true));
+  await view.unmount();
+  await act(async () => jest.advanceTimersByTime(151));
+  expect(find).not.toHaveBeenCalled();
+});
 
 test("does not load the whole reference before a visible marker viewport exists", async () => {
   const view = await renderHook(
@@ -43,7 +65,7 @@ test("does not load the whole reference before a visible marker viewport exists"
   await view.rerender({ area: viewport, visible: true });
   await act(async () => jest.advanceTimersByTime(151));
   expect(view.result.current).toEqual([point]);
-  expect(find).toHaveBeenCalledWith(expect.anything(), viewport.bounds, 100);
+  expect(find).toHaveBeenCalledWith(viewport.bounds, 100);
   await view.rerender({ area: viewport, visible: false });
   expect(view.result.current).toEqual([]);
 });
@@ -100,7 +122,7 @@ test("changes SQL precision at zoom thresholds and ignores a pending finer resul
     { initialProps: { zoom: 15 } },
   );
   await act(async () => jest.advanceTimersByTime(151));
-  expect(find).toHaveBeenLastCalledWith(expect.anything(), viewport.bounds, 1);
+  expect(find).toHaveBeenLastCalledWith(viewport.bounds, 1);
   for (const [zoom, interval] of [
     [14, 100],
     [12, 500],
@@ -109,11 +131,7 @@ test("changes SQL precision at zoom thresholds and ignores a pending finer resul
     find.mockResolvedValueOnce([]);
     await view.rerender({ zoom });
     await act(async () => jest.advanceTimersByTime(151));
-    expect(find).toHaveBeenLastCalledWith(
-      expect.anything(),
-      viewport.bounds,
-      interval,
-    );
+    expect(find).toHaveBeenLastCalledWith(viewport.bounds, interval);
   }
   await act(async () => finish([point]));
   expect(view.result.current).toEqual([]);

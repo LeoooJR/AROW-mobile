@@ -20,11 +20,14 @@ import {
   findMilestone as findMilestoneInDatabase,
   findMilestoneNeighbours as findNeighboursInDatabase,
   findRailwayMilestoneBounds as findBoundsInDatabase,
+  findVisibleMilestones as findVisibleInDatabase,
   loadSearchableRailways,
 } from "@/features/railway-reference/repository";
 import railwayReferenceDatabaseAsset from "@/statics/railway_reference.sqlite";
 import { RAILWAY_REFERENCE_DATABASE_NAME } from "@shared/railway-reference/database-version";
 import type { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import type { MapViewport } from "@/types/map-viewport";
+import type { MilestoneDisplayInterval } from "./milestone-display";
 
 export interface RailwayReferenceProviderProps {
   readonly children: ReactNode;
@@ -78,8 +81,14 @@ function RailwayReferenceDataProvider({
     (id: MilestoneId) => findNeighboursInDatabase(database, id),
     [database],
   );
+  const findVisibleMilestones = useCallback(
+    (bounds: MapViewport["bounds"], interval: MilestoneDisplayInterval) =>
+      findVisibleInDatabase(database, bounds, interval),
+    [database],
+  );
   const value = useMemo<RailwayReferenceModel>(
     () => ({
+      findVisibleMilestones,
       findMilestoneNeighbours,
       findRailwayMilestoneBounds,
       milestoneSearch: { findMilestone, loadRailways, state: searchState },
@@ -90,6 +99,7 @@ function RailwayReferenceDataProvider({
       findRailwayMilestoneBounds,
       loadRailways,
       searchState,
+      findVisibleMilestones,
     ],
   );
 

@@ -57,7 +57,7 @@ SQL and native filters must stay consistent while asynchronous requests change.
 ## Evidence and related decisions
 
 - [Viewport hook](../../src/features/use-visible-milestones.ts),
-  [viewport retrieval](../../src/features/railway-reference/visible-milestones.ts),
+  [viewport retrieval](../../src/features/railway-reference/repository.ts),
   [display policy](../../src/features/railway-reference/milestone-display.ts) and
   [native layers](../../src/components/adapters/map/milestone-layer.tsx).
 - [Runtime display and navigation behavior](../map-interactivity.md).

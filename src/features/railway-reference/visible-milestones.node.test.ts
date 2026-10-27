@@ -1,25 +1,9 @@
 /** @jest-environment node */
 import { DatabaseSync } from "node:sqlite";
 import type { SQLiteDatabase } from "expo-sqlite";
-import { findVisibleMilestones, markerBounds } from "./visible-milestones";
+import { findVisibleMilestones } from "./repository";
 import { milestoneVisibilityClassForPosition } from "@shared/railway-reference/milestone-visibility-class";
 import { milestoneFromDatabaseRow } from "./mapping/milestone-mapper";
-
-test("marker requests are zoom-gated, validated and normalize wrapped longitudes", () => {
-  expect(markerBounds({ bounds: [4, 45, 5, 46], zoom: 9.9 })).toBeUndefined();
-  expect(markerBounds({ bounds: [4, 46, 5, 45], zoom: 14 })).toBeUndefined();
-  expect(markerBounds({ bounds: [NaN, 45, 5, 46], zoom: 14 })).toBeUndefined();
-  expect(markerBounds({ bounds: [4, 45, 5, 91], zoom: 14 })).toBeUndefined();
-  expect(markerBounds({ bounds: [4.85933, 45, 5, 46], zoom: 10 })).toEqual([
-    4.85933, 45, 5, 46,
-  ]);
-  expect(markerBounds({ bounds: [179, -1, 181, 1], zoom: 14 })).toEqual([
-    179, -1, -179, 1,
-  ]);
-  expect(markerBounds({ bounds: [-540, -90, 540, 90], zoom: 10 })).toEqual([
-    -180, -90, 180, 90,
-  ]);
-});
 
 test("viewport SQL includes boundary points and both sides of the antimeridian", async () => {
   const database = new DatabaseSync(":memory:");

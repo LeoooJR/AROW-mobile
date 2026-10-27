@@ -26,8 +26,8 @@ src/features/
     simulation-provider.tsx
 ```
 
-Keep hook tests beside their hooks, including platform variants such as
-`use-visible-milestones.web.ts`. Controllers, providers, contexts, repositories,
+Keep hook tests and any platform variants beside their hooks.
+Controllers, providers, contexts, repositories,
 queries, mappings and their tests stay in their owning implementation directories.
 An implementation directory may support several hooks. Keep logic already
 contained in a hook there; do not create empty folders

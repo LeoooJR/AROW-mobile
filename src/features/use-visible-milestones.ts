@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
-import { useSQLiteContext } from "expo-sqlite";
 import type { Milestone } from "@shared/railway-domain/milestone";
 import type { MapViewport } from "@/types/map-viewport";
 import { milestoneDisplayInterval } from "./railway-reference/milestone-display";
-import {
-  findVisibleMilestones,
-  markerBounds,
-} from "./railway-reference/visible-milestones";
+import { normalizedViewportBounds } from "@/components/adapters/map/viewport";
+import { useRailwayReference } from "./use-railway-reference";
 
 const EMPTY_POINTS: readonly Milestone[] = [];
 
@@ -14,11 +11,13 @@ export function useVisibleMilestones(
   viewport: MapViewport | undefined,
   visible: boolean,
 ): readonly Milestone[] {
-  const database = useSQLiteContext();
+  const { findVisibleMilestones } = useRailwayReference();
   const [points, setPoints] = useState(EMPTY_POINTS);
   useEffect(() => {
     const bounds =
-      viewport === undefined || !visible ? undefined : markerBounds(viewport);
+      viewport === undefined || !visible
+        ? undefined
+        : normalizedViewportBounds(viewport.bounds);
     const interval =
       viewport === undefined
         ? undefined
@@ -28,7 +27,7 @@ export function useVisibleMilestones(
     }
     let active = true;
     const timer = setTimeout(() => {
-      void findVisibleMilestones(database, bounds, interval).then(
+      void findVisibleMilestones(bounds, interval).then(
         (rows) => {
           if (active) setPoints(rows);
         },
@@ -44,10 +43,11 @@ export function useVisibleMilestones(
       active = false;
       clearTimeout(timer);
     };
-  }, [database, viewport, visible]);
+  }, [findVisibleMilestones, viewport, visible]);
   return viewport === undefined ||
     !visible ||
-    markerBounds(viewport) === undefined
+    milestoneDisplayInterval(viewport.zoom) === undefined ||
+    normalizedViewportBounds(viewport.bounds) === undefined
     ? EMPTY_POINTS
     : points;
 }

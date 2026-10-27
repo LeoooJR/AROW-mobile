@@ -54,6 +54,7 @@ const useRealLocationMock = jest.mocked(useRealLocation);
 describe("Index", () => {
   beforeEach(() => {
     useRailwayReferenceMock.mockReturnValue({
+      findVisibleMilestones: async () => [],
       findMilestoneNeighbours: async () => undefined,
       findRailwayMilestoneBounds: async () => ({}),
       milestoneSearch: {

@@ -2,7 +2,11 @@ import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { Milestone } from "@shared/railway-domain/milestone";
 
-import { findMilestone, loadSearchableRailways } from "./repository";
+import {
+  findMilestone,
+  findVisibleMilestones,
+  loadSearchableRailways,
+} from "./repository";
 import {
   FIND_MILESTONE_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
@@ -36,6 +40,30 @@ const SECTION_RECORD = {
 };
 
 describe("railway reference database", () => {
+  test("rejects malformed viewport rows and preserves query failures", async () => {
+    const bounds = [4, 45, 5, 46] as const;
+    await expect(
+      findVisibleMilestones(
+        {
+          getAllAsync: jest
+            .fn()
+            .mockResolvedValue([{ ...MILESTONE_RECORD, latitude: 91 }]),
+        },
+        bounds,
+        100,
+      ),
+    ).rejects.toThrow("visible map point");
+    const error = new Error("database unavailable");
+    await expect(
+      findVisibleMilestones(
+        {
+          getAllAsync: jest.fn().mockRejectedValue(error),
+        },
+        bounds,
+        100,
+      ),
+    ).rejects.toBe(error);
+  });
   test("executes and converts searchable railway loading", async () => {
     const getAllAsync = jest.fn().mockResolvedValue([SECTION_RECORD]);
     const railways = await loadSearchableRailways({ getAllAsync });
