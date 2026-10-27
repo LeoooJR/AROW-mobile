@@ -15,7 +15,7 @@ import { resolveColorTheme } from "@/utils/color-theme";
 import { MILESTONE_DISPLAY_BANDS } from "@/features/railway-reference/milestone-display";
 
 export interface MilestoneLayerProps {
-  readonly data?: string | readonly Milestone[];
+  readonly data?: readonly Milestone[];
   readonly selectedMilestone?: Milestone;
   readonly visible?: boolean;
 }
@@ -69,7 +69,6 @@ export default function MilestoneLayer({
   const colorScheme = useColorScheme();
   const palette = MILESTONE_PALETTES[resolveColorTheme(colorScheme)];
   const sourceData = useMemo(() => {
-    if (typeof data === "string") return data;
     const points = data ?? [];
     const displayed =
       selectedMilestone !== undefined &&
@@ -84,11 +83,7 @@ export default function MilestoneLayer({
   }, [data, selectedMilestone]);
 
   return (
-    <GeoJSONSource
-      data={sourceData}
-      id="railway-milestones-source"
-      key={typeof data === "string" ? data : "viewport-milestones"}
-    >
+    <GeoJSONSource data={sourceData} id="railway-milestones-source">
       {MILESTONE_DISPLAY_BANDS.map((band) => (
         <Layer
           id={milestoneDotLayerId(band.intervalMeters)}

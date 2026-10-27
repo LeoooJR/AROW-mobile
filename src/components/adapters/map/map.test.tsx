@@ -137,7 +137,7 @@ describe("Map", () => {
         onReady={onReady}
         onLoadError={onLoadError}
         railwayData="file:///railways.geojson"
-        milestoneData="file:///milestones.geojson"
+        milestoneData={[MILESTONE]}
       />,
     );
     await fireEvent(screen.getByTestId("arow-map"), "didFinishLoadingStyle");
@@ -181,7 +181,7 @@ describe("Map", () => {
       <Map
         onReady={onReady}
         railwayData="file:///railways.geojson"
-        milestoneData="file:///milestones.geojson"
+        milestoneData={[MILESTONE]}
       />,
     );
     await fireEvent(
@@ -213,7 +213,7 @@ describe("Map", () => {
       <Map
         onReady={onReady}
         railwayData="file:///railways.geojson"
-        milestoneData="file:///milestones.geojson"
+        milestoneData={[MILESTONE]}
       />,
     );
     await fireEvent(screen.getByTestId("arow-map"), "didFinishRenderingMap");
@@ -237,7 +237,7 @@ describe("Map", () => {
         onReady={onReady}
         onLoadError={onLoadError}
         railwayData="file:///railways.geojson"
-        milestoneData="file:///milestones.geojson"
+        milestoneData={[MILESTONE]}
       />,
     );
     await fireEvent(screen.getByTestId("arow-map"), "didFailLoadingMap");
@@ -319,15 +319,14 @@ describe("Map", () => {
     );
   });
 
-  test("forwards the milestone asset URI to its presentation layer", async () => {
+  test("forwards viewport milestones to its presentation layer", async () => {
     jest.spyOn(ReactNative, "useColorScheme").mockReturnValue("light");
 
-    await render(<Map milestoneData="file:///milestones.geojson" />);
+    await render(<Map milestoneData={[MILESTONE]} />);
 
-    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
-      "data",
-      "file:///milestones.geojson",
-    );
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp("data", [
+      MILESTONE,
+    ]);
     expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
       "visible",
       true,
@@ -350,7 +349,7 @@ describe("Map", () => {
     await render(
       <Map
         layerVisibility={{ milestone: false, railway: false }}
-        milestoneData="file:///milestones.geojson"
+        milestoneData={[MILESTONE]}
         railwayData="file:///railways.geojson"
       />,
     );
@@ -370,7 +369,7 @@ describe("Map", () => {
 
     await render(
       <Map
-        milestoneData="file:///milestones.geojson"
+        milestoneData={[MILESTONE]}
         onFeaturePress={onFeaturePress}
         railwayData="file:///railways.geojson"
         selectedFeature={MILESTONE}
@@ -418,7 +417,7 @@ function StartupMap({ startup }: { readonly startup: AppStartupResult }) {
       onReady={onReady}
       onLoadError={startup.status === "loading" ? startup.onFailure : undefined}
       railwayData="file:///railways.geojson"
-      milestoneData="file:///milestones.geojson"
+      milestoneData={[MILESTONE]}
     />
   );
 }

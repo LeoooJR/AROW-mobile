@@ -139,6 +139,9 @@ source is ready, and the source remains mounted so its dot layer provides a
 stable ordering anchor. Railway layers render below that anchor regardless of
 source loading order. The map does not load a whole-country point GeoJSON.
 
+Milestone inputs accept optional readonly arrays of domain points. URI inputs
+are supported for railway geometry, not milestone data.
+
 [`camera.tsx`](../src/components/adapters/map/camera.tsx) focuses the first
 available location at the approved local zoom, then leaves the camera under
 user control while later fixes move the marker. A transient reconnect retains

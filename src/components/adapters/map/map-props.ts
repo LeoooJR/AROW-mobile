@@ -14,7 +14,7 @@ export interface MapProps {
   readonly focusRequest?: number;
   readonly layerVisibility?: MapLayerVisibility;
   readonly location?: MapLocation;
-  readonly milestoneData?: string | readonly Milestone[];
+  readonly milestoneData?: readonly Milestone[];
   readonly onViewportChange?: (viewport: MapViewport) => void;
   readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly onReady?: () => void;

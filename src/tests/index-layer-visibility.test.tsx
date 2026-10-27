@@ -39,12 +39,7 @@ const mockRailwayLine = new Railway({
 const mockRailway = mockRailwayLine.sections[0];
 
 jest.mock("expo-asset", () => ({
-  useAssets: () => [
-    [
-      { localUri: "file:///railways.geojson" },
-      { localUri: "file:///milestones.geojson" },
-    ],
-  ],
+  useAssets: () => [[{ localUri: "file:///railways.geojson" }]],
 }));
 
 jest.mock("@/statics/lignes-par-type.geojson", () => "railway-asset");

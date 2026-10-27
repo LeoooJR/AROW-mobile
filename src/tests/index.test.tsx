@@ -12,12 +12,7 @@ jest.mock("@/components/adapters/toast", () => ({
 }));
 
 jest.mock("expo-asset", () => ({
-  useAssets: () => [
-    [
-      { localUri: "file:///railways.geojson" },
-      { localUri: "file:///milestones.geojson" },
-    ],
-  ],
+  useAssets: () => [[{ localUri: "file:///railways.geojson" }]],
 }));
 jest.mock("@/features/use-railway-reference", () => ({
   useRailwayReference: jest.fn(),

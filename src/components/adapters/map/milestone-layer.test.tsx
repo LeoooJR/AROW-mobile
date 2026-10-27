@@ -52,13 +52,13 @@ const FEATURE = {
 describe("MilestoneLayer", () => {
   afterEach(() => jest.restoreAllMocks());
 
-  test("passes the generated asset URI directly to MapLibre", async () => {
-    await render(<MilestoneLayer data="file:///milestones.geojson" />);
+  test("renders viewport points with the native zoom bands", async () => {
+    await render(<MilestoneLayer data={[MILESTONE]} />);
 
-    expect(screen.getByTestId("mock-milestone-source")).toHaveProp(
-      "data",
-      "file:///milestones.geojson",
-    );
+    expect(screen.getByTestId("mock-milestone-source")).toHaveProp("data", {
+      type: "FeatureCollection",
+      features: [FEATURE],
+    });
     expect(
       screen.getByTestId(`mock-${MAP_LAYER_IDS.milestone.dots}`),
     ).toHaveProp("minzoom", 10);
@@ -84,19 +84,28 @@ describe("MilestoneLayer", () => {
     });
   });
 
-  test("keeps an empty source mounted until the asset URI is ready", async () => {
+  test("keeps the same source mounted as viewport points arrive and clear", async () => {
     const view = await render(<MilestoneLayer />);
+    const source = screen.getByTestId("mock-milestone-source");
 
     expect(screen.getByTestId("mock-milestone-source")).toHaveProp("data", {
       features: [],
       type: "FeatureCollection",
     });
 
-    await view.rerender(<MilestoneLayer data="file:///milestones.geojson" />);
-    expect(screen.getByTestId("mock-milestone-source")).toHaveProp(
-      "data",
-      "file:///milestones.geojson",
-    );
+    await view.rerender(<MilestoneLayer data={[MILESTONE]} />);
+    expect(screen.getByTestId("mock-milestone-source")).toBe(source);
+    expect(source).toHaveProp("data", {
+      type: "FeatureCollection",
+      features: [FEATURE],
+    });
+
+    await view.rerender(<MilestoneLayer data={[]} />);
+    expect(screen.getByTestId("mock-milestone-source")).toBe(source);
+    expect(source).toHaveProp("data", {
+      type: "FeatureCollection",
+      features: [],
+    });
   });
 
   test("leaves feature presses to the map", async () => {

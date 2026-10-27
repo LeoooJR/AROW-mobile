@@ -48,10 +48,6 @@ jest.mock("expo-asset", () => ({
         localUri: "file:///railways.geojson",
         uri: "asset:///railways.geojson",
       },
-      {
-        localUri: "file:///milestones.geojson",
-        uri: "asset:///milestones.geojson",
-      },
     ],
     undefined,
   ]),
