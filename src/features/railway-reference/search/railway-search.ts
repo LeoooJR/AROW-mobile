@@ -5,46 +5,44 @@ function isCodeQuery(query: string): boolean {
   return /^\d+$/.test(query);
 }
 
+function isNormalizedQueryReady(query: string): boolean {
+  return query.length > 0 && (isCodeQuery(query) || query.length >= 2);
+}
+
 export function isRailwayQueryReady(query: string): boolean {
-  const normalizedQuery = normalizeSearchText(query);
-  if (normalizedQuery.length === 0) {
-    return false;
-  }
-
-  return isCodeQuery(normalizedQuery) || normalizedQuery.length >= 2;
+  return isNormalizedQueryReady(normalizeSearchText(query));
 }
 
-function lineMatchesQuery(
-  railway: Railway,
-  normalizedQuery: string,
-  codeQuery: boolean,
-): boolean {
-  if (codeQuery) {
-    return railway.code.startsWith(normalizedQuery);
-  }
-
-  return normalizeSearchText(railway.name).includes(normalizedQuery);
+interface RailwayNameMatch {
+  readonly railway: Railway;
+  readonly startsWithQuery: boolean;
 }
 
-function compareLineSearchResults(
-  left: Railway,
-  right: Railway,
-  normalizedQuery: string,
-  codeQuery: boolean,
+function compareNameMatches(
+  left: RailwayNameMatch,
+  right: RailwayNameMatch,
 ): number {
-  if (codeQuery) {
-    return left.code.localeCompare(right.code);
+  if (left.startsWithQuery === right.startsWithQuery) {
+    return left.railway.name.localeCompare(right.railway.name, "fr");
   }
+  return left.startsWithQuery ? -1 : 1;
+}
 
-  const leftStarts = normalizeSearchText(left.name).startsWith(normalizedQuery);
-  const rightStarts = normalizeSearchText(right.name).startsWith(
-    normalizedQuery,
-  );
-  if (leftStarts === rightStarts) {
-    return left.name.localeCompare(right.name, "fr");
+function findNameMatches(
+  railways: readonly Railway[],
+  normalizedQuery: string,
+): RailwayNameMatch[] {
+  const matches: RailwayNameMatch[] = [];
+  for (const railway of railways) {
+    const normalizedName = normalizeSearchText(railway.name);
+    if (normalizedName.includes(normalizedQuery)) {
+      matches.push({
+        railway,
+        startsWithQuery: normalizedName.startsWith(normalizedQuery),
+      });
+    }
   }
-
-  return leftStarts ? -1 : 1;
+  return matches;
 }
 
 export function searchRailways(
@@ -52,16 +50,20 @@ export function searchRailways(
   query: string,
   limit = 20,
 ): readonly Railway[] {
-  if (!isRailwayQueryReady(query)) {
+  const normalizedQuery = normalizeSearchText(query);
+  if (!isNormalizedQueryReady(normalizedQuery)) {
     return [];
   }
 
-  const normalizedQuery = normalizeSearchText(query);
-  const codeQuery = isCodeQuery(normalizedQuery);
-  return railways
-    .filter((railway) => lineMatchesQuery(railway, normalizedQuery, codeQuery))
-    .sort((left, right) =>
-      compareLineSearchResults(left, right, normalizedQuery, codeQuery),
-    )
-    .slice(0, limit);
+  if (isCodeQuery(normalizedQuery)) {
+    return railways
+      .filter((railway) => railway.code.startsWith(normalizedQuery))
+      .sort((left, right) => left.code.localeCompare(right.code))
+      .slice(0, limit);
+  }
+
+  return findNameMatches(railways, normalizedQuery)
+    .sort(compareNameMatches)
+    .slice(0, limit)
+    .map(({ railway }) => railway);
 }

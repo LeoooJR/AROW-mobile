@@ -57,4 +57,33 @@ describe("railway search", () => {
       "001000",
     ]);
   });
+
+  test.each(["lyon", "  LYÓN  ", "lyo\u0301n"])(
+    "preserves stable name ties and original objects for query %p",
+    (query) => {
+      const first = createRailway("003000", "Lyon à Grenoble");
+      const substring = createRailway("002000", "Grande ligne de Lyon");
+      const tied = createRailway("001000", "Lyon à Grenoble");
+      const railways = Object.freeze([first, substring, tied]);
+
+      const matches = searchRailways(railways, query);
+
+      expect(matches).toEqual([first, tied, substring]);
+      expect(matches[0]).toBe(first);
+      expect(matches[1]).toBe(tied);
+      expect(railways).toEqual([first, substring, tied]);
+    },
+  );
+
+  test("keeps code ordering independent of names and respects zero results", () => {
+    const first = createRailway("003000", "Lyon");
+    const second = createRailway("001000", "Paris");
+    const railways = Object.freeze([first, second]);
+
+    expect(searchRailways(railways, "00")).toEqual([second, first]);
+    expect(searchRailways(railways, "00", 0)).toEqual([]);
+    expect(searchRailways(railways, "lyon", 0)).toEqual([]);
+    expect(searchRailways(railways, "Marseille")).toEqual([]);
+    expect(railways).toEqual([first, second]);
+  });
 });

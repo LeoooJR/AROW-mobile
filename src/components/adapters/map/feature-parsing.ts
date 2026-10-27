@@ -13,12 +13,9 @@ import {
   isUnsignedInteger,
 } from "@shared/value-validation";
 import { geographicCoordinatesFromPosition } from "./geojson-validation";
-interface MilestoneGeoJSONProperties {
-  readonly label: string;
-  readonly lineCode: string;
-  readonly positionMeters: number;
-  readonly sectionRank: number;
-}
+type MilestoneGeoJSONProperties = Readonly<
+  ReturnType<Milestone["toGeoJSON"]>["properties"]
+>;
 
 export type MilestoneFeatureCollection = FeatureCollection<
   Point,
