@@ -29,8 +29,8 @@ src/features/
 Keep hook tests beside their hooks, including platform variants such as
 `use-visible-milestones.web.ts`. Controllers, providers, contexts, repositories,
 queries, mappings and their tests stay in their owning implementation directories.
-Existing groups such as `map-screen` and `railway-reference` may support several
-hooks. Keep logic already contained in a hook there; do not create empty folders
+An implementation directory may support several hooks. Keep logic already
+contained in a hook there; do not create empty folders
 or extract helpers solely to match the layout.
 
 Import entry hooks directly, for example `@/features/use-simulation`. Do not add

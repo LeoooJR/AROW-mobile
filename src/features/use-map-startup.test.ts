@@ -1,10 +1,10 @@
 import { act, renderHook } from "@testing-library/react-native";
 
 import type { AppStartupActions } from "@/contexts/app-startup-context";
-import { createBasemapStartupAttempt } from "@/features/map-screen/check-basemap-source";
+import { createBasemapStartupAttempt } from "@/components/adapters/map/check-basemap-source";
 import { useMapStartup } from "./use-map-startup";
 
-jest.mock("@/features/map-screen/check-basemap-source", () => ({
+jest.mock("@/components/adapters/map/check-basemap-source", () => ({
   createBasemapStartupAttempt: jest.fn(),
 }));
 const createAttempt = jest.mocked(createBasemapStartupAttempt);
