@@ -31,7 +31,7 @@ The form has three steps:
 
 For example, searching for code **893000** finds **Ligne de Collonges-Fontaines à Lyon-Guillotière**. Selecting its section **1**, then entering `509` + `000`, requests the point at **509,000 metres** along that section.
 
-[`usePointSearchForm`](../src/components/composites/map-toolbar/point-search-sheet/use-point-search-form.ts) holds the form state. [`searchRailways`](../src/features/railways/search/railway-search.ts) filters the loaded lines, while [`validateMilestoneInput`](../src/features/milestones/search/milestone-input.ts) checks the entered point.
+[`usePointSearchForm`](../src/components/composites/map-toolbar/point-search-sheet/use-point-search-form.ts) holds the form state. [`searchRailways`](../src/features/railway-reference/search/railway-search.ts) filters the loaded lines, while [`validateMilestoneInput`](../src/features/railway-reference/search/milestone-input.ts) checks the entered point.
 
 ## 2. Resolve and select the milestone
 
@@ -62,6 +62,12 @@ Start does not repeat the milestone lookup. The selected `Milestone` already con
 For the example above, the selected `Milestone` resolves to approximately **45.74744 N, 4.85933 E**. The journey reaches its endpoint only when the native result confirms that those coordinates were applied and the UI enters `running`.
 
 ## Where to look in code
+
+The `railway-reference` feature owns railway-object search and retrieval. Its
+`search/` directory groups railway filtering, milestone input validation,
+resolution messages and their shared search contracts. Component-specific form
+state and interaction hooks remain beside the search sheet. The feature entry
+hooks remain at the root of `src/features`.
 
 Within railway-reference, `sqlite/reader.ts` executes queries and returns raw rows.
 The feature-level repository passes those rows to `mapping/`, where the milestone

@@ -1,4 +1,4 @@
-import { outOfRangeMilestoneResolution } from "@/features/milestones/search/resolution-messages";
+import { outOfRangeMilestoneResolution } from "@/features/railway-reference/search/resolution-messages";
 import type { RailwaySection } from "@shared/railway-domain/railway-section";
 import { parseMilestoneLabel } from "@shared/railway-domain/kilometric-position";
 

@@ -11,7 +11,7 @@ import { SQLiteProvider, useSQLiteContext } from "expo-sqlite";
 
 import type { Milestone } from "@shared/railway-domain/milestone";
 import type { MilestoneId } from "@shared/railway-domain/milestone-id";
-import type { RailwaySearchState } from "@/features/railways/search/contracts";
+import type { RailwaySearchState } from "@/features/railway-reference/search/contracts";
 import {
   RailwayReferenceContext,
   type RailwayReferenceModel,

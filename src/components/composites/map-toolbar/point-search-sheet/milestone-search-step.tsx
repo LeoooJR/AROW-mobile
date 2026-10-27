@@ -5,7 +5,7 @@ import MilestoneResolutionFeedback from "@/components/composites/map-toolbar/poi
 import MilestoneStep from "@/components/composites/map-toolbar/point-search-sheet/milestone-step";
 import PointSearchStepHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-step-header";
 import TextField from "@/components/primitives/text-field";
-import type { MilestoneResolution } from "@/features/milestones/search/contracts";
+import type { MilestoneResolution } from "@/features/railway-reference/search/contracts";
 import type { Railway } from "@shared/railway-domain/railway";
 import type { RailwaySection } from "@shared/railway-domain/railway-section";
 

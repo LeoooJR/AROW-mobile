@@ -1,7 +1,7 @@
 import { type ReactElement } from "react";
 import { Text, View } from "react-native";
 
-import type { MilestoneResolution } from "@/features/milestones/search/contracts";
+import type { MilestoneResolution } from "@/features/railway-reference/search/contracts";
 import type { Railway } from "@shared/railway-domain/railway";
 import { formatGeographicCoordinates } from "@/utils/location-format";
 

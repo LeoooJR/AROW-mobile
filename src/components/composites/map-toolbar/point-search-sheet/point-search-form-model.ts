@@ -1,4 +1,4 @@
-import type { MilestoneResolution } from "@/features/milestones/search/contracts";
+import type { MilestoneResolution } from "@/features/railway-reference/search/contracts";
 import type { Railway } from "@shared/railway-domain/railway";
 import type { RailwaySection } from "@shared/railway-domain/railway-section";
 

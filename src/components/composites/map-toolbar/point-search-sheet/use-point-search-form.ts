@@ -8,11 +8,11 @@ import pointSearchFormReducer, {
   selectedSection,
 } from "@/components/composites/map-toolbar/point-search-sheet/point-search-form-reducer";
 import useMilestoneResolution from "@/components/composites/map-toolbar/point-search-sheet/use-milestone-resolution";
-import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
+import type { MilestoneSearchModel } from "@/features/railway-reference/search/contracts";
 import {
   isRailwayQueryReady,
   searchRailways,
-} from "@/features/railways/search/railway-search";
+} from "@/features/railway-reference/search/railway-search";
 import type { Railway } from "@shared/railway-domain/railway";
 
 const EMPTY_RAILWAYS: readonly Railway[] = [];

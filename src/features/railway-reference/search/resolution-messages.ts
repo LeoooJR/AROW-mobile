@@ -1,7 +1,7 @@
 import type {
   MilestoneInputResolution,
   MilestoneResolution,
-} from "@/features/milestones/search/contracts";
+} from "@/features/railway-reference/search/contracts";
 import type { RailwayMilestoneRange } from "@shared/railway-domain/railway-milestone-range";
 
 export function outOfRangeMilestoneResolution(

@@ -14,7 +14,7 @@ import PointSearchForm from "@/components/composites/map-toolbar/point-search-sh
 import PointSearchSheetHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-sheet-header";
 import usePointSearchForm from "@/components/composites/map-toolbar/point-search-sheet/use-point-search-form";
 import type { Milestone } from "@shared/railway-domain/milestone";
-import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
+import type { MilestoneSearchModel } from "@/features/railway-reference/search/contracts";
 import { resolveColorTheme } from "@/utils/color-theme";
 
 interface PointSearchSheetProps {

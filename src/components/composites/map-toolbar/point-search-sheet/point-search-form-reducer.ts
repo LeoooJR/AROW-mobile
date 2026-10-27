@@ -1,7 +1,7 @@
 import {
   parsePastedMilestone,
   sanitizeMilestonePart,
-} from "@/features/milestones/search/milestone-input";
+} from "@/features/railway-reference/search/milestone-input";
 import type { Railway } from "@shared/railway-domain/railway";
 import type { RailwaySection } from "@shared/railway-domain/railway-section";
 
