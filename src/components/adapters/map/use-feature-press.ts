@@ -16,7 +16,6 @@ interface MapFeaturePressOptions extends Omit<MapFeaturePickOptions, "point"> {
   readonly map: RefObject<FeatureQueryMap | null>;
   readonly ready: RefObject<boolean>;
   readonly onFeaturePress?: (feature: MapFeature) => void;
-  readonly selectedFeature?: MapFeature;
   readonly milestoneData: MapProps["milestoneData"];
   readonly railwayData: MapProps["railwayData"];
 }
@@ -39,8 +38,6 @@ export function useMapFeaturePress(options: MapFeaturePressOptions) {
   useLayoutEffect(invalidate, [
     invalidate,
     options.selectedFeature,
-    options.selectedMilestone,
-    options.selectedSection,
     options.railwayAvailable,
     options.visibility.milestone,
     options.visibility.railway,

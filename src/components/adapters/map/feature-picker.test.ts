@@ -1,6 +1,7 @@
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { Milestone } from "@shared/railway-domain/milestone";
 import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { Railway } from "@shared/railway-domain/railway";
 import { pickMapFeature, type MapFeaturePickOptions } from "./feature-picker";
 import { MAP_LAYER_IDS } from "./layer-ids";
 
@@ -33,8 +34,13 @@ const defaults: MapFeaturePickOptions = {
   point: [100, 100],
   visibility: { milestone: true, railway: true },
   railwayAvailable: true,
-  selectedSection: false,
 };
+
+const selectedSection = new Railway({
+  code: "001000",
+  name: "Line",
+  sections: [{ sectionRank: 2, geometry: { status: "absent" } }],
+}).sections[0];
 
 function setup(zoom = 15, points = [point(1000).toGeoJSON()]) {
   return {
@@ -123,7 +129,7 @@ test("only the selected irregular point bypasses the display tier, with its visi
     (
       await pickMapFeature(
         map,
-        { ...defaults, selectedMilestone: selected, selectedSection: true },
+        { ...defaults, selectedFeature: selected },
         () => true,
       )
     )?.id.value,
@@ -142,11 +148,18 @@ test("only the selected irregular point bypasses the display tier, with its visi
     (
       await pickMapFeature(
         map,
-        { ...defaults, selectedMilestone: selected },
+        { ...defaults, selectedFeature: selected },
         () => true,
       )
     )?.kind,
   ).toBe("railway-section");
+  expect(map.queryRenderedFeatures).toHaveBeenLastCalledWith(
+    [
+      [78, 78],
+      [122, 122],
+    ],
+    { layers: [MAP_LAYER_IDS.railway.passive, MAP_LAYER_IDS.railway.selected] },
+  );
   expect((await pickMapFeature(map, defaults, () => true))?.kind).toBe(
     "railway-section",
   );
@@ -160,11 +173,34 @@ test("does not grant unselected points the selected circle radius", async () => 
     (
       await pickMapFeature(
         map,
-        { ...defaults, selectedMilestone: selected },
+        { ...defaults, selectedFeature: selected },
         () => true,
       )
     )?.kind,
   ).toBe("railway-section");
+});
+
+test("a railway selection does not grant the marker selection exception", async () => {
+  const map = setup(10, [point(1772).toGeoJSON()]);
+
+  expect(
+    (
+      await pickMapFeature(
+        map,
+        { ...defaults, selectedFeature: selectedSection },
+        () => true,
+      )
+    )?.kind,
+  ).toBe("railway-section");
+  expect(map.project).not.toHaveBeenCalled();
+  expect(map.queryRenderedFeatures).toHaveBeenNthCalledWith(
+    1,
+    [
+      [93, 93],
+      [107, 107],
+    ],
+    { layers: [MAP_LAYER_IDS.milestone.dots] },
+  );
 });
 
 test("ignores ineligible stale points, malformed features and invalid projections", async () => {
@@ -197,7 +233,7 @@ test("preserves the first valid railway in rendered order", async () => {
     (
       await pickMapFeature(
         map,
-        { ...defaults, selectedSection: true },
+        { ...defaults, selectedFeature: selectedSection },
         () => true,
       )
     )?.id.value,
@@ -286,7 +322,7 @@ test("selected points respect layer visibility and the minimum zoom", async () =
         map,
         {
           ...defaults,
-          selectedMilestone: selected,
+          selectedFeature: selected,
           visibility: { milestone: false, railway: true },
         },
         () => true,
@@ -299,7 +335,7 @@ test("selected points respect layer visibility and the minimum zoom", async () =
     (
       await pickMapFeature(
         map,
-        { ...defaults, selectedMilestone: selected },
+        { ...defaults, selectedFeature: selected },
         () => true,
       )
     )?.kind,

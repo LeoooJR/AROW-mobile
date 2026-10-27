@@ -4,6 +4,7 @@ import type { PressEvent } from "@maplibre/maplibre-react-native";
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { Milestone } from "@shared/railway-domain/milestone";
 import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
+import { Railway } from "@shared/railway-domain/railway";
 import { useMapFeaturePress } from "./use-feature-press";
 
 const milestone = new Milestone({
@@ -32,7 +33,6 @@ function setup() {
     onFeaturePress: jest.fn(),
     visibility: { milestone: true, railway: true },
     railwayAvailable: true,
-    selectedSection: false,
     milestoneData: [milestone],
     railwayData: "file:///railways.geojson",
   };
@@ -68,8 +68,6 @@ test.each([
     await view.rerender({
       ...options,
       selectedFeature: milestone,
-      selectedMilestone: milestone,
-      selectedSection: true,
     });
   if (reason === "visibility")
     await view.rerender({
@@ -94,6 +92,42 @@ test("only the newest tap can change selection", async () => {
   await act(async () => resolve([milestone.toGeoJSON()]));
   expect(options.onFeaturePress).toHaveBeenCalledTimes(1);
 });
+
+test.each([
+  {
+    name: "another milestone",
+    selectedFeature: new Milestone({
+      id: new MilestoneId(milestone.id.sectionId, 2000),
+      label: "002+000",
+      coordinates: milestone.coordinates,
+    }),
+  },
+  {
+    name: "a railway section",
+    selectedFeature: new Railway({
+      code: "001000",
+      name: "Line",
+      sections: [{ sectionRank: 2, geometry: { status: "absent" } }],
+    }).sections[0],
+  },
+  { name: "cleared selection", selectedFeature: undefined },
+])(
+  "ignores a pending hit after switching to $name",
+  async ({ selectedFeature }) => {
+    const { options, resolve } = setup();
+    const view = await renderHook(
+      (props: Options) => useMapFeaturePress(props),
+      {
+        initialProps: { ...options, selectedFeature: milestone },
+      },
+    );
+    await act(async () => view.result.current.onPress(event));
+    await view.rerender({ ...options, selectedFeature });
+    await act(async () => resolve([milestone.toGeoJSON()]));
+
+    expect(options.onFeaturePress).not.toHaveBeenCalled();
+  },
+);
 
 test.each(["getZoom", "queryRenderedFeatures", "project"] as const)(
   "leaves selection unchanged when %s fails",

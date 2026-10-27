@@ -69,8 +69,6 @@ export default function Map({
       ready: styleLoaded,
       visibility: layerVisibility,
       railwayAvailable: railwayData !== undefined,
-      selectedSection: selectedSection !== undefined,
-      selectedMilestone,
       selectedFeature,
       milestoneData,
       railwayData,

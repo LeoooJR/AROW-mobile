@@ -30,8 +30,7 @@ export interface MapFeaturePickOptions {
   readonly point: PixelPoint;
   readonly visibility: MapLayerVisibility;
   readonly railwayAvailable: boolean;
-  readonly selectedSection: boolean;
-  readonly selectedMilestone?: Milestone;
+  readonly selectedFeature?: MapFeature;
 }
 
 function boundsAround([x, y]: PixelPoint, radius: number): PixelPointBounds {
@@ -62,11 +61,12 @@ async function pickMilestone(
   options: MapFeaturePickOptions,
   isCurrent: () => boolean,
 ): Promise<Milestone | undefined> {
+  const selectedMilestone =
+    options.selectedFeature?.kind === "milestone"
+      ? options.selectedFeature
+      : undefined;
   const interval = milestoneDisplayInterval(zoom);
-  const radius = milestoneHitRadius(
-    zoom,
-    options.selectedMilestone !== undefined,
-  );
+  const radius = milestoneHitRadius(zoom, selectedMilestone !== undefined);
   if (
     interval === undefined ||
     radius === undefined ||
@@ -75,7 +75,7 @@ async function pickMilestone(
     return undefined;
 
   const layers = [milestoneDotLayerId(interval)];
-  if (options.selectedMilestone !== undefined)
+  if (selectedMilestone !== undefined)
     layers.push(MAP_LAYER_IDS.milestone.selected);
   const features = await map.queryRenderedFeatures(
     boundsAround(options.point, radius),
@@ -83,7 +83,7 @@ async function pickMilestone(
   );
   if (!isCurrent()) return undefined;
 
-  const selectedId = options.selectedMilestone?.id.value;
+  const selectedId = selectedMilestone?.id.value;
   const candidates = eligibleMilestoneCandidates(
     features,
     interval,
@@ -110,7 +110,8 @@ async function pickRailway(
     return undefined;
 
   const layers: string[] = [MAP_LAYER_IDS.railway.passive];
-  if (options.selectedSection) layers.push(MAP_LAYER_IDS.railway.selected);
+  if (options.selectedFeature !== undefined)
+    layers.push(MAP_LAYER_IDS.railway.selected);
   const railways = await map.queryRenderedFeatures(
     boundsAround(options.point, RAILWAY_HIT_PADDING),
     { layers },
