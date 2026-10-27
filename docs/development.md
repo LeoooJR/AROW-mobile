@@ -4,6 +4,9 @@ This guide covers local setup, development builds, previews, and code-quality
 checks. Run all commands from the repository root. For an introduction to the
 application, see the [README](../README.md).
 
+For the rationale behind reference-data, SQL, map-loading and feature-ownership
+choices, see the [Architecture Decision Records](adr/README.md).
+
 ## Get started
 
 You need **Node.js 24 or newer**, npm, and an Android development environment with

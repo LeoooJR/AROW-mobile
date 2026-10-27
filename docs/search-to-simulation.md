@@ -69,6 +69,10 @@ resolution messages and their shared search contracts. Component-specific form
 state and interaction hooks remain beside the search sheet. The feature entry
 hooks remain at the root of `src/features`.
 
+[ADR-0008](adr/0008-consolidate-railway-reference-feature-ownership.md) records
+why search and retrieval share this owner and feature hooks sit beside their
+implementation directories.
+
 Within railway-reference, `sqlite/reader.ts` executes queries and returns raw rows.
 The feature-level repository passes those rows to `mapping/`, where the milestone
 and railway mappers validate them with the shared row decoders and construct domain

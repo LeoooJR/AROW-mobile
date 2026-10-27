@@ -2,6 +2,10 @@
 
 On the native map, tapping a railway line or a milestone selects one railway feature and opens its metadata card. The map adapter identifies the feature; the map screen owns the selection; the card presents it. This guide follows that path so a new developer knows where to make a change.
 
+For the architectural rationale, see
+[viewport loading and progressive display](adr/0004-load-visible-points-from-sqlite.md)
+and [central native picking](adr/0007-centralise-native-map-feature-picking.md).
+
 ```mermaid
 flowchart LR
     Tap[Tap a milestone dot or railway line]

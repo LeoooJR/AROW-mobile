@@ -6,6 +6,10 @@ verified against SQLite schema version **5** (`PRAGMA user_version`). The
 authoritative schema definitions live in
 [`shared/railway-reference/schema.ts`](../shared/railway-reference/schema.ts).
 
+The [Architecture Decision Records](adr/README.md) explain the rationale and
+trade-offs behind the asset lifecycle, import policy, precomputed metadata,
+geographic index and recorded endpoint relationships.
+
 Each recorded kilometric point belongs to exactly one railway section. A section
 can have zero or more recorded points.
 
