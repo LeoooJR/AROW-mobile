@@ -2,7 +2,7 @@ import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { renderHook } from "@testing-library/react-native";
 
-import { useRailwayReference } from "@/hooks/features/use-railway-reference";
+import { useRailwayReference } from "@/features/use-railway-reference";
 import RailwayReferenceProvider from "./provider.web";
 
 describe("RailwayReferenceProvider web fallback", () => {

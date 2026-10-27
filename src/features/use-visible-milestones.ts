@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import type { Milestone } from "@shared/railway-domain/milestone";
 import type { MapViewport } from "@/types/map-viewport";
-import { milestoneDisplayInterval } from "./milestone-display";
-import { findVisibleMilestones, markerBounds } from "./visible-milestones";
+import { milestoneDisplayInterval } from "./railway-reference/milestone-display";
+import {
+  findVisibleMilestones,
+  markerBounds,
+} from "./railway-reference/visible-milestones";
 
 const EMPTY_POINTS: readonly Milestone[] = [];
 

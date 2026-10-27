@@ -7,7 +7,7 @@ This guide describes the **local Android simulation** started from a selected ra
 | File                                                                                                                                       | Responsibility                                                                            |
 | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
 | [`simulation-provider.tsx`](simulation-provider.tsx)                                                                                       | Application-scoped owner of one controller, foreground reconciliation, and running polls. |
-| [`use-simulation.ts`](../../hooks/features/use-simulation.ts)                                                                              | React adapter: exposes the provider's `start`, `stop`, and `state` to screen consumers.   |
+| [`use-simulation.ts`](../use-simulation.ts)                                                                                                | React adapter: exposes the provider's `start`, `stop`, and `state` to screen consumers.   |
 | [`simulation-controller.ts`](simulation-controller.ts)                                                                                     | Orders operations, handles cancellation, publishes UI state, and reconciles native state. |
 | [`simulation-state.ts`](simulation-state.ts)                                                                                               | UI state variants and typed predicates such as `isSimulationStopRequired`.                |
 | [`mock-location.ts`](mock-location.ts)                                                                                                     | Loads the Android executor and defines the operations the controller needs.               |
@@ -17,7 +17,7 @@ This guide describes the **local Android simulation** started from a selected ra
 | [`MockLocationEngine.kt`](../../../modules/arow-mock-location/android/src/main/java/expo/modules/arowmocklocation/MockLocationEngine.kt)   | Owns the Android simulation state and test providers.                                     |
 | [`MockLocationService.kt`](../../../modules/arow-mock-location/android/src/main/java/expo/modules/arowmocklocation/MockLocationService.kt) | Runs with a notification and refreshes fixes while the app is backgrounded.               |
 
-The map screen composes real location and simulation in [`use-map-location.ts`](../map-screen/use-map-location.ts). It supplies the action to the location bar and keeps the stop control available after the milestone card closes.
+The map screen composes real location and simulation in [`use-map-location.ts`](../use-map-location.ts). It supplies the action to the location bar and keeps the stop control available after the milestone card closes.
 
 ## Lifecycle at a glance
 
@@ -73,7 +73,7 @@ An invalid native snapshot produces an actionable `SIMULATION_UNAVAILABLE` error
 - Keep the ordering **search-sheet milestone lookup → readiness → native start → first-fix acknowledgement → independent notification preparation**. Do not infer success from a request to start the service or gate simulation on notification consent.
 - Keep native resource ownership explicit. If a provider remains after partial cleanup, report it through `ownsProviders`; never infer ownership from an error code.
 - Keep UI state and native bridge contracts distinct. Add or change a native result in the Kotlin contracts, TypeScript contracts, decoder, and controller together.
-- Cover races in [`simulation-controller.test.ts`](simulation-controller.test.ts), bridge shapes in [`decode-native-result.test.ts`](../../../modules/arow-mock-location/src/decode-native-result.test.ts), and hook reconciliation in [`use-simulation.test.ts`](../../hooks/features/use-simulation.test.ts). For an Android behavior change, exercise the affected path on an emulator; [`mock-phone-location.yaml`](../../../.maestro/tests/mock-phone-location.yaml) covers the milestone journey and fail-fast mock-app check.
+- Cover races in [`simulation-controller.test.ts`](simulation-controller.test.ts), bridge shapes in [`decode-native-result.test.ts`](../../../modules/arow-mock-location/src/decode-native-result.test.ts), and hook reconciliation in [`use-simulation.test.ts`](../use-simulation.test.ts). For an Android behavior change, exercise the affected path on an emulator; [`mock-phone-location.yaml`](../../../.maestro/tests/mock-phone-location.yaml) covers the milestone journey and fail-fast mock-app check.
 - [`manage-simulation-notification.yaml`](../../../.maestro/tests/manage-simulation-notification.yaml) exercises consent, foreground/background notification visibility, Stop removal, denial continuation, warning expiry, and accessible Stop. Run it after selecting AROW as the mock-location provider. Host tests cover stale notification attempts, independent simulation startup, and warning delivery across foreground transitions.
 
 Before each notification journey or recording, reset consent on the confirmed emulator without clearing application data:

@@ -51,7 +51,7 @@ passive markers at low zoom. No representative points are synthesized.
 1. [`Map`](../src/components/adapters/map/map.tsx) renders the milestone GeoJSON source and forwards its `onFeaturePress` callback. Milestone dots appear from zoom 10; their labels appear from zoom 13.
 2. [`MilestoneLayer`](../src/components/adapters/map/milestone-layer.tsx) receives the MapLibre press event. It takes the first valid pressed point, checks its railway identity and label, validates its coordinates, builds a `Milestone`, and checks that the GeoJSON feature ID matches the domain ID. Invalid hits do nothing.
 3. For a valid hit, the layer stops event propagation and calls `onFeaturePress(milestone)`.
-4. [`useMapSelection`](../src/features/map-screen/use-map-selection.ts) stores `{ feature: milestone, origin: "map" }` and exits map-only mode if it was active. The route passes the same selected feature back to the map and to [`MilestoneDetailsCard`](../src/components/composites/map-feature-details-card/milestone-details-card.tsx).
+4. [`useMapSelection`](../src/features/use-map-selection.ts) stores `{ feature: milestone, origin: "map" }` and exits map-only mode if it was active. The route passes the same selected feature back to the map and to [`MilestoneDetailsCard`](../src/components/composites/map-feature-details-card/milestone-details-card.tsx).
 5. The map highlights the selected milestone dot **and** its parent railway section. The card shows the milestone's railway metadata and coordinates.
 
 For example, tapping **PK 509+000** on line **893000**, section **1**, opens a card like this:
@@ -87,7 +87,7 @@ The route renders the card only when a feature is selected and native overlays a
 
 Railway details provide **Premier repère** and **Dernier repère** controls. They focus the lowest or highest recorded PK in the selected section, keeping the railway card and highlight selected. These bounds come from the reference database and may differ from the geometry's displayed start/end labels. Empty sections disable both controls; a lookup error shows an error toast and either control can retry. Camera focus never starts or changes simulation.
 
-Neighbour and endpoint hooks share [`useSelectionLookup`](../src/features/map-screen/use-selection-lookup.ts) for loading, retries, duplicate-request prevention, and stale-result protection. Their feature hooks retain neighbour navigation and endpoint camera focus; the shared lifecycle contains no railway-specific actions.
+Neighbour and endpoint hooks share [`useSelectionLookup`](../src/features/use-selection-lookup.ts) for loading, retries, duplicate-request prevention, and stale-result protection. Their feature hooks retain neighbour navigation and endpoint camera focus; the shared lifecycle contains no railway-specific actions.
 
 ## A map tap is not a simulation request
 
@@ -100,7 +100,7 @@ The card action is disabled during simulation activity and uncertain cleanup or 
 | Need                                                        | Start here                                                                                                                                                                                                            |
 | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Recognize a different GeoJSON hit or change validation      | [`milestone-layer.tsx`](../src/components/adapters/map/milestone-layer.tsx) or [`railway-lines-source.tsx`](../src/components/adapters/map/railway-lines-source.tsx)                                                  |
-| Change selection, layer hiding, close, or map-only behavior | [`use-map-selection.ts`](../src/features/map-screen/use-map-selection.ts)                                                                                                                                             |
+| Change selection, layer hiding, close, or map-only behavior | [`use-map-selection.ts`](../src/features/use-map-selection.ts)                                                                                                                                                        |
 | Change what metadata appears                                | [`RailwayDetailsCard`](../src/components/composites/map-feature-details-card/railway-details-card.tsx) and [`MilestoneDetailsCard`](../src/components/composites/map-feature-details-card/milestone-details-card.tsx) |
 | Check the complete interaction on Android                   | [Map-feature selection Maestro flow](../.maestro/tests/manage-map-feature-selection.yaml)                                                                                                                             |
 

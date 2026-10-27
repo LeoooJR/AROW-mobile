@@ -12,7 +12,7 @@ import { fetch } from "expo/fetch";
 import * as ReactNative from "react-native";
 
 import { Milestone } from "@shared/railway-domain/milestone";
-import { useMapStartup } from "@/hooks/features/use-map-startup";
+import { useMapStartup } from "@/features/use-map-startup";
 import {
   type AppStartupResult,
   useAppStartup,

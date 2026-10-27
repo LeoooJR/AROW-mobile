@@ -3,7 +3,7 @@ import { AppState } from "react-native";
 
 import { useToast } from "@/components/adapters/toast";
 import ToastMessage from "@/components/composites/toast-message";
-import { useSimulation } from "@/hooks/features/use-simulation";
+import { useSimulation } from "@/features/use-simulation";
 import { isAppActive } from "@/utils/app-state";
 
 const TOAST_ID = "simulation-notifications-disabled";

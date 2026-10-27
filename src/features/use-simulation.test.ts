@@ -7,7 +7,7 @@ import { getMockLocationExecutor } from "@/features/simulation/mock-location";
 import { prepareSimulationNotifications } from "@/features/simulation/simulation-notifications";
 
 import SimulationProvider from "@/features/simulation/simulation-provider";
-import { useSimulation } from "@/hooks/features/use-simulation";
+import { useSimulation } from "@/features/use-simulation";
 
 jest.mock("@/features/simulation/simulation-notifications", () => ({
   prepareSimulationNotifications: jest.fn(),

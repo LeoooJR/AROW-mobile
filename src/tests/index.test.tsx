@@ -1,10 +1,10 @@
 import { render, screen } from "@testing-library/react-native";
 
-import { useRailwayReference } from "@/hooks/features/use-railway-reference";
-import { useRealLocation } from "@/hooks/features/use-real-location";
+import { useRailwayReference } from "@/features/use-railway-reference";
+import { useRealLocation } from "@/features/use-real-location";
 
 import Index from "@/app/index";
-jest.mock("@/features/railway-reference/use-visible-milestones", () => ({
+jest.mock("@/features/use-visible-milestones", () => ({
   useVisibleMilestones: () => [],
 }));
 jest.mock("@/components/adapters/toast", () => ({
@@ -19,17 +19,17 @@ jest.mock("expo-asset", () => ({
     ],
   ],
 }));
-jest.mock("@/hooks/features/use-railway-reference", () => ({
+jest.mock("@/features/use-railway-reference", () => ({
   useRailwayReference: jest.fn(),
 }));
-jest.mock("@/hooks/features/use-simulation", () => ({
+jest.mock("@/features/use-simulation", () => ({
   useSimulation: () => ({
     start: jest.fn(),
     state: { status: "idle" },
     stop: jest.fn(),
   }),
 }));
-jest.mock("@/hooks/features/use-real-location", () => ({
+jest.mock("@/features/use-real-location", () => ({
   useRealLocation: jest.fn(),
 }));
 jest.mock("@/components/adapters/map/map", () => {

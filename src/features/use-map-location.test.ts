@@ -4,7 +4,7 @@ import { act, renderHook } from "@testing-library/react-native";
 
 import getLocationPresentation from "@/components/composites/location-bar/location-presentation";
 import { Milestone } from "@shared/railway-domain/milestone";
-import { useMapLocation } from "@/features/map-screen/use-map-location";
+import { useMapLocation } from "@/features/use-map-location";
 import type { SimulationState } from "@/features/simulation/simulation-state";
 import type { LocationState } from "@/features/real-location/real-location-state";
 
@@ -17,7 +17,7 @@ const mockOpenSettings = jest.fn();
 let mockSimulation: SimulationState = { status: "idle" };
 let mockRealLocation: LocationState = { status: "permissionRequired" };
 
-jest.mock("@/hooks/features/use-simulation", () => ({
+jest.mock("@/features/use-simulation", () => ({
   useSimulation: () => ({
     dismissStartError: mockDismissStartError,
     start: mockStart,
@@ -25,7 +25,7 @@ jest.mock("@/hooks/features/use-simulation", () => ({
     stop: mockStop,
   }),
 }));
-jest.mock("@/hooks/features/use-real-location", () => ({
+jest.mock("@/features/use-real-location", () => ({
   useRealLocation: () => ({
     openSettings: mockOpenSettings,
     requestAccess: mockRequestAccess,

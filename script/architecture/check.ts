@@ -89,7 +89,6 @@ function dependencyViolation(
       "src/app",
       "src/components/composites",
       "src/features",
-      "src/hooks/features",
       "src/contexts",
     ].some((directory) => isWithin(target, directory))
   ) {
@@ -99,12 +98,9 @@ function dependencyViolation(
   const platformHook = isWithin(file, "src/hooks/platform");
   if (
     (uiHook || platformHook) &&
-    [
-      "src/features",
-      "src/hooks/features",
-      "shared/railway-domain",
-      "shared/railway-reference",
-    ].some((directory) => isWithin(target, directory))
+    ["src/features", "shared/railway-domain", "shared/railway-reference"].some(
+      (directory) => isWithin(target, directory),
+    )
   ) {
     return "UI/platform hooks cannot depend on feature implementations, feature hooks, or railway-domain/reference modules; use a feature hook or keep the logic with its owner.";
   }

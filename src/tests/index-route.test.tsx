@@ -16,7 +16,7 @@ import type { SimulationState } from "@/features/simulation/simulation-state";
 import Index from "@/app/index";
 import { useAssets } from "expo-asset";
 import { AppStartupContext } from "@/contexts/app-startup-context";
-jest.mock("@/features/railway-reference/use-visible-milestones", () => ({
+jest.mock("@/features/use-visible-milestones", () => ({
   useVisibleMilestones: () => [],
 }));
 const mockFindBounds = jest.fn().mockResolvedValue({});
@@ -25,7 +25,7 @@ jest.mock("@/components/adapters/toast", () => ({
   useToast: () => mockToast,
 }));
 const mockToast = { show: jest.fn(), close: jest.fn() };
-jest.mock("@/hooks/features/use-map-startup", () => ({
+jest.mock("@/features/use-map-startup", () => ({
   useMapStartup: () => undefined,
 }));
 
@@ -33,7 +33,7 @@ const mockStartSimulation = jest.fn();
 const mockStopSimulation = jest.fn();
 let mockSimulationState: SimulationState = { status: "idle" };
 
-jest.mock("@/hooks/features/use-simulation", () => ({
+jest.mock("@/features/use-simulation", () => ({
   useSimulation: () => ({
     start: mockStartSimulation,
     state: mockSimulationState,
@@ -61,7 +61,7 @@ const defaultRailwayAssets = jest.mocked(useAssets).getMockImplementation()?.(
   [],
 );
 
-jest.mock("@/hooks/features/use-railway-reference", () => ({
+jest.mock("@/features/use-railway-reference", () => ({
   useRailwayReference: () => ({
     findRailwayMilestoneBounds: mockFindBounds,
     findMilestoneNeighbours: mockFindNeighbours,
@@ -77,7 +77,7 @@ jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ bottom: 0, left: 0, right: 0, top: 0 }),
 }));
 
-jest.mock("@/hooks/features/use-real-location", () => ({
+jest.mock("@/features/use-real-location", () => ({
   useRealLocation: () => ({
     openSettings: jest.fn(),
     requestAccess: jest.fn(),

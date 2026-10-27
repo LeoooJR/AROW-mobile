@@ -13,7 +13,7 @@ import {
 } from "expo-sqlite";
 import { type PropsWithChildren } from "react";
 
-import { useRailwayReference } from "@/hooks/features/use-railway-reference";
+import { useRailwayReference } from "@/features/use-railway-reference";
 import RailwayReferenceProvider from "./provider";
 import { FIND_MILESTONE_QUERY } from "./sqlite/queries";
 

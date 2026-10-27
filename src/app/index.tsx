@@ -9,16 +9,16 @@ import RailwayDetailsCard from "@/components/composites/map-feature-details-card
 import MilestoneDetailsCard from "@/components/composites/map-feature-details-card/milestone-details-card";
 import ToastMessage from "@/components/composites/toast-message";
 import { useToast } from "@/components/adapters/toast";
-import { useRailwayMilestoneBounds } from "@/features/map-screen/use-railway-milestone-bounds";
-import { useMilestoneNeighbours } from "@/features/map-screen/use-milestone-neighbours";
+import { useRailwayMilestoneBounds } from "@/features/use-railway-milestone-bounds";
+import { useMilestoneNeighbours } from "@/features/use-milestone-neighbours";
 import MapToolbar from "@/components/composites/map-toolbar";
 import { AppStartupContext } from "@/contexts/app-startup-context";
-import { useMapStartup } from "@/hooks/features/use-map-startup";
-import { useMapLocation } from "@/features/map-screen/use-map-location";
-import { useMapSelection } from "@/features/map-screen/use-map-selection";
-import { useRailwayReference } from "@/hooks/features/use-railway-reference";
+import { useMapStartup } from "@/features/use-map-startup";
+import { useMapLocation } from "@/features/use-map-location";
+import { useMapSelection } from "@/features/use-map-selection";
+import { useRailwayReference } from "@/features/use-railway-reference";
 import railwayLinesAsset from "@/statics/lignes-par-type.geojson";
-import { useVisibleMilestones } from "@/features/railway-reference/use-visible-milestones";
+import { useVisibleMilestones } from "@/features/use-visible-milestones";
 import type { MapViewport } from "@/types/map-viewport";
 
 export default function Index() {

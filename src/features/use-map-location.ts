@@ -10,11 +10,11 @@ import {
   isSimulationDismissibleError,
   type SimulationState,
 } from "@/features/simulation/simulation-state";
-import { useSimulation } from "@/hooks/features/use-simulation";
+import { useSimulation } from "@/features/use-simulation";
 import {
   useRealLocation,
   type UseRealLocationResult,
-} from "@/hooks/features/use-real-location";
+} from "@/features/use-real-location";
 import type { LocationState } from "@/features/real-location/real-location-state";
 import type { LocationDescriptor } from "@/types/location-descriptor";
 

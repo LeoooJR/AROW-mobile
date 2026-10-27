@@ -4,7 +4,7 @@ import { act, renderHook } from "@testing-library/react-native";
 import { BackHandler } from "react-native";
 
 import { Milestone } from "@shared/railway-domain/milestone";
-import { useMapSelection } from "@/features/map-screen/use-map-selection";
+import { useMapSelection } from "@/features/use-map-selection";
 
 const milestone = new Milestone({
   id: new MilestoneId(new RailwaySectionId("893000", 1), 509_000),

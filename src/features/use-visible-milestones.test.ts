@@ -3,15 +3,15 @@ import { Milestone } from "@shared/railway-domain/milestone";
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import type { MapViewport } from "@/types/map-viewport";
-import { findVisibleMilestones } from "./visible-milestones";
+import { findVisibleMilestones } from "./railway-reference/visible-milestones";
 import { useVisibleMilestones } from "./use-visible-milestones";
 
 jest.mock("expo-sqlite", () => {
   const database = {};
   return { useSQLiteContext: () => database };
 });
-jest.mock("./visible-milestones", () => ({
-  ...jest.requireActual("./visible-milestones"),
+jest.mock("./railway-reference/visible-milestones", () => ({
+  ...jest.requireActual("./railway-reference/visible-milestones"),
   findVisibleMilestones: jest.fn(),
 }));
 const find = jest.mocked(findVisibleMilestones);

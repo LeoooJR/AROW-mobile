@@ -7,7 +7,7 @@ import { Milestone } from "@shared/railway-domain/milestone";
 import { Railway } from "@shared/railway-domain/railway";
 
 import Index from "@/app/index";
-jest.mock("@/features/railway-reference/use-visible-milestones", () => ({
+jest.mock("@/features/use-visible-milestones", () => ({
   useVisibleMilestones: () => [],
 }));
 const mockFindBounds = jest.fn().mockResolvedValue({});
@@ -49,7 +49,7 @@ jest.mock("expo-asset", () => ({
 
 jest.mock("@/statics/lignes-par-type.geojson", () => "railway-asset");
 
-jest.mock("@/hooks/features/use-simulation", () => ({
+jest.mock("@/features/use-simulation", () => ({
   useSimulation: () => ({
     start: jest.fn(),
     state: { status: "idle" },
@@ -57,7 +57,7 @@ jest.mock("@/hooks/features/use-simulation", () => ({
   }),
 }));
 
-jest.mock("@/hooks/features/use-real-location", () => ({
+jest.mock("@/features/use-real-location", () => ({
   useRealLocation: () => ({
     openSettings: jest.fn(),
     requestAccess: jest.fn(),
@@ -69,7 +69,7 @@ jest.mock("@/hooks/features/use-real-location", () => ({
   }),
 }));
 
-jest.mock("@/hooks/features/use-railway-reference", () => ({
+jest.mock("@/features/use-railway-reference", () => ({
   useRailwayReference: () => ({
     findRailwayMilestoneBounds: mockFindBounds,
     findMilestoneNeighbours: mockFindNeighbours,
