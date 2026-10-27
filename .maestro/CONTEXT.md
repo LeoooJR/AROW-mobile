@@ -3,6 +3,10 @@
 These instructions apply to the Maestro configuration and flows under
 `.maestro/`.
 
+Keep this context about authoring, running and maintaining journeys. Put product
+walkthroughs and past validation results in regular documentation or review
+artifacts. Add lessons here as reusable test-maintenance rules.
+
 ## Journey maintenance
 
 - Model tests as durable, goal-driven user journeys. Evolve an existing flow as
@@ -21,6 +25,9 @@ These instructions apply to the Maestro configuration and flows under
   not select a physical device.
 
 ## Recording
+
+Follow the user's requested evidence format. If they request screenshots only
+or no recording, do not run the recording commands below.
 
 Record only the flows that exercise the feature being delivered. All selected
 validation flows must pass before recording. Run these commands from the repository root,

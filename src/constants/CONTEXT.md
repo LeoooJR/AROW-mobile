@@ -3,22 +3,18 @@
 This directory is reserved for application-wide visual design tokens. Read this
 file before creating, moving, or modifying a file under `src/constants`.
 
-The repository-level [`DESIGN.md`](../../DESIGN.md) is the normative source of
-truth for token names, values, semantics, light and dark themes, typography,
-spacing, shape, motion, and accessibility exceptions. If code, Tailwind, or this
-context disagrees with `DESIGN.md`, update the implementation to match
-`DESIGN.md`.
+Keep this context about token authoring, synchronization and pitfalls. Do not
+duplicate implemented token values or maintain a progress inventory here.
+
+Follow the [design authority](../../docs/agents/design.md) for token names,
+values, semantics, themes and accessibility exceptions. Use
+[`DESIGN.md`](../../DESIGN.md) for the approved token vocabulary and follow the
+design authority's precedence rules when sources disagree.
 
 ## What belongs here
 
-The initial token modules, when implementation is requested, are:
-
-```text
-src/constants/
-  colors.ts    Semantic light and dark color tokens.
-  fonts.ts     Approved font families, weights, and typography roles.
-  spacing.ts   The approved application spacing rhythm.
-```
+Group tokens by semantic family, such as colors, fonts or spacing. Add a family
+only when application code needs it; do not create placeholder modules.
 
 Additional visual token families may be added only when they are defined by
 `DESIGN.md` and needed by application code. Do not place these concerns here:
@@ -34,8 +30,7 @@ design decisions, not replace configuration, state, or domain models.
 
 ## Authority and synchronization
 
-`DESIGN.md` is the human-readable design authority. Future TypeScript constants
-will be the canonical runtime representation of those approved values.
+Use TypeScript constants as the runtime representation of approved design values.
 
 When a design token changes:
 
@@ -98,7 +93,7 @@ it here.
 Tailwind CSS cannot become an independent token authority. Semantic `@theme`
 variables must mirror the TypeScript values and names derived from `DESIGN.md`.
 Update both representations together, and use semantic NativeWind utilities in
-components instead of raw palette utilities once those variables exist.
+components instead of raw palette utilities.
 
 Do not generate class names dynamically from token values. Keep complete utility
 class names visible to Tailwind and NativeWind.
@@ -113,4 +108,3 @@ For every future token implementation or update:
 4. run `npx tsc --noEmit` and the repository lint command when configured;
 5. inspect representative components on native and web, including text scaling,
    contrast, reduced motion, and other relevant accessibility preferences.
-

@@ -4,10 +4,13 @@ This directory owns reusable React hooks for UI and platform behavior.
 Read this file before creating, moving, or modifying a hook under
 `src/hooks`.
 
+Keep this context about hook development rules and pitfalls. Document application
+behavior and implementation walkthroughs outside this file; add iteration
+lessons here only when they produce a reusable working rule.
+
 Hooks that affect interaction, motion, accessibility, visual feedback, or
-platform adaptation must also follow the repository-level [`DESIGN.md`](../../DESIGN.md).
-That document is authoritative for design decisions and takes precedence when
-guidance conflicts.
+platform adaptation must also follow the [design authority](../../docs/agents/design.md).
+Follow its precedence rules rather than defining a separate design authority here.
 
 ## What belongs here
 
@@ -86,7 +89,7 @@ Application-wide infrastructure contexts belong in `src/contexts`.
 
 ## React Compiler and native behavior
 
-The application has React Compiler enabled:
+When writing hooks for React Compiler:
 
 - return stable operations and let consumers destructure functions before using
   them in callbacks;

@@ -2,6 +2,10 @@
 
 Read this file before creating or moving feature hooks and their supporting logic.
 
+Keep this context focused on local working rules and reusable lessons. Put
+implementation walkthroughs and behavior descriptions in regular documentation;
+do not add feature histories or inventories of implemented code here.
+
 ## Entry points and implementation
 
 Feature hooks live directly under `src/features` with `use-*.ts` filenames.

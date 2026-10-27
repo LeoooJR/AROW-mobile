@@ -3,13 +3,17 @@
 This directory is the application-owned UI boundary. Read this file before
 creating, moving, or modifying a component under `src/components`.
 
+Keep this context about component authoring rules, boundaries and pitfalls.
+Document component behavior and implementation walkthroughs elsewhere. Capture
+iteration lessons as reusable instructions, not dependency snapshots or changelogs.
+
 ## What belongs here
 
 Every extracted React component belongs under `src/components`, whether it is
 shared across the application or used by one screen or domain. Route files may
 keep small inline JSX; do not extract markup only to satisfy this rule.
 
-This directory contains:
+Use this directory for:
 
 - styled wrappers around React Native and Expo primitives;
 - custom components composed from application primitives;
@@ -83,64 +87,22 @@ When using `tailwind-variants`:
 - do not add `tailwind-merge` only for this purpose: `tailwind-variants` 3.3's
   default build already includes conflict resolution.
 
-Example shape for future variant components:
-
-```tsx
-import { tv, type VariantProps } from "tailwind-variants";
-
-const buttonStyles = tv({
-  base: "items-center justify-center rounded-xl",
-  variants: {
-    intent: {
-      primary: "bg-blue-600",
-      secondary: "bg-slate-200",
-    },
-  },
-  defaultVariants: {
-    intent: "primary",
-  },
-});
-
-type ButtonVariants = VariantProps<typeof buttonStyles>;
-
-export interface ButtonProps extends ButtonVariants {
-  className?: string;
-}
-```
-
 ## Packages and platform foundation
 
-The current component foundation is defined in `package.json`:
-
-| Package                      | Current version    | Component responsibility                                    |
-| ---------------------------- | ------------------ | ----------------------------------------------------------- |
-| Expo                         | `~57.0.9`          | Universal application runtime and SDK                       |
-| React Native                 | `0.86.2`           | Native primitives and platform behavior                     |
-| @gluestack-ui/core           | `^5.0.15`          | Headless component creators and providers                   |
-| @gluestack-ui/utils          | `^5.0.6`           | Gluestack accessibility and styling utilities               |
-| NativeWind                   | `^5.0.0-preview.4` | Universal `className` styling                               |
-| react-native-css             | `^3.0.7`           | Native CSS runtime used by NativeWind                       |
-| Tailwind CSS                 | `^4.3.3`           | Utility generation and design tokens                        |
-| tailwind-variants            | `^3.3.0`           | Typed visual variants, slots, and class conflict resolution |
-| expo-image                   | `~57.0.1`          | Application image rendering                                 |
-| react-native-reanimated      | `4.5.1`            | UI-thread animations                                        |
-| react-native-gesture-handler | `~2.32.0`          | Coordinated native gestures                                 |
-
-Verify this table when upgrading the UI stack. Follow the exact Expo SDK 57
-documentation required by the repository-level `AGENTS.md`.
+Check installed versions in [`package.json`](../../package.json) and the package's
+documentation before changing integrations. Do not duplicate dependency-version
+tables here. Follow the exact Expo SDK documentation required by `AGENTS.md`.
 
 ## Gluestack UI v5
 
-Gluestack UI is installed as a source-owned component library on top of
-NativeWind v5 and Tailwind CSS v4. Manually copied gluestack components belong in
-`src/components/adapters`; application code must import them directly through
+Place manually copied Gluestack components in `src/components/adapters`;
+application code must import them directly through
 the `@/components/adapters/<component>` boundary rather than importing
 `@gluestack-ui/*` package APIs.
 
-The root `GluestackUIProvider` is the single application-level exception to the
-normal adapter dependency direction: it owns gluestack overlay and toast
-providers and is mounted once by `src/app/_layout.tsx`. Do not mount additional
-copies in routes or feature components.
+Keep `GluestackUIProvider` mounted once at the application root. Treat its
+application-level provider dependencies as an exception to normal adapter
+dependency direction; do not mount additional copies in routes or features.
 
 Agents must not install or run the `gluestack-ui` CLI at any version, including
 through `npx`, `npm exec`, `yarn dlx`, `pnpm dlx`, global commands, or project
