@@ -25,7 +25,6 @@ export type RailwayResource = Readonly<
 
 export interface RailwayResources {
   readonly railwayGeojson: RailwayResource;
-  readonly milestoneGeojson: RailwayResource;
   readonly milestones: RailwayResource;
 }
 
@@ -41,11 +40,27 @@ export interface Milestone {
 export interface SkippedMilestone {
   readonly label: string;
   readonly lineNumber: number;
+  readonly reason: "unsupported-pk";
+}
+
+export interface MilestoneSourceRow {
+  readonly lineNumber: number;
+  readonly label: string;
+  readonly type: string;
+  readonly latitude: string;
+  readonly longitude: string;
+}
+
+export interface DuplicateMilestone {
+  readonly id: string;
+  readonly kept: MilestoneSourceRow;
+  readonly discarded: MilestoneSourceRow;
 }
 
 export interface ParsedMilestones {
   readonly milestones: readonly Milestone[];
   readonly skipped: readonly SkippedMilestone[];
+  readonly duplicates: readonly DuplicateMilestone[];
 }
 
 interface RailwaySectionBase {
@@ -55,19 +70,15 @@ interface RailwaySectionBase {
 }
 
 export interface RailwaySectionWithGeometry extends RailwaySectionBase {
-  readonly endMilestone: string;
   readonly gaiaId: string;
   readonly hasGeometry: 1;
   readonly railwayType: string;
-  readonly startMilestone: string;
 }
 
 export interface RailwaySectionWithoutGeometry extends RailwaySectionBase {
-  readonly endMilestone: null;
   readonly gaiaId: null;
   readonly hasGeometry: 0;
   readonly railwayType: null;
-  readonly startMilestone: null;
 }
 
 export type RailwaySection =
@@ -90,8 +101,6 @@ export interface RailwayProperties {
   readonly code_ligne: string;
   readonly idgaia: string;
   readonly lib_ligne: string;
-  readonly pkd: string;
-  readonly pkf: string;
   readonly rg_troncon: number;
   readonly type_ligne: string;
 }
@@ -108,34 +117,13 @@ export interface RailwayFeatureCollection {
   readonly type: "FeatureCollection";
 }
 
-export interface MilestoneGeoJsonProperties {
-  readonly label: string;
-  readonly lineCode: string;
-  readonly positionMeters: number;
-  readonly sectionRank: number;
-}
-
-export interface MilestoneGeoJsonFeature {
-  readonly geometry: {
-    readonly coordinates: readonly [number, number];
-    readonly type: "Point";
-  };
-  readonly id: string;
-  readonly properties: MilestoneGeoJsonProperties;
-  readonly type: "Feature";
-}
-
-export interface MilestoneFeatureCollection {
-  readonly features: readonly MilestoneGeoJsonFeature[];
-  readonly type: "FeatureCollection";
-}
-
 export interface NormalizedRailwayData {
   readonly geojson: RailwayFeatureCollection;
   readonly sections: readonly RailwaySectionWithGeometry[];
 }
 
 export interface GenerationSummary {
+  readonly duplicateMilestoneCount: number;
   readonly fallbackSectionCount: number;
   readonly geometryCount: number;
   readonly geometryWithoutMilestoneCount: number;
@@ -150,10 +138,10 @@ export interface StagingWorkspace {
   readonly rawMilestonesPath: string;
   readonly stagedDatabasePath: string;
   readonly stagedGeojsonPath: string;
-  readonly stagedMilestoneGeojsonPath: string;
+  readonly stagedImportReportPath: string;
   readonly targetDatabasePath: string;
   readonly targetGeojsonPath: string;
-  readonly targetMilestoneGeojsonPath: string;
+  readonly targetImportReportPath: string;
 }
 
 export interface SetupOptions {
@@ -162,6 +150,5 @@ export interface SetupOptions {
   readonly fetchImplementation?: FetchImplementation;
   readonly geojsonPath?: string;
   readonly logger?: GenerationLogger;
-  readonly milestoneGeojsonPath?: string;
   readonly resources?: RailwayResources;
 }

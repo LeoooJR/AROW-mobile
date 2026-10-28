@@ -2,6 +2,8 @@ const { readFileSync } = require("node:fs");
 const { join } = require("node:path");
 
 const REMOVED_PROPERTIES = [
+  "pkd",
+  "pkf",
   "x_d_l93",
   "y_d_l93",
   "x_f_l93",

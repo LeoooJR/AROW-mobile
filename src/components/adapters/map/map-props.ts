@@ -1,5 +1,7 @@
-import type { MapLayerVisibility } from "@/components/adapters/map/map-layer-visibility";
+import type { MapLayerVisibility } from "@/components/adapters/map/layer-visibility";
 import type { MapFeature } from "@/types/map-feature";
+import type { MapViewport } from "@/types/map-viewport";
+import type { Milestone } from "@shared/railway-domain/milestone";
 import type {
   GeographicCoordinates,
   GeographicCoordinatesWithHeading,
@@ -12,7 +14,8 @@ export interface MapProps {
   readonly focusRequest?: number;
   readonly layerVisibility?: MapLayerVisibility;
   readonly location?: MapLocation;
-  readonly milestoneData?: string;
+  readonly milestoneData?: readonly Milestone[];
+  readonly onViewportChange?: (viewport: MapViewport) => void;
   readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly onReady?: () => void;
   readonly onLoadError?: () => void;

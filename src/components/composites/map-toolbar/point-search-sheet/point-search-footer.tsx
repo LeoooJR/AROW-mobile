@@ -3,7 +3,7 @@ import { Text, View } from "react-native";
 
 import Button from "@/components/primitives/button";
 import type { Milestone } from "@shared/railway-domain/milestone";
-import type { MilestoneResolution } from "@/features/milestones/search/contracts";
+import type { MilestoneResolution } from "@/features/railway-reference/search/contracts";
 
 interface PointSearchFooterProps {
   readonly bottomInset: number;

@@ -11,15 +11,23 @@ import {
   RAILWAY_SECTIONS_TABLE,
 } from "../../shared/railway-reference/schema";
 import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
+import { milestoneRowsBySection } from "./milestone-metadata";
+import { validatePointDisplayMetadata } from "./point-display-metadata";
+import { validateSectionEndpoints } from "./section-endpoints";
 
 import {
   BEGIN_TRANSACTION,
+  ANALYZE_DATABASE,
+  CREATE_POINT_DISPLAY_INDEX,
   CHECK_DATABASE_INTEGRITY,
   CHECK_FOREIGN_KEYS,
   CHECK_SCHEMA_VERSION,
   COMMIT_TRANSACTION,
   DATABASE_SCHEMA_VERSION,
   ENABLE_FOREIGN_KEYS,
+  FIND_INVALID_SECTION_COUNT,
+  FIND_INVALID_MILESTONE_ORDINAL,
+  FIND_CONFLICTING_LINE_NAMES,
   INSERT_KILOMETRIC_POINT,
   INSERT_RAILWAY_SECTION,
   ROLLBACK_TRANSACTION,
@@ -45,16 +53,15 @@ interface DatabaseCounts {
 
 function fallbackRailwaySection(
   milestone: Milestone,
+  lineName?: string,
 ): RailwaySectionWithoutGeometry {
   return Object.freeze({
     code: milestone.code,
-    endMilestone: null,
     gaiaId: null,
     hasGeometry: 0,
-    name: `Ligne ${milestone.code}`,
+    name: lineName ?? `Ligne ${milestone.code}`,
     railwayType: null,
     rank: milestone.rank,
-    startMilestone: null,
   });
 }
 
@@ -62,6 +69,9 @@ export function completeRailwaySections(
   geojsonSections: readonly RailwaySectionWithGeometry[],
   milestones: readonly Milestone[],
 ): readonly RailwaySection[] {
+  const lineNames = new Map(
+    geojsonSections.map((section) => [section.code, section.name]),
+  );
   const sections = new Map<string, RailwaySection>(
     geojsonSections.map((section) => [
       new RailwaySectionId(section.code, section.rank).value,
@@ -71,7 +81,10 @@ export function completeRailwaySections(
   for (const milestone of milestones) {
     const id = new RailwaySectionId(milestone.code, milestone.rank).value;
     if (!sections.has(id)) {
-      sections.set(id, fallbackRailwaySection(milestone));
+      sections.set(
+        id,
+        fallbackRailwaySection(milestone, lineNames.get(milestone.code)),
+      );
     }
   }
   return [...sections.values()].sort(
@@ -83,9 +96,17 @@ export function completeRailwaySections(
 function insertRailwaySections(
   database: DatabaseSync,
   sections: readonly RailwaySection[],
+  points: ReadonlyMap<string, readonly KilometricPointDatabaseRow[]>,
 ): void {
   const statement = database.prepare(INSERT_RAILWAY_SECTION);
   for (const section of sections) {
+    const sectionPoints =
+      points.get(new RailwaySectionId(section.code, section.rank).value) ?? [];
+    const milestoneCount = sectionPoints.length;
+    const endpoints = {
+      first_recorded_position_m: sectionPoints[0]?.position_m ?? null,
+      last_recorded_position_m: sectionPoints.at(-1)?.position_m ?? null,
+    };
     const row: RailwaySectionDatabaseRow =
       section.hasGeometry === 1
         ? {
@@ -93,8 +114,8 @@ function insertRailwaySections(
             has_geometry: 1,
             idgaia: section.gaiaId,
             lib_ligne: section.name,
-            pkd: section.startMilestone,
-            pkf: section.endMilestone,
+            milestone_count: milestoneCount,
+            ...endpoints,
             rg_troncon: section.rank,
             type_ligne: section.railwayType,
           }
@@ -103,8 +124,8 @@ function insertRailwaySections(
             has_geometry: 0,
             idgaia: null,
             lib_ligne: section.name,
-            pkd: null,
-            pkf: null,
+            milestone_count: milestoneCount,
+            ...endpoints,
             rg_troncon: section.rank,
             type_ligne: null,
           };
@@ -114,35 +135,32 @@ function insertRailwaySections(
       row.idgaia,
       row.lib_ligne,
       row.type_ligne,
-      row.pkd,
-      row.pkf,
+      row.first_recorded_position_m,
+      row.last_recorded_position_m,
       row.has_geometry,
+      row.milestone_count,
     );
   }
 }
 
 function insertMilestones(
   database: DatabaseSync,
-  milestones: readonly Milestone[],
+  groups: ReadonlyMap<string, readonly KilometricPointDatabaseRow[]>,
 ): void {
   const statement = database.prepare(INSERT_KILOMETRIC_POINT);
-  for (const milestone of milestones) {
-    const row: KilometricPointDatabaseRow = {
-      code_ligne: milestone.code,
-      label: milestone.label,
-      latitude: milestone.latitude,
-      longitude: milestone.longitude,
-      position_m: milestone.positionMeters,
-      rg_troncon: milestone.rank,
-    };
-    statement.run(
-      row.code_ligne,
-      row.rg_troncon,
-      row.position_m,
-      row.label,
-      row.latitude,
-      row.longitude,
-    );
+  for (const rows of groups.values()) {
+    for (const row of rows) {
+      statement.run(
+        row.code_ligne,
+        row.rg_troncon,
+        row.position_m,
+        row.label,
+        row.latitude,
+        row.longitude,
+        row.position_in_section,
+        row.visibility_class,
+      );
+    }
   }
 }
 
@@ -153,10 +171,13 @@ function populateDatabase(
 ): void {
   database.exec(BEGIN_TRANSACTION);
   try {
+    const points = milestoneRowsBySection(milestones);
     database.exec(createTableSql(RAILWAY_SECTIONS_TABLE));
     database.exec(createTableSql(KILOMETRIC_POINTS_TABLE));
-    insertRailwaySections(database, sections);
-    insertMilestones(database, milestones);
+    insertRailwaySections(database, sections, points);
+    insertMilestones(database, points);
+    database.exec(CREATE_POINT_DISPLAY_INDEX);
+    database.exec(ANALYZE_DATABASE);
     database.exec(SET_SCHEMA_VERSION);
     database.exec(COMMIT_TRANSACTION);
   } catch (cause) {
@@ -233,7 +254,24 @@ export function validateRailwayDatabase(
     if (database.prepare(CHECK_FOREIGN_KEYS).get() !== undefined) {
       throw new Error("Generated database contains an invalid foreign key");
     }
+    if (database.prepare(FIND_CONFLICTING_LINE_NAMES).get() !== undefined) {
+      throw new Error(
+        "Generated database contains conflicting railway line names",
+      );
+    }
+    if (database.prepare(FIND_INVALID_SECTION_COUNT).get() !== undefined) {
+      throw new Error(
+        "Generated database contains an invalid section milestone count",
+      );
+    }
+    if (database.prepare(FIND_INVALID_MILESTONE_ORDINAL).get() !== undefined) {
+      throw new Error(
+        "Generated database contains an invalid milestone section position",
+      );
+    }
 
+    validatePointDisplayMetadata(database);
+    validateSectionEndpoints(database);
     const counts = databaseCounts(
       database.prepare(SELECT_DATABASE_COUNTS).get(),
     );

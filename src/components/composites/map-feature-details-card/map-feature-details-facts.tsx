@@ -18,7 +18,7 @@ export default function MapFeatureDetailsFacts({
   return (
     <>
       <Divider className="mt-[12px] bg-border-subtle dark:bg-[#4D4D4D]" />
-      <View className="py-[10px]">
+      <View className="flex-row py-[10px]">
         <MapFeatureDetailsFact label="Code ligne" value={lineCode} />
       </View>
       <Divider className="bg-border-subtle dark:bg-[#4D4D4D]" />

@@ -6,19 +6,20 @@ import {
   render,
   screen,
   userEvent,
+  waitFor,
 } from "@testing-library/react-native";
 import { fetch } from "expo/fetch";
 import * as ReactNative from "react-native";
 
 import { Milestone } from "@shared/railway-domain/milestone";
-import { useMapStartup } from "@/hooks/features/use-map-startup";
+import { useMapStartup } from "@/features/use-map-startup";
 import {
   type AppStartupResult,
   useAppStartup,
 } from "@/hooks/platform/use-app-startup";
 
-import { DARK_MAP_STYLE } from "./map-style-dark";
-import { LIGHT_MAP_STYLE } from "./map-style-light";
+import { DARK_MAP_STYLE } from "./style-dark";
+import { LIGHT_MAP_STYLE } from "./style-light";
 import Map from "./map";
 
 jest.mock("expo/fetch", () => ({ fetch: jest.fn() }));
@@ -29,21 +30,32 @@ const MILESTONE = new Milestone({
   coordinates: { latitude: 45.74, longitude: 4.86 },
   label: "241+000",
 });
+const mockNativeMap = {
+  getZoom: jest.fn().mockResolvedValue(15),
+  project: jest.fn().mockResolvedValue([100, 100]),
+  queryRenderedFeatures: jest.fn(),
+};
 jest.mock("@maplibre/maplibre-react-native", () => {
+  const { useImperativeHandle } =
+    jest.requireActual<typeof import("react")>("react");
   const { View: MockView } =
     jest.requireActual<typeof import("react-native")>("react-native");
 
   return {
     Map: ({
       children,
+      ref,
       ...props
-    }: React.PropsWithChildren<Record<string, unknown>>) => (
-      <MockView {...props}>{children}</MockView>
-    ),
+    }: React.PropsWithChildren<Record<string, unknown>> & {
+      ref?: React.Ref<typeof mockNativeMap>;
+    }) => {
+      useImperativeHandle(ref, () => mockNativeMap);
+      return <MockView {...props}>{children}</MockView>;
+    },
   };
 });
 
-jest.mock("./map-camera", () => {
+jest.mock("./camera", () => {
   const { View: MockView } =
     jest.requireActual<typeof import("react-native")>("react-native");
 
@@ -92,6 +104,31 @@ jest.mock("./railway-lines-source", () => {
 });
 
 describe("Map", () => {
+  test("reports viewport bounds while an empty point array permits startup", async () => {
+    const onViewportChange = jest.fn(),
+      onReady = jest.fn();
+    await render(
+      <Map
+        milestoneData={[]}
+        railwayData="file:///railways.geojson"
+        onViewportChange={onViewportChange}
+        onReady={onReady}
+      />,
+    );
+    await fireEvent(screen.getByTestId("arow-map"), "regionDidChange", {
+      nativeEvent: { bearing: 0, bounds: [4, 45, 5, 46], zoom: 14 },
+    });
+    expect(onViewportChange).toHaveBeenCalledWith({
+      bounds: [4, 45, 5, 46],
+      zoom: 14,
+    });
+    await fireEvent(screen.getByTestId("arow-map"), "didFinishLoadingStyle");
+    await fireEvent(
+      screen.getByTestId("arow-map"),
+      "didFinishRenderingFrameFully",
+    );
+    expect(onReady).toHaveBeenCalledTimes(1);
+  });
   test("a reported render still permits one subsequent loading failure", async () => {
     const onReady = jest.fn();
     const onLoadError = jest.fn();
@@ -100,7 +137,7 @@ describe("Map", () => {
         onReady={onReady}
         onLoadError={onLoadError}
         railwayData="file:///railways.geojson"
-        milestoneData="file:///milestones.geojson"
+        milestoneData={[MILESTONE]}
       />,
     );
     await fireEvent(screen.getByTestId("arow-map"), "didFinishLoadingStyle");
@@ -144,7 +181,7 @@ describe("Map", () => {
       <Map
         onReady={onReady}
         railwayData="file:///railways.geojson"
-        milestoneData="file:///milestones.geojson"
+        milestoneData={[MILESTONE]}
       />,
     );
     await fireEvent(
@@ -176,7 +213,7 @@ describe("Map", () => {
       <Map
         onReady={onReady}
         railwayData="file:///railways.geojson"
-        milestoneData="file:///milestones.geojson"
+        milestoneData={[MILESTONE]}
       />,
     );
     await fireEvent(screen.getByTestId("arow-map"), "didFinishRenderingMap");
@@ -200,7 +237,7 @@ describe("Map", () => {
         onReady={onReady}
         onLoadError={onLoadError}
         railwayData="file:///railways.geojson"
-        milestoneData="file:///milestones.geojson"
+        milestoneData={[MILESTONE]}
       />,
     );
     await fireEvent(screen.getByTestId("arow-map"), "didFailLoadingMap");
@@ -282,15 +319,14 @@ describe("Map", () => {
     );
   });
 
-  test("forwards the milestone asset URI to its presentation layer", async () => {
+  test("forwards viewport milestones to its presentation layer", async () => {
     jest.spyOn(ReactNative, "useColorScheme").mockReturnValue("light");
 
-    await render(<Map milestoneData="file:///milestones.geojson" />);
+    await render(<Map milestoneData={[MILESTONE]} />);
 
-    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
-      "data",
-      "file:///milestones.geojson",
-    );
+    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp("data", [
+      MILESTONE,
+    ]);
     expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
       "visible",
       true,
@@ -313,7 +349,7 @@ describe("Map", () => {
     await render(
       <Map
         layerVisibility={{ milestone: false, railway: false }}
-        milestoneData="file:///milestones.geojson"
+        milestoneData={[MILESTONE]}
         railwayData="file:///railways.geojson"
       />,
     );
@@ -328,12 +364,12 @@ describe("Map", () => {
     );
   });
 
-  test("forwards a shared callback and derives linked milestone selection", async () => {
+  test("owns presses centrally and derives linked milestone selection", async () => {
     const onFeaturePress = jest.fn();
 
     await render(
       <Map
-        milestoneData="file:///milestones.geojson"
+        milestoneData={[MILESTONE]}
         onFeaturePress={onFeaturePress}
         railwayData="file:///railways.geojson"
         selectedFeature={MILESTONE}
@@ -344,21 +380,32 @@ describe("Map", () => {
       "data",
       "file:///railways.geojson",
     );
-    expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
+    expect(screen.getByTestId("mock-railway-lines-source")).not.toHaveProp(
       "onFeaturePress",
-      onFeaturePress,
     );
     expect(screen.getByTestId("mock-railway-lines-source")).toHaveProp(
       "selectedSection",
       MILESTONE.id.sectionId,
     );
-    expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
+    expect(screen.getByTestId("mock-milestone-layer")).not.toHaveProp(
       "onFeaturePress",
-      onFeaturePress,
     );
     expect(screen.getByTestId("mock-milestone-layer")).toHaveProp(
       "selectedMilestone",
       MILESTONE,
+    );
+    mockNativeMap.getZoom.mockResolvedValue(15);
+    mockNativeMap.project.mockResolvedValue([100, 100]);
+    mockNativeMap.queryRenderedFeatures.mockResolvedValue([
+      MILESTONE.toGeoJSON(),
+    ]);
+    await fireEvent(screen.getByTestId("arow-map"), "didFinishLoadingStyle");
+    await fireEvent(screen.getByTestId("arow-map"), "press", {
+      nativeEvent: { point: [100, 100], lngLat: [4.86, 45.74] },
+    });
+    await waitFor(() => expect(onFeaturePress).toHaveBeenCalledTimes(1));
+    expect(onFeaturePress).toHaveBeenCalledWith(
+      expect.objectContaining({ id: MILESTONE.id }),
     );
   });
 });
@@ -370,7 +417,7 @@ function StartupMap({ startup }: { readonly startup: AppStartupResult }) {
       onReady={onReady}
       onLoadError={startup.status === "loading" ? startup.onFailure : undefined}
       railwayData="file:///railways.geojson"
-      milestoneData="file:///milestones.geojson"
+      milestoneData={[MILESTONE]}
     />
   );
 }

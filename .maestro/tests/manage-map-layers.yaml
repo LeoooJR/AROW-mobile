@@ -45,9 +45,7 @@ tags:
 - tapOn:
     id: "milestones-layer-switch"
 - assertVisible: "Afficher les points kilométriques"
-- swipe:
-    start: "50%,84%"
-    end: "50%,98%"
+- pressKey: Back
 - assertNotVisible: "Couches ferroviaires"
 - waitForAnimationToEnd
 - tapOn:
@@ -70,12 +68,10 @@ tags:
 - tapOn:
     id: "milestones-layer-switch"
 - assertVisible: "Masquer les points kilométriques"
-- swipe:
-    start: "50%,84%"
-    end: "50%,98%"
+- pressKey: Back
 - waitForAnimationToEnd
 - tapOn:
-    point: "16%,34%"
+    point: "16%,32%"
     retryTapIfNoChange: true
 # A system-bar change can satisfy the generic UI-change check before selection.
 - runFlow:
@@ -83,13 +79,20 @@ tags:
       notVisible: "PK 509\\+000"
     commands:
       - tapOn:
-          point: "16%,34%"
+          point: "16%,31.7%"
+- runFlow:
+    when:
+      notVisible: "PK 509\\+000"
+    commands:
+      - tapOn:
+          point: "16%,33%"
           retryTapIfNoChange: true
 - extendedWaitUntil:
     visible: "PK 509\\+000"
     timeout: 10000
 - tapOn:
     id: "close-map-feature-details"
+# The line remains selectable between visible dots.
 - tapOn:
     point: "24%,13%"
     retryTapIfNoChange: true

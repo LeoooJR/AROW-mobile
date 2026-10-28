@@ -1,4 +1,5 @@
 import { type ReactElement } from "react";
+import type { Milestone } from "@shared/railway-domain/milestone";
 
 import {
   RailwayReferenceContext,
@@ -6,7 +7,10 @@ import {
 } from "@/features/railway-reference/context";
 import type { RailwayReferenceProviderProps } from "@/features/railway-reference/provider";
 
+const EMPTY_POINTS: readonly Milestone[] = [];
+
 const UNAVAILABLE_REFERENCE: RailwayReferenceModel = {
+  findVisibleMilestones: async () => EMPTY_POINTS,
   findMilestoneNeighbours: async () => undefined,
   findRailwayMilestoneBounds: async () => ({}),
   milestoneSearch: {

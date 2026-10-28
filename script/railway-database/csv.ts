@@ -1,4 +1,5 @@
 import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
+import { parseMilestoneLabel } from "../../shared/railway-domain/kilometric-position";
 import {
   canonicalLineCode,
   milestonePositionMeters,
@@ -6,7 +7,13 @@ import {
   requirePositiveInteger,
 } from "./validation";
 import { MilestoneId } from "../../shared/railway-domain/milestone-id";
-import type { Milestone, ParsedMilestones, SkippedMilestone } from "./types";
+import type {
+  DuplicateMilestone,
+  Milestone,
+  MilestoneSourceRow,
+  ParsedMilestones,
+  SkippedMilestone,
+} from "./types";
 
 const EXPECTED_HEADER = Object.freeze([
   "TYPE_REPER",
@@ -18,7 +25,6 @@ const EXPECTED_HEADER = Object.freeze([
   "longitude",
 ]);
 const LINE_REFERENCE = /^(\d{6})-(\d+)$/;
-const SKIPPED_LABELS = new Set(["D+000"]);
 
 function parseDecimal(value: string, context: string): number {
   if (!/^-?\d+(?:[.,]\d+)?(?:e[+-]?\d+)?$/i.test(value)) {
@@ -41,20 +47,12 @@ function parseLineReference(
   };
 }
 
-function parseMilestone(
+function parseMilestoneIdentity(
   fields: readonly string[],
   lineNumber: number,
-): Milestone {
+): Pick<Milestone, "code" | "rank" | "label" | "positionMeters"> {
   const context = `Milestone CSV line ${lineNumber}`;
-  const [
-    ,
-    label,
-    lineReferenceValue,
-    codeValue,
-    rankValue,
-    latitude,
-    longitude,
-  ] = fields;
+  const [, label, lineReferenceValue, codeValue, rankValue] = fields;
   if (!/^\d{1,6}$/.test(codeValue)) {
     throw new Error(`${context} CODE_LIGNE must contain one to six digits`);
   }
@@ -83,18 +81,6 @@ function parseMilestone(
   return Object.freeze({
     code,
     label,
-    latitude: requireCoordinate(
-      parseDecimal(latitude, `${context} latitude`),
-      -90,
-      90,
-      `${context} latitude`,
-    ),
-    longitude: requireCoordinate(
-      parseDecimal(longitude, `${context} longitude`),
-      -180,
-      180,
-      `${context} longitude`,
-    ),
     positionMeters: milestonePositionMeters(label, `${context} PK`),
     rank,
   });
@@ -110,7 +96,8 @@ export function parseMilestoneCsv(buffer: Uint8Array): ParsedMilestones {
 
   const milestones: Milestone[] = [];
   const skipped: SkippedMilestone[] = [];
-  const ids = new Set<string>();
+  const sources = new Map<string, MilestoneSourceRow>();
+  const duplicates: DuplicateMilestone[] = [];
   for (const [index, line] of lines.entries()) {
     if (line === "") {
       continue;
@@ -122,24 +109,60 @@ export function parseMilestoneCsv(buffer: Uint8Array): ParsedMilestones {
         `Milestone CSV line ${lineNumber} must contain ${EXPECTED_HEADER.length} columns`,
       );
     }
-    if (fields[0] !== "Kilomètre") {
-      continue;
-    }
-    if (SKIPPED_LABELS.has(fields[1])) {
-      skipped.push(Object.freeze({ label: fields[1], lineNumber }));
+    const position = parseMilestoneLabel(fields[1])?.positionMeters;
+    if (
+      position === undefined ||
+      !Number.isSafeInteger(position) ||
+      position < 0
+    ) {
+      skipped.push(
+        Object.freeze({
+          label: fields[1],
+          lineNumber,
+          reason: "unsupported-pk",
+        }),
+      );
       continue;
     }
 
-    const milestone = parseMilestone(fields, lineNumber);
+    const milestone = parseMilestoneIdentity(fields, lineNumber);
     const id = new MilestoneId(
       new RailwaySectionId(milestone.code, milestone.rank),
       milestone.positionMeters,
     ).value;
-    if (ids.has(id)) {
-      throw new Error(`Duplicate milestone ${id} at CSV line ${lineNumber}`);
+    const source = Object.freeze({
+      lineNumber,
+      label: fields[1],
+      type: fields[0],
+      latitude: fields[5],
+      longitude: fields[6],
+    });
+    const kept = sources.get(id);
+    // WARNING: DUPLICATE FILTER APPLIED — FIRST CSV OCCURRENCE WINS.
+    // Preserve source order and the original coordinates; see the import report.
+    if (kept !== undefined) {
+      duplicates.push(Object.freeze({ id, kept, discarded: source }));
+      continue;
     }
-    ids.add(id);
-    milestones.push(milestone);
+    const context = `Milestone CSV line ${lineNumber}`;
+    milestones.push(
+      Object.freeze({
+        ...milestone,
+        latitude: requireCoordinate(
+          parseDecimal(fields[5], `${context} latitude`),
+          -90,
+          90,
+          `${context} latitude`,
+        ),
+        longitude: requireCoordinate(
+          parseDecimal(fields[6], `${context} longitude`),
+          -180,
+          180,
+          `${context} longitude`,
+        ),
+      }),
+    );
+    sources.set(id, source);
   }
 
   milestones.sort(
@@ -151,5 +174,6 @@ export function parseMilestoneCsv(buffer: Uint8Array): ParsedMilestones {
   return Object.freeze({
     milestones: Object.freeze(milestones),
     skipped: Object.freeze(skipped),
+    duplicates: Object.freeze(duplicates),
   });
 }

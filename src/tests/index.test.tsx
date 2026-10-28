@@ -1,32 +1,30 @@
 import { render, screen } from "@testing-library/react-native";
 
-import { useRailwayReference } from "@/hooks/features/use-railway-reference";
-import { useRealLocation } from "@/hooks/features/use-real-location";
+import { useRailwayReference } from "@/features/use-railway-reference";
+import { useRealLocation } from "@/features/use-real-location";
 
 import Index from "@/app/index";
+jest.mock("@/features/use-visible-milestones", () => ({
+  useVisibleMilestones: () => [],
+}));
 jest.mock("@/components/adapters/toast", () => ({
   useToast: () => ({ show: jest.fn(), close: jest.fn() }),
 }));
 
 jest.mock("expo-asset", () => ({
-  useAssets: () => [
-    [
-      { localUri: "file:///railways.geojson" },
-      { localUri: "file:///milestones.geojson" },
-    ],
-  ],
+  useAssets: () => [[{ localUri: "file:///railways.geojson" }]],
 }));
-jest.mock("@/hooks/features/use-railway-reference", () => ({
+jest.mock("@/features/use-railway-reference", () => ({
   useRailwayReference: jest.fn(),
 }));
-jest.mock("@/hooks/features/use-simulation", () => ({
+jest.mock("@/features/use-simulation", () => ({
   useSimulation: () => ({
     start: jest.fn(),
     state: { status: "idle" },
     stop: jest.fn(),
   }),
 }));
-jest.mock("@/hooks/features/use-real-location", () => ({
+jest.mock("@/features/use-real-location", () => ({
   useRealLocation: jest.fn(),
 }));
 jest.mock("@/components/adapters/map/map", () => {
@@ -56,6 +54,7 @@ const useRealLocationMock = jest.mocked(useRealLocation);
 describe("Index", () => {
   beforeEach(() => {
     useRailwayReferenceMock.mockReturnValue({
+      findVisibleMilestones: async () => [],
       findMilestoneNeighbours: async () => undefined,
       findRailwayMilestoneBounds: async () => ({}),
       milestoneSearch: {
@@ -80,17 +79,14 @@ describe("Index", () => {
     });
   });
 
-  test("passes generated asset URIs and location data to the map", async () => {
+  test("passes railway geometry, viewport points and location data to the map", async () => {
     await render(<Index />);
 
     expect(screen.getByTestId("mock-map")).toHaveProp(
       "railwayData",
       "file:///railways.geojson",
     );
-    expect(screen.getByTestId("mock-map")).toHaveProp(
-      "milestoneData",
-      "file:///milestones.geojson",
-    );
+    expect(screen.getByTestId("mock-map")).toHaveProp("milestoneData", []);
     expect(screen.getByTestId("mock-map")).toHaveProp(
       "location",
       expect.objectContaining({ latitude: 45.74, longitude: 4.86 }),

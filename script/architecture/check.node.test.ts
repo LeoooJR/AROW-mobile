@@ -156,7 +156,7 @@ test.each([
   "src/app/route.tsx",
   "src/components/composites/card.tsx",
   "src/features/model.ts",
-  "src/hooks/features/use-model.ts",
+  "src/features/use-model.ts",
   "src/contexts/model.ts",
 ])("prevents primitive dependencies on %s", (target) => {
   expect(
@@ -195,18 +195,18 @@ test.each(["ui", "platform"])(
 
 describe.each(["ui", "platform"])("%s hook feature boundaries", (role) => {
   test.each([
-    'import { useModel } from "@/hooks/features/use-model";',
-    'import type { Model } from "../features/use-model";',
-    'export { useModel } from "@/hooks/features/use-model";',
-    'const model = import("../features/use-model");',
-    'const model = require("@/hooks/features/use-model");',
-    'type Model = import("@/hooks/features/use-model").Model;',
+    'import { useModel } from "@/features/use-model";',
+    'import type { Model } from "../../features/use-model";',
+    'export { useModel } from "@/features/use-model";',
+    'const model = import("../../features/use-model");',
+    'const model = require("@/features/use-model");',
+    'type Model = import("@/features/use-model").Model;',
   ])("rejects a feature-hook dependency: %s", (source) => {
     const file = `src/hooks/${role}/use-model.ts`;
     expect(
       inspect({
         [file]: source,
-        "src/hooks/features/use-model.ts":
+        "src/features/use-model.ts":
           "export interface Model {} export function useModel() {}",
       }),
     ).toEqual([
@@ -221,8 +221,8 @@ describe.each(["ui", "platform"])("%s hook feature boundaries", (role) => {
     expect(
       inspect({
         [`src/hooks/${role}/use-model.test.ts`]:
-          'import { useModel } from "@/hooks/features/use-model";',
-        "src/hooks/features/use-model.ts": "export function useModel() {}",
+          'import { useModel } from "@/features/use-model";',
+        "src/features/use-model.ts": "export function useModel() {}",
       }),
     ).toEqual([]);
   });

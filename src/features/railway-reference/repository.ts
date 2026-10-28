@@ -1,4 +1,6 @@
 import type { SQLiteDatabase } from "expo-sqlite";
+import type { MapViewport } from "@/types/map-viewport";
+import type { MilestoneDisplayInterval } from "./milestone-display";
 import type { MilestoneNeighbours } from "@shared/railway-domain/milestone-neighbours";
 import { milestoneRowsToNeighbours } from "./mapping/milestone-neighbours-mapper";
 
@@ -16,10 +18,22 @@ import {
   readCurrentMilestoneRow,
   readRailwayMilestoneBoundRows,
   readSearchableRailwayRows,
+  readVisibleMilestoneRows,
 } from "./sqlite/reader";
 import type { Railway } from "@shared/railway-domain/railway";
 import type { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import type { RailwayMilestoneBounds } from "@shared/railway-domain/railway-milestone-bounds";
+
+export async function findVisibleMilestones(
+  database: Pick<SQLiteDatabase, "getAllAsync">,
+  bounds: MapViewport["bounds"],
+  interval: MilestoneDisplayInterval,
+): Promise<readonly Milestone[]> {
+  const records = await readVisibleMilestoneRows(database, bounds, interval);
+  return records.map((row) =>
+    milestoneFromDatabaseRow(row, "visible map point"),
+  );
+}
 
 export async function findMilestoneNeighbours(
   database: Pick<SQLiteDatabase, "getFirstAsync">,

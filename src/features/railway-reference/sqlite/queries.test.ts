@@ -6,14 +6,14 @@ import {
 describe("railway reference queries", () => {
   test("uses the complete milestone projection for exact lookup", () => {
     const columns =
-      "code_ligne, rg_troncon, position_m, label, latitude, longitude";
+      "code_ligne, rg_troncon, position_m, label, latitude, longitude, position_in_section, visibility_class";
 
     expect(FIND_MILESTONE_QUERY).toContain(`SELECT ${columns}`);
   });
 
   test("loads searchable section bounds with geometry metadata", () => {
     expect(LOAD_SEARCHABLE_RAILWAYS_QUERY).toContain(
-      "INNER JOIN section_bounds",
+      "INNER JOIN kilometric_points AS minimum_point",
     );
     expect(LOAD_SEARCHABLE_RAILWAYS_QUERY).toContain("railway.has_geometry");
     expect(LOAD_SEARCHABLE_RAILWAYS_QUERY).toContain("railway.idgaia");

@@ -4,6 +4,9 @@ This guide covers local setup, development builds, previews, and code-quality
 checks. Run all commands from the repository root. For an introduction to the
 application, see the [README](../README.md).
 
+For the rationale behind reference-data, SQL, map-loading and feature-ownership
+choices, see the [Architecture Decision Records](adr/README.md).
+
 ## Get started
 
 You need **Node.js 24 or newer**, npm, and an Android development environment with
@@ -21,6 +24,15 @@ the source files, and generates the GeoJSON and SQLite assets used by the app.
 Generated assets stay outside version control. If startup reports missing or
 invalid assets, rerun `npm run database:setup`. Prepare these assets before an EAS
 build too: the upload includes them and the remote build validates them.
+
+The CSV import accepts every marker type with a supported numerical PK. It
+keeps the first source occurrence of each section/position and writes the
+detailed `src/statics/railway_reference.import-report.json` alongside the assets.
+**Duplicate filtering has been applied: first CSV occurrence wins.** See the
+[import policy and audit trail](railway-database.md#import-policy-and-audit-trail)
+before changing how points are selected. Generation verifies SQLite points directly
+against the accepted CSV records. The app renders points queried from SQLite for
+the current viewport, from zoom 10 while the point layer is visible.
 
 Start and boot your Android emulator, then build and open the development client:
 

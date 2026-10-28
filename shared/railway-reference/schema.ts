@@ -13,6 +13,7 @@ export interface RailwayReferenceColumnDescriptor<
 }
 
 export interface RailwayReferenceForeignKeyDescriptor {
+  readonly deferred?: boolean;
   readonly columns: readonly string[];
   readonly referencedColumns: readonly string[];
   readonly referencedTableName: string;
@@ -68,7 +69,9 @@ function table<
 
 export const RAILWAY_SECTIONS_TABLE = table({
   checks: [
-    "CHECK (\n      has_geometry = 0 OR\n      (idgaia IS NOT NULL AND type_ligne IS NOT NULL AND pkd IS NOT NULL AND pkf IS NOT NULL)\n    )",
+    "CHECK (has_geometry = 0 OR (idgaia IS NOT NULL AND type_ligne IS NOT NULL))",
+    "CHECK ((milestone_count = 0 AND first_recorded_position_m IS NULL AND last_recorded_position_m IS NULL) OR (milestone_count > 0 AND first_recorded_position_m IS NOT NULL AND last_recorded_position_m IS NOT NULL AND first_recorded_position_m >= 0 AND first_recorded_position_m <= last_recorded_position_m))",
+    "CHECK (milestone_count != 1 OR first_recorded_position_m = last_recorded_position_m)",
   ],
   columns: [
     column({
@@ -110,16 +113,18 @@ export const RAILWAY_SECTIONS_TABLE = table({
       type: "TEXT",
     }),
     column({
-      description: "Geometry section start milestone",
-      name: "pkd",
+      description:
+        "First recorded numerical PK in this section; null when empty",
+      name: "first_recorded_position_m",
       nullable: true,
-      type: "TEXT",
+      type: "INTEGER",
     }),
     column({
-      description: "Geometry section end milestone",
-      name: "pkf",
+      description:
+        "Last recorded numerical PK in this section; null when empty",
+      name: "last_recorded_position_m",
       nullable: true,
-      type: "TEXT",
+      type: "INTEGER",
     }),
     column({
       checkLayout: "inline",
@@ -129,8 +134,29 @@ export const RAILWAY_SECTIONS_TABLE = table({
       nullable: false,
       type: "INTEGER",
     }),
+    column({
+      checkLayout: "inline",
+      checks: ["milestone_count >= 0"],
+      description: "Total recorded milestones in this exact section",
+      name: "milestone_count",
+      nullable: false,
+      type: "INTEGER",
+    }),
   ] as const,
-  foreignKeys: [],
+  foreignKeys: [
+    {
+      columns: ["code_ligne", "rg_troncon", "first_recorded_position_m"],
+      referencedColumns: ["code_ligne", "rg_troncon", "position_m"],
+      referencedTableName: "kilometric_points",
+      deferred: true,
+    },
+    {
+      columns: ["code_ligne", "rg_troncon", "last_recorded_position_m"],
+      referencedColumns: ["code_ligne", "rg_troncon", "position_m"],
+      referencedTableName: "kilometric_points",
+      deferred: true,
+    },
+  ],
   name: "railway_sections",
   strict: true,
   withoutRowId: true,
@@ -198,6 +224,24 @@ export const KILOMETRIC_POINTS_TABLE = table({
       name: "longitude",
       nullable: false,
       type: "REAL",
+    }),
+    column({
+      checkLayout: "inline",
+      checks: ["position_in_section > 0"],
+      description:
+        "One-based recorded milestone ordinal ordered by numeric PK within its section",
+      name: "position_in_section",
+      nullable: false,
+      type: "INTEGER",
+    }),
+    column({
+      checkLayout: "inline",
+      checks: ["visibility_class BETWEEN 0 AND 3"],
+      description:
+        "Passive map visibility tier from numerical PK: 0 kilometre, 1 half kilometre, 2 hectometre, 3 other",
+      name: "visibility_class",
+      nullable: false,
+      type: "INTEGER",
     }),
   ] as const,
   foreignKeys: [
@@ -284,7 +328,7 @@ export function createTableSql(
     `    PRIMARY KEY (${primaryKey})`,
     ...tableDescriptor.foreignKeys.map(
       (descriptor) =>
-        `    FOREIGN KEY (${descriptor.columns.join(", ")})\n      REFERENCES ${descriptor.referencedTableName}(${descriptor.referencedColumns.join(", ")})`,
+        `    FOREIGN KEY (${descriptor.columns.join(", ")})\n      REFERENCES ${descriptor.referencedTableName}(${descriptor.referencedColumns.join(", ")})${descriptor.deferred ? " DEFERRABLE INITIALLY DEFERRED" : ""}`,
     ),
   ];
   const body = elements

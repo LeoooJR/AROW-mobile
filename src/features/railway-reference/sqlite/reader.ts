@@ -1,4 +1,9 @@
 import type { SQLiteDatabase } from "expo-sqlite";
+import type { MapViewport } from "@/types/map-viewport";
+import {
+  MILESTONE_DISPLAY_CLASSES,
+  type MilestoneDisplayInterval,
+} from "../milestone-display";
 
 import type { MilestoneId } from "@shared/railway-domain/milestone-id";
 import type { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
@@ -9,7 +14,25 @@ import {
   FIND_CURRENT_MILESTONE_QUERY,
   FIND_RAILWAY_MILESTONE_BOUNDS_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
+  visibleMilestonesQuery,
 } from "./queries";
+
+export function readVisibleMilestoneRows(
+  database: Pick<SQLiteDatabase, "getAllAsync">,
+  bounds: MapViewport["bounds"],
+  interval: MilestoneDisplayInterval,
+): Promise<readonly unknown[]> {
+  const [west, south, east, north] = bounds;
+  const classes = MILESTONE_DISPLAY_CLASSES[interval];
+  return database.getAllAsync<unknown>(
+    visibleMilestonesQuery(classes, west > east),
+    south,
+    north,
+    west,
+    east,
+    ...classes,
+  );
+}
 
 export function readPreviousMilestoneRow(
   database: Pick<SQLiteDatabase, "getFirstAsync">,
@@ -71,10 +94,6 @@ export function readRailwayMilestoneBoundRows(
 ): Promise<readonly unknown[]> {
   return database.getAllAsync<unknown>(
     FIND_RAILWAY_MILESTONE_BOUNDS_QUERY,
-    section.lineCode,
-    section.sectionRank,
-    section.lineCode,
-    section.sectionRank,
     section.lineCode,
     section.sectionRank,
   );

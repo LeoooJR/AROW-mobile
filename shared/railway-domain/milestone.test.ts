@@ -9,6 +9,26 @@ const INPUT = {
 } as const;
 
 describe("Milestone", () => {
+  test("serializes its identity, preserved label and longitude-first coordinates as GeoJSON", () => {
+    const milestone = new Milestone({ ...INPUT, label: "000241+000" });
+
+    expect(milestone.toGeoJSON()).toEqual({
+      type: "Feature",
+      id: "001000:1:241000",
+      geometry: { type: "Point", coordinates: [4.86234, 45.74491] },
+      properties: {
+        label: "000241+000",
+        lineCode: "001000",
+        sectionRank: 1,
+        positionMeters: 241_000,
+      },
+    });
+
+    milestone.toGeoJSON().geometry.coordinates[0] = 0;
+    expect(milestone.coordinates).toEqual(INPUT.coordinates);
+    expect(milestone.toGeoJSON().geometry.coordinates[0]).toBe(4.86234);
+  });
+
   test("encapsulates milestone identity and values", () => {
     const milestone = new Milestone(INPUT);
 

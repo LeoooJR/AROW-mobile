@@ -1,19 +1,22 @@
 # Shared Hooks Context
 
-This directory owns reusable React hooks for UI, platform, and feature-adapter
-behavior. Read this file before creating, moving, or modifying a hook under
+This directory owns reusable React hooks for UI and platform behavior.
+Read this file before creating, moving, or modifying a hook under
 `src/hooks`.
 
+Keep this context about hook development rules and pitfalls. Document application
+behavior and implementation walkthroughs outside this file; add iteration
+lessons here only when they produce a reusable working rule.
+
 Hooks that affect interaction, motion, accessibility, visual feedback, or
-platform adaptation must also follow the repository-level [`DESIGN.md`](../../DESIGN.md).
-That document is authoritative for design decisions and takes precedence when
-guidance conflicts.
+platform adaptation must also follow the [design authority](../../docs/agents/design.md).
+Follow its precedence rules rather than defining a separate design authority here.
 
 ## What belongs here
 
 Move logic into `src/hooks` only when it is reused by multiple components or
-clearly represents an application-wide UI or platform policy, or adapts a feature
-context for shared use. A hook used by one component stays beside that component
+clearly represents an application-wide UI or platform policy.
+A hook used by one component stays beside that component
 until genuine reuse appears.
 
 This directory may contain:
@@ -22,8 +25,7 @@ This directory may contain:
 - accessibility and reduced-motion behavior;
 - lifecycle, subscription, measurement, and layout coordination;
 - animation behavior shared across component families;
-- operating-system, device-capability, and Expo/native API adapters;
-- shared React adapters to feature-owned contexts and models.
+- operating-system, device-capability, and Expo/native API adapters.
 
 It must not contain:
 
@@ -43,17 +45,16 @@ Create role directories only when the first shared hook for that role is added:
 src/hooks/
   ui/         Shared interaction, accessibility, animation, and presentation logic.
   platform/   Shared operating-system, device, and Expo/native API behavior.
-  features/   Shared React adapters to feature-owned contexts and models.
 ```
 
 UI hooks may depend on platform hooks. Platform hooks must not depend on UI hooks
 or components. Neither role may import feature or domain modules, and circular
 dependencies are not allowed.
 
-Feature hooks may import feature-owned contexts and model types. They expose
-those contexts to shared consumers without owning controllers, business workflows,
-data access, or persistence. Feature-owned providers and contexts stay with their
-features. Application-wide infrastructure contexts belong in `src/contexts`.
+Feature entry hooks live directly under `src/features`, beside the directories
+containing their supporting logic. See the [feature context](../features/CONTEXT.md).
+Feature-owned providers and contexts stay in their feature directories.
+Application-wide infrastructure contexts belong in `src/contexts`.
 
 ## Hook API conventions
 
@@ -88,7 +89,7 @@ features. Application-wide infrastructure contexts belong in `src/contexts`.
 
 ## React Compiler and native behavior
 
-The application has React Compiler enabled:
+When writing hooks for React Compiler:
 
 - return stable operations and let consumers destructure functions before using
   them in callbacks;

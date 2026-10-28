@@ -13,9 +13,9 @@ import {
 } from "expo-sqlite";
 import { type PropsWithChildren } from "react";
 
-import { useRailwayReference } from "@/hooks/features/use-railway-reference";
+import { useRailwayReference } from "@/features/use-railway-reference";
 import RailwayReferenceProvider from "./provider";
-import { FIND_MILESTONE_QUERY } from "./sqlite/queries";
+import { FIND_MILESTONE_QUERY, visibleMilestonesQuery } from "./sqlite/queries";
 
 jest.mock("expo-sqlite", () => ({
   SQLiteProvider: jest.fn(({ children }: PropsWithChildren) => children),
@@ -42,6 +42,8 @@ const MILESTONE_RECORD = {
   latitude: 45.74744,
   longitude: 4.85933,
   position_m: 509_000,
+  position_in_section: 10,
+  visibility_class: 0,
   rg_troncon: 1,
 };
 const SECTION_RECORD = {
@@ -49,17 +51,59 @@ const SECTION_RECORD = {
   has_geometry: 1,
   idgaia: "gaia-id",
   lib_ligne: "Ligne test",
+  milestone_count: 12,
   maximum_label: "509+000",
   maximum_position_m: 509_000,
   minimum_label: "499+000",
   minimum_position_m: 499_000,
-  pkd: "499+752",
-  pkf: "511+605",
+  first_recorded_position_m: 499_000,
+  last_recorded_position_m: 509_000,
   rg_troncon: 1,
   type_ligne: "Ligne",
 };
 
 describe("RailwayReferenceProvider", () => {
+  test("retrieves visible points through the provider without loading the catalogue", async () => {
+    const getAllAsync = jest.fn().mockResolvedValue([MILESTONE_RECORD]);
+    useSQLiteContextMock.mockReturnValue(
+      asDatabase({ getAllAsync, getFirstAsync: jest.fn() }),
+    );
+    const view = await renderHook(() => useRailwayReference(), {
+      wrapper: RailwayReferenceProvider,
+    });
+    const find = view.result.current.findVisibleMilestones;
+    const points = await find([4, 45, 5, 46], 500);
+    expect(points.map((point) => point.id.value)).toEqual(["893000:1:509000"]);
+    expect(getAllAsync).toHaveBeenCalledTimes(1);
+    expect(getAllAsync).toHaveBeenCalledWith(
+      visibleMilestonesQuery([0, 1], false),
+      45,
+      46,
+      4,
+      5,
+      0,
+      1,
+    );
+    await view.rerender({});
+    expect(view.result.current.findVisibleMilestones).toBe(find);
+    expect(view.result.current.milestoneSearch.state).toEqual({
+      status: "idle",
+    });
+  });
+  test("imports the versioned asset without overwriting it on each mount", async () => {
+    useSQLiteContextMock.mockReturnValue(
+      asDatabase({ getAllAsync: jest.fn(), getFirstAsync: jest.fn() }),
+    );
+    await render(<RailwayReferenceProvider>{null}</RailwayReferenceProvider>);
+    expect(jest.mocked(SQLiteProvider).mock.lastCall?.[0]).toMatchObject({
+      databaseName: "railway_reference_v5_r2.sqlite",
+      assetSource: { assetId: "database-asset" },
+    });
+    expect(
+      jest.mocked(SQLiteProvider).mock.lastCall?.[0].assetSource
+        ?.forceOverwrite,
+    ).toBeUndefined();
+  });
   test("forwards database initialization failure outside the render phase", async () => {
     const error = new Error("database failed");
     const onError = jest.fn();

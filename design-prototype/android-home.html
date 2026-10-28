@@ -331,10 +331,11 @@
 
         <section class="search-step disabled" id="milestone-step" data-od-id="search-step-milestone" aria-labelledby="milestone-step-title" aria-disabled="true">
           <div class="step-head"><span class="step-number">3</span><span class="step-title" id="milestone-step-title">Repère kilométrique</span><span class="step-status" id="milestone-step-status">Section requise</span></div>
+          <span class="field-help" id="milestone-range" data-od-id="milestone-available-range" role="status" aria-live="polite" aria-atomic="true">Sélectionnez une section pour connaître les repères disponibles.</span>
           <div class="milestone-group" role="group" aria-labelledby="milestone-step-title">
-            <div class="milestone-field"><label class="field-label" for="milestone-km">Kilomètre</label><input class="milestone-input" id="milestone-km" data-od-id="milestone-kilometer-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-describedby="milestone-help milestone-error" aria-invalid="false" disabled placeholder="240"></div>
+            <div class="milestone-field"><label class="field-label" for="milestone-km">Kilomètre</label><input class="milestone-input" id="milestone-km" data-od-id="milestone-kilometer-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-describedby="milestone-range milestone-help milestone-error" aria-invalid="false" disabled placeholder="240"></div>
             <span class="milestone-plus" aria-hidden="true">+</span>
-            <div class="milestone-field metric"><label class="field-label" for="milestone-offset">Partie métrique</label><input class="milestone-input" id="milestone-offset" data-od-id="milestone-offset-input" inputmode="numeric" pattern="[0-9]{2}" maxlength="2" autocomplete="off" aria-describedby="milestone-help milestone-error" aria-invalid="false" disabled placeholder="00"></div>
+            <div class="milestone-field metric"><label class="field-label" for="milestone-offset">Partie métrique</label><input class="milestone-input" id="milestone-offset" data-od-id="milestone-offset-input" inputmode="numeric" pattern="[0-9]{2}" maxlength="2" autocomplete="off" aria-describedby="milestone-range milestone-help milestone-error" aria-invalid="false" disabled placeholder="00"></div>
           </div>
           <span class="field-help" id="milestone-help">Format attendu : 240+00. Le repère est résolu dans la section sélectionnée.</span>
           <p class="field-error" id="milestone-error" role="alert" hidden></p>
@@ -372,6 +373,7 @@
     const sectionStateDetail=document.getElementById('section-state-detail');
     const sectionStepStatus=document.getElementById('section-step-status');
     const milestoneStep=document.getElementById('milestone-step');
+    const milestoneRange=document.getElementById('milestone-range');
     const milestoneKm=document.getElementById('milestone-km');
     const milestoneOffset=document.getElementById('milestone-offset');
     const milestoneStepStatus=document.getElementById('milestone-step-status');
@@ -487,7 +489,7 @@
       clearSections();clearResolvedPoint(true);sectionStep.classList.remove('disabled');sectionStep.setAttribute('aria-disabled','false');sectionStepStatus.textContent='Chargement';sectionState.hidden=false;sectionState.className='inline-state loading';sectionStateTitle.textContent='Chargement des sections';sectionStateDetail.textContent='Référentiel de la ligne sélectionnée';
       sectionTimer=window.setTimeout(()=>renderSections(railway.sections),220);announce(`${railway.name} sélectionnée. Chargement des sections.`);
     }
-    function clearSections(){sectionList.replaceChildren();document.querySelectorAll('.section-highlight').forEach(path=>path.classList.remove('active'));sectionState.hidden=true;sectionStepStatus.textContent=selectedRailway?'À choisir':'Ligne requise';milestoneStep.classList.add('disabled');milestoneStep.setAttribute('aria-disabled','true');milestoneStepStatus.textContent='Section requise';milestoneKm.disabled=true;milestoneOffset.disabled=true}
+    function clearSections(){milestoneRange.textContent='Sélectionnez une section pour connaître les repères disponibles.';sectionList.replaceChildren();document.querySelectorAll('.section-highlight').forEach(path=>path.classList.remove('active'));sectionState.hidden=true;sectionStepStatus.textContent=selectedRailway?'À choisir':'Ligne requise';milestoneStep.classList.add('disabled');milestoneStep.setAttribute('aria-disabled','true');milestoneStepStatus.textContent='Section requise';milestoneKm.disabled=true;milestoneOffset.disabled=true}
     function renderSections(sections){
       sectionState.hidden=true;sectionList.replaceChildren();
       if(!sections.length){sectionStepStatus.textContent='Indisponible';sectionState.hidden=false;sectionStateTitle.textContent='Aucune section disponible';sectionStateDetail.textContent='Le référentiel de cette ligne est incomplet.';return}
@@ -496,6 +498,7 @@
       if(sections.length===1)selectSection(sections[0],true);
     }
     function selectSection(section,automatic=false){
+      milestoneRange.textContent=`Repères disponibles : ${section.min} à ${section.max}.`;
       selectedSection=section;resolvedPoint=null;document.querySelectorAll('.section-highlight').forEach(path=>path.classList.toggle('active',path.id===section.pathId));
       [...sectionList.children].forEach(button=>{const selected=button.textContent===`Section ${section.number}`;button.classList.toggle('selected',selected);button.setAttribute('aria-pressed',String(selected))});
       sectionStepStatus.textContent=`Section ${section.number}`;milestoneStep.classList.remove('disabled');milestoneStep.setAttribute('aria-disabled','false');milestoneStepStatus.textContent='À renseigner';milestoneKm.disabled=false;milestoneOffset.disabled=false;clearResolvedPoint(false);resetMapView();

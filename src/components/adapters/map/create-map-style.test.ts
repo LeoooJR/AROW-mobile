@@ -1,7 +1,7 @@
 import { createMapStyle } from "./create-map-style";
-import { MAP_LAYER_IDS } from "./map-layer-ids";
-import { DARK_MAP_STYLE } from "./map-style-dark";
-import { LIGHT_MAP_STYLE } from "./map-style-light";
+import { MAP_LAYER_IDS } from "./layer-ids";
+import { DARK_MAP_STYLE } from "./style-dark";
+import { LIGHT_MAP_STYLE } from "./style-light";
 
 const palette = {
   border: "border",

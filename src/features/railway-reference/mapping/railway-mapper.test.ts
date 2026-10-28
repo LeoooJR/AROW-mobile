@@ -7,18 +7,26 @@ const BASE_ROW = {
   has_geometry: 1,
   idgaia: "gaia-id",
   lib_ligne: "Ligne de Collonges-Fontaines à Lyon-Guillotière",
+  milestone_count: 4,
   maximum_label: "511+000",
   maximum_position_m: 511_000,
   minimum_label: "508+000",
   minimum_position_m: 508_000,
-  pkd: "499+752",
-  pkf: "511+605",
+  first_recorded_position_m: 508_000,
+  last_recorded_position_m: 511_000,
   rg_troncon: 2,
   type_ligne: "Ligne",
 } as const;
 
 function row(overrides: Partial<Record<keyof typeof BASE_ROW, unknown>> = {}) {
-  return { ...BASE_ROW, ...overrides };
+  return {
+    ...BASE_ROW,
+    first_recorded_position_m:
+      overrides.minimum_position_m ?? BASE_ROW.minimum_position_m,
+    last_recorded_position_m:
+      overrides.maximum_position_m ?? BASE_ROW.maximum_position_m,
+    ...overrides,
+  };
 }
 
 describe("railway assembly", () => {
@@ -55,10 +63,8 @@ describe("railway assembly", () => {
     ]);
     expect(railway?.sections[0]?.railway).toBe(railway);
     expect(railway?.sections[1]?.geometry).toEqual({
-      endMilestone: "511+605",
       gaiaId: "gaia-id",
       railwayType: "Ligne",
-      startMilestone: "499+752",
       status: "present",
     });
     expect(railway?.sections[1]?.milestoneRange).toEqual({
@@ -80,8 +86,8 @@ describe("railway assembly", () => {
         maximum_position_m: 1_100,
         minimum_label: "1+100",
         minimum_position_m: 1_100,
-        pkd: null,
-        pkf: null,
+        first_recorded_position_m: 1100,
+        last_recorded_position_m: 1100,
         rg_troncon: 1,
         type_ligne: null,
       }),

@@ -1,10 +1,8 @@
 import { Railway } from "./railway";
 
 const GEOMETRY = {
-  endMilestone: "137+980",
   gaiaId: "4718490e-6665-11e3-afff-01f464e0362d",
   railwayType: "Raccordement",
-  startMilestone: "136+772",
   status: "present",
 } as const;
 

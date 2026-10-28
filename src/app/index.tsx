@@ -9,28 +9,36 @@ import RailwayDetailsCard from "@/components/composites/map-feature-details-card
 import MilestoneDetailsCard from "@/components/composites/map-feature-details-card/milestone-details-card";
 import ToastMessage from "@/components/composites/toast-message";
 import { useToast } from "@/components/adapters/toast";
-import { useRailwayMilestoneBounds } from "@/features/map-screen/use-railway-milestone-bounds";
-import { useMilestoneNeighbours } from "@/features/map-screen/use-milestone-neighbours";
+import { useRailwayMilestoneBounds } from "@/features/use-railway-milestone-bounds";
+import { useMilestoneNeighbours } from "@/features/use-milestone-neighbours";
 import MapToolbar from "@/components/composites/map-toolbar";
 import { AppStartupContext } from "@/contexts/app-startup-context";
-import { useMapStartup } from "@/hooks/features/use-map-startup";
-import { useMapLocation } from "@/features/map-screen/use-map-location";
-import { useMapSelection } from "@/features/map-screen/use-map-selection";
-import { useRailwayReference } from "@/hooks/features/use-railway-reference";
+import { useMapStartup } from "@/features/use-map-startup";
+import { useMapLocation } from "@/features/use-map-location";
+import { useMapSelection } from "@/features/use-map-selection";
+import { useRailwayReference } from "@/features/use-railway-reference";
 import railwayLinesAsset from "@/statics/lignes-par-type.geojson";
-import milestonesAsset from "@/statics/milestones.geojson";
+import { useVisibleMilestones } from "@/features/use-visible-milestones";
+import type { MapViewport } from "@/types/map-viewport";
 
 export default function Index() {
   const [locationBarHeight, setLocationBarHeight] = useState<number>();
+  const [viewport, setViewport] = useState<MapViewport>();
+  const onViewportChange = useCallback((next: MapViewport) => {
+    setViewport((current) =>
+      current !== undefined &&
+      current.zoom === next.zoom &&
+      current.bounds.every((value, index) => value === next.bounds[index])
+        ? current
+        : next,
+    );
+  }, []);
   const onLocationBarLayout = useCallback((event: LayoutChangeEvent) => {
     setLocationBarHeight(event.nativeEvent.layout.height);
   }, []);
   const detailsBottomOffset =
     locationBarHeight === undefined ? undefined : locationBarHeight + 16;
-  const [railwayAssets, assetError] = useAssets([
-    railwayLinesAsset,
-    milestonesAsset,
-  ]);
+  const [railwayAssets, assetError] = useAssets([railwayLinesAsset]);
   const startup = use(AppStartupContext);
   const onMapReady = useMapStartup(startup);
   const onFailure = startup?.onFailure;
@@ -98,13 +106,15 @@ export default function Index() {
     [canSelectSimulationTarget, onMilestoneSelect],
   );
   const railwayData = railwayAssets?.[0]?.localUri ?? railwayAssets?.[0]?.uri;
-  const milestoneData = railwayAssets?.[1]?.localUri ?? railwayAssets?.[1]?.uri;
+  const milestoneData = useVisibleMilestones(
+    viewport,
+    selection.layerVisibility.milestone,
+  );
   const showOverlays = process.env.EXPO_OS !== "web" && !selection.mapFocused;
 
   return (
     <View className="flex-1 bg-surface">
-      {process.env.EXPO_OS === "web" ||
-      (railwayData !== undefined && milestoneData !== undefined) ? (
+      {process.env.EXPO_OS === "web" || railwayData !== undefined ? (
         <Map
           focusLocation={selection.focusLocation}
           focusRequest={selection.focusRequest}
@@ -112,6 +122,7 @@ export default function Index() {
           location={location.currentLocation}
           milestoneData={milestoneData}
           onFeaturePress={selection.onFeaturePress}
+          onViewportChange={onViewportChange}
           onReady={onMapReady}
           onLoadError={startup?.status === "loading" ? onFailure : undefined}
           railwayData={railwayData}

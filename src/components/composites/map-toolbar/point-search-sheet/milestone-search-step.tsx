@@ -5,7 +5,7 @@ import MilestoneResolutionFeedback from "@/components/composites/map-toolbar/poi
 import MilestoneStep from "@/components/composites/map-toolbar/point-search-sheet/milestone-step";
 import PointSearchStepHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-step-header";
 import TextField from "@/components/primitives/text-field";
-import type { MilestoneResolution } from "@/features/milestones/search/contracts";
+import type { MilestoneResolution } from "@/features/railway-reference/search/contracts";
 import type { Railway } from "@shared/railway-domain/railway";
 import type { RailwaySection } from "@shared/railway-domain/railway-section";
 
@@ -18,6 +18,19 @@ interface MilestoneSearchStepProps {
   readonly resolution: MilestoneResolution;
   readonly selectedLine?: Railway;
   readonly selectedSection?: RailwaySection;
+}
+
+function availableRangeMessage(section: RailwaySection | undefined): string {
+  if (section === undefined) {
+    return "Sélectionnez une section pour connaître les repères disponibles.";
+  }
+
+  const range = section.milestoneRange;
+  if (range === undefined) {
+    return "Plage de repères indisponible pour cette section.";
+  }
+
+  return `Repères disponibles : ${range.minimumLabel} à ${range.maximumLabel}.`;
 }
 
 export default function MilestoneSearchStep({
@@ -42,6 +55,13 @@ export default function MilestoneSearchStep({
       testID="search-step-milestone"
     >
       <PointSearchStepHeader step={step} />
+      <Text
+        aria-live="polite"
+        className="mt-1.5 text-[11px] leading-4 text-text-muted"
+        testID="milestone-available-range"
+      >
+        {availableRangeMessage(selectedSection)}
+      </Text>
       <View className="flex-row items-end gap-2">
         <View className="min-w-0 flex-1">
           <Text className="mb-1.5 text-xs font-semibold text-text-primary">

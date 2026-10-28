@@ -3,12 +3,12 @@ import { type ReactElement, useState } from "react";
 import type {
   MapLayerVisibility,
   ToggleableMapLayer,
-} from "@/components/adapters/map/map-layer-visibility";
+} from "@/components/adapters/map/layer-visibility";
 import MapLayersSheet from "@/components/composites/map-toolbar/map-layers-sheet";
 import MapToolbarActions from "@/components/composites/map-toolbar/map-toolbar-actions";
 import PointSearchSheet from "@/components/composites/map-toolbar/point-search-sheet";
 import type { Milestone } from "@shared/railway-domain/milestone";
-import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
+import type { MilestoneSearchModel } from "@/features/railway-reference/search/contracts";
 
 export interface MapToolbarProps {
   readonly mapFocused: boolean;

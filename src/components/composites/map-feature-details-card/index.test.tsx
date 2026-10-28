@@ -18,10 +18,8 @@ const railwayLine = new Railway({
   sections: [
     {
       geometry: {
-        endMilestone: "137+980",
         gaiaId: "4718490e-6665-11e3-afff-01f464e0362d",
         railwayType: "Raccordement",
-        startMilestone: "136+772",
         status: "present",
       },
       sectionRank: 1,
@@ -62,6 +60,7 @@ describe("MapFeatureDetailsCard", () => {
     );
     expect(first).toHaveBeenCalledTimes(1);
     expect(last).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("241+000 → 241+000")).toBeOnTheScreen();
   });
   test("disables missing and loading endpoints but enables error recovery", async () => {
     const props = {
@@ -71,11 +70,14 @@ describe("MapFeatureDetailsCard", () => {
       onLast: jest.fn(),
     };
     const { rerender } = await render(<RailwayDetailsCard {...props} />);
+    expect(screen.getByText("Aucun repère enregistré")).toBeOnTheScreen();
     expect(screen.getByTestId("first-railway-milestone")).toBeDisabled();
     expect(screen.getByTestId("last-railway-milestone")).toBeDisabled();
     await rerender(<RailwayDetailsCard {...props} retryable />);
+    expect(screen.getByText("Plage de repères indisponible")).toBeOnTheScreen();
     expect(screen.getByTestId("first-railway-milestone")).toBeEnabled();
     await rerender(<RailwayDetailsCard {...props} retryable loading />);
+    expect(screen.getByText("Chargement des repères…")).toBeOnTheScreen();
     expect(screen.getByTestId("first-railway-milestone")).toBeDisabled();
   });
   test("shows compact operational railway metadata", async () => {
@@ -94,7 +96,7 @@ describe("MapFeatureDetailsCard", () => {
     ).toBeOnTheScreen();
     expect(screen.getByText("340311")).toBeOnTheScreen();
     expect(screen.getByText("1")).toBeOnTheScreen();
-    expect(screen.getByText("136+772 → 137+980")).toBeOnTheScreen();
+    expect(screen.getByText("Aucun repère enregistré")).toBeOnTheScreen();
     expect(screen.queryByText("Coordonnées")).not.toBeOnTheScreen();
   });
 

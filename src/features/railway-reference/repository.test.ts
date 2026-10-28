@@ -2,7 +2,11 @@ import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
 import { Milestone } from "@shared/railway-domain/milestone";
 
-import { findMilestone, loadSearchableRailways } from "./repository";
+import {
+  findMilestone,
+  findVisibleMilestones,
+  loadSearchableRailways,
+} from "./repository";
 import {
   FIND_MILESTONE_QUERY,
   LOAD_SEARCHABLE_RAILWAYS_QUERY,
@@ -14,6 +18,8 @@ const MILESTONE_RECORD = {
   latitude: 45.74744,
   longitude: 4.85933,
   position_m: 509_000,
+  position_in_section: 10,
+  visibility_class: 0,
   rg_troncon: 1,
 };
 
@@ -22,17 +28,42 @@ const SECTION_RECORD = {
   has_geometry: 1,
   idgaia: "gaia-id",
   lib_ligne: "Ligne de Collonges-Fontaines à Lyon-Guillotière",
+  milestone_count: 12,
   maximum_label: "509+000",
   maximum_position_m: 509_000,
   minimum_label: "499+000",
   minimum_position_m: 499_000,
-  pkd: "499+752",
-  pkf: "511+605",
+  first_recorded_position_m: 499_000,
+  last_recorded_position_m: 509_000,
   rg_troncon: 1,
   type_ligne: "Ligne",
 };
 
 describe("railway reference database", () => {
+  test("rejects malformed viewport rows and preserves query failures", async () => {
+    const bounds = [4, 45, 5, 46] as const;
+    await expect(
+      findVisibleMilestones(
+        {
+          getAllAsync: jest
+            .fn()
+            .mockResolvedValue([{ ...MILESTONE_RECORD, latitude: 91 }]),
+        },
+        bounds,
+        100,
+      ),
+    ).rejects.toThrow("visible map point");
+    const error = new Error("database unavailable");
+    await expect(
+      findVisibleMilestones(
+        {
+          getAllAsync: jest.fn().mockRejectedValue(error),
+        },
+        bounds,
+        100,
+      ),
+    ).rejects.toBe(error);
+  });
   test("executes and converts searchable railway loading", async () => {
     const getAllAsync = jest.fn().mockResolvedValue([SECTION_RECORD]);
     const railways = await loadSearchableRailways({ getAllAsync });

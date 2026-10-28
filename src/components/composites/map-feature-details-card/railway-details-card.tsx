@@ -102,9 +102,13 @@ export default function RailwayDetailsCard({
         lineCode={feature.lineCode}
         sectionRank={feature.sectionRank}
         milestone={
-          geometry.status === "present"
-            ? `${geometry.startMilestone} → ${geometry.endMilestone}`
-            : "Non renseigné"
+          loading
+            ? "Chargement des repères…"
+            : retryable
+              ? "Plage de repères indisponible"
+              : bounds?.first !== undefined && bounds.last !== undefined
+                ? `${bounds.first.label} → ${bounds.last.label}`
+                : "Aucun repère enregistré"
         }
       />
     </MapFeatureDetailsFrame>

@@ -1,4 +1,4 @@
-import { normalizeDegrees } from "./angle";
+import { normalizeDegrees, normalizeLongitude } from "./angle";
 
 test.each([
   [0, 0],
@@ -20,3 +20,15 @@ test.each([NaN, Infinity, -Infinity])(
     expect(normalizeDegrees(degrees)).toBeNaN();
   },
 );
+
+test.each([
+  [-180, -180],
+  [180, 180],
+  [4.85933, 4.85933],
+  [181, -179],
+  [-181, 179],
+  [540, -180],
+  [-540, -180],
+])("normalizes longitude %s to %s", (longitude, expected) => {
+  expect(normalizeLongitude(longitude)).toBe(expected);
+});

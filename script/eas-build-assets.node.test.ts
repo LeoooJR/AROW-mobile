@@ -8,8 +8,8 @@ import { join, resolve } from "node:path";
 const EAS_ASSET_INCLUSIONS = [
   "# Generated railway assets required by EAS Build",
   "!/src/statics/lignes-par-type.geojson",
-  "!/src/statics/milestones.geojson",
   "!/src/statics/railway_reference.sqlite",
+  "!/src/statics/railway_reference.import-report.json",
 ].join("\n");
 
 describe("EAS build asset inclusion", () => {
@@ -23,6 +23,7 @@ describe("EAS build asset inclusion", () => {
 
   test("excludes development files while retaining required build inputs", () => {
     const excluded = [
+      "src/statics/milestones.geojson",
       "design-prototype/android-home.html",
       "docs/HOW_TO_communication_contract",
       ".maestro/artifacts/.gitkeep",
@@ -76,8 +77,8 @@ describe("EAS build asset inclusion", () => {
       "shared/railway-reference/schema.ts",
       "src/app/_layout.tsx",
       "src/statics/lignes-par-type.geojson",
-      "src/statics/milestones.geojson",
       "src/statics/railway_reference.sqlite",
+      "src/statics/railway_reference.import-report.json",
       "assets/images/icon.png",
       "assets/images/favicon.png",
       "assets/images/android-icon.png",

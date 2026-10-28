@@ -37,7 +37,10 @@ module.exports = defineConfig([
     },
   },
   {
-    files: ["src/hooks/**/*.{spec,test}.{js,jsx,ts,tsx}"],
+    files: [
+      "src/hooks/**/*.{spec,test}.{js,jsx,ts,tsx}",
+      "src/features/use-*.{spec,test}.{js,jsx,ts,tsx}",
+    ],
     rules: {
       // The generic rule does not distinguish renderHook results from render results.
       "testing-library/render-result-naming-convention": "off",

@@ -11,10 +11,12 @@ import { useState } from "react";
 import {
   DEFAULT_MAP_LAYER_VISIBILITY,
   type MapLayerVisibility,
-} from "@/components/adapters/map/map-layer-visibility";
+} from "@/components/adapters/map/layer-visibility";
 import { Milestone } from "@shared/railway-domain/milestone";
-import type { MilestoneSearchModel } from "@/features/milestones/search/contracts";
-import type { RailwaySearchState } from "@/features/railways/search/contracts";
+import type {
+  MilestoneSearchModel,
+  RailwaySearchState,
+} from "@/features/railway-reference/search/contracts";
 import { Railway } from "@shared/railway-domain/railway";
 
 import MapToolbar from "./index";

@@ -2,39 +2,18 @@ import {
   GeoJSONSource,
   Layer,
   type LineLayerSpecification,
-  type PressEventWithFeatures,
 } from "@maplibre/maplibre-react-native";
 import { type ReactElement } from "react";
-import { type NativeSyntheticEvent, useColorScheme } from "react-native";
+import { useColorScheme } from "react-native";
 
-import { MAP_LAYER_IDS } from "@/components/adapters/map/map-layer-ids";
-import type { MapFeature } from "@/types/map-feature";
-import { isCanonicalRailwayLineCode } from "@shared/railway-domain/line-code";
+import { MAP_LAYER_IDS } from "@/components/adapters/map/layer-ids";
 import { RailwaySectionId } from "@shared/railway-domain/railway-section-id";
-import { Railway } from "@shared/railway-domain/railway";
-import type { RailwaySection } from "@shared/railway-domain/railway-section";
-import {
-  isNonEmptyString,
-  isPositiveInteger,
-  isRecord,
-} from "@shared/value-validation";
 import { resolveColorTheme } from "@/utils/color-theme";
 
 export interface RailwayLinesSourceProps {
   readonly data: string;
-  readonly onFeaturePress?: (feature: MapFeature) => void;
   readonly selectedSection?: RailwaySectionId;
   readonly visible?: boolean;
-}
-
-interface RailwayLineProperties {
-  readonly code_ligne: string;
-  readonly idgaia: string;
-  readonly lib_ligne: string;
-  readonly pkd: string;
-  readonly pkf: string;
-  readonly rg_troncon: number;
-  readonly type_ligne: string;
 }
 
 const LAYER_COLORS = {
@@ -74,99 +53,18 @@ const SELECTED_LINE_WIDTH: LineWidth = [
   8,
 ];
 
-function isRailwayLineProperties(
-  properties: GeoJSON.GeoJsonProperties,
-): properties is RailwayLineProperties {
-  if (!isRecord(properties)) {
-    return false;
-  }
-
-  return hasRailwayIdentity(properties) && hasRailwayMetadata(properties);
-}
-
-function hasRailwayIdentity(properties: Record<string, unknown>): boolean {
-  return (
-    isCanonicalRailwayLineCode(properties.code_ligne) &&
-    isPositiveInteger(properties.rg_troncon)
-  );
-}
-
-function hasRailwayMetadata(properties: Record<string, unknown>): boolean {
-  return (
-    isNonEmptyString(properties.idgaia) &&
-    isNonEmptyString(properties.lib_ligne) &&
-    isNonEmptyString(properties.pkd) &&
-    isNonEmptyString(properties.pkf) &&
-    isNonEmptyString(properties.type_ligne)
-  );
-}
-
-function railwayFromFeature(
-  feature: GeoJSON.Feature,
-): RailwaySection | undefined {
-  if (
-    feature.geometry.type !== "LineString" &&
-    feature.geometry.type !== "MultiLineString"
-  ) {
-    return undefined;
-  }
-
-  if (!isRailwayLineProperties(feature.properties)) {
-    return undefined;
-  }
-
-  const railway = new Railway({
-    code: feature.properties.code_ligne,
-    name: feature.properties.lib_ligne,
-    sections: [
-      {
-        geometry: {
-          endMilestone: feature.properties.pkf,
-          gaiaId: feature.properties.idgaia,
-          railwayType: feature.properties.type_ligne,
-          startMilestone: feature.properties.pkd,
-          status: "present",
-        },
-        sectionRank: feature.properties.rg_troncon,
-      },
-    ],
-  });
-  const section = railway.sections[0];
-
-  return section !== undefined && feature.id === section.id.value
-    ? section
-    : undefined;
-}
-
 export default function RailwayLinesSource({
   data,
-  onFeaturePress,
   selectedSection,
   visible = true,
 }: RailwayLinesSourceProps): ReactElement {
   const colorScheme = useColorScheme();
   const colors = LAYER_COLORS[resolveColorTheme(colorScheme)];
 
-  const onPress = (
-    event: NativeSyntheticEvent<PressEventWithFeatures>,
-  ): void => {
-    const railway = event.nativeEvent.features
-      .map(railwayFromFeature)
-      .find((feature) => feature !== undefined);
-
-    if (railway === undefined) {
-      return;
-    }
-
-    event.stopPropagation();
-    onFeaturePress?.(railway);
-  };
-
   return (
     <GeoJSONSource
       data={data}
       id="arow-railway-lines"
-      onPress={visible ? onPress : undefined}
       testID="railway-lines-source"
     >
       <Layer

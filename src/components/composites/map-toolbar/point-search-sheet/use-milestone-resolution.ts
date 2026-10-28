@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { Milestone } from "@shared/railway-domain/milestone";
 import { MilestoneId } from "@shared/railway-domain/milestone-id";
-import { type MilestoneResolution } from "@/features/milestones/search/contracts";
-import { validateMilestoneInput } from "@/features/milestones/search/milestone-input";
+import { type MilestoneResolution } from "@/features/railway-reference/search/contracts";
+import { validateMilestoneInput } from "@/features/railway-reference/search/milestone-input";
 import {
   milestoneLookupErrorResolution,
   unavailableMilestoneResolution,
-} from "@/features/milestones/search/resolution-messages";
+} from "@/features/railway-reference/search/resolution-messages";
 import type { Railway } from "@shared/railway-domain/railway";
 import type { RailwaySection } from "@shared/railway-domain/railway-section";
 
