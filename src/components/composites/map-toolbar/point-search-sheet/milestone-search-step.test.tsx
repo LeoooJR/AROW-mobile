@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react-native";
+import { render, screen, userEvent } from "@testing-library/react-native";
 
 import { Railway } from "@shared/railway-domain/railway";
 
@@ -59,6 +59,55 @@ const props = {
 } as const;
 
 describe("MilestoneSearchStep range hint", () => {
+  test("steps the kilometer independently of the metric part", async () => {
+    const onKilometerChange = jest.fn();
+    const onMetricChange = jest.fn();
+    const user = userEvent.setup();
+    await render(
+      <MilestoneSearchStep
+        {...props}
+        kilometer="509"
+        metric="007"
+        onKilometerChange={onKilometerChange}
+        onMetricChange={onMetricChange}
+        selectedSection={railway.sections[0]}
+      />,
+    );
+    await user.press(
+      screen.getByRole("button", { name: "Augmenter d’un kilomètre" }),
+    );
+    expect(onKilometerChange).toHaveBeenLastCalledWith("510");
+    await user.press(
+      screen.getByRole("button", { name: "Diminuer d’un kilomètre" }),
+    );
+    expect(onKilometerChange).toHaveBeenLastCalledWith("508");
+    expect(onMetricChange).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    ["499", true, false],
+    ["511", false, true],
+    ["", true, false],
+    ["9999999999999999999999", true, true],
+  ])(
+    "disables unavailable steps for kilometer %s",
+    async (kilometer, decreaseDisabled, increaseDisabled) => {
+      await render(
+        <MilestoneSearchStep
+          {...props}
+          kilometer={kilometer}
+          selectedSection={railway.sections[0]}
+        />,
+      );
+      expect(
+        screen.getByRole("button", { name: "Diminuer d’un kilomètre" }),
+      ).toHaveProp("accessibilityState", { disabled: decreaseDisabled });
+      expect(
+        screen.getByRole("button", { name: "Augmenter d’un kilomètre" }),
+      ).toHaveProp("accessibilityState", { disabled: increaseDisabled });
+    },
+  );
+
   test("prompts for a section before selection", async () => {
     await render(<MilestoneSearchStep {...props} />);
 
@@ -68,6 +117,31 @@ describe("MilestoneSearchStep range hint", () => {
       ),
     ).toBeOnTheScreen();
     expect(screen.getByLabelText("Kilomètre")).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Augmenter d’un kilomètre" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Diminuer d’un kilomètre" }),
+    ).toBeDisabled();
+  });
+
+  test("starts empty inputs at the first recorded position", async () => {
+    const onKilometerChange = jest.fn();
+    const onMetricChange = jest.fn();
+    const user = userEvent.setup();
+    await render(
+      <MilestoneSearchStep
+        {...props}
+        onKilometerChange={onKilometerChange}
+        onMetricChange={onMetricChange}
+        selectedSection={railway.sections[1]}
+      />,
+    );
+    await user.press(
+      screen.getByRole("button", { name: "Augmenter d’un kilomètre" }),
+    );
+    expect(onKilometerChange).toHaveBeenCalledWith("0");
+    expect(onMetricChange).toHaveBeenCalledWith("005");
   });
 
   test("shows recorded bounds and announces updates politely", async () => {

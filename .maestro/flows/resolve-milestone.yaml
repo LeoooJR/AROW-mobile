@@ -17,18 +17,54 @@ appId: com.leooojrrr.AROWmobile
     id: "line-search-input"
 - eraseText
 - inputText: "893000"
+- extendedWaitUntil:
+    visible:
+      id: "line-result-893000"
+    timeout: 60000
 - tapOn:
     id: "line-result-893000"
 - assertVisible: "Repères disponibles : 499\\+752 à 511\\+600."
+- scrollUntilVisible:
+    element:
+      id: "milestone-kilometer-input"
+    direction: DOWN
 - tapOn:
     id: "milestone-kilometer-input"
 - eraseText
 - inputText: "${KILOMETER}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "milestone-metric-input"
+    direction: DOWN
 - tapOn:
     id: "milestone-metric-input"
 - eraseText
 - inputText: "${METRIC}"
 - pressKey: Enter
+- scrollUntilVisible:
+    element:
+      id: "kilometer-increase"
+    direction: DOWN
+- runFlow:
+    when:
+      visible:
+        id: "kilometer-increase"
+        enabled: true
+    commands:
+      - tapOn:
+          id: "kilometer-increase"
+      - assertVisible:
+          id: "milestone-kilometer-input"
+          text: "${String(Number(KILOMETER) + 1)}"
+      - assertVisible:
+          id: "milestone-metric-input"
+          text: "${METRIC}"
+      - tapOn:
+          id: "kilometer-decrease"
+      - assertVisible:
+          id: "milestone-kilometer-input"
+          text: "${KILOMETER}"
 - extendedWaitUntil:
     visible: "Point résolu"
     timeout: 15000

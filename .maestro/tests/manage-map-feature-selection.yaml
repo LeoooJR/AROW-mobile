@@ -1,5 +1,7 @@
 appId: com.leooojrrr.AROWmobile
 name: Select railway and milestone map features
+env:
+  METRO_HOST: "10.0.2.2"
 tags:
   - feature
   - map
@@ -11,13 +13,13 @@ tags:
 - setPermissions:
     permissions:
       location: allow
-- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F${METRO_HOST}%3A8081"
 # Wait for this cold launch; a second immediate URL can restart React while
 # the Expo native runtime is still initializing.
 - extendedWaitUntil:
     visible:
       id: "arow-map"
-    timeout: 60000
+    timeout: 120000
 - setLocation:
     latitude: 45.74491
     longitude: 4.86234
@@ -61,6 +63,16 @@ tags:
     timeout: 10000
 - assertVisible:
     id: "use-map-milestone"
+- tapOn:
+    id: "map-feature-details-toggle"
+- assertNotVisible: "Coordonnées"
+- assertVisible: "PK 509\\+000"
+- assertVisible: "96 sur 124"
+- assertVisible:
+    id: "use-map-milestone"
+- tapOn:
+    id: "map-feature-details-toggle"
+- assertVisible: ".*45\\.74744 N.*4\\.85933 E.*"
 - assertNotVisible:
     id: "simulation-play-pause"
 - tapOn:
@@ -117,6 +129,16 @@ tags:
 - assertNotVisible: "PK 509\\+000"
 - assertVisible: "893000"
 - assertVisible: "1"
+- assertVisible: "499\\+752 → 511\\+600"
+- tapOn:
+    id: "map-feature-details-toggle"
+- assertNotVisible: "499\\+752 → 511\\+600"
+- assertVisible:
+    id: "first-railway-milestone"
+- assertVisible:
+    id: "last-railway-milestone"
+- tapOn:
+    id: "map-feature-details-toggle"
 - assertVisible: "499\\+752 → 511\\+600"
 - assertNotVisible:
     id: "use-map-milestone"
