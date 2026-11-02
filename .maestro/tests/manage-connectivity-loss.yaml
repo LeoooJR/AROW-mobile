@@ -1,0 +1,165 @@
+appId: com.leooojrrr.AROWmobile
+name: Keep the foreground map usable after connectivity loss
+env:
+  METRO_HOST: "127.0.0.1"
+tags:
+  - journey
+  - connectivity
+  - simulation
+  - map
+onFlowComplete:
+  # Runs on success and failure. Restore radios before any UI-dependent cleanup.
+  - setAirplaneMode: disabled
+  - runFlow:
+      when:
+        visible: "Internet,.*"
+      commands:
+        - pressKey: Back
+  - launchApp:
+      stopApp: false
+  - runFlow:
+      when:
+        visible:
+          id: "point-search-sheet"
+      commands:
+        - hideKeyboard
+        - runFlow:
+            when:
+              visible:
+                id: "point-search-sheet"
+            commands:
+              - pressKey: Back
+  - runFlow:
+      when:
+        visible: "Arrêter la simulation"
+      commands:
+        - tapOn:
+            id: "simulation-play-pause"
+        - extendedWaitUntil:
+            notVisible: "Arrêter la simulation"
+            timeout: 10000
+---
+# English Android AVD, initially online with airplane mode off, Location on,
+# and AROW selected as mock-location app. Keep Metro independent of the radios:
+# adb -s <emulator-serial> reverse tcp:8081 tcp:8081
+- stopApp
+- setPermissions:
+    permissions:
+      location: allow
+      notifications: allow
+- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F${METRO_HOST}%3A8081"
+- extendedWaitUntil:
+    visible:
+      id: "arow-map"
+    timeout: 120000
+- retry:
+    maxRetries: 2
+    commands:
+      - runFlow:
+          when:
+            visible: "Réessayer"
+          commands:
+            - tapOn: "Réessayer"
+      - extendedWaitUntil:
+          notVisible:
+            id: "startup-screen"
+          timeout: 45000
+- runFlow:
+    file: ../flows/resolve-milestone.yaml
+    env:
+      KILOMETER: "509"
+      METRIC: "000"
+- assertVisible: "PK 509\\+000"
+- tapOn:
+    id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "Arrêter la simulation"
+    timeout: 10000
+- assertVisible:
+    id: "location-status"
+    text: ".*45\\.74744 N.*4\\.85933 E.*"
+- takeScreenshot: connectivity-online-active
+
+# Connectivity is removed only after startup and a confirmed applied fix.
+- setAirplaneMode: enabled
+- swipe:
+    start: "50%,2%"
+    end: "50%,80%"
+    duration: 500
+# A connected Wi-Fi network replaces this label even in airplane mode. Fail
+# rather than silently exercising an online app if Wi-Fi stays connected.
+- extendedWaitUntil:
+    visible: "Internet, Airplane mode"
+    timeout: 15000
+- assertNotVisible:
+    id: "com.android.systemui:id/wifi_signal"
+- takeScreenshot: connectivity-offline-system
+- pressKey: Back
+- assertVisible: "Arrêter la simulation"
+- assertNotVisible:
+    id: "startup-screen"
+- assertVisible:
+    id: "location-status"
+    text: ".*45\\.74744 N.*4\\.85933 E.*"
+
+# Exercise the map and prove that dismissing metadata does not remove Stop.
+- swipe:
+    start: "80%,28%"
+    end: "20%,28%"
+    duration: 600
+- tapOn:
+    id: "close-map-feature-details"
+- assertVisible:
+    id: "arow-map"
+- assertVisible: "Arrêter la simulation"
+- takeScreenshot: connectivity-offline-map
+
+# A different exact SQLite record resolves without the network. Selecting it
+# prepares the next target; it must not change the currently applied fix.
+- runFlow:
+    file: ../flows/resolve-milestone.yaml
+    env:
+      KILOMETER: "500"
+      METRIC: "000"
+- assertVisible: "PK 500\\+000"
+- assertVisible:
+    id: "location-status"
+    text: ".*45\\.74744 N.*4\\.85933 E.*"
+- tapOn:
+    id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "Démarrer la simulation"
+    timeout: 10000
+- tapOn:
+    id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "Arrêter la simulation"
+    timeout: 10000
+- assertVisible:
+    id: "location-status"
+    text: ".*45\\.82465 N.*4\\.84849 E.*"
+- assertNotVisible: "Erreur"
+- takeScreenshot: connectivity-offline-restarted
+
+# Reconnect without restarting AROW or reopening its development URL.
+- setAirplaneMode: disabled
+- extendedWaitUntil:
+    visible:
+      id: "com.android.systemui:id/wifi_signal"
+    timeout: 60000
+- takeScreenshot: connectivity-restored-online
+- assertVisible:
+    id: "arow-map"
+- assertNotVisible:
+    id: "startup-screen"
+- assertVisible: "Arrêter la simulation"
+- tapOn:
+    id: "center-location"
+- tapOn:
+    id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "Démarrer la simulation"
+    timeout: 10000
+- assertVisible: "PK 500\\+000"
+- assertNotVisible: "Erreur"
+- takeScreenshot: connectivity-restored-stopped

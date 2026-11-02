@@ -68,6 +68,18 @@ appId: com.leooojrrr.AROWmobile
 - extendedWaitUntil:
     visible: "Point résolu"
     timeout: 15000
+# Android can restore the native sheet's half-height snap after the keyboard
+# closes. Expand it through its handle when the footer is below the viewport.
+- runFlow:
+    when:
+      notVisible:
+        id: "use-selected-point"
+    commands:
+      - swipe:
+          start: "50%,51%"
+          end: "50%,10%"
+          duration: 600
+      - waitForAnimationToEnd
 - tapOn:
     id: "use-selected-point"
 - assertNotVisible:
