@@ -46,6 +46,29 @@ and ask before mutating it.
 
 ## Maestro validation
 
+Before a long run, inspect tool versions, AVD API/boot state, available `/data`
+storage, installed build type, and ADB connectivity. For a development client,
+also check Metro and port forwarding. Try a short launch/input smoke check before
+investing in a full journey. Do not install/update host tools without authorization.
+
+Choose the build before testing: prefer a standalone preview for process-death,
+cold-start, or connectivity scenarios where Metro/the development launcher would
+confound the result. Use a development client for the edit loop. Record which
+build supplied each result; a successful preview run is not a successful full
+development-client journey.
+
+After a repeated infrastructure failure, stop rerunning the whole scenario.
+Capture the failure, reduce it to a small probe, identify app versus tool/build
+behavior, then make one justified adjustment. Do not accumulate retries.
+
+Before changing device settings, save their actual initial values in local
+artifacts (including absent settings, not guessed defaults). Restore them on
+success, failure, and interruption using a cleanup hook/trap where possible;
+verify the resulting state independently. Never turn off Developer options or
+USB debugging. Preserve application data. Stop simulation and verify native
+service/provider cleanup before leaving the emulator. If a different build was
+installed for validation, restore the original build type and its connection.
+
 Read [`.maestro/CONTEXT.md`](../../.maestro/CONTEXT.md) before changing or running
 journeys or creating recordings. It contains the commands and maintenance rules.
 
@@ -54,7 +77,7 @@ Inspect their assertions and the affected code paths, then briefly explain the
 selection before running them. Do not run the entire configured suite by default.
 
 For example, a simulation native-contract change requires
-`.maestro/tests/mock-phone-location.yaml`; map selection, layer visibility, and
+`.maestro/journeys/mock-phone-location.yaml`; map selection, layer visibility, and
 map-only flows are required only if their behavior may be affected. Expand the
 selection when shared behavior changes, or run the entire suite when the scope
 warrants it or the user requests it.

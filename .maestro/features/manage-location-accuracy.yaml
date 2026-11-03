@@ -1,0 +1,169 @@
+appId: com.leooojrrr.AROWmobile
+name: Simulate milestones with precise or approximate device location
+tags:
+  - feature
+  - location
+  - permission
+  - simulation
+onFlowComplete:
+  - setPermissions:
+      permissions:
+        location: allow
+  - pressKey: Home
+  - launchApp:
+      stopApp: false
+      permissions: {}
+  - runFlow:
+      when:
+        visible:
+          id: "point-search-sheet"
+      commands:
+        - hideKeyboard
+        - runFlow:
+            when:
+              visible:
+                id: "point-search-sheet"
+            commands:
+              - pressKey: Back
+  - runFlow:
+      when:
+        visible: "(Arrêter la simulation|Réessayer l’arrêt)"
+      commands:
+        - tapOn:
+            id: "simulation-play-pause"
+        - extendedWaitUntil:
+            notVisible: "(Arrêter la simulation|Réessayer l’arrêt)"
+            timeout: 10000
+---
+# English Android 12+ AVD with Location on and AROW selected as mock app.
+# Start/end with precise foreground access. Preserve app data and Developer
+# options. Connect the development client to Metro before running this flow.
+- stopApp
+# Discard stale Settings dialogs before attempting permission changes.
+# Google and AOSP images use different permission-controller package names.
+- stopApp: com.google.android.permissioncontroller
+- stopApp: com.android.permissioncontroller
+- stopApp: com.android.settings
+- setPermissions:
+    permissions:
+      location: allow
+      notifications: allow
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
+- extendedWaitUntil:
+    visible:
+      id: "location-status"
+      text: ".*précision [0-9]+ m.*"
+    timeout: 30000
+- runFlow:
+    file: ../subflows/resolve-milestone.yaml
+    env:
+      KILOMETER: "509"
+      METRIC: "000"
+- runFlow:
+    file: ../subflows/assert-milestone-injection.yaml
+    env:
+      SCREENSHOT_NAME: "location-fine-active"
+- tapOn:
+    id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "Démarrer la simulation"
+    timeout: 10000
+- takeScreenshot: location-fine-stopped
+- tapOn:
+    id: "simulation-play-pause"
+- assertVisible: "Arrêter la simulation"
+
+# Attempt a Settings downgrade, using the test API if Android guards providers.
+# The permission restart must not resume injection or retain owned providers.
+- runFlow:
+    file: ../subflows/set-device-location-permission.yaml
+    env:
+      LOCATION_ACCESS: "allow"
+- pressKey: Home
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
+- assertNotVisible: "(Arrêter la simulation|Réessayer l’arrêt|Arrêt incomplet.*)"
+- extendedWaitUntil:
+    visible:
+      id: "location-status"
+      text: ".*précision [0-9]+ m.*"
+    timeout: 45000
+- takeScreenshot: location-coarse-device
+- runFlow:
+    file: ../subflows/resolve-milestone.yaml
+    env:
+      KILOMETER: "509"
+      METRIC: "000"
+- runFlow:
+    file: ../subflows/assert-milestone-injection.yaml
+    env:
+      SCREENSHOT_NAME: "location-coarse-active"
+- tapOn:
+    id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "Démarrer la simulation"
+    timeout: 10000
+- takeScreenshot: location-coarse-stopped
+
+# Denial is a different state from coarse access. Recover with coarse access
+# without any mandatory precision upgrade.
+- runFlow:
+    file: ../subflows/set-device-location-permission.yaml
+    env:
+      LOCATION_ACCESS: "deny"
+- pressKey: Home
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
+- extendedWaitUntil:
+    visible: "(Accès refusé|Accès bloqué)"
+    timeout: 60000
+- assertNotVisible: "(Arrêter la simulation|Réessayer l’arrêt)"
+- takeScreenshot: location-denied
+- runFlow:
+    file: ../subflows/resolve-milestone.yaml
+    env:
+      KILOMETER: "509"
+      METRIC: "000"
+- tapOn:
+    id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "Autorisez l’accès à la position"
+    timeout: 10000
+- assertNotVisible: "Arrêter la simulation"
+- takeScreenshot: location-denied-start
+- runFlow:
+    file: ../subflows/set-device-location-permission.yaml
+    env:
+      LOCATION_ACCESS: "allow"
+- pressKey: Home
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
+- extendedWaitUntil:
+    visible:
+      id: "location-status"
+      text: ".*précision [0-9]+ m.*"
+    timeout: 45000
+- assertNotVisible: "(Accès refusé|Accès bloqué)"
+- runFlow:
+    file: ../subflows/resolve-milestone.yaml
+    env:
+      KILOMETER: "509"
+      METRIC: "000"
+- runFlow:
+    file: ../subflows/assert-milestone-injection.yaml
+    env:
+      SCREENSHOT_NAME: "location-coarse-recovered"
+- tapOn:
+    id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "Démarrer la simulation"
+    timeout: 10000

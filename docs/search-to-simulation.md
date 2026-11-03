@@ -48,7 +48,7 @@ Pressing **Utiliser ce point** closes the sheet. [`useMapSelection`](../src/feat
 ```text
 Check: AROW is the selected mock-location app
 Check: Android location services are enabled
-Check: fine location permission is granted
+Check: coarse or fine location permission is granted
         ↓ only if ready
 Start the Android executor with the selected Milestone's coordinates
         ↓ only after the first fix is applied
@@ -86,4 +86,4 @@ objects. Railway grouping and sorting also belong to the railway mapper.
 | Preserve the searched origin and request map focus                   | [`use-map-selection.ts`](../src/features/use-map-selection.ts)                                                                                            |
 | Check readiness and confirm start                                    | [`simulation-controller.ts`](../src/features/simulation/simulation-controller.ts)                                                                         |
 
-The [milestone Maestro journey](../.maestro/tests/mock-phone-location.yaml) exercises the search, selection, and fail-fast mock-app check. Its assertions stop before a successful native start, so a change to first-fix acknowledgement also needs a focused Android check.
+The [milestone Maestro journey](../.maestro/journeys/mock-phone-location.yaml) exercises the search, selection, and fail-fast mock-app check. Its assertions stop before a successful native start, so a change to first-fix acknowledgement also needs a focused Android check.

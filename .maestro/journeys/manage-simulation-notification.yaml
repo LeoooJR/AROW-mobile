@@ -14,7 +14,7 @@ tags:
     permissions:
       location: allow
       notifications: unset
-- runFlow: ../flows/select-simulation-milestone.yaml
+- runFlow: ../subflows/select-simulation-milestone.yaml
 - retry:
     maxRetries: 3
     commands:
@@ -92,7 +92,7 @@ tags:
 - setPermissions:
     permissions:
       notifications: unset
-- runFlow: ../flows/select-simulation-milestone.yaml
+- runFlow: ../subflows/select-simulation-milestone.yaml
 - tapOn:
     id: "simulation-play-pause"
 - tapOn: "Don’t allow"

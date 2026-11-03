@@ -1,7 +1,7 @@
 appId: com.leooojrrr.AROWmobile
 name: Select AROW as the mock location app
 tags:
-  - feature
+  - setup
   - location
   - simulation
   - developer-options

@@ -9,6 +9,28 @@ artifacts. Add lessons here as reusable test-maintenance rules.
 
 ## Journey maintenance
 
+- Use `journeys/` for end-to-end user goals, `features/` for focused regression
+  checks, `subflows/` for reusable units, and `setup/` for system preparation.
+  Give executable flows a unique name and the matching `journey`, `feature`, or
+  `setup` tag. Subflows are never suite entry points. Include setup in the suite
+  only by explicit filename. `npm run check:validation` enforces this layout,
+  parses YAML, and checks flow references, cycles, and ordered names.
+- State preconditions and persistent device changes in each executable flow.
+  Include cleanup for temporary changes on success and failure, or explicitly
+  document the manual restoration required. Setup flows intentionally establish
+  state; name that state. Do not depend on an undocumented preceding test.
+- Shared preparation must fail when startup fails. Do not add retries or press
+  Retry in subflows. Recovery belongs in a named scenario with assertions before
+  and after the user retries. Do not relax assertions to accommodate tool hangs.
+- Use `launchApp` with `permissions: {}` when permission state is under test,
+  then the strict map-ready subflow. Connect a development client to its saved
+  project once. Do not send repeated Expo development URLs to recover startup;
+  they can restart the runtime and confound the scenario.
+- Keep device diagnostics separate from UI assertions. A visible running label
+  does not prove injection; a Stop button disappearing does not prove native
+  cleanup. Describe the guarantees of each maintained command and any separate
+  local checks. Never link maintained coverage to ignored diagnostic scripts.
+
 - Model tests as durable, goal-driven user journeys. Evolve an existing flow as
   its product workflow grows instead of documenting or naming it after one
   temporary implementation stage.
@@ -38,25 +60,25 @@ Use Maestro's local recorder first. Give each recorded feature flow a stable,
 dedicated review artifact:
 
 ```bash
-maestro --device emulator-5554 record --local .maestro/tests/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4
+maestro --device emulator-5554 record --local .maestro/journeys/mock-phone-location.yaml .maestro/artifacts/arow-e2e-recording.mp4
 ```
 
 For the standalone map-feature selection flow:
 
 ```bash
-maestro --device emulator-5554 record --local .maestro/tests/manage-map-feature-selection.yaml .maestro/artifacts/map-feature-selection-e2e-recording.mp4
+maestro --device emulator-5554 record --local .maestro/features/manage-map-feature-selection.yaml .maestro/artifacts/map-feature-selection-e2e-recording.mp4
 ```
 
 For the standalone map-layer feature flow:
 
 ```bash
-maestro --device emulator-5554 record --local .maestro/tests/manage-map-layers.yaml .maestro/artifacts/map-layers-e2e-recording.mp4
+maestro --device emulator-5554 record --local .maestro/features/manage-map-layers.yaml .maestro/artifacts/map-layers-e2e-recording.mp4
 ```
 
 For the standalone map-focus feature flow:
 
 ```bash
-maestro --device emulator-5554 record --local .maestro/tests/manage-map-focus.yaml .maestro/artifacts/map-focus-e2e-recording.mp4
+maestro --device emulator-5554 record --local .maestro/features/manage-map-focus.yaml .maestro/artifacts/map-focus-e2e-recording.mp4
 ```
 
 Present the video only when the recorded flow passes. If Maestro's local
@@ -69,7 +91,7 @@ adb -s emulator-5554 shell screenrecord --bit-rate 2000000 /sdcard/arow-e2e-reco
 ```
 
 ```bash
-maestro --device emulator-5554 test .maestro/tests/mock-phone-location.yaml
+maestro --device emulator-5554 test .maestro/journeys/mock-phone-location.yaml
 ```
 
 Then copy the fallback recording to the host for review:

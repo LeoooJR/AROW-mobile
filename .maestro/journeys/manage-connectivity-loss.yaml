@@ -1,7 +1,5 @@
 appId: com.leooojrrr.AROWmobile
 name: Keep the foreground map usable after connectivity loss
-env:
-  METRO_HOST: "127.0.0.1"
 tags:
   - journey
   - connectivity
@@ -47,25 +45,12 @@ onFlowComplete:
     permissions:
       location: allow
       notifications: allow
-- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F${METRO_HOST}%3A8081"
-- extendedWaitUntil:
-    visible:
-      id: "arow-map"
-    timeout: 120000
-- retry:
-    maxRetries: 2
-    commands:
-      - runFlow:
-          when:
-            visible: "Réessayer"
-          commands:
-            - tapOn: "Réessayer"
-      - extendedWaitUntil:
-          notVisible:
-            id: "startup-screen"
-          timeout: 45000
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
 - runFlow:
-    file: ../flows/resolve-milestone.yaml
+    file: ../subflows/resolve-milestone.yaml
     env:
       KILOMETER: "509"
       METRIC: "000"
@@ -117,7 +102,7 @@ onFlowComplete:
 # A different exact SQLite record resolves without the network. Selecting it
 # prepares the next target; it must not change the currently applied fix.
 - runFlow:
-    file: ../flows/resolve-milestone.yaml
+    file: ../subflows/resolve-milestone.yaml
     env:
       KILOMETER: "500"
       METRIC: "000"

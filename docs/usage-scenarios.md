@@ -6,9 +6,9 @@ of security attacks or a claim that every entry is fixed.
 
 ## Coverage and handling at a glance
 
-**App handling: 3 managed, 9 partially managed, 4 unverified.**
+**App handling: 4 managed, 9 partially managed, 3 unverified.**
 **Automated coverage: 1 covered, 13 partial, 2 missing.**
-Assessment: 2026-10-30, baseline `7488ef7`; evidence and limitations are in each entry.
+Assessment baseline: `303f667` plus working-tree changes; evidence and limitations are in each entry.
 
 Handling and automated coverage are separate:
 
@@ -25,14 +25,14 @@ Handling and automated coverage are separate:
 
 ### Managed behavior
 
-These primary behaviors were observed working. Two still lack a complete
-automated journey.
+These primary behaviors were observed working. Automation gaps are listed per row.
 
-| ID                  | Situation                       | Automated coverage                      | Next action                                                                           |
-| ------------------- | ------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------- |
-| [USE-005](#use-005) | Close the active point's card   | **Partial** — coordination unit tests   | Add a journey closing the card during simulation; assert status and Stop remain.      |
-| [USE-007](#use-007) | Home and return                 | **Covered** — notification/Home journey | Maintain the existing journey; test lock, process death, and task removal separately. |
-| [USE-014](#use-014) | In-range PK absent from dataset | **Partial** — resolution unit tests     | Add the missing-record → correction journey; verify fast edits on device.             |
+| ID                  | Situation                       | Automated coverage                        | Next action                                                                           |
+| ------------------- | ------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------- |
+| [USE-005](#use-005) | Close the active point's card   | **Partial** — coordination unit tests     | Add a journey closing the card during simulation; assert status and Stop remain.      |
+| [USE-007](#use-007) | Home and return                 | **Covered** — notification/Home journey   | Maintain the existing journey; test lock, process death, and task removal separately. |
+| [USE-009](#use-009) | Fine/coarse access and denial   | **Partial** — Maestro UI, ownership tests | Verify Settings-only downgrade; native injection/cleanup remain diagnostic checks.    |
+| [USE-014](#use-014) | In-range PK absent from dataset | **Partial** — resolution unit tests       | Add the missing-record → correction journey; verify fast edits on device.             |
 
 ### Partially managed — needs attention
 
@@ -56,12 +56,11 @@ an intentional behavior does not resolve the remaining user-facing question.
 Existing readiness or layout code is not sufficient evidence that these
 transitions are managed.
 
-| ID                  | Situation                              | Automated coverage                                  | Next action                                                                                                   |
-| ------------------- | -------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| [USE-009](#use-009) | Location permission downgraded mid-run | **Partial** — permission/readiness tests            | Exercise approximate-only and full denial separately during a run; check restart, native state, and recovery. |
-| [USE-010](#use-010) | Notifications blocked mid-run          | **Partial** — denial at Start; notification journey | Block a previously allowed channel during simulation; check warning, background visibility, and Stop.         |
-| [USE-012](#use-012) | Large text and landscape               | **Missing** — no combined configuration journey     | Exercise large text, landscape, keyboard, long cards, and reachable Stop; restore settings.                   |
-| [USE-015](#use-015) | Standalone offline cold launch         | **Partial** — startup failure/retry unit tests      | Use a standalone preview/release build; verify access to local data, failure feedback, and online Retry.      |
+| ID                  | Situation                      | Automated coverage                                  | Next action                                                                                              |
+| ------------------- | ------------------------------ | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| [USE-010](#use-010) | Notifications blocked mid-run  | **Partial** — denial at Start; notification journey | Block a previously allowed channel during simulation; check warning, background visibility, and Stop.    |
+| [USE-012](#use-012) | Large text and landscape       | **Missing** — no combined configuration journey     | Exercise large text, landscape, keyboard, long cards, and reachable Stop; restore settings.              |
+| [USE-015](#use-015) | Standalone offline cold launch | **Partial** — startup failure/retry unit tests      | Use a standalone preview/release build; verify access to local data, failure feedback, and online Retry. |
 
 ## Maintaining this index
 
@@ -155,7 +154,7 @@ transitions are managed.
   The controller polls a running native snapshot and reconciles on foreground
   return. Current cleanup feedback does not name mock-app selection as a remedy.
 - **Coverage gap:** Controller tests simulate cleanup failure, and the
-  [mock-provider journey](../.maestro/tests/select-mock-location-provider.yaml)
+  [mock-provider journey](../.maestro/setup/select-mock-location-provider.yaml)
   selects a provider before Start. Neither exercises revocation during a run,
   restoration, and successful cleanup afterward.
 
@@ -176,7 +175,7 @@ transitions are managed.
   startup failures; the route only reports map errors to that gate while loading,
   so startup tests do not establish feedback for later connectivity loss.
 - **Coverage:** **Partial.** The
-  [Maestro journey](../.maestro/tests/manage-connectivity-loss.yaml) covers
+  [Maestro journey](../.maestro/journeys/manage-connectivity-loss.yaml) covers
   connectivity loss after startup, map interaction, local lookup, simulation
   Stop/Start, and Wi-Fi reconnection. Verified on an Android 36 development
   client at baseline `7488ef7`.
@@ -242,7 +241,7 @@ transitions are managed.
 - **Project handling:** [Map route](../src/app/index.tsx) hides the location bar
   while map-focused; [selection hook](../src/features/use-map-selection.ts)
   handles Android Back to exit. Hiding overlays does not stop simulation.
-- **Coverage:** [Map-focus journey](../.maestro/tests/manage-map-focus.yaml)
+- **Coverage:** [Map-focus journey](../.maestro/features/manage-map-focus.yaml)
   exercises map-only mode, and selection tests cover Back. Neither establishes
   discoverability of Stop during a running simulation.
 
@@ -259,7 +258,7 @@ transitions are managed.
 - **Project handling:** [Foreground service](../modules/arow-mock-location/android/src/main/java/expo/modules/arowmocklocation/MockLocationService.kt)
   refreshes independently of the screen. [Provider](../src/features/simulation/simulation-provider.tsx)
   reconciles on foreground return.
-- **Coverage:** The existing [notification journey](../.maestro/tests/manage-simulation-notification.yaml)
+- **Coverage:** The existing [notification journey](../.maestro/journeys/manage-simulation-notification.yaml)
   exercises Home and notification return. Screen lock, process death, and task
   dismissal remain distinct cases rather than covered variants of Home.
 
@@ -295,19 +294,32 @@ transitions are managed.
 
 ### USE-009 — Downgrade precise location access during simulation
 
-- **Situation:** In app permissions, change precise access to approximate, or
-  deny location access, while AROW is simulating in the background.
-- **Possible consequence:** Android may restart the app; service state, selected
-  point, and user feedback may no longer agree after return.
-- **Live result:** Not yet exercised. Approximate-only and full denial must be
-  recorded separately; they are not equivalent permission states.
-- **Project handling:** Engine readiness requires fine location. The
-  [real-location controller](../src/features/real-location/real-location-controller.ts)
-  rechecks permission on foreground return; the simulation provider reconciles
-  native state on mount and resume.
-- **Coverage gap:** [Permission journey](../.maestro/tests/manage-location-permission.yaml)
-  covers location access recovery, not proof of a permission downgrade during
-  an already running native simulation.
+- **Situation:** Choose approximate rather than precise device location,
+  including during simulation. Complete location denial is a separate case.
+- **Possible consequence:** Rejecting valid coarse access, unexpectedly resuming
+  after Android restarts the process, or reporting stopped with owned providers
+  still installed. Denied access must not appear to start simulation.
+- **Project handling:** [Readiness and cleanup](../modules/arow-mock-location/android/src/main/java/expo/modules/arowmocklocation/MockLocationEngine.kt)
+  accept coarse or fine access; neither permission rejects Start. The device
+  marker uses Android's returned position and the existing accuracy display.
+  Simulation injects database milestone coordinates independently; Android owns
+  receiving applications' precision policy. A restarted process cleans recovered
+  provider ownership before reporting stopped, retaining retry-stop on failure.
+  No target is persisted or automatically resumed; restarting requires Start.
+- **Live result:** **Observed recovery.** Fine/coarse device readings, Start/Stop, identical native
+  milestone coordinates, and advancing fixes verified. The downgrade restarts
+  the process and reopens with the native controller stopped and owned providers
+  removed. Complete denial rejects Start; granting coarse access permits an
+  explicit restart. Retained mock-fix presentation is tracked separately in
+  [USE-016](#use-016).
+- **Coverage:** **Partial.** The [Maestro feature flow](../.maestro/features/manage-location-accuracy.yaml)
+  covers UI controls, downgrade/reopen, denial, and recovery. Raw provider
+  coordinates, advancing timestamps, and service/provider cleanup were verified
+  with local diagnostics; these guarantees are not asserted by the maintained suite.
+  [Ownership tests](../modules/arow-mock-location/android/src/test/java/expo/modules/arowmocklocation/MockProviderOwnershipTest.kt)
+  cover recovered claims and retryable cleanup failures. Android 36 Settings
+  guards active location providers; the journey captures that guard and uses a
+  test-API downgrade. A successful Settings-only downgrade remains unverified.
 
 <a id="use-010"></a>
 
@@ -323,7 +335,7 @@ transitions are managed.
   [provider](../src/features/simulation/simulation-provider.tsx) does not repeat
   that check during native snapshot polling. The warning is deliberately separate
   from simulation success.
-- **Coverage gap:** [Notification journey](../.maestro/tests/manage-simulation-notification.yaml)
+- **Coverage gap:** [Notification journey](../.maestro/journeys/manage-simulation-notification.yaml)
   covers denial at Start and background return; blocking a previously allowed
   channel mid-run needs its own observation.
 

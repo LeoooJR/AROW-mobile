@@ -49,6 +49,10 @@ coverage/
 .maestro/artifacts/*
 !.maestro/artifacts/.gitkeep
 
+# Task-specific scripts are local evidence, not maintained tooling.
+/script/local/*
+!/script/local/.gitkeep
+
 # Local environment files
 .env*.local
 
@@ -86,6 +90,8 @@ Thumbs.db
 /tsconfig.shared.json
 /script/check-architecture.ts
 /script/architecture/
+/script/check-validation.ts
+/script/validation/
 
 # Generated local-module outputs; keep native sources and resources
 /modules/**/android/build/

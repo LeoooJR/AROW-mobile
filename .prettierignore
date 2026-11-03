@@ -22,5 +22,6 @@ modules/**/android/build/
 modules/**/android/.gradle/
 modules/**/android/.cxx/
 .maestro/artifacts/
+script/local/
 src/statics/*.geojson
 src/statics/*.sqlite

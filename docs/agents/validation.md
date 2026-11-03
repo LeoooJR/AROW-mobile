@@ -30,3 +30,19 @@ explicitly.
   bundling unless they also alter executable examples or configuration.
 
 See the [development guide](../development.md) for setup and local build commands.
+
+## Keep validation durable
+
+- Put one-task probes in `script/local/`, following [script ownership](../../script/README.md).
+  Promote them only for an explicit recurring need. `npm run check` enforces
+  Maestro structure/references and rejects tracked task-local scripts.
+- Before expanding a diff to fix test infrastructure, isolate the failure and
+  explain why the shared change is necessary. Re-run affected callers. Do not
+  change application expectations to compensate for an unstable tool.
+- A mocked callback proves the behavior of its caller, not the Android API.
+  Name tests accordingly and retain a device check for platform guarantees.
+- Report unit, UI, native, and manual verification separately, including build
+  type, any retries/recovery, substitutions for real user actions, and unverified
+  variants. Do not aggregate unrelated test counts into a coverage claim.
+- Keep the usage index concise: current handling, durable coverage links, and
+  remaining gaps. Put run logs and implementation narratives in review artifacts.

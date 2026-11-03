@@ -46,7 +46,7 @@ build. The helper installs the debug APK, starts or reuses Metro, and opens the
 client. The APK is generated at
 `android/app/build/outputs/apk/debug/app-debug.apk`.
 
-To use location simulation, grant precise location access, enable Android
+To use location simulation, grant approximate or precise location access, enable Android
 location services, and select **AROW-mobile** as the mock location app in Android
 Developer options. The app checks these requirements before starting a
 simulation.
@@ -121,12 +121,17 @@ npm run check
 npm run test:ci
 ```
 
-`check` runs architecture rules, source/configuration formatting, lint, the
+`check` runs architecture rules, validation-tooling boundaries, source/configuration formatting, lint, the
 application type check, and an independent Node-only shared type check.
 `test:ci` runs code tests without production datasets or the asset-dependent
 `pretest` hook. It excludes the production GeoJSON snapshot and bundled SQLite
 schema suites. Fixture-based tooling and in-memory repository tests remain
 included. Ordinary `npm test` retains the full local suite and asset precheck.
+
+Maestro flows are categorized in [the Maestro guide](../.maestro/README.md).
+Task-only diagnostic scripts belong in the ignored `script/local/` workspace;
+see [script ownership](../script/README.md). They are excluded from code checks,
+test discovery, and EAS uploads. Only the placeholder is versioned.
 
 GitHub Actions runs these commands for pull requests and pushes to `main`.
 Production dataset preparation/validation and Android/web exports are outside

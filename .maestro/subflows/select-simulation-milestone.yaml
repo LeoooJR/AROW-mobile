@@ -5,22 +5,7 @@ appId: com.leooojrrr.AROWmobile
     permissions:
       location: allow
       notifications: unset
-- extendedWaitUntil:
-    visible:
-      id: "arow-map"
-    timeout: 120000
-- retry:
-    maxRetries: 2
-    commands:
-      - runFlow:
-          when:
-            visible: "Réessayer"
-          commands:
-            - tapOn: "Réessayer"
-      - extendedWaitUntil:
-          notVisible:
-            id: "startup-screen"
-          timeout: 45000
+- runFlow: wait-for-ready-map.yaml
 - tapOn:
     id: "open-point-search"
 - tapOn:

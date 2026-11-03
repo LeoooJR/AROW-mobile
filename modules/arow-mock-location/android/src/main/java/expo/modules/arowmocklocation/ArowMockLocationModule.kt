@@ -35,11 +35,15 @@ class ArowMockLocationModule : Module() {
     }
 
     AsyncFunction("getSnapshot") {
-      MockLocationEngine.snapshot().toBridge()
+      MockLocationEngine.restore(requireContext()).toBridge()
     }
 
     AsyncFunction("start") Coroutine { latitude: Double, longitude: Double ->
       val context = requireContext()
+      val recovered = MockLocationEngine.restore(context)
+      if (recovered is NativeErrorSnapshot && recovered.ownsProviders) {
+        return@Coroutine recovered.toBridge()
+      }
       val readiness = MockLocationEngine.readiness(context)
       if (readiness is NativeReadiness.Failed) {
         return@Coroutine MockLocationEngine.rejection(readiness.code).toBridge()

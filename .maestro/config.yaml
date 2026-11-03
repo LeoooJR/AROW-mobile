@@ -7,6 +7,11 @@ executionOrder:
     - Manage railway map layer visibility
     - Use the distraction-free map-only mode
     - Select AROW as the mock location app
+    - Simulate milestones with precise or approximate device location
     - Manage simulation notification visibility
     - Keep the foreground map usable after connectivity loss
-flows: "tests/**"
+flows:
+  - "journeys/*"
+  - "features/*"
+  # Explicit system setup between missing-provider and active-simulation tests.
+  - "setup/select-mock-location-provider.yaml"

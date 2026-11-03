@@ -28,6 +28,10 @@ Run `npm run check` for architecture, formatting, lint, application types, and
 isolated shared types. Run `npm run test:ci` for asset-independent code tests;
 ordinary `npm test` retains its dataset precheck and production-asset suites.
 
+`check` also runs `check:validation` for Maestro layout, references, and local
+script boundaries. Task-specific scripts live in ignored `script/local/`;
+maintained code/tests cannot import them. See [script ownership](../../script/README.md).
+
 CI does not prepare production datasets or export bundles. This does not remove
 the task-specific local checks required by the [validation guide](validation.md).
 See [development and testing](../development.md#code-quality-and-testing) for

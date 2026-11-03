@@ -1,0 +1,16 @@
+appId: com.leooojrrr.AROWmobile
+---
+# Connect a saved development project if necessary; never retry app startup.
+- runFlow:
+    when:
+      visible: "Development Build"
+    commands:
+      - tapOn: "http://.*:8081"
+- extendedWaitUntil:
+    visible:
+      id: "arow-map"
+    timeout: 45000
+- extendedWaitUntil:
+    notVisible:
+      id: "startup-screen"
+    timeout: 45000
