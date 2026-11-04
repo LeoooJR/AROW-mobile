@@ -23,4 +23,20 @@
     android:layout_marginTop="16dp"
     android:text="@string/arow_notification_detail"
     android:textAppearance="@style/Arow.Notification.Body" />
+  <TextView
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:layout_marginTop="12dp"
+    android:importantForAccessibility="no"
+    android:background="@color/arow_notification_border" />
+  <Button
+    android:id="@+id/arow_notification_stop"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="48dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:padding="8dp"
+    android:text="@string/arow_notification_stop"
+    android:textAllCaps="false"
+    android:textAppearance="@style/Arow.Notification.Action" />
 </LinearLayout>

@@ -23,6 +23,10 @@ internal object SimulationInterruptionNotification {
 
   fun postIfBackground(context: Context, failure: NativeErrorSnapshot) {
     if (foreground) return
+    post(context, failure)
+  }
+
+  fun post(context: Context, failure: NativeErrorSnapshot) {
     try {
       val notifications = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
       if (!notifications.areNotificationsEnabled()) return

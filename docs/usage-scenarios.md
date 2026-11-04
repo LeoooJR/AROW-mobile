@@ -7,8 +7,8 @@ of security attacks or a claim that every entry is fixed.
 ## Coverage and handling at a glance
 
 **App handling: 5 managed, 8 partially managed, 3 unverified.**
-**Automated coverage: 1 covered, 13 partial, 2 missing.**
-Assessment baseline: `b8d6aa6` plus working-tree changes; evidence and limitations are in each entry.
+**Automated coverage: 1 covered, 14 partial, 1 missing.**
+Assessment baseline: `df97d83` plus working-tree changes; evidence and limitations are in each entry.
 
 Handling and automated coverage are separate:
 
@@ -47,7 +47,7 @@ an intentional behavior does not resolve the remaining user-facing question.
 | [USE-003](#use-003) | Wi-Fi and mobile data switched off       | **Partial** — foreground connectivity-loss journey           | Verify uncached tiles, Wi-Fi-to-cellular fallback, and failed-request recovery.                                    |
 | [USE-004](#use-004) | Decimal-style PK input                   | **Partial** — sanitization/range unit tests                  | Clarify punctuation normalization; cover decimal, comma, signed, and clipboard variants.                           |
 | [USE-006](#use-006) | Map-only mode during simulation          | **Partial** — map-only journey without active simulation     | Decide how users discover Stop in map-only mode; cover active simulation and Back.                                 |
-| [USE-011](#use-011) | AROW task swiped away                    | **Missing** — no task-dismissal journey                      | Make continued simulation after dismissal explicit; automate task removal, reopen, and Stop.                       |
+| [USE-011](#use-011) | AROW task swiped away                    | **Partial** — native command tests; notification Stop flow   | Complete task-dismissal verification on responsive Android automation.                                             |
 | [USE-013](#use-013) | Another point selected during simulation | **Partial** — selection/coordination unit tests              | Resolve the search/card action inconsistency; cover prepared target versus applied fix.                            |
 | [USE-016](#use-016) | Simulated/active label after Stop        | **Partial** — presentation/controller unit tests             | Distinguish retained mock fixes from active simulation; assert cleanup, fix freshness, and real-position recovery. |
 
@@ -344,29 +344,28 @@ transitions are managed.
 
 ### USE-011 — Swipe AROW away from Recents during simulation
 
-- **Situation:** A user swipes the app's recent-task card away, believing this
-  always stops its work, then opens AROW again.
-- **Possible consequence:** A service may outlive the task, or an operation may
-  stop without the next screen explaining what happened.
-- **Live result:** **Observed limitation and recovery**, 2026-10-30. With
-  `500+000` running, open Recents and swipe AROW's card upward. A fresh Recents
-  hierarchy no longer contains the AROW card; the foreground service still
-  exists with notification ID `8051`. Reopening AROW shows the same simulated
-  coordinates and Stop. Swiping the task away is therefore not a Stop on this
-  emulator. An initial slower gesture did not remove the card and was not used
-  as evidence. Home, force-stop, process death, reboot, and other manufacturers'
-  task policies remain separate scenarios.
-- **Project handling:** [Service](../modules/arow-mock-location/android/src/main/java/expo/modules/arowmocklocation/MockLocationService.kt)
-  returns `START_NOT_STICKY`; [manifest plugin](../modules/arow-mock-location/app.plugin.js)
-  declares its foreground type but does not set `stopWithTask`.
-  `START_NOT_STICKY` governs restart after service termination, and by itself
-  does not prove immediate shutdown on a task swipe. The
-  [lifecycle guide](../src/features/simulation/README.md)'s no-restart statement
-  must not be read as a guarantee that dismissing a task stops its existing
-  service.
-- **Coverage gap:** No configured Maestro journey swipes away a running task and
-  checks both service/provider state and the next launch. Reopening a development
-  client here is not proof of standalone-build cold-start behavior.
+- **Situation:** Dismiss AROW from Recents while keeping the selected mock
+  position active, then stop from the notification without reopening the UI.
+- **Possible consequence:** Simulation becomes difficult to stop, or removing a
+  notification is mistaken for successful provider cleanup.
+- **Project handling:** Task dismissal intentionally preserves the existing
+  foreground service. The expanded [active notification](../modules/arow-mock-location/android/src/main/java/expo/modules/arowmocklocation/ActiveSimulationNotification.kt)
+  offers **Arrêter** through the private native service. Success removes service
+  and providers; cleanup failure retains ownership, warning, and in-app retry-stop.
+  Process termination, force-stop, reboot, and manufacturer policies remain distinct.
+- **Live result:** Continued simulation after task dismissal was previously
+  observed. On the standalone preview, notification Stop removed the service and
+  both mock providers without foregrounding AROW; reopening remained stopped.
+  Light/dark presentation and Stop at 200% text size were verified. The combined
+  task-dismissal → notification Stop check remains unverified: this AVD did not
+  accept the task-card swipe.
+- **Coverage:** **Partial.** [Native command tests](../modules/arow-mock-location/android/src/test/java/expo/modules/arowmocklocation/SimulationStopCommandTest.kt)
+  cover mocked cleanup, failure, repeated requests, and refresh cancellation.
+  [Feature flow](../.maestro/features/stop-simulation-from-notification.yaml)
+  checks task dismissal, notification Stop without foreground return, and reopening.
+  Maestro execution remains blocked by Android 16 input instability. Advancing
+  native fixes and background Stop cleanup were checked separately; repeating
+  these diagnostics after actual task dismissal remains required.
 
 <a id="use-012"></a>
 

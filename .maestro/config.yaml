@@ -10,6 +10,7 @@ executionOrder:
     - Simulate milestones with precise or approximate device location
     - Stop simulation when Location is disabled
     - Manage simulation notification visibility
+    - Stop background simulation after dismissing the task
     - Keep the foreground map usable after connectivity loss
 flows:
   - "journeys/*"
