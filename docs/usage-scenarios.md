@@ -6,9 +6,9 @@ of security attacks or a claim that every entry is fixed.
 
 ## Coverage and handling at a glance
 
-**App handling: 5 managed, 8 partially managed, 3 unverified.**
+**App handling: 6 managed, 7 partially managed, 3 unverified.**
 **Automated coverage: 1 covered, 14 partial, 1 missing.**
-Assessment baseline: `df97d83` plus working-tree changes; evidence and limitations are in each entry.
+Assessment baseline: `f009a57` plus working-tree changes; evidence and limitations are in each entry.
 
 Handling and automated coverage are separate:
 
@@ -33,6 +33,7 @@ These primary behaviors were observed working. Automation gaps are listed per ro
 | [USE-007](#use-007) | Home and return                 | **Covered** — notification/Home journey   | Maintain the existing journey; test lock, process death, and task removal separately. |
 | [USE-008](#use-008) | Location switched off mid-run   | **Partial** — refresh tests; feature flow | Complete the blocked Maestro run; retain independent native cleanup checks.           |
 | [USE-009](#use-009) | Fine/coarse access and denial   | **Partial** — Maestro UI, ownership tests | Verify Settings-only downgrade; native injection/cleanup remain diagnostic checks.    |
+| [USE-013](#use-013) | Browse during simulation        | **Partial** — card/selection tests        | Verify the search entry on device; automate active browsing and Stop.                 |
 | [USE-014](#use-014) | In-range PK absent from dataset | **Partial** — resolution unit tests       | Add the missing-record → correction journey; verify fast edits on device.             |
 
 ### Partially managed — needs attention
@@ -40,16 +41,15 @@ These primary behaviors were observed working. Automation gaps are listed per ro
 These entries remain open even where recovery succeeded. A successful retry or
 an intentional behavior does not resolve the remaining user-facing question.
 
-| ID                  | Situation                                | Automated coverage                                           | Next action                                                                                                        |
-| ------------------- | ---------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| [USE-001](#use-001) | Developer options switched off           | **Partial** — cleanup/controller unit tests                  | Clarify recovery instructions. Live retesting is excluded by the user; retain historical evidence.                 |
-| [USE-002](#use-002) | Mock-app selection removed mid-run       | **Partial** — cleanup tests; provider selection before Start | Explain mock-selection restoration; add revocation → restoration → Stop coverage.                                  |
-| [USE-003](#use-003) | Wi-Fi and mobile data switched off       | **Partial** — foreground connectivity-loss journey           | Verify uncached tiles, Wi-Fi-to-cellular fallback, and failed-request recovery.                                    |
-| [USE-004](#use-004) | Decimal-style PK input                   | **Partial** — sanitization/range unit tests                  | Clarify punctuation normalization; cover decimal, comma, signed, and clipboard variants.                           |
-| [USE-006](#use-006) | Map-only mode during simulation          | **Partial** — map-only journey without active simulation     | Decide how users discover Stop in map-only mode; cover active simulation and Back.                                 |
-| [USE-011](#use-011) | AROW task swiped away                    | **Partial** — native command tests; notification Stop flow   | Complete task-dismissal verification on responsive Android automation.                                             |
-| [USE-013](#use-013) | Another point selected during simulation | **Partial** — selection/coordination unit tests              | Resolve the search/card action inconsistency; cover prepared target versus applied fix.                            |
-| [USE-016](#use-016) | Simulated/active label after Stop        | **Partial** — presentation/controller unit tests             | Distinguish retained mock fixes from active simulation; assert cleanup, fix freshness, and real-position recovery. |
+| ID                  | Situation                          | Automated coverage                                           | Next action                                                                                                        |
+| ------------------- | ---------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| [USE-001](#use-001) | Developer options switched off     | **Partial** — cleanup/controller unit tests                  | Clarify recovery instructions. Live retesting is excluded by the user; retain historical evidence.                 |
+| [USE-002](#use-002) | Mock-app selection removed mid-run | **Partial** — cleanup tests; provider selection before Start | Explain mock-selection restoration; add revocation → restoration → Stop coverage.                                  |
+| [USE-003](#use-003) | Wi-Fi and mobile data switched off | **Partial** — foreground connectivity-loss journey           | Verify uncached tiles, Wi-Fi-to-cellular fallback, and failed-request recovery.                                    |
+| [USE-004](#use-004) | Decimal-style PK input             | **Partial** — sanitization/range unit tests                  | Clarify punctuation normalization; cover decimal, comma, signed, and clipboard variants.                           |
+| [USE-006](#use-006) | Map-only mode during simulation    | **Partial** — map-only journey without active simulation     | Decide how users discover Stop in map-only mode; cover active simulation and Back.                                 |
+| [USE-011](#use-011) | AROW task swiped away              | **Partial** — native command tests; notification Stop flow   | Complete task-dismissal verification on responsive Android automation.                                             |
+| [USE-016](#use-016) | Simulated/active label after Stop  | **Partial** — presentation/controller unit tests             | Distinguish retained mock fixes from active simulation; assert cleanup, fix freshness, and real-position recovery. |
 
 ### Unverified — investigation and coverage needed
 
@@ -386,28 +386,27 @@ transitions are managed.
 
 <a id="use-013"></a>
 
-### USE-013 — Choose a different point while an existing simulation runs
+### USE-013 — Browse another point during preparation or simulation
 
-- **Situation:** While simulating point A, search for point B or browse a neighbour
-  and press “Utiliser ce point”, expecting immediate movement.
-- **Possible consequence:** Card, highlight, prepared target, and applied position
-  may describe different points without an understandable distinction.
-- **Live result:** **Observed limitation**, 2026-10-30, also offline. While
-  simulating `499+752` at `45.82680 N, 4.84784 E`, resolve `500+000` in search.
-  The sheet enables “Utiliser ce point” and accepts it. The card now describes
-  `500+000` at `45.82465 N, 4.84849 E`, but the active location remains at
-  `499+752`. The equivalent action on the card is disabled. Stop then Start
-  applies `500+000` correctly, including without network access. This preserves
-  the existing fix but leaves two identically named selection actions with
-  different availability during a run.
-- **Screenshot:** `selected-point-differs-active-fix.png`.
-- **Project handling:** [Map coordination](../src/features/use-map-location.ts)
-  prevents a new native Start while stopping is required; the map card action
-  is guarded by `canSelectSimulationTarget` in [the route](../src/app/index.tsx).
-  Point search still supplies `selection.onMilestoneSelect` through the toolbar.
-  A changed selection alone does not imply a changed applied fix.
-- **Coverage gap:** Existing selection/coordination unit tests cover individual
-  rules, not the complete user journey comparing both entry paths while active.
+- **Situation:** Inspect or search for another point before starting or while
+  simulation is running. Browsing is supported and does not itself move the
+  active simulated position.
+- **Possible consequence:** Redundant preparation actions obscure the next step,
+  or browsing is mistaken for changing the applied position.
+- **Project handling:** [Selection](../src/features/use-map-selection.ts) clears
+  preparation when another point is browsed; preparing a point exposes simulation
+  controls. The [metadata card](../src/components/composites/map-feature-details-card/milestone-details-card.tsx)
+  hides “Utiliser ce point” when those controls are already visible or preparation
+  is unavailable. Active simulation retains Stop independently of the viewed card.
+- **Live result:** **Observed recovery** in the development client: map preparation
+  hides the action in expanded and compact cards; active neighbour browsing keeps
+  Stop and hides preparation. After Stop, the browsed point requires explicit
+  preparation again. The search-sheet entry check was interrupted by device-tool
+  timeouts and remains unverified live.
+- **Coverage:** **Partial.** [Card tests](../src/components/composites/map-feature-details-card/milestone-use-point-button.test.tsx),
+  selection/coordination tests, and the [map feature flow](../.maestro/features/manage-map-feature-selection.yaml)
+  cover visibility and preparation rules. Complete Maestro execution, the search
+  entry device check, and an automated active-browsing/Stop journey remain open.
 
 <a id="use-014"></a>
 

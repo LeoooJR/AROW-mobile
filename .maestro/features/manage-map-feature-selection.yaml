@@ -78,9 +78,13 @@ tags:
     id: "use-map-milestone"
 - assertVisible: "PK 509\\+000"
 - assertVisible: "Démarrer la simulation"
+- assertNotVisible:
+    id: "use-map-milestone"
 - tapOn:
     id: "previous-milestone"
 - assertVisible: "PK 508\\+900"
+- assertVisible:
+    id: "use-map-milestone"
 - assertVisible: "95 sur 124"
 - assertNotVisible:
     id: "simulation-play-pause"
@@ -94,6 +98,8 @@ tags:
       KILOMETER: "511"
       METRIC: "500"
 - assertVisible: "123 sur 124"
+- assertNotVisible:
+    id: "use-map-milestone"
 - tapOn:
     id: "next-milestone"
 - assertVisible: "PK 511\\+600"
