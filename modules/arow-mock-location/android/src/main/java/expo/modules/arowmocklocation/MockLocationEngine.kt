@@ -124,6 +124,18 @@ internal object MockLocationEngine {
   }
 
   @Synchronized
+  fun refresh(context: Context, scheduleNext: () -> Unit, interrupted: (NativeErrorSnapshot) -> Unit) {
+    refreshSimulation(
+      state,
+      { readiness(context) },
+      { inject(context) },
+      { fail(context, it) },
+      scheduleNext,
+      interrupted,
+    )
+  }
+
+  @Synchronized
   fun inject(context: Context) {
     val current = state
     val coordinates = when (current) {
@@ -171,10 +183,14 @@ internal object MockLocationEngine {
   }
 
   private fun removeProviders(context: Context): NativeErrorCode? {
-    val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    val released = ownership?.releaseAll { provider ->
-      manager.removeTestProvider(provider)
+    return try {
+      val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+      val released = ownership?.releaseAll { provider ->
+        manager.removeTestProvider(provider)
+      }
+      if (released == true) null else NativeErrorCode.CLEANUP_FAILED
+    } catch (exception: Exception) {
+      NativeErrorCode.CLEANUP_FAILED
     }
-    return if (released == true) null else NativeErrorCode.CLEANUP_FAILED
   }
 }

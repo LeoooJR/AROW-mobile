@@ -24,14 +24,17 @@ class MockLocationService : Service() {
   private var notificationStartedAt = 0L
   private val refresh = object : Runnable {
     override fun run() {
-      if (MockLocationEngine.snapshot() !is NativeRunningSnapshot) return
-      try {
-        MockLocationEngine.inject(this@MockLocationService)
-        handler.postDelayed(this, REFRESH_INTERVAL_MS)
-      } catch (exception: Exception) {
-        MockLocationEngine.fail(this@MockLocationService, NativeErrorCode.APPLY_FAILED)
-        stopSelf()
-      }
+      MockLocationEngine.refresh(
+        this@MockLocationService,
+        { handler.postDelayed(this, REFRESH_INTERVAL_MS) },
+        { failure ->
+          try {
+            SimulationInterruptionNotification.postIfBackground(this@MockLocationService, failure)
+          } finally {
+            stopSelf()
+          }
+        },
+      )
     }
   }
 
@@ -61,6 +64,8 @@ class MockLocationService : Service() {
       promoteToForeground()
       MockLocationEngine.activate(this)
       if (MockLocationEngine.snapshot() is NativeRunningSnapshot) {
+        // Clear before ticking: a delayed Start response must not erase a newer interruption.
+        SimulationInterruptionNotification.clear(this)
         handler.removeCallbacks(refresh)
         handler.postDelayed(refresh, REFRESH_INTERVAL_MS)
       } else {

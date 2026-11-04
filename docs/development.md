@@ -49,7 +49,8 @@ client. The APK is generated at
 To use location simulation, grant approximate or precise location access, enable Android
 location services, and select **AROW-mobile** as the mock location app in Android
 Developer options. The app checks these requirements before starting a
-simulation.
+simulation and before each scheduled fix. Losing a prerequisite interrupts the
+simulation; restoring it requires an explicit Start.
 
 ## Everyday development
 

@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import expo.modules.kotlin.functions.Coroutine
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -14,6 +16,15 @@ import kotlinx.coroutines.withTimeout
 class ArowMockLocationModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("ArowMockLocation")
+
+    OnCreate {
+      SimulationInterruptionNotification.foreground =
+        (appContext.currentActivity as? LifecycleOwner)?.lifecycle?.currentState
+          ?.isAtLeast(Lifecycle.State.RESUMED) == true
+    }
+    OnActivityEntersForeground { SimulationInterruptionNotification.foreground = true }
+    OnActivityEntersBackground { SimulationInterruptionNotification.foreground = false }
+    OnDestroy { SimulationInterruptionNotification.foreground = false }
 
     AsyncFunction("canShowSimulationNotification") {
       val context = requireContext()
@@ -70,6 +81,7 @@ class ArowMockLocationModule : Module() {
       val context = requireContext()
       val snapshot = MockLocationEngine.stop(context)
       context.stopService(Intent(context, MockLocationService::class.java))
+      if (snapshot is NativeStoppedSnapshot) SimulationInterruptionNotification.clear(context)
       snapshot.toBridge()
     }
   }

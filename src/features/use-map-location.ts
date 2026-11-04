@@ -8,6 +8,7 @@ import {
   isSimulationRunning,
   isSimulationError,
   isSimulationDismissibleError,
+  isSimulationInterrupted,
   type SimulationState,
 } from "@/features/simulation/simulation-state";
 import { useSimulation } from "@/features/use-simulation";
@@ -95,6 +96,7 @@ export function useMapLocation(
   const hasSimulatedPosition = isSimulationStarted(simulation);
   const running = isSimulationRunning(simulation);
   const stopped = isSimulationStopped(simulation);
+  const interrupted = isSimulationInterrupted(simulation);
   const recenter = useCallback(
     () => setRecenterRequest((request) => request + 1),
     [],
@@ -111,16 +113,17 @@ export function useMapLocation(
   useEffect(() => {
     if (running) {
       simulationWasRunning.current = true;
-    } else if (stopped && simulationWasRunning.current) {
+    } else if ((stopped || interrupted) && simulationWasRunning.current) {
       simulationWasRunning.current = false;
       retry();
     }
-  }, [retry, running, stopped]);
+  }, [interrupted, retry, running, stopped]);
 
   return {
     canSelectSimulationTarget:
       isSimulationStopped(simulationState) ||
-      isSimulationDismissibleError(simulationState),
+      isSimulationDismissibleError(simulationState) ||
+      isSimulationInterrupted(simulationState),
     currentLocation: displayedPosition(state, simulation),
     onCenter:
       hasSimulatedPosition ||

@@ -6,9 +6,9 @@ of security attacks or a claim that every entry is fixed.
 
 ## Coverage and handling at a glance
 
-**App handling: 4 managed, 9 partially managed, 3 unverified.**
+**App handling: 5 managed, 8 partially managed, 3 unverified.**
 **Automated coverage: 1 covered, 13 partial, 2 missing.**
-Assessment baseline: `303f667` plus working-tree changes; evidence and limitations are in each entry.
+Assessment baseline: `b8d6aa6` plus working-tree changes; evidence and limitations are in each entry.
 
 Handling and automated coverage are separate:
 
@@ -31,6 +31,7 @@ These primary behaviors were observed working. Automation gaps are listed per ro
 | ------------------- | ------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------- |
 | [USE-005](#use-005) | Close the active point's card   | **Partial** — coordination unit tests     | Add a journey closing the card during simulation; assert status and Stop remain.      |
 | [USE-007](#use-007) | Home and return                 | **Covered** — notification/Home journey   | Maintain the existing journey; test lock, process death, and task removal separately. |
+| [USE-008](#use-008) | Location switched off mid-run   | **Partial** — refresh tests; feature flow | Complete the blocked Maestro run; retain independent native cleanup checks.           |
 | [USE-009](#use-009) | Fine/coarse access and denial   | **Partial** — Maestro UI, ownership tests | Verify Settings-only downgrade; native injection/cleanup remain diagnostic checks.    |
 | [USE-014](#use-014) | In-range PK absent from dataset | **Partial** — resolution unit tests       | Add the missing-record → correction journey; verify fast edits on device.             |
 
@@ -46,7 +47,6 @@ an intentional behavior does not resolve the remaining user-facing question.
 | [USE-003](#use-003) | Wi-Fi and mobile data switched off       | **Partial** — foreground connectivity-loss journey           | Verify uncached tiles, Wi-Fi-to-cellular fallback, and failed-request recovery.                                    |
 | [USE-004](#use-004) | Decimal-style PK input                   | **Partial** — sanitization/range unit tests                  | Clarify punctuation normalization; cover decimal, comma, signed, and clipboard variants.                           |
 | [USE-006](#use-006) | Map-only mode during simulation          | **Partial** — map-only journey without active simulation     | Decide how users discover Stop in map-only mode; cover active simulation and Back.                                 |
-| [USE-008](#use-008) | Location services switched off mid-run   | **Partial** — readiness/real-location tests                  | Clarify the running status with Location off; verify foreground return and delivery to a receiving app.            |
 | [USE-011](#use-011) | AROW task swiped away                    | **Missing** — no task-dismissal journey                      | Make continued simulation after dismissal explicit; automate task removal, reopen, and Stop.                       |
 | [USE-013](#use-013) | Another point selected during simulation | **Partial** — selection/coordination unit tests              | Resolve the search/card action inconsistency; cover prepared target versus applied fix.                            |
 | [USE-016](#use-016) | Simulated/active label after Stop        | **Partial** — presentation/controller unit tests             | Distinguish retained mock fixes from active simulation; assert cleanup, fix freshness, and real-position recovery. |
@@ -270,25 +270,26 @@ transitions are managed.
   return to AROW, and try Stop and Start again.
 - **Possible consequence:** “Active” may outlive usable location delivery, or
   cleanup may become inaccessible when location is disabled.
-- **Live result:** **Observed limitation and recovery**, 2026-10-30. With
-  `499+752` active, switch Android Location off (driven by
-  `cmd location set-location-enabled false`). Android displays “No location
-  access”; choose Close to leave Location off. AROW still shows “Position
-  simulée — Active” and Stop. Stop succeeds and the real-location status becomes
-  “Services désactivés”. A subsequent Start is rejected with “Activez les services
-  de localisation”. Location was restored afterward. The running screen does
-  not distinguish location delivery being disabled from the engine remaining
-  active; actual delivery to another app was not measured.
-- **Screenshot:** `location-disabled-active.png`, after dismissing Android's
-  warning while leaving Location off.
-- **Project handling:** [Engine readiness](../modules/arow-mock-location/android/src/main/java/expo/modules/arowmocklocation/MockLocationEngine.kt)
-  checks the setting before Start. The running refresh injects fixes without
-  re-running readiness; reconciliation reads the stored native snapshot.
-  Therefore startup validation alone does not establish mid-run behavior.
-- **Coverage gap:** The live run covers Stop and rejected restart with Location
-  off. Existing readiness/real-location tests do not reproduce the mid-run
-  Android transition. Foreground-return behavior and delivery to a receiving
-  application still need separate checks.
+- **Project handling:** [Native refresh](../modules/arow-mock-location/android/src/main/java/expo/modules/arowmocklocation/MockLocationService.kt)
+  rechecks readiness before each scheduled fix (nominally every second), stops
+  injection on failure, and attempts provider cleanup. Clean interruption keeps
+  its reason visible in AROW; background interruptions also post a dismissible
+  notification when permitted. Failed cleanup retains retry-stop. Restoring
+  Location never resumes simulation automatically; coarse permission remains valid.
+- **Live result:** **Observed recovery** on the standalone preview. Location-off
+  stopped injection and removed the service and both mock providers, including
+  with notifications denied. Background notification and persistent in-app
+  feedback were observed when permitted. Restoration did not resume simulation;
+  explicit restart restored advancing milestone fixes. Coarse-only injection was
+  independently verified.
+- **Coverage:** **Partial.** [Native refresh tests](../modules/arow-mock-location/android/src/test/java/expo/modules/arowmocklocation/SimulationRefreshTest.kt)
+  exercise mocked readiness/injection failures and scheduling termination.
+  [Feature flow](../.maestro/features/manage-runtime-prerequisites.yaml) covers
+  Settings revocation, background notification, denied notification consent,
+  coarse access, and explicit restart. The complete Maestro run remains blocked
+  by Android 16 automation instability; manual checks do not establish a passing
+  journey. Receiving applications' behavior is Android's responsibility. Process
+  termination is separate from a live tick.
 
 <a id="use-009"></a>
 

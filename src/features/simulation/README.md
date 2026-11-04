@@ -56,6 +56,26 @@ For example, selecting PK 509+000 on line 893000 resolves the milestone in the s
 
 ### Stop and cleanup
 
+Before each scheduled fix, the native service rechecks the same prerequisites
+as Start. A failed check stops injection, attempts cleanup, and terminates the
+service without scheduling another fix. A check exception reports
+`READINESS_CHECK_FAILED`; an injection exception reports `APPLY_FAILED`.
+Successful cleanup retains an interruption reason in the existing error snapshot,
+displayed as **Simulation arrêtée** until an explicit new action. Cleanup failure
+retains owned providers and retry-stop. The real-location reader is refreshed
+after a clean interruption. Restoring a prerequisite never automatically resumes
+simulation; preparing a new target and explicit Start are available after cleanup.
+
+For background interruptions, native activity lifecycle tracking gates a
+dismissible notification on the existing channel, with ID `8052`. Its text
+distinguishes confirmed cleanup from incomplete stopping; tapping it opens AROW.
+It is separate from the active foreground notification (`8051`), whose removal
+does not remove the warning. Delivery is best effort and never requests consent,
+blocks cleanup, or changes the result. Successful explicit Start/Stop clears a
+stale warning. In-app interruption feedback does not expire with failed-start
+messages. If Android kills the process first, polling and warning delivery cannot
+be guaranteed; ownership cleanup on reopening still applies.
+
 While running, the location control invokes `stop` even if the selected feature card has closed or another map feature is selected. The controller publishes `stopping` with the last applied position, then calls native stop. It also uses this same cleanup path after a canceled start or an active error without a known position. Repeated stop presses during `canceling` or `stopping` have no effect. The engine removes only its owned test providers; the native module then stops the foreground service. The UI returns to `idle` only when native stop reports `stopped`.
 
 If removal fails, native returns an `error` with `ownsProviders`. The controller uses that boolean for `mayBeActive`: `true` keeps an actionable **retry stop** control. It may retain the last applied position for display, but error coordinates are never treated as a new applied fix. A malformed stop response is handled conservatively as uncertain cleanup rather than success.
@@ -83,6 +103,7 @@ An invalid native snapshot produces an actionable `SIMULATION_UNAVAILABLE` error
 - Keep UI state and native bridge contracts distinct. Add or change a native result in the Kotlin contracts, TypeScript contracts, decoder, and controller together.
 - Cover races in [`simulation-controller.test.ts`](simulation-controller.test.ts), bridge shapes in [`decode-native-result.test.ts`](../../../modules/arow-mock-location/src/decode-native-result.test.ts), and hook reconciliation in [`use-simulation.test.ts`](../use-simulation.test.ts). For an Android behavior change, exercise the affected path on an emulator; [`mock-phone-location.yaml`](../../../.maestro/journeys/mock-phone-location.yaml) covers the milestone journey and fail-fast mock-app check.
 - [`manage-simulation-notification.yaml`](../../../.maestro/journeys/manage-simulation-notification.yaml) exercises consent, foreground/background notification visibility, Stop removal, denial continuation, warning expiry, and accessible Stop. Run it after selecting AROW as the mock-location provider. Host tests cover stale notification attempts, independent simulation startup, and warning delivery across foreground transitions.
+- [`manage-runtime-prerequisites.yaml`](../../../.maestro/features/manage-runtime-prerequisites.yaml) checks Location revocation through Settings, background interruption feedback, explicit restart, coarse access, and notification-denied cleanup. Verify actual service/provider cleanup separately; an absent Stop button alone is not proof.
 
 Before each notification journey or recording, reset consent on the confirmed emulator without clearing application data:
 

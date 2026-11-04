@@ -1,0 +1,163 @@
+appId: com.leooojrrr.AROWmobile
+name: Stop simulation when Location is disabled
+tags:
+  - feature
+  - simulation
+  - location
+  - notifications
+onFlowComplete:
+  - runFlow:
+      file: ../subflows/set-location-services.yaml
+      env:
+        LOCATION_ENABLED: "true"
+  - setPermissions:
+      permissions:
+        location: allow
+        notifications: allow
+  - launchApp:
+      stopApp: false
+      permissions: {}
+  - runFlow:
+      when:
+        visible: "(Arrêter la simulation|Réessayer l’arrêt)"
+      commands:
+        - tapOn:
+            id: "simulation-play-pause"
+        - extendedWaitUntil:
+            notVisible: "(Arrêter la simulation|Réessayer l’arrêt)"
+            timeout: 10000
+---
+# English Android 13+ AVD, Location on, AROW selected as mock provider, no
+# simulation running. Starts/ends with notifications and fine/coarse granted.
+# Seed emulator GPS before running; do not use Maestro setLocation (providers
+# would compete with AROW). Prefer a standalone preview. Preserves app data.
+- stopApp
+- setPermissions:
+    permissions:
+      android.permission.ACCESS_FINE_LOCATION: deny
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      notifications: allow
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
+- extendedWaitUntil:
+    visible:
+      id: "location-status"
+      text: ".*précision [0-9]+ m.*"
+    timeout: 45000
+- runFlow:
+    file: ../subflows/resolve-milestone.yaml
+    env:
+      KILOMETER: "509"
+      METRIC: "000"
+- runFlow:
+    file: ../subflows/assert-milestone-injection.yaml
+    env:
+      SCREENSHOT_NAME: "runtime-coarse-active"
+- runFlow:
+    file: ../subflows/set-location-services.yaml
+    env:
+      LOCATION_ENABLED: "false"
+- swipe:
+    start: "50%,2%"
+    end: "50%,80%"
+    duration: 500
+- extendedWaitUntil:
+    visible: "Simulation arrêtée"
+    timeout: 10000
+- assertNotVisible: "Simulation de position active"
+- takeScreenshot: runtime-background-interruption
+- tapOn: "Simulation arrêtée"
+- extendedWaitUntil:
+    visible: "Activez les services de localisation"
+    timeout: 10000
+- assertVisible: "Simulation arrêtée"
+- assertNotVisible: "(Arrêter la simulation|Réessayer l’arrêt)"
+- takeScreenshot: runtime-stopped-warning
+- tapOn:
+    id: "simulation-play-pause"
+# Failed explicit Start feedback expires after five seconds; either that
+# feedback or the underlying disabled-services status must remain, never Run.
+- assertVisible: "(Activez les services de localisation|Services désactivés)"
+- assertNotVisible: "Arrêter la simulation"
+- runFlow:
+    file: ../subflows/set-location-services.yaml
+    env:
+      LOCATION_ENABLED: "true"
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
+# Restoration must not start anything, even after several native tick periods.
+- evalScript: ${output.restorationDeadline = Date.now() + 6000}
+- repeat:
+    while:
+      true: ${Date.now() < output.restorationDeadline}
+    commands:
+      - assertNotVisible: "Arrêter la simulation"
+- tapOn:
+    id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "Arrêter la simulation"
+    timeout: 10000
+- takeScreenshot: runtime-explicit-restart
+- swipe:
+    start: "50%,2%"
+    end: "50%,80%"
+    duration: 500
+- assertNotVisible: "Simulation arrêtée"
+- pressKey: Back
+- tapOn:
+    id: "simulation-play-pause"
+
+# No notification consent: runtime cleanup still succeeds; warn inside AROW.
+- stopApp
+- setPermissions:
+    permissions:
+      notifications: unset
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
+- runFlow:
+    file: ../subflows/resolve-milestone.yaml
+    env:
+      KILOMETER: "509"
+      METRIC: "000"
+- tapOn:
+    id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "Don’t allow"
+    timeout: 10000
+- tapOn: "Don’t allow"
+- extendedWaitUntil:
+    visible: "Arrêter la simulation"
+    timeout: 10000
+- runFlow:
+    file: ../subflows/set-location-services.yaml
+    env:
+      LOCATION_ENABLED: "false"
+- swipe:
+    start: "50%,2%"
+    end: "50%,80%"
+    duration: 500
+# Allow multiple check periods for cleanup without using the app as a trigger.
+- evalScript: ${output.deniedDeadline = Date.now() + 6000}
+- repeat:
+    while:
+      true: ${Date.now() < output.deniedDeadline}
+    commands:
+      - assertNotVisible: "Simulation de position active"
+      - assertNotVisible: "Simulation arrêtée"
+- takeScreenshot: runtime-notifications-denied
+- pressKey: Back
+- launchApp:
+    stopApp: false
+    permissions: {}
+- extendedWaitUntil:
+    visible: "Simulation arrêtée"
+    timeout: 10000
+- assertVisible: "Activez les services de localisation"
+- assertNotVisible: "(Arrêter la simulation|Réessayer l’arrêt)"
+- takeScreenshot: runtime-denied-in-app-warning

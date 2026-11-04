@@ -30,6 +30,8 @@ artifacts. Add lessons here as reusable test-maintenance rules.
   does not prove injection; a Stop button disappearing does not prove native
   cleanup. Describe the guarantees of each maintained command and any separate
   local checks. Never link maintained coverage to ignored diagnostic scripts.
+- Selector `checked` values must be literal booleans. For an environment-driven
+  choice, branch using `runFlow.when.true` and use a literal selector in each branch.
 
 - Model tests as durable, goal-driven user journeys. Evolve an existing flow as
   its product workflow grows instead of documenting or naming it after one

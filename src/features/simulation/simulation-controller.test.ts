@@ -43,6 +43,30 @@ function setup() {
 }
 
 describe("SimulationController", () => {
+  test("retains an automatic-stop reason until explicit restart", async () => {
+    const { controller, executor } = setup();
+    await controller.start(milestone);
+    executor.getSnapshot.mockResolvedValue({
+      status: "error",
+      code: "LOCATION_SERVICES_DISABLED",
+      ownsProviders: false,
+    });
+    await controller.reconcile();
+    const interrupted = controller.state;
+    expect(interrupted).toMatchObject({
+      status: "error",
+      origin: "reconciliation",
+      code: "LOCATION_SERVICES_DISABLED",
+      mayBeActive: false,
+    });
+    controller.dismissStartError(interrupted);
+    expect(controller.state).toBe(interrupted);
+    await controller.reconcile();
+    expect(executor.start).toHaveBeenCalledTimes(1);
+    await expect(controller.start(milestone)).resolves.toBe(true);
+    expect(executor.start).toHaveBeenCalledTimes(2);
+  });
+
   test("accepted starts report completion; ignored starts return undefined", async () => {
     const { controller } = setup();
     const completion = controller.start(milestone);

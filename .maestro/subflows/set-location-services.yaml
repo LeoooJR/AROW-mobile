@@ -1,0 +1,61 @@
+appId: com.leooojrrr.AROWmobile
+---
+# English Android Settings. LOCATION_ENABLED is 'true' or 'false'.
+- launchApp:
+    appId: com.android.settings
+    stopApp: true
+    permissions: {}
+- runFlow:
+    when:
+      notVisible: "Use location"
+    commands:
+      - scrollUntilVisible:
+          element: "Location"
+          direction: DOWN
+          speed: 80
+          timeout: 60000
+      - tapOn: "Location"
+- assertVisible: "Use location"
+- runFlow:
+    when:
+      true: ${LOCATION_ENABLED === 'true'}
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: "android:id/switch_widget"
+              checked: false
+          commands:
+            - tapOn:
+                id: "android:id/switch_widget"
+- runFlow:
+    when:
+      true: ${LOCATION_ENABLED === 'false'}
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: "android:id/switch_widget"
+              checked: true
+          commands:
+            - tapOn:
+                id: "android:id/switch_widget"
+- runFlow:
+    when:
+      visible: "No location access"
+    commands:
+      - tapOn: "Close"
+- runFlow:
+    when:
+      true: ${LOCATION_ENABLED === 'true'}
+    commands:
+      - assertVisible:
+          id: "android:id/switch_widget"
+          checked: true
+- runFlow:
+    when:
+      true: ${LOCATION_ENABLED === 'false'}
+    commands:
+      - assertVisible:
+          id: "android:id/switch_widget"
+          checked: false

@@ -8,6 +8,7 @@ executionOrder:
     - Use the distraction-free map-only mode
     - Select AROW as the mock location app
     - Simulate milestones with precise or approximate device location
+    - Stop simulation when Location is disabled
     - Manage simulation notification visibility
     - Keep the foreground map usable after connectivity loss
 flows:

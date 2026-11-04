@@ -5,6 +5,7 @@ import type {
 } from "@/features/real-location/real-location-state";
 import {
   isSimulationStarted,
+  isSimulationInterrupted,
   type SimulationState,
 } from "@/features/simulation/simulation-state";
 
@@ -57,11 +58,22 @@ export default function getLocationPresentation(
         "Sélectionnez AROW comme application de position fictive",
       LOCATION_SERVICES_DISABLED: "Activez les services de localisation",
       LOCATION_PERMISSION_REQUIRED: "Autorisez l’accès à la position",
+      READINESS_CHECK_FAILED:
+        "Vérification de la localisation impossible. Réessayez",
       CLEANUP_FAILED: "Arrêt incomplet. Réessayez",
       UNSUPPORTED_PLATFORM: "Simulation disponible uniquement sur Android",
     };
     const detail =
       messages[simulation.code] ?? "Simulation indisponible. Réessayez";
+    if (isSimulationInterrupted(simulation)) {
+      return {
+        accessibilityLabel: `Simulation arrêtée. ${detail}`,
+        detail,
+        dotClassName: "bg-warning",
+        kindLabel: "Simulation arrêtée",
+        stateLabel: "À redémarrer",
+      };
+    }
     return {
       accessibilityLabel: `Simulation indisponible. ${detail}`,
       detail,
