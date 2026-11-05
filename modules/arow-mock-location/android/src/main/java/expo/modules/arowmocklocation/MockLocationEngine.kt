@@ -36,7 +36,7 @@ internal object MockLocationEngine {
       }
       if (ownedProviders.isNotEmpty()) {
         val error = removeProviders(context)
-        state = if (error == null) NativeStoppedSnapshot else NativeErrorSnapshot(error, true)
+        state = if (error == null) NativeStoppedSnapshot else cleanupFailure(context)
       } else {
         state = NativeStoppedSnapshot
       }
@@ -50,14 +50,22 @@ internal object MockLocationEngine {
   fun rejection(code: NativeReadinessErrorCode): NativeErrorSnapshot =
     NativeErrorSnapshot(code.executionCode, ownedProviders.isNotEmpty())
 
-  fun readiness(context: Context): NativeReadiness {
+  private fun mockProviderSelected(context: Context): Boolean? {
     val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
     val mode = appOps.checkOpNoThrow(
       AppOpsManager.OPSTR_MOCK_LOCATION,
       android.os.Process.myUid(),
       context.packageName,
     )
-    if (mode != AppOpsManager.MODE_ALLOWED) {
+    return when (mode) {
+      AppOpsManager.MODE_ALLOWED -> true
+      AppOpsManager.MODE_IGNORED, AppOpsManager.MODE_ERRORED -> false
+      else -> null
+    }
+  }
+
+  fun readiness(context: Context): NativeReadiness {
+    if (mockProviderSelected(context) != true) {
       return NativeReadiness.Failed(NativeReadinessErrorCode.MOCK_PROVIDER_NOT_SELECTED)
     }
 
@@ -159,7 +167,9 @@ internal object MockLocationEngine {
   @Synchronized
   fun fail(context: Context, code: NativeErrorCode): NativeErrorSnapshot {
     val cleanupError = removeProviders(context)
-    val failure = NativeErrorSnapshot(cleanupError ?: code, ownedProviders.isNotEmpty())
+    val failure = if (cleanupError == null) {
+      NativeErrorSnapshot(code, ownedProviders.isNotEmpty())
+    } else cleanupFailure(context)
     state = failure
     pendingStart?.complete(failure)
     pendingStart = null
@@ -174,13 +184,16 @@ internal object MockLocationEngine {
     val result: NativeStopResult = if (cleanupError == null) {
       NativeStoppedSnapshot
     } else {
-      NativeErrorSnapshot(cleanupError, ownedProviders.isNotEmpty())
+      cleanupFailure(context)
     }
     state = result
     pendingStart?.complete(result)
     pendingStart = null
     return result
   }
+
+  private fun cleanupFailure(context: Context): NativeErrorSnapshot =
+    diagnoseCleanupFailure(ownedProviders.isNotEmpty()) { mockProviderSelected(context) }
 
   private fun removeProviders(context: Context): NativeErrorCode? {
     return try {

@@ -6,9 +6,9 @@ of security attacks or a claim that every entry is fixed.
 
 ## Coverage and handling at a glance
 
-**App handling: 6 managed, 7 partially managed, 3 unverified.**
+**App handling: 7 managed, 6 partially managed, 3 unverified.**
 **Automated coverage: 1 covered, 14 partial, 1 missing.**
-Assessment baseline: `f009a57` plus working-tree changes; evidence and limitations are in each entry.
+Assessment baseline: `8e5a809` plus working-tree changes; evidence and limitations are in each entry.
 
 Handling and automated coverage are separate:
 
@@ -27,29 +27,29 @@ Handling and automated coverage are separate:
 
 These primary behaviors were observed working. Automation gaps are listed per row.
 
-| ID                  | Situation                       | Automated coverage                        | Next action                                                                           |
-| ------------------- | ------------------------------- | ----------------------------------------- | ------------------------------------------------------------------------------------- |
-| [USE-005](#use-005) | Close the active point's card   | **Partial** — coordination unit tests     | Add a journey closing the card during simulation; assert status and Stop remain.      |
-| [USE-007](#use-007) | Home and return                 | **Covered** — notification/Home journey   | Maintain the existing journey; test lock, process death, and task removal separately. |
-| [USE-008](#use-008) | Location switched off mid-run   | **Partial** — refresh tests; feature flow | Complete the blocked Maestro run; retain independent native cleanup checks.           |
-| [USE-009](#use-009) | Fine/coarse access and denial   | **Partial** — Maestro UI, ownership tests | Verify Settings-only downgrade; native injection/cleanup remain diagnostic checks.    |
-| [USE-013](#use-013) | Browse during simulation        | **Partial** — card/selection tests        | Verify the search entry on device; automate active browsing and Stop.                 |
-| [USE-014](#use-014) | In-range PK absent from dataset | **Partial** — resolution unit tests       | Add the missing-record → correction journey; verify fast edits on device.             |
+| ID                  | Situation                          | Automated coverage                              | Next action                                                                           |
+| ------------------- | ---------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [USE-002](#use-002) | Mock-app selection removed mid-run | **Partial** — diagnostic/UI tests; feature flow | Complete device automation and standalone verification; exercise another mock app.    |
+| [USE-005](#use-005) | Close the active point's card      | **Partial** — coordination unit tests           | Add a journey closing the card during simulation; assert status and Stop remain.      |
+| [USE-007](#use-007) | Home and return                    | **Covered** — notification/Home journey         | Maintain the existing journey; test lock, process death, and task removal separately. |
+| [USE-008](#use-008) | Location switched off mid-run      | **Partial** — refresh tests; feature flow       | Complete the blocked Maestro run; retain independent native cleanup checks.           |
+| [USE-009](#use-009) | Fine/coarse access and denial      | **Partial** — Maestro UI, ownership tests       | Verify Settings-only downgrade; native injection/cleanup remain diagnostic checks.    |
+| [USE-013](#use-013) | Browse during simulation           | **Partial** — card/selection tests              | Verify the search entry on device; automate active browsing and Stop.                 |
+| [USE-014](#use-014) | In-range PK absent from dataset    | **Partial** — resolution unit tests             | Add the missing-record → correction journey; verify fast edits on device.             |
 
 ### Partially managed — needs attention
 
 These entries remain open even where recovery succeeded. A successful retry or
 an intentional behavior does not resolve the remaining user-facing question.
 
-| ID                  | Situation                          | Automated coverage                                           | Next action                                                                                                        |
-| ------------------- | ---------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| [USE-001](#use-001) | Developer options switched off     | **Partial** — cleanup/controller unit tests                  | Clarify recovery instructions. Live retesting is excluded by the user; retain historical evidence.                 |
-| [USE-002](#use-002) | Mock-app selection removed mid-run | **Partial** — cleanup tests; provider selection before Start | Explain mock-selection restoration; add revocation → restoration → Stop coverage.                                  |
-| [USE-003](#use-003) | Wi-Fi and mobile data switched off | **Partial** — foreground connectivity-loss journey           | Verify uncached tiles, Wi-Fi-to-cellular fallback, and failed-request recovery.                                    |
-| [USE-004](#use-004) | Decimal-style PK input             | **Partial** — sanitization/range unit tests                  | Clarify punctuation normalization; cover decimal, comma, signed, and clipboard variants.                           |
-| [USE-006](#use-006) | Map-only mode during simulation    | **Partial** — map-only journey without active simulation     | Decide how users discover Stop in map-only mode; cover active simulation and Back.                                 |
-| [USE-011](#use-011) | AROW task swiped away              | **Partial** — native command tests; notification Stop flow   | Complete task-dismissal verification on responsive Android automation.                                             |
-| [USE-016](#use-016) | Simulated/active label after Stop  | **Partial** — presentation/controller unit tests             | Distinguish retained mock fixes from active simulation; assert cleanup, fix freshness, and real-position recovery. |
+| ID                  | Situation                          | Automated coverage                                         | Next action                                                                                                        |
+| ------------------- | ---------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| [USE-001](#use-001) | Developer options switched off     | **Partial** — cleanup/controller unit tests                | Clarify recovery instructions. Live retesting is excluded by the user; retain historical evidence.                 |
+| [USE-003](#use-003) | Wi-Fi and mobile data switched off | **Partial** — foreground connectivity-loss journey         | Verify uncached tiles, Wi-Fi-to-cellular fallback, and failed-request recovery.                                    |
+| [USE-004](#use-004) | Decimal-style PK input             | **Partial** — sanitization/range unit tests                | Clarify punctuation normalization; cover decimal, comma, signed, and clipboard variants.                           |
+| [USE-006](#use-006) | Map-only mode during simulation    | **Partial** — map-only journey without active simulation   | Decide how users discover Stop in map-only mode; cover active simulation and Back.                                 |
+| [USE-011](#use-011) | AROW task swiped away              | **Partial** — native command tests; notification Stop flow | Complete task-dismissal verification on responsive Android automation.                                             |
+| [USE-016](#use-016) | Simulated/active label after Stop  | **Partial** — presentation/controller unit tests           | Distinguish retained mock fixes from active simulation; assert cleanup, fix freshness, and real-position recovery. |
 
 ### Unverified — investigation and coverage needed
 
@@ -137,26 +137,27 @@ transitions are managed.
   Developer options while AROW is simulating in the background.
 - **Possible consequence:** Injection or cleanup fails; a stale running status
   or simulated last-known fix may mislead the user.
-- **Live result:** **Observed gap and recovery**, 2026-10-30. Start `499+752`,
-  open Developer options, and change only “Select mock location app” from AROW
-  to “Nothing”. Returning shows “Arrêt incomplet. Réessayez” and “Réessayer
-  l'arrêt”; retry without restoring authority leaves the error. Select AROW
-  again in Settings, return, and press retry: the status returns to real-location
-  search and the action becomes Start. Developer options and USB debugging
-  remained on throughout this test. The retry path recovers, but its message
-  does not tell a first-time user to restore mock selection. Retained coordinates
-  do not prove continued injection while authority is absent.
-- **Screenshot:** Local artifact `mock-selection-removed.png` in the session's
-  screenshot directory.
+- **Live result:** **Observed recovery.** Selecting “Nothing” stops new native
+  fixes and the service. The bottom bar explains how to restore AROW and retry
+  incomplete cleanup; a failed retry retains that guidance. Restoring selection
+  does not resume injection. Explicit retry removes both mock providers.
 - **Project handling:** [Engine](../modules/arow-mock-location/android/src/main/java/expo/modules/arowmocklocation/MockLocationEngine.kt)
-  checks mock authority before Start. Injection failures go through service
-  cleanup; cleanup failure retains ownership and an explicit retry-stop action.
-  The controller polls a running native snapshot and reconciles on foreground
-  return. Current cleanup feedback does not name mock-app selection as a remedy.
-- **Coverage gap:** Controller tests simulate cleanup failure, and the
-  [mock-provider journey](../.maestro/setup/select-mock-location-provider.yaml)
-  selects a provider before Start. Neither exercises revocation during a run,
-  restoration, and successful cleanup afterward.
+  checks readiness before each injection. Confirmed revocation has specific
+  [feedback](../src/components/composites/location-bar/location-presentation.ts):
+  clean stopping requires explicit restart; retained ownership requires retry-stop.
+  Unknown selection and unrelated cleanup failures retain generic recovery.
+- **Coverage:** **Partial.** [Native diagnostic tests](../modules/arow-mock-location/android/src/test/java/expo/modules/arowmocklocation/CleanupFailureTest.kt),
+  [controller](../src/features/simulation/simulation-controller.test.ts),
+  [provider persistence](../src/features/simulation/simulation-provider.test.tsx),
+  and [presentation tests](../src/components/composites/location-bar/location-presentation.test.ts)
+  cover both outcomes and recovery. The [feature flow](../.maestro/features/manage-mock-provider-revocation.yaml)
+  covers removal, restoration, cleanup, and explicit restart.
+- **Remaining gaps:** The complete device journey, including post-recovery
+  restart, and standalone-preview verification are blocked on the current AVD.
+  Another selected mock app, clean automatic
+  removal, and recovered ownership remain separate live variants. Native
+  injection and cleanup require independent diagnostics, not retained coordinates
+  or UI labels.
 
 <a id="use-003"></a>
 

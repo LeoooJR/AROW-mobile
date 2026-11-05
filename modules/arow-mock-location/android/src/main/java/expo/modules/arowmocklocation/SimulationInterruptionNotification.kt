@@ -39,7 +39,9 @@ internal object SimulationInterruptionNotification {
         "Arrêt de simulation incomplet"
       } else "Simulation arrêtée"
       val detail = when (failure.code) {
-        NativeErrorCode.MOCK_PROVIDER_NOT_SELECTED -> "Sélectionnez AROW comme application de position fictive, puis redémarrez la simulation."
+        NativeErrorCode.MOCK_PROVIDER_NOT_SELECTED -> if (failure.ownsProviders) {
+          "Sélectionnez AROW comme application de position fictive dans les options développeur, puis réessayez l’arrêt dans AROW."
+        } else "Sélectionnez AROW comme application de position fictive dans les options développeur, puis redémarrez la simulation."
         NativeErrorCode.LOCATION_SERVICES_DISABLED -> "Activez les services de localisation, puis redémarrez la simulation."
         NativeErrorCode.LOCATION_PERMISSION_REQUIRED -> "Autorisez l’accès à la position, puis redémarrez la simulation."
         NativeErrorCode.CLEANUP_FAILED -> "Rétablissez les conditions de localisation dans Android, puis réessayez l’arrêt dans AROW."

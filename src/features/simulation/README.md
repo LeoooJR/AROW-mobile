@@ -80,6 +80,15 @@ While running, the location control invokes `stop` even if the selected feature 
 
 If removal fails, native returns an `error` with `ownsProviders`. The controller uses that boolean for `mayBeActive`: `true` keeps an actionable **retry stop** control. It may retain the last applied position for display, but error coordinates are never treated as a new applied fix. A malformed stop response is handled conservatively as uncertain cleanup rather than success.
 
+When cleanup retains provider claims, native checks the current mock-app
+selection. Confirmed revocation reports `MOCK_PROVIDER_NOT_SELECTED` with
+`ownsProviders: true`; the bottom bar explains restoring AROW in Developer
+options before retrying Stop. This diagnostic also applies to failed retries and
+recovered claims. Restored/unknown selection or a diagnostic exception keeps
+`CLEANUP_FAILED`. Ownership, not the error code alone, guards restart. Clean
+runtime stopping instead says **Simulation arrêtée** and requires explicit Start
+after restoration. Background notification wording makes the same distinction.
+
 ## UI state versus native state
 
 `SimulationState` is a UI/workflow state (`idle`, `checking`, `starting`, `canceling`, `running`, `stopping`, or `error`). `canceling` and `stopping` make pending cleanup visible without private lifecycle flags. Native snapshots have their own variants (`stopped`, `starting`, `running`, or `error`). The bridge decoder checks required fields, known codes, coordinate ranges, and provider ownership once, before a snapshot reaches the controller.

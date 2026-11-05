@@ -47,6 +47,9 @@ function Consumer(): ReactElement {
   return (
     <>
       <Text>{state.status}</Text>
+      <Text testID="simulation-error-code">
+        {state.status === "error" ? state.code : ""}
+      </Text>
       <Text testID="notification-warning-id">{notificationWarningId}</Text>
       <Pressable
         accessibilityLabel="Start simulation"
@@ -257,33 +260,48 @@ describe("SimulationProvider", () => {
     }
   });
 
-  test("keeps runtime interruption visible beyond the failed-start timeout", async () => {
-    const view = await render(application(true));
-    await waitFor(() => expect(executor.getSnapshot).toHaveBeenCalledTimes(1));
-    jest.useFakeTimers();
-    try {
-      await fireEvent.press(
-        screen.getByRole("button", { name: "Start simulation" }),
+  test.each([
+    { code: "LOCATION_SERVICES_DISABLED", ownsProviders: false },
+    { code: "MOCK_PROVIDER_NOT_SELECTED", ownsProviders: false },
+    { code: "MOCK_PROVIDER_NOT_SELECTED", ownsProviders: true },
+  ])(
+    "keeps $code visible across remount and foreground return (ownership $ownsProviders)",
+    async ({ code, ownsProviders }) => {
+      const view = await render(application(true));
+      await waitFor(() =>
+        expect(executor.getSnapshot).toHaveBeenCalledTimes(1),
       );
-      await act(async () => Promise.resolve());
-      expect(screen.getByText("running")).toBeOnTheScreen();
-      executor.getSnapshot.mockResolvedValue({
-        status: "error",
-        code: "LOCATION_SERVICES_DISABLED",
-        ownsProviders: false,
-      });
-      await act(async () => jest.advanceTimersByTime(2_000));
-      expect(screen.getByText("error")).toBeOnTheScreen();
-      await view.rerender(application(false));
-      await act(async () => jest.advanceTimersByTime(6_000));
-      await view.rerender(application(true));
-      expect(screen.getByText("error")).toBeOnTheScreen();
-      expect(executor.start).toHaveBeenCalledTimes(1);
-    } finally {
-      await view.unmount();
-      jest.useRealTimers();
-    }
-  });
+      jest.useFakeTimers();
+      try {
+        await fireEvent.press(
+          screen.getByRole("button", { name: "Start simulation" }),
+        );
+        await act(async () => Promise.resolve());
+        expect(screen.getByText("running")).toBeOnTheScreen();
+        executor.getSnapshot.mockResolvedValue({
+          status: "error",
+          code,
+          ownsProviders,
+        });
+        await act(async () => jest.advanceTimersByTime(2_000));
+        expect(screen.getByText("error")).toBeOnTheScreen();
+        await view.rerender(application(false));
+        await act(async () => jest.advanceTimersByTime(6_000));
+        await view.rerender(application(true));
+        const onAppStateChange = jest.mocked(AppState.addEventListener).mock
+          .calls[0][1];
+        await act(async () => onAppStateChange("active"));
+        expect(screen.getByText("error")).toBeOnTheScreen();
+        expect(screen.getByTestId("simulation-error-code")).toHaveTextContent(
+          code,
+        );
+        expect(executor.start).toHaveBeenCalledTimes(1);
+      } finally {
+        await view.unmount();
+        jest.useRealTimers();
+      }
+    },
+  );
 
   test("cancels the old timeout on retry and never expires cleanup errors", async () => {
     const view = await render(application(true));

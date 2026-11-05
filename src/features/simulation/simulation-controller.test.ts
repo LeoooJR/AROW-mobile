@@ -43,6 +43,54 @@ function setup() {
 }
 
 describe("SimulationController", () => {
+  test.each([false, true])(
+    "mock-app revocation preserves recovery and requires explicit restart (ownership %s)",
+    async (ownsProviders) => {
+      const { controller, executor } = setup();
+      await controller.start(milestone);
+      const revoked = {
+        status: "error",
+        code: "MOCK_PROVIDER_NOT_SELECTED",
+        ownsProviders,
+      };
+      executor.getSnapshot.mockResolvedValue(revoked);
+      await controller.reconcile();
+      expect(controller.state).toMatchObject({
+        status: "error",
+        code: revoked.code,
+        mayBeActive: ownsProviders,
+        origin: "reconciliation",
+      });
+      if (ownsProviders) {
+        expect(controller.start(milestone)).toBeUndefined();
+        executor.stop.mockResolvedValue(revoked);
+        controller.stop();
+        await waitFor(() =>
+          expect(controller.state).toMatchObject({
+            status: "error",
+            origin: "cleanup",
+            code: revoked.code,
+            mayBeActive: true,
+          }),
+        );
+        expect(controller.start(milestone)).toBeUndefined();
+        executor.stop.mockResolvedValue({ status: "stopped" });
+        controller.stop();
+        await waitFor(() => expect(controller.state.status).toBe("idle"));
+      }
+      expect(executor.start).toHaveBeenCalledTimes(1);
+      executor.checkReadiness.mockResolvedValue({
+        ready: false,
+        code: "MOCK_PROVIDER_NOT_SELECTED",
+      });
+      await expect(controller.start(milestone)).resolves.toBe(false);
+      expect(executor.start).toHaveBeenCalledTimes(1);
+      executor.checkReadiness.mockResolvedValue({ ready: true });
+      await expect(controller.start(milestone)).resolves.toBe(true);
+      expect(executor.start).toHaveBeenCalledTimes(2);
+    },
+  );
+
   test("retains an automatic-stop reason until explicit restart", async () => {
     const { controller, executor } = setup();
     await controller.start(milestone);

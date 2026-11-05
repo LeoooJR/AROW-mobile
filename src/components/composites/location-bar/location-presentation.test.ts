@@ -5,7 +5,7 @@ test.each([
   ["LOCATION_PERMISSION_REQUIRED", "Autorisez l’accès à la position"],
   [
     "MOCK_PROVIDER_NOT_SELECTED",
-    "Sélectionnez AROW comme application de position fictive",
+    "Options développeur : sélectionnez AROW comme application de position fictive.",
   ],
   [
     "READINESS_CHECK_FAILED",
@@ -64,3 +64,27 @@ test("a failed explicit start keeps its existing feedback", () => {
     ).kindLabel,
   ).toBe("Position simulée");
 });
+
+test.each(["start", "cleanup", "reconciliation"] as const)(
+  "mock selection loss with retained ownership explains incomplete cleanup (%s)",
+  (origin) => {
+    const presentation = getLocationPresentation(
+      { status: "checking" },
+      {
+        status: "error",
+        origin,
+        code: "MOCK_PROVIDER_NOT_SELECTED",
+        mayBeActive: true,
+      },
+    );
+    expect(presentation).toMatchObject({
+      kindLabel: "Position simulée",
+      stateLabel: "Erreur",
+      dotClassName: "bg-error",
+      detail:
+        "Arrêt incomplet. Sélectionnez AROW comme application de position fictive dans les options développeur, puis réessayez l’arrêt.",
+    });
+    expect(presentation.accessibilityLabel).toContain(presentation.detail);
+    expect(presentation.accessibilityLabel).not.toContain("Simulation arrêtée");
+  },
+);

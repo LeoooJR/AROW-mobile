@@ -55,7 +55,7 @@ export default function getLocationPresentation(
   if (simulation?.status === "error") {
     const messages: Record<string, string> = {
       MOCK_PROVIDER_NOT_SELECTED:
-        "Sélectionnez AROW comme application de position fictive",
+        "Options développeur : sélectionnez AROW comme application de position fictive.",
       LOCATION_SERVICES_DISABLED: "Activez les services de localisation",
       LOCATION_PERMISSION_REQUIRED: "Autorisez l’accès à la position",
       READINESS_CHECK_FAILED:
@@ -63,8 +63,12 @@ export default function getLocationPresentation(
       CLEANUP_FAILED: "Arrêt incomplet. Réessayez",
       UNSUPPORTED_PLATFORM: "Simulation disponible uniquement sur Android",
     };
-    const detail =
-      messages[simulation.code] ?? "Simulation indisponible. Réessayez";
+    const incompleteMockStop =
+      simulation.code === "MOCK_PROVIDER_NOT_SELECTED" &&
+      (simulation.mayBeActive || simulation.origin === "cleanup");
+    const detail = incompleteMockStop
+      ? "Sélectionnez AROW comme application de position fictive dans les options développeur, puis réessayez l’arrêt."
+      : (messages[simulation.code] ?? "Simulation indisponible. Réessayez");
     if (isSimulationInterrupted(simulation)) {
       return {
         accessibilityLabel: `Simulation arrêtée. ${detail}`,

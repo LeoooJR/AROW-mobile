@@ -1,0 +1,49 @@
+appId: com.leooojrrr.AROWmobile
+---
+# English Android Settings; MOCK_APP is 'none' or 'arow'. Never toggle the
+# Developer options or USB debugging switches. Developer options must be on.
+- launchApp:
+    appId: com.android.settings
+    stopApp: true
+    permissions: {}
+- scrollUntilVisible:
+    element: "System"
+    direction: DOWN
+    timeout: 60000
+    speed: 80
+- tapOn: "System"
+- extendedWaitUntil:
+    visible:
+      id: "com.android.settings:id/collapsing_toolbar"
+      text: "System"
+    timeout: 10000
+- scrollUntilVisible:
+    element: "Developer options"
+    direction: DOWN
+    timeout: 60000
+    speed: 80
+    centerElement: true
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn: "Developer options"
+- extendedWaitUntil:
+    visible: "Use developer options"
+    timeout: 10000
+- scrollUntilVisible:
+    element: "Select mock location app"
+    direction: DOWN
+    timeout: 120000
+    speed: 80
+- tapOn: "Select mock location app"
+- runFlow:
+    when:
+      true: ${MOCK_APP === 'none'}
+    commands:
+      - tapOn: "Nothing"
+      - assertNotVisible: "Nothing"
+- runFlow:
+    when:
+      true: ${MOCK_APP === 'arow'}
+    commands:
+      - tapOn: "AROW-mobile"
+      - assertVisible: "Mock location app: AROW-mobile"

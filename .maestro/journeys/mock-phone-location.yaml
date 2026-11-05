@@ -79,7 +79,7 @@ tags:
 # Without selecting AROW as the developer mock-location app, the action fails
 # before the milestone is looked up or a foreground service is started.
 - extendedWaitUntil:
-    visible: "Sélectionnez AROW comme application de position fictive"
+    visible: "Options développeur : sélectionnez AROW comme application de position fictive\\."
     timeout: 10000
 - assertVisible: "Réessayer la simulation"
 - assertVisible: "PK 509\\+000"
@@ -91,4 +91,4 @@ tags:
 - extendedWaitUntil:
     visible: "(Connectée|Active)"
     timeout: 10000
-- assertNotVisible: "Sélectionnez AROW comme application de position fictive"
+- assertNotVisible: "Options développeur : sélectionnez AROW comme application de position fictive\\."
