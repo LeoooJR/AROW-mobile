@@ -314,14 +314,17 @@ transitions are managed.
   removed. Complete denial rejects Start; granting coarse access permits an
   explicit restart. Retained mock-fix presentation is tracked separately in
   [USE-016](#use-016).
-- **Coverage:** **Partial.** The [Maestro feature flow](../.maestro/features/manage-location-accuracy.yaml)
-  covers UI controls, downgrade/reopen, denial, and recovery. Raw provider
+- **Coverage:** **Partial.** The [permission API feature](../.maestro/features/manage-location-accuracy.yaml)
+  covers UI controls, downgrade/reopen, denial, and recovery. The separate
+  [Settings feature](../.maestro/features/manage-location-permission-settings.yaml)
+  requires actual Settings transitions without a test-API fallback. Raw provider
   coordinates, advancing timestamps, and service/provider cleanup were verified
   with local diagnostics; these guarantees are not asserted by the maintained suite.
   [Ownership tests](../modules/arow-mock-location/android/src/test/java/expo/modules/arowmocklocation/MockProviderOwnershipTest.kt)
-  cover recovered claims and retryable cleanup failures. Android 36 Settings
-  guards active location providers; the journey captures that guard and uses a
-  test-API downgrade. A successful Settings-only downgrade remains unverified.
+  cover recovered claims and retryable cleanup failures.
+- **Remaining gaps:** The split flows have not been exercised on device.
+  Android 36 Settings guards active location providers; Settings-only downgrade
+  remains unverified and must fail visibly when blocked.
 
 <a id="use-010"></a>
 

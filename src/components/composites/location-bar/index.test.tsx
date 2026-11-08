@@ -77,7 +77,7 @@ test.each([false, true])(
       />,
     );
     const detail = mayBeActive
-      ? "Arrêt incomplet. Sélectionnez AROW comme application de position fictive dans les options développeur, puis réessayez l’arrêt."
+      ? "Sélectionnez AROW comme application de position fictive dans les options développeur, puis réessayez l’arrêt."
       : "Options développeur : sélectionnez AROW comme application de position fictive.";
     expect(screen.getByText(detail)).toBeOnTheScreen();
     expect(screen.queryByText("Active")).not.toBeOnTheScreen();

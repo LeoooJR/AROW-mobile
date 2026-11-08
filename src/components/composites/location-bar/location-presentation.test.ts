@@ -82,7 +82,7 @@ test.each(["start", "cleanup", "reconciliation"] as const)(
       stateLabel: "Erreur",
       dotClassName: "bg-error",
       detail:
-        "Arrêt incomplet. Sélectionnez AROW comme application de position fictive dans les options développeur, puis réessayez l’arrêt.",
+        "Sélectionnez AROW comme application de position fictive dans les options développeur, puis réessayez l’arrêt.",
     });
     expect(presentation.accessibilityLabel).toContain(presentation.detail);
     expect(presentation.accessibilityLabel).not.toContain("Simulation arrêtée");

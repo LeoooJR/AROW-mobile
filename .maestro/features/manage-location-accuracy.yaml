@@ -1,5 +1,5 @@
 appId: com.leooojrrr.AROWmobile
-name: Simulate milestones with precise or approximate device location
+name: Simulate milestones across permission API changes
 tags:
   - feature
   - location
@@ -37,13 +37,9 @@ onFlowComplete:
 ---
 # English Android 12+ AVD with Location on and AROW selected as mock app.
 # Start/end with precise foreground access. Preserve app data and Developer
-# options. Connect the development client to Metro before running this flow.
+# options. Changes under test use Maestro's permission API, never Settings.
+# Connect the development client to Metro before running this flow.
 - stopApp
-# Discard stale Settings dialogs before attempting permission changes.
-# Google and AOSP images use different permission-controller package names.
-- stopApp: com.google.android.permissioncontroller
-- stopApp: com.android.permissioncontroller
-- stopApp: com.android.settings
 - setPermissions:
     permissions:
       location: allow
@@ -76,12 +72,12 @@ onFlowComplete:
     id: "simulation-play-pause"
 - assertVisible: "Arrêter la simulation"
 
-# Attempt a Settings downgrade, using the test API if Android guards providers.
+# Change permission through the test API, independently of Settings restrictions.
 # The permission restart must not resume injection or retain owned providers.
 - runFlow:
-    file: ../subflows/set-device-location-permission.yaml
+    file: ../subflows/set-device-location-permission-via-api.yaml
     env:
-      LOCATION_ACCESS: "allow"
+      LOCATION_ACCESS: "coarse"
 - pressKey: Home
 - launchApp:
     stopApp: false
@@ -113,7 +109,7 @@ onFlowComplete:
 # Denial is a different state from coarse access. Recover with coarse access
 # without any mandatory precision upgrade.
 - runFlow:
-    file: ../subflows/set-device-location-permission.yaml
+    file: ../subflows/set-device-location-permission-via-api.yaml
     env:
       LOCATION_ACCESS: "deny"
 - pressKey: Home
@@ -139,9 +135,9 @@ onFlowComplete:
 - assertNotVisible: "Arrêter la simulation"
 - takeScreenshot: location-denied-start
 - runFlow:
-    file: ../subflows/set-device-location-permission.yaml
+    file: ../subflows/set-device-location-permission-via-api.yaml
     env:
-      LOCATION_ACCESS: "allow"
+      LOCATION_ACCESS: "coarse"
 - pressKey: Home
 - launchApp:
     stopApp: false

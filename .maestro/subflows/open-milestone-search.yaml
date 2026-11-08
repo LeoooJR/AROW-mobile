@@ -1,0 +1,34 @@
+appId: com.leooojrrr.AROWmobile
+---
+# Open the shared 893000 / section 1 fixture with empty milestone fields.
+- tapOn:
+    id: "open-point-search"
+- extendedWaitUntil:
+    visible:
+      id: "point-search-sheet"
+    timeout: 30000
+- runFlow:
+    when:
+      visible:
+        id: "change-line"
+    commands:
+      - tapOn:
+          id: "change-line"
+# This fixture retains its query when reopened; reselecting the line clears the
+# PK fields. Avoid synthetic backspaces into an already empty input.
+- runFlow:
+    when:
+      notVisible:
+        id: "line-search-input"
+        text: "893000"
+    commands:
+      - tapOn:
+          id: "line-search-input"
+      - inputText: "893000"
+- extendedWaitUntil:
+    visible:
+      id: "line-result-893000"
+    timeout: 60000
+- tapOn:
+    id: "line-result-893000"
+- assertVisible: "Repères disponibles : 499\\+752 à 511\\+600."

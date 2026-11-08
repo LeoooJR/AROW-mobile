@@ -69,14 +69,16 @@ onFlowComplete:
     when:
       visible: "Réessayer l’arrêt"
     commands:
-      - assertVisible: ".*Arrêt incomplet.*réessayez l’arrêt.*"
+      - assertVisible: "Position simulée"
+      - assertVisible: "Erreur"
+      - assertVisible: "Sélectionnez AROW comme application de position fictive dans les options développeur, puis réessayez l’arrêt\\."
       - assertNotVisible: "Simulation arrêtée"
       - tapOn:
           id: "simulation-play-pause"
       - extendedWaitUntil:
           visible: "Réessayer l’arrêt"
           timeout: 10000
-      - assertVisible: ".*Arrêt incomplet.*application de position fictive.*"
+      - assertVisible: "Sélectionnez AROW comme application de position fictive dans les options développeur, puis réessayez l’arrêt\\."
       - takeScreenshot: mock-provider-retry-still-required
 - runFlow:
     when:
@@ -123,7 +125,8 @@ onFlowComplete:
     file: ../subflows/assert-milestone-injection.yaml
     env:
       SCREENSHOT_NAME: "mock-provider-explicit-restart"
-- assertNotVisible: ".*Arrêt incomplet.*"
+- assertNotVisible: "Réessayer l’arrêt"
+- assertNotVisible: "Erreur"
 - tapOn:
     id: "simulation-play-pause"
 - extendedWaitUntil:

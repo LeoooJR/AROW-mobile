@@ -74,16 +74,25 @@ export AROW_EMULATOR_SERIAL=emulator-5554
 maestro --device "$AROW_EMULATOR_SERIAL" test .maestro/journeys/manage-location-permission.yaml
 ```
 
-| Flow                                                                              | What it exercises                                                                                                              |
-| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| [`manage-location-permission.yaml`](journeys/manage-location-permission.yaml)     | Denied location access, recovery through the Android prompt or Settings, and permission persistence after restart.             |
-| [`mock-phone-location.yaml`](journeys/mock-phone-location.yaml)                   | Real location, milestone search, and the mock-app readiness failure.                                                           |
-| [`manage-map-feature-selection.yaml`](features/manage-map-feature-selection.yaml) | Selecting railway and milestone features on the map.                                                                           |
-| [`manage-map-layers.yaml`](features/manage-map-layers.yaml)                       | Map layer visibility.                                                                                                          |
-| [`manage-map-focus.yaml`](features/manage-map-focus.yaml)                         | Map-only mode.                                                                                                                 |
-| [`select-mock-location-provider.yaml`](setup/select-mock-location-provider.yaml)  | Selecting AROW in Android Developer options as the mock location app.                                                          |
-| [`manage-connectivity-loss.yaml`](journeys/manage-connectivity-loss.yaml)         | Foreground connectivity loss after successful startup: map interaction, local search, simulation Stop/Start, and reconnection. |
-| [`manage-location-accuracy.yaml`](features/manage-location-accuracy.yaml)         | Fine/coarse access, milestone simulation, downgrade restart cleanup, denial, and coarse-access recovery.                       |
+| Flow                                                                                            | What it exercises                                                                                                                               |
+| ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`manage-location-permission.yaml`](journeys/manage-location-permission.yaml)                   | Denied location access, recovery through the Android prompt or Settings, and permission persistence after restart.                              |
+| [`mock-phone-location.yaml`](journeys/mock-phone-location.yaml)                                 | Real location, milestone search, and the mock-app readiness failure.                                                                            |
+| [`manage-map-feature-selection.yaml`](features/manage-map-feature-selection.yaml)               | Selecting railway and milestone features on the map.                                                                                            |
+| [`manage-milestone-stepping.yaml`](features/manage-milestone-stepping.yaml)                     | First Plus initializes the first recorded milestone; later Plus/Minus preserve metrics, validate missing records, and respect kilometre limits. |
+| [`manage-map-layers.yaml`](features/manage-map-layers.yaml)                                     | Map layer visibility.                                                                                                                           |
+| [`manage-map-focus.yaml`](features/manage-map-focus.yaml)                                       | Map-only mode.                                                                                                                                  |
+| [`select-mock-location-provider.yaml`](setup/select-mock-location-provider.yaml)                | Selecting AROW in Android Developer options as the mock location app.                                                                           |
+| [`manage-connectivity-loss.yaml`](journeys/manage-connectivity-loss.yaml)                       | Foreground connectivity loss after successful startup: map interaction, local search, simulation Stop/Start, and reconnection.                  |
+| [`manage-location-accuracy.yaml`](features/manage-location-accuracy.yaml)                       | Explicit permission API changes: fine/coarse simulation, downgrade/reopen, denial, and coarse recovery.                                         |
+| [`manage-location-permission-settings.yaml`](features/manage-location-permission-settings.yaml) | Settings-only downgrade during simulation, stopped reopen, explicit restart, denial, and coarse recovery.                                       |
+
+Permission mechanisms are separate scenarios. The Settings feature fails when
+Android guards an active location provider; it never substitutes `setPermissions`.
+Its API calls establish and restore test state only. The API feature covers those
+permission states independently. Prefer a standalone preview for process restarts;
+verify native provider coordinates, advancing timestamps, and cleanup separately.
+Neither UI labels nor successful static flow validation prove these guarantees.
 
 ## Run the configured suite
 

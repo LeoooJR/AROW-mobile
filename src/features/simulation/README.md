@@ -89,6 +89,14 @@ recovered claims. Restored/unknown selection or a diagnostic exception keeps
 runtime stopping instead says **Simulation arrêtée** and requires explicit Start
 after restoration. Background notification wording makes the same distinction.
 
+For mock-app revocation with retained ownership, the bottom bar remains
+**Position simulée — Erreur**, with **Réessayer l’arrêt**, and says:
+“Sélectionnez AROW comme application de position fictive dans les options
+développeur, puis réessayez l’arrêt.” Confirmed stopping instead remains
+**Simulation arrêtée — À redémarrer**. Presentation, component, and Maestro
+assertions must preserve this wording contract; notification titles retain their
+own explicit incomplete-cleanup wording.
+
 ## UI state versus native state
 
 `SimulationState` is a UI/workflow state (`idle`, `checking`, `starting`, `canceling`, `running`, `stopping`, or `error`). `canceling` and `stopping` make pending cleanup visible without private lifecycle flags. Native snapshots have their own variants (`stopped`, `starting`, `running`, or `error`). The bridge decoder checks required fields, known codes, coordinate ranges, and provider ownership once, before a snapshot reaches the controller.

@@ -3,11 +3,13 @@ executionOrder:
   flowsOrder:
     - Recover location access after denial
     - Resolve a milestone with location access
+    - Step milestone kilometers within a section
     - Select railway and milestone map features
     - Manage railway map layer visibility
     - Use the distraction-free map-only mode
     - Select AROW as the mock location app
-    - Simulate milestones with precise or approximate device location
+    - Simulate milestones across permission API changes
+    - Recover simulation after location permission changes in Settings
     - Stop simulation when Location is disabled
     - Recover after mock-location selection is removed
     - Manage simulation notification visibility

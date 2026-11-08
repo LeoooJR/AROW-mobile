@@ -22,6 +22,11 @@ artifacts. Add lessons here as reusable test-maintenance rules.
 - Shared preparation must fail when startup fails. Do not add retries or press
   Retry in subflows. Recovery belongs in a named scenario with assertions before
   and after the user retries. Do not relax assertions to accommodate tool hangs.
+- Shared preparation performs only the steps needed to establish its state.
+  Put feature regressions such as plus/minus interactions in named feature flows.
+- Choose permission-change mechanisms explicitly in the parent flow. Settings
+  helpers must fail when Android blocks the operation; never fall back to the
+  permission test API. Keep API-driven transitions in separately named flows.
 - Use `launchApp` with `permissions: {}` when permission state is under test,
   then the strict map-ready subflow. Connect a development client to its saved
   project once. Do not send repeated Expo development URLs to recover startup;
