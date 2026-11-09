@@ -81,6 +81,10 @@ onFlowComplete:
 - extendedWaitUntil:
     visible: "Point résolu"
     timeout: 15000
+# 500+000 minus one kilometer would precede the section's 499+752 minimum.
+- assertVisible:
+    id: "kilometer-decrease"
+    enabled: false
 - tapOn:
     id: "kilometer-increase"
 - assertVisible:
@@ -103,17 +107,37 @@ onFlowComplete:
 - extendedWaitUntil:
     visible: "Point résolu"
     timeout: 15000
-# At the last recorded kilometer, Plus is disabled; Minus remains available.
+# 510+700 plus one kilometer would exceed the section's 511+600 maximum.
 - tapOn:
     id: "milestone-kilometer-input"
 - eraseText
-- inputText: "511"
+- inputText: "510"
 - hideKeyboard
+- tapOn:
+    id: "milestone-metric-input"
+- eraseText
+- inputText: "700"
+- hideKeyboard
+- assertVisible:
+    id: "kilometer-increase"
+    enabled: false
+# Landing exactly on the full upper bound remains possible.
 - tapOn:
     id: "milestone-metric-input"
 - eraseText
 - inputText: "600"
 - hideKeyboard
+- assertVisible:
+    id: "kilometer-increase"
+    enabled: true
+- tapOn:
+    id: "kilometer-increase"
+- assertVisible:
+    id: "milestone-kilometer-input"
+    text: "511"
+- assertVisible:
+    id: "milestone-metric-input"
+    text: "600"
 - extendedWaitUntil:
     visible: "Point résolu"
     timeout: 15000

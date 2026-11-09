@@ -7,6 +7,7 @@ import KilometerStepButton from "@/components/composites/map-toolbar/point-searc
 import PointSearchStepHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-step-header";
 import TextField from "@/components/primitives/text-field";
 import type { MilestoneResolution } from "@/features/railway-reference/search/contracts";
+import { validateMilestoneInput } from "@/features/railway-reference/search/milestone-input";
 import type { Railway } from "@shared/railway-domain/railway";
 import type { RailwaySection } from "@shared/railway-domain/railway-section";
 
@@ -50,25 +51,27 @@ export default function MilestoneSearchStep({
   const currentKilometer = /^\d+$/.test(kilometer) ? Number(kilometer) : NaN;
   const range = selectedSection?.milestoneRange;
   const minimum = Math.floor((range?.minimumPositionMeters ?? 0) / 1000);
-  const maximum = Math.floor(
-    (range?.maximumPositionMeters ?? Number.MAX_SAFE_INTEGER) / 1000,
-  );
+  const minimumMetric = String(
+    (range?.minimumPositionMeters ?? 0) % 1000,
+  ).padStart(3, "0");
   const canDecrease =
-    !disabled &&
-    Number.isSafeInteger(currentKilometer) &&
-    currentKilometer > minimum;
+    validateMilestoneInput(
+      selectedSection,
+      String(currentKilometer - 1),
+      metric,
+    ).status === "ready";
   const canIncrease =
-    !disabled &&
-    ((kilometer === "" && range !== undefined) ||
-      (Number.isSafeInteger(currentKilometer) && currentKilometer < maximum));
+    validateMilestoneInput(
+      selectedSection,
+      String(kilometer === "" ? minimum : currentKilometer + 1),
+      kilometer === "" && metric === "" ? minimumMetric : metric,
+    ).status === "ready";
 
   function increaseKilometer(): void {
     if (kilometer === "" && range !== undefined) {
       onKilometerChange(String(minimum));
       if (metric === "") {
-        onMetricChange(
-          String(range.minimumPositionMeters % 1000).padStart(3, "0"),
-        );
+        onMetricChange(minimumMetric);
       }
       return;
     }

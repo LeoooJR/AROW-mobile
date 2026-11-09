@@ -247,7 +247,9 @@ describe("Index map feature selection", () => {
       screen.queryByRole("button", { name: "Action de simulation" }),
     ).toBeNull();
     await user.press(screen.getByRole("button", { name: "Utiliser ce point" }));
-    await user.press(screen.getByRole("button", { name: "Utiliser ce point" }));
+    expect(
+      screen.queryByRole("button", { name: "Utiliser ce point" }),
+    ).not.toBeOnTheScreen();
     expect(screen.getByText("PK 241+000")).toBeOnTheScreen();
     expect(mockStartSimulation).not.toHaveBeenCalled();
     expect(mockStopSimulation).not.toHaveBeenCalled();
@@ -285,9 +287,9 @@ describe("Index map feature selection", () => {
       }),
     );
     expect(
-      screen.getByRole("button", { name: "Utiliser ce point" }),
-    ).toBeDisabled();
-    await user.press(screen.getByRole("button", { name: "Utiliser ce point" }));
+      screen.queryByRole("button", { name: "Utiliser ce point" }),
+    ).not.toBeOnTheScreen();
+    expect(screen.getByText("PK 241+000")).toBeOnTheScreen();
     expect(mockStartSimulation).not.toHaveBeenCalled();
     expect(mockStopSimulation).not.toHaveBeenCalled();
     await user.press(
