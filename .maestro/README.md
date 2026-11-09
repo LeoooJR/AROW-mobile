@@ -1,5 +1,23 @@
 # Run the Android Maestro flows
 
+## Flow ownership
+
+| Directory   | Purpose                                         | Execute directly? |
+| ----------- | ----------------------------------------------- | ----------------- |
+| `journeys/` | End-to-end user goals across several features   | Yes               |
+| `features/` | Focused regression checks for one capability    | Yes               |
+| `subflows/` | Reusable commands; inherit caller preconditions | No                |
+| `setup/`    | Explicit Android/device preparation             | Yes, when needed  |
+
+`config.yaml` discovers journeys and features. System setup is included only by
+an explicit filename, never a wildcard. The configured order intentionally runs
+the missing-provider journey before selecting AROW for active simulation tests.
+For a standalone run, prepare that flow's preconditions yourself; do not assume
+another flow has run. See [authoring rules](CONTEXT.md) for cleanup and evidence.
+
+Run `npm run check:validation` to check layout, YAML, references, suite ordering,
+and the boundary between maintained tools and task-local scripts.
+
 Run these commands from the repository root. The flows use an Android development
 client connected to Metro on port **8081**; Expo Go cannot run the app's native
 mock-location module.
@@ -53,21 +71,35 @@ In another terminal, select the confirmed emulator and run the flow you need:
 
 ```bash
 export AROW_EMULATOR_SERIAL=emulator-5554
-maestro --device "$AROW_EMULATOR_SERIAL" test .maestro/tests/manage-location-permission.yaml
+maestro --device "$AROW_EMULATOR_SERIAL" test .maestro/journeys/manage-location-permission.yaml
 ```
 
-| Flow                                                                             | What it exercises                                                                                                  |
-| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| [`manage-location-permission.yaml`](tests/manage-location-permission.yaml)       | Denied location access, recovery through the Android prompt or Settings, and permission persistence after restart. |
-| [`mock-phone-location.yaml`](tests/mock-phone-location.yaml)                     | Real location, milestone search, and the mock-app readiness failure.                                               |
-| [`manage-map-feature-selection.yaml`](tests/manage-map-feature-selection.yaml)   | Selecting railway and milestone features on the map.                                                               |
-| [`manage-map-layers.yaml`](tests/manage-map-layers.yaml)                         | Map layer visibility.                                                                                              |
-| [`manage-map-focus.yaml`](tests/manage-map-focus.yaml)                           | Map-only mode.                                                                                                     |
-| [`select-mock-location-provider.yaml`](tests/select-mock-location-provider.yaml) | Selecting AROW in Android Developer options as the mock location app.                                              |
+| Flow                                                                                            | What it exercises                                                                                                                               |
+| ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`manage-location-permission.yaml`](journeys/manage-location-permission.yaml)                   | Denied location access, recovery through the Android prompt or Settings, and permission persistence after restart.                              |
+| [`mock-phone-location.yaml`](journeys/mock-phone-location.yaml)                                 | Real location, milestone search, and the mock-app readiness failure.                                                                            |
+| [`manage-map-feature-selection.yaml`](features/manage-map-feature-selection.yaml)               | Selecting railway and milestone features on the map.                                                                                            |
+| [`manage-milestone-stepping.yaml`](features/manage-milestone-stepping.yaml)                     | First Plus initializes the first recorded milestone; later Plus/Minus preserve metrics, validate missing records, and respect kilometre limits. |
+| [`manage-map-layers.yaml`](features/manage-map-layers.yaml)                                     | Map layer visibility.                                                                                                                           |
+| [`manage-map-focus.yaml`](features/manage-map-focus.yaml)                                       | Map-only mode.                                                                                                                                  |
+| [`select-mock-location-provider.yaml`](setup/select-mock-location-provider.yaml)                | Selecting AROW in Android Developer options as the mock location app.                                                                           |
+| [`manage-connectivity-loss.yaml`](journeys/manage-connectivity-loss.yaml)                       | Foreground connectivity loss after successful startup: map interaction, local search, simulation Stop/Start, and reconnection.                  |
+| [`manage-location-accuracy.yaml`](features/manage-location-accuracy.yaml)                       | Explicit permission API changes: fine/coarse simulation, downgrade/reopen, denial, and coarse recovery.                                         |
+| [`manage-location-permission-settings.yaml`](features/manage-location-permission-settings.yaml) | Settings-only downgrade during simulation, stopped reopen, explicit restart, denial, and coarse recovery.                                       |
+
+Permission mechanisms are separate scenarios. The Settings feature fails when
+Android guards an active location provider; it never substitutes `setPermissions`.
+Its API calls establish and restore test state only. The API feature covers those
+permission states independently. Prefer a standalone preview for process restarts;
+verify native provider coordinates, advancing timestamps, and cleanup separately.
+Neither UI labels nor successful static flow validation prove these guarantees.
+
+## Run the configured suite
 
 Choose flows that exercise the change you are checking. To run the complete
 configured suite in [execution order](config.yaml), use:
 
 ```bash
+adb -s "$AROW_EMULATOR_SERIAL" reverse tcp:8081 tcp:8081
 maestro --device "$AROW_EMULATOR_SERIAL" test .maestro
 ```

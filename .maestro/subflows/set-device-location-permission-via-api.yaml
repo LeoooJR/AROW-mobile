@@ -1,0 +1,8 @@
+appId: com.leooojrrr.AROWmobile
+---
+# LOCATION_ACCESS is 'coarse' or 'deny'. This is test-API preparation, not a
+# Settings interaction. Downgrading a live process can make Android restart it.
+- setPermissions:
+    permissions:
+      android.permission.ACCESS_FINE_LOCATION: deny
+      android.permission.ACCESS_COARSE_LOCATION: "${LOCATION_ACCESS === 'coarse' ? 'allow' : 'deny'}"

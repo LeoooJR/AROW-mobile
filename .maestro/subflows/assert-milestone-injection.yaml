@@ -1,0 +1,24 @@
+appId: com.leooojrrr.AROWmobile
+---
+# The parent resolves the same DB record, 893000 / section 1 / 509+000, in
+# both permission modes. These are applied native coordinates, not read-back GPS.
+- tapOn:
+    id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "Arrêter la simulation"
+    timeout: 10000
+- assertVisible:
+    id: "location-status"
+    text: ".*45\\.74744 N.*4\\.85933 E.*"
+- takeScreenshot: ${SCREENSHOT_NAME}
+# Leave a bounded window for independent ADB checks of raw provider coordinates
+# and advancing fix timestamps; an injection failure must surface during it.
+- evalScript: ${output.fixCheckDeadline = Date.now() + 15000}
+- repeat:
+    while:
+      true: ${Date.now() < output.fixCheckDeadline}
+    commands:
+      - assertVisible: "Arrêter la simulation"
+      - assertVisible:
+          id: "location-status"
+          text: ".*45\\.74744 N.*4\\.85933 E.*"

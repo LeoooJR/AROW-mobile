@@ -86,6 +86,7 @@ module.exports = defineConfig([
       "ios/**",
       "coverage/**",
       ".maestro/artifacts/**",
+      "script/local/**",
       "modules/**/android/build/**",
       "modules/**/android/.gradle/**",
       "modules/**/android/.cxx/**",

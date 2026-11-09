@@ -75,6 +75,21 @@ export function isSimulationDismissibleError(
   );
 }
 
+export function isSimulationInterrupted(state: SimulationState): boolean {
+  return (
+    state.status === "error" &&
+    state.origin === "reconciliation" &&
+    !state.mayBeActive &&
+    [
+      "MOCK_PROVIDER_NOT_SELECTED",
+      "LOCATION_SERVICES_DISABLED",
+      "LOCATION_PERMISSION_REQUIRED",
+      "READINESS_CHECK_FAILED",
+      "APPLY_FAILED",
+    ].includes(state.code)
+  );
+}
+
 export function isSimulationBusy(
   state: SimulationState,
 ): state is StateWithStatus<

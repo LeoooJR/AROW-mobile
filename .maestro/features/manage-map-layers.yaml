@@ -13,11 +13,10 @@ tags:
 - setPermissions:
     permissions:
       location: allow
-- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
-- extendedWaitUntil:
-    visible:
-      id: "arow-map"
-    timeout: 60000
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
 - setLocation:
     latitude: 45.74491
     longitude: 4.86234

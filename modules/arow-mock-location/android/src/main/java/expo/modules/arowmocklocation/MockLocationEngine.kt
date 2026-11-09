@@ -13,7 +13,9 @@ import kotlinx.coroutines.CompletableDeferred
 
 internal object MockLocationEngine {
   private val providers = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
-  private val ownedProviders = mutableSetOf<String>()
+  private var ownership: MockProviderOwnership? = null
+  private val ownedProviders: Set<String>
+    get() = ownership?.providers ?: emptySet()
   private var pendingStart: CompletableDeferred<NativeStartResult>? = null
   private var state: NativeSnapshot = NativeStoppedSnapshot
 
@@ -21,17 +23,49 @@ internal object MockLocationEngine {
   fun snapshot(): NativeSnapshot = state
 
   @Synchronized
+  fun restore(context: Context): NativeSnapshot {
+    if (ownership != null) return state
+    try {
+      val preferences = context.getSharedPreferences("arow_mock_location", Context.MODE_PRIVATE)
+      val recovered = preferences.getStringSet("owned_providers", emptySet()).orEmpty()
+        .filter { it in providers }.toSet()
+      ownership = MockProviderOwnership(recovered) { claimed ->
+        check(preferences.edit().putStringSet("owned_providers", claimed.toSet()).commit()) {
+          "Could not persist mock-provider ownership"
+        }
+      }
+      if (ownedProviders.isNotEmpty()) {
+        val error = removeProviders(context)
+        state = if (error == null) NativeStoppedSnapshot else cleanupFailure(context)
+      } else {
+        state = NativeStoppedSnapshot
+      }
+    } catch (exception: Exception) {
+      state = NativeErrorSnapshot(NativeErrorCode.CLEANUP_FAILED, true)
+    }
+    return state
+  }
+
+  @Synchronized
   fun rejection(code: NativeReadinessErrorCode): NativeErrorSnapshot =
     NativeErrorSnapshot(code.executionCode, ownedProviders.isNotEmpty())
 
-  fun readiness(context: Context): NativeReadiness {
+  private fun mockProviderSelected(context: Context): Boolean? {
     val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
     val mode = appOps.checkOpNoThrow(
       AppOpsManager.OPSTR_MOCK_LOCATION,
       android.os.Process.myUid(),
       context.packageName,
     )
-    if (mode != AppOpsManager.MODE_ALLOWED) {
+    return when (mode) {
+      AppOpsManager.MODE_ALLOWED -> true
+      AppOpsManager.MODE_IGNORED, AppOpsManager.MODE_ERRORED -> false
+      else -> null
+    }
+  }
+
+  fun readiness(context: Context): NativeReadiness {
+    if (mockProviderSelected(context) != true) {
       return NativeReadiness.Failed(NativeReadinessErrorCode.MOCK_PROVIDER_NOT_SELECTED)
     }
 
@@ -45,7 +79,9 @@ internal object MockLocationEngine {
     if (!enabled) {
       return NativeReadiness.Failed(NativeReadinessErrorCode.LOCATION_SERVICES_DISABLED)
     }
-    if (context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+    val fine = context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+    val coarse = context.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+    if (fine != PackageManager.PERMISSION_GRANTED && coarse != PackageManager.PERMISSION_GRANTED) {
       return NativeReadiness.Failed(NativeReadinessErrorCode.LOCATION_PERMISSION_REQUIRED)
     }
     return NativeReadiness.Ready
@@ -68,6 +104,7 @@ internal object MockLocationEngine {
     val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     try {
       for (provider in providers) {
+        checkNotNull(ownership).claim(provider)
         @Suppress("DEPRECATION")
         manager.addTestProvider(
           provider,
@@ -81,7 +118,6 @@ internal object MockLocationEngine {
           Criteria.POWER_LOW,
           if (provider == LocationManager.GPS_PROVIDER) Criteria.ACCURACY_FINE else Criteria.ACCURACY_COARSE,
         )
-        ownedProviders.add(provider)
         @Suppress("DEPRECATION")
         manager.setTestProviderEnabled(provider, true)
       }
@@ -93,6 +129,18 @@ internal object MockLocationEngine {
     } catch (exception: Exception) {
       fail(context, NativeErrorCode.APPLY_FAILED)
     }
+  }
+
+  @Synchronized
+  fun refresh(context: Context, scheduleNext: () -> Unit, interrupted: (NativeErrorSnapshot) -> Unit) {
+    refreshSimulation(
+      state,
+      { readiness(context) },
+      { inject(context) },
+      { fail(context, it) },
+      scheduleNext,
+      interrupted,
+    )
   }
 
   @Synchronized
@@ -119,7 +167,9 @@ internal object MockLocationEngine {
   @Synchronized
   fun fail(context: Context, code: NativeErrorCode): NativeErrorSnapshot {
     val cleanupError = removeProviders(context)
-    val failure = NativeErrorSnapshot(cleanupError ?: code, ownedProviders.isNotEmpty())
+    val failure = if (cleanupError == null) {
+      NativeErrorSnapshot(code, ownedProviders.isNotEmpty())
+    } else cleanupFailure(context)
     state = failure
     pendingStart?.complete(failure)
     pendingStart = null
@@ -128,11 +178,13 @@ internal object MockLocationEngine {
 
   @Synchronized
   fun stop(context: Context): NativeStopResult {
+    restore(context)
+    if (ownership == null) return NativeErrorSnapshot(NativeErrorCode.CLEANUP_FAILED, true)
     val cleanupError = removeProviders(context)
     val result: NativeStopResult = if (cleanupError == null) {
       NativeStoppedSnapshot
     } else {
-      NativeErrorSnapshot(cleanupError, ownedProviders.isNotEmpty())
+      cleanupFailure(context)
     }
     state = result
     pendingStart?.complete(result)
@@ -140,17 +192,18 @@ internal object MockLocationEngine {
     return result
   }
 
+  private fun cleanupFailure(context: Context): NativeErrorSnapshot =
+    diagnoseCleanupFailure(ownedProviders.isNotEmpty()) { mockProviderSelected(context) }
+
   private fun removeProviders(context: Context): NativeErrorCode? {
-    val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    var failed = false
-    for (provider in ownedProviders.toList()) {
-      try {
+    return try {
+      val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+      val released = ownership?.releaseAll { provider ->
         manager.removeTestProvider(provider)
-        ownedProviders.remove(provider)
-      } catch (exception: Exception) {
-        failed = true
       }
+      if (released == true) null else NativeErrorCode.CLEANUP_FAILED
+    } catch (exception: Exception) {
+      NativeErrorCode.CLEANUP_FAILED
     }
-    return if (failed) NativeErrorCode.CLEANUP_FAILED else null
   }
 }

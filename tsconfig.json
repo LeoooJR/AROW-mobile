@@ -9,6 +9,7 @@
       "@shared/*": ["./shared/*"]
     }
   },
+  "exclude": ["node_modules", "script/local"],
   "include": [
     "**/*.ts",
     "**/*.tsx",

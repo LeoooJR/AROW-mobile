@@ -35,6 +35,58 @@ const milestone = new Milestone({
 });
 
 describe("MapFeatureDetailsCard", () => {
+  test("folds milestone metadata while keeping navigation and use-point actions available", async () => {
+    const user = userEvent.setup();
+    const onUsePoint = jest.fn();
+    await render(
+      <MilestoneDetailsCard
+        feature={milestone}
+        onClose={jest.fn()}
+        onUsePoint={onUsePoint}
+        usePointDisabled={false}
+      />,
+    );
+    await user.press(screen.getByRole("button", { name: "Réduire la fiche" }));
+    expect(screen.queryByText("Coordonnées")).not.toBeOnTheScreen();
+    expect(screen.queryByText("001000")).not.toBeOnTheScreen();
+    expect(screen.getByText("PK 241+000")).toBeOnTheScreen();
+    expect(screen.getByTestId("milestone-navigation")).toBeOnTheScreen();
+    await user.press(screen.getByTestId("use-map-milestone"));
+    expect(onUsePoint).toHaveBeenCalledWith(milestone);
+    expect(
+      screen.getByRole("button", { name: "Développer la fiche" }),
+    ).toHaveProp("accessibilityState", { expanded: false });
+    await user.press(
+      screen.getByRole("button", { name: "Développer la fiche" }),
+    );
+    expect(screen.getByText("45.74491 N · 4.86234 E")).toBeOnTheScreen();
+  });
+
+  test("folds railway metadata while preserving endpoint navigation and close", async () => {
+    const user = userEvent.setup();
+    const onFirst = jest.fn();
+    const onClose = jest.fn();
+    await render(
+      <RailwayDetailsCard
+        feature={railway}
+        onClose={onClose}
+        onFirst={onFirst}
+        onLast={jest.fn()}
+        bounds={{ first: milestone, last: milestone }}
+      />,
+    );
+    await user.press(screen.getByRole("button", { name: "Réduire la fiche" }));
+    expect(screen.queryByText("340311")).not.toBeOnTheScreen();
+    await user.press(screen.getByTestId("first-railway-milestone"));
+    expect(onFirst).toHaveBeenCalledTimes(1);
+    await user.press(
+      screen.getByRole("button", { name: "Développer la fiche" }),
+    );
+    expect(screen.getByText("340311")).toBeOnTheScreen();
+    await user.press(screen.getByTestId("close-map-feature-details"));
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   test("exposes enabled endpoint labels and independent callbacks", async () => {
     const first = jest.fn(),
       last = jest.fn();

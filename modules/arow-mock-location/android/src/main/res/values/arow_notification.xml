@@ -2,7 +2,9 @@
 <resources>
   <string name="arow_notification_title">Simulation de position active</string>
   <string name="arow_notification_summary">Une position ferroviaire simulée est appliquée.</string>
-  <string name="arow_notification_detail">La simulation continue en arrière-plan. Vous pouvez l’arrêter dans AROW.</string>
+  <string name="arow_notification_detail">La simulation continue en arrière-plan. Vous pouvez l’arrêter ici.</string>
+  <string name="arow_notification_stop">Arrêter</string>
+  <color name="arow_notification_border">#E7E7E2</color>
   <color name="arow_notification_foreground">#0A0A0A</color>
   <color name="arow_notification_success">#3FA66E</color>
 
@@ -23,4 +25,8 @@
     <item name="android:lineSpacingExtra">3sp</item>
   </style>
   <style name="Arow.Notification.Body" parent="Arow.Notification.Body.Base" />
+  <style name="Arow.Notification.Action" parent="Arow.Notification.Body">
+    <item name="android:fontFamily">sans-serif-medium</item>
+    <item name="android:textSize">13sp</item>
+  </style>
 </resources>

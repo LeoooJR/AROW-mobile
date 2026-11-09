@@ -25,6 +25,8 @@ function sourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const file = join(directory, entry.name);
     if (entry.isDirectory()) {
+      if (entry.name === "local" && directory.endsWith(`${sep}script`))
+        return [];
       const nativeBuild =
         entry.name === "build" && directory.endsWith(`${sep}android`);
       return IGNORED_DIRECTORIES.has(entry.name) || nativeBuild
@@ -52,6 +54,9 @@ function dependencyViolation(
   target: string | undefined,
   specifier: string,
 ): string | undefined {
+  if (target !== undefined && isWithin(target, "script/local")) {
+    return "Maintained code and tests cannot import task-local scripts; promote reusable tooling first.";
+  }
   if (isWithin(file, "shared")) {
     if (
       isBuiltin(specifier) ||

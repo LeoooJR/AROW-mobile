@@ -1,0 +1,134 @@
+appId: com.leooojrrr.AROWmobile
+name: Recover after mock-location selection is removed
+tags:
+  - feature
+  - simulation
+  - mock-provider
+onFlowComplete:
+  - runFlow:
+      when:
+        true: ${output.mockSelectionTouched === true}
+      commands:
+        - runFlow:
+            file: ../subflows/set-mock-location-app.yaml
+            env:
+              MOCK_APP: "arow"
+  - launchApp:
+      stopApp: false
+      permissions: {}
+  - runFlow:
+      when:
+        visible: "(Arrêter la simulation|Réessayer l’arrêt)"
+      commands:
+        - tapOn:
+            id: "simulation-play-pause"
+        - extendedWaitUntil:
+            notVisible: "(Arrêter la simulation|Réessayer l’arrêt)"
+            timeout: 10000
+---
+# English Android 13+ AVD, Developer options and USB debugging on, AROW selected
+# as mock app, Location and location/notification permissions enabled, no active
+# simulation. The foreground map must already have loaded, with no sheet open.
+# Prefer a standalone preview. Preserves app data and permissions.
+# Completion attempts to restore AROW and stop simulation; restore manually if
+# automation fails. Verify native service/provider state independently.
+- evalScript: ${output.mockSelectionTouched = false}
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
+- runFlow:
+    file: ../subflows/resolve-milestone.yaml
+    env:
+      KILOMETER: "509"
+      METRIC: "000"
+- runFlow:
+    file: ../subflows/assert-milestone-injection.yaml
+    env:
+      SCREENSHOT_NAME: "mock-provider-before-revocation"
+- evalScript: ${output.mockSelectionTouched = true}
+- runFlow:
+    file: ../subflows/set-mock-location-app.yaml
+    env:
+      MOCK_APP: "none"
+- launchApp:
+    stopApp: false
+    permissions: {}
+- extendedWaitUntil:
+    visible:
+      id: "location-status"
+      text: ".*application de position fictive.*"
+    timeout: 10000
+- assertVisible: ".*[Oo]ptions développeur.*"
+- assertNotVisible: "Arrêter la simulation"
+- assertNotVisible: "Active"
+- takeScreenshot: mock-provider-revoked
+# Android may permit clean removal or retain ownership after revocation. Assert
+# each outcome honestly rather than requiring platform-dependent cleanup failure.
+- runFlow:
+    when:
+      visible: "Réessayer l’arrêt"
+    commands:
+      - assertVisible: "Position simulée"
+      - assertVisible: "Erreur"
+      - assertVisible: "Sélectionnez AROW comme application de position fictive dans les options développeur, puis réessayez l’arrêt\\."
+      - assertNotVisible: "Simulation arrêtée"
+      - tapOn:
+          id: "simulation-play-pause"
+      - extendedWaitUntil:
+          visible: "Réessayer l’arrêt"
+          timeout: 10000
+      - assertVisible: "Sélectionnez AROW comme application de position fictive dans les options développeur, puis réessayez l’arrêt\\."
+      - takeScreenshot: mock-provider-retry-still-required
+- runFlow:
+    when:
+      visible: "Simulation arrêtée"
+    commands:
+      - assertVisible: "À redémarrer"
+      - assertVisible: "Réessayer la simulation"
+- runFlow:
+    file: ../subflows/set-mock-location-app.yaml
+    env:
+      MOCK_APP: "arow"
+- evalScript: ${output.mockSelectionTouched = false}
+- launchApp:
+    stopApp: false
+    permissions: {}
+- evalScript: ${output.mockRestoredDeadline = Date.now() + 6000}
+- repeat:
+    while:
+      true: ${Date.now() < output.mockRestoredDeadline}
+    commands:
+      - assertNotVisible: "Arrêter la simulation"
+      - assertNotVisible: "Active"
+- takeScreenshot: mock-provider-restored-without-resume
+- runFlow:
+    when:
+      visible: "Réessayer l’arrêt"
+    commands:
+      - tapOn:
+          id: "simulation-play-pause"
+      - extendedWaitUntil:
+          notVisible: "Réessayer l’arrêt"
+          timeout: 10000
+- runFlow:
+    when:
+      notVisible:
+        id: "simulation-play-pause"
+    commands:
+      - runFlow:
+          file: ../subflows/resolve-milestone.yaml
+          env:
+            KILOMETER: "509"
+            METRIC: "000"
+- runFlow:
+    file: ../subflows/assert-milestone-injection.yaml
+    env:
+      SCREENSHOT_NAME: "mock-provider-explicit-restart"
+- assertNotVisible: "Réessayer l’arrêt"
+- assertNotVisible: "Erreur"
+- tapOn:
+    id: "simulation-play-pause"
+- extendedWaitUntil:
+    visible: "Démarrer la simulation"
+    timeout: 10000

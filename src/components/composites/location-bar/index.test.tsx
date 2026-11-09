@@ -51,6 +51,44 @@ interface StateExpectation {
   readonly state: RealLocationState | MockedLocationState;
 }
 
+test.each([false, true])(
+  "mock-app revocation pairs guidance with the safe action (ownership %s)",
+  async (mayBeActive) => {
+    const press = jest.fn();
+    await render(
+      <LocationBar
+        state={{
+          status: "mocked",
+          position: {
+            accuracy: 3,
+            heading: null,
+            latitude: 45.74744,
+            longitude: 4.85933,
+          },
+        }}
+        simulation={{
+          status: "error",
+          origin: "reconciliation",
+          code: "MOCK_PROVIDER_NOT_SELECTED",
+          mayBeActive,
+        }}
+        showSimulationAction
+        onSimulationPress={press}
+      />,
+    );
+    const detail = mayBeActive
+      ? "Sélectionnez AROW comme application de position fictive dans les options développeur, puis réessayez l’arrêt."
+      : "Options développeur : sélectionnez AROW comme application de position fictive.";
+    expect(screen.getByText(detail)).toBeOnTheScreen();
+    expect(screen.queryByText("Active")).not.toBeOnTheScreen();
+    const action = screen.getByRole("button", {
+      name: mayBeActive ? "Réessayer l’arrêt" : "Réessayer la simulation",
+    });
+    await fireEvent.press(action);
+    expect(press).toHaveBeenCalledTimes(1);
+  },
+);
+
 const stateExpectations: readonly StateExpectation[] = [
   {
     detail: "Accès à la position…",

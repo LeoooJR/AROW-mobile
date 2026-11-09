@@ -43,7 +43,7 @@ The diagram shows the usual path. A stop during `checking` cancels the pending w
 ### Start, step by step
 
 1. The location control calls `useMapLocation.onSimulationPress`, which passes the **selected searched milestone** to `useSimulation.start`. A map feature selected only for inspection is not a simulation target.
-2. The point-search sheet has already resolved the `Milestone` domain object and its coordinates. `SimulationController` checks Android readiness before applying it: AROW must be the selected mock-location app, location services must be enabled, and fine location permission must be granted.
+2. The point-search sheet has already resolved the `Milestone` domain object and its coordinates. `SimulationController` checks Android readiness before applying it: AROW must be the selected mock-location app, location services must be enabled, and either coarse or fine location permission must be granted. This permission affects device-location readings, not the milestone coordinates injected by the engine.
 3. The controller passes that milestone's coordinates to the native executor without another lookup. The native module checks readiness again, starts the notification-backed service, installs GPS and network test providers, and injects the first fix. Native `start` returns `running` only after that fix is applied. Later fixes receive fresh timestamps roughly every second.
 4. The bridge decoder validates the result. The controller converts a valid `NativeRunningSnapshot` to a `LocationDescriptor` with `accuracy` and `heading` set to `null`, then publishes `running`.
 5. After successful startup, the provider separately prepares notification visibility. On Android 13 or later it requests `POST_NOTIFICATIONS` only when needed and while the application is active, then queries actual application/channel visibility. Denial, a pending request, or preparation exceptions cannot change the simulation result. Temporary inactivity while the permission dialog closes does not cancel simulation. Stop, a newer accepted Start, or provider unmount invalidates late results and prevents a pending permission check from opening a stale prompt.
@@ -56,15 +56,71 @@ For example, selecting PK 509+000 on line 893000 resolves the milestone in the s
 
 ### Stop and cleanup
 
+Before each scheduled fix, the native service rechecks the same prerequisites
+as Start. A failed check stops injection, attempts cleanup, and terminates the
+service without scheduling another fix. A check exception reports
+`READINESS_CHECK_FAILED`; an injection exception reports `APPLY_FAILED`.
+Successful cleanup retains an interruption reason in the existing error snapshot,
+displayed as **Simulation arrêtée** until an explicit new action. Cleanup failure
+retains owned providers and retry-stop. The real-location reader is refreshed
+after a clean interruption. Restoring a prerequisite never automatically resumes
+simulation; preparing a new target and explicit Start are available after cleanup.
+
+For background interruptions, native activity lifecycle tracking gates a
+dismissible notification on the existing channel, with ID `8052`. Its text
+distinguishes confirmed cleanup from incomplete stopping; tapping it opens AROW.
+It is separate from the active foreground notification (`8051`), whose removal
+does not remove the warning. Delivery is best effort and never requests consent,
+blocks cleanup, or changes the result. Successful explicit Start/Stop clears a
+stale warning. In-app interruption feedback does not expire with failed-start
+messages. If Android kills the process first, polling and warning delivery cannot
+be guaranteed; ownership cleanup on reopening still applies.
+
 While running, the location control invokes `stop` even if the selected feature card has closed or another map feature is selected. The controller publishes `stopping` with the last applied position, then calls native stop. It also uses this same cleanup path after a canceled start or an active error without a known position. Repeated stop presses during `canceling` or `stopping` have no effect. The engine removes only its owned test providers; the native module then stops the foreground service. The UI returns to `idle` only when native stop reports `stopped`.
 
 If removal fails, native returns an `error` with `ownsProviders`. The controller uses that boolean for `mayBeActive`: `true` keeps an actionable **retry stop** control. It may retain the last applied position for display, but error coordinates are never treated as a new applied fix. A malformed stop response is handled conservatively as uncertain cleanup rather than success.
+
+When cleanup retains provider claims, native checks the current mock-app
+selection. Confirmed revocation reports `MOCK_PROVIDER_NOT_SELECTED` with
+`ownsProviders: true`; the bottom bar explains restoring AROW in Developer
+options before retrying Stop. This diagnostic also applies to failed retries and
+recovered claims. Restored/unknown selection or a diagnostic exception keeps
+`CLEANUP_FAILED`. Ownership, not the error code alone, guards restart. Clean
+runtime stopping instead says **Simulation arrêtée** and requires explicit Start
+after restoration. Background notification wording makes the same distinction.
+
+For mock-app revocation with retained ownership, the bottom bar remains
+**Position simulée — Erreur**, with **Réessayer l’arrêt**, and says:
+“Sélectionnez AROW comme application de position fictive dans les options
+développeur, puis réessayez l’arrêt.” Confirmed stopping instead remains
+**Simulation arrêtée — À redémarrer**. Presentation, component, and Maestro
+assertions must preserve this wording contract; notification titles retain their
+own explicit incomplete-cleanup wording.
 
 ## UI state versus native state
 
 `SimulationState` is a UI/workflow state (`idle`, `checking`, `starting`, `canceling`, `running`, `stopping`, or `error`). `canceling` and `stopping` make pending cleanup visible without private lifecycle flags. Native snapshots have their own variants (`stopped`, `starting`, `running`, or `error`). The bridge decoder checks required fields, known codes, coordinate ranges, and provider ownership once, before a snapshot reaches the controller.
 
-The root layout mounts `SimulationProvider` around the route stack. It creates one controller for the application session, reconciles from a native snapshot when it mounts and whenever the app becomes active, and polls every two seconds while running. `useSimulation` reads the provider's state and actions; closing or remounting the map screen cannot create another controller or interrupt an operation. An inactive failed start stays visible for five seconds from publication, then the provider asks the controller to dismiss that exact error. Closing the searched card dismisses it immediately and restores real-location feedback. Cleanup and reconciliation errors do not expire. Operation and snapshot sequence numbers prevent late reads from overwriting a newer start or stop. When the root provider unmounts, it removes its React listener and timers but does **not** call native stop. The Android service can therefore continue sending fixes while the app is in the background. A new JS session creates a new controller and reconciles from native state. The service is not configured to restart after task removal, process termination, or device reboot.
+The root layout mounts `SimulationProvider` around the route stack. It creates one controller for the application session, reconciles from a native snapshot when it mounts and whenever the app becomes active, and polls every two seconds while running. `useSimulation` reads the provider's state and actions; closing or remounting the map screen cannot create another controller or interrupt an operation. An inactive failed start stays visible for five seconds from publication, then the provider asks the controller to dismiss that exact error. Closing the searched card dismisses it immediately and restores real-location feedback. Cleanup and reconciliation errors do not expire. Operation and snapshot sequence numbers prevent late reads from overwriting a newer start or stop. When the root provider unmounts, it removes its React listener and timers but does **not** call native stop. The Android service can therefore continue sending fixes while the app is in the background. A new JS session creates a new controller and reconciles from native state. The service is not configured to restart after process termination or device reboot.
+
+Task dismissal intentionally leaves an existing foreground simulation running.
+The expanded active notification offers **Arrêter** through an immutable intent
+to the private native service; it cancels refreshes and performs provider cleanup
+without opening the UI. Success removes the active notification and any stale
+interruption warning. Cleanup failure retains ownership and posts the existing
+incomplete-stop warning when notifications are permitted; opening AROW exposes
+retry-stop. Notification consent remains independent of simulation.
+Task dismissal does not guarantee reduced process memory or survival under
+manufacturer policies. Process termination, force-stop, and reboot are separate
+from dismissing a task; none automatically resumes simulation.
+
+The engine journals provider names before installing them and clears each claim
+only after removal and durable persistence succeed. A fresh process removes
+recovered claims before reporting stopped; a cleanup failure retains the existing
+retry-stop state. No coordinates or resume request are persisted. In particular,
+Android's process restart after a precise-to-approximate permission downgrade
+does not automatically resume simulation; the user can explicitly start again
+with approximate access.
 
 An invalid native snapshot produces an actionable `SIMULATION_UNAVAILABLE` error with uncertain active state, even on initial reconciliation. When the native snapshot says `stopped`, the controller clears a state that still requires stopping. After a successful stop, map coordination retries the real-location watcher so the displayed position can return to the device's real location.
 
@@ -73,8 +129,10 @@ An invalid native snapshot produces an actionable `SIMULATION_UNAVAILABLE` error
 - Keep the ordering **search-sheet milestone lookup → readiness → native start → first-fix acknowledgement → independent notification preparation**. Do not infer success from a request to start the service or gate simulation on notification consent.
 - Keep native resource ownership explicit. If a provider remains after partial cleanup, report it through `ownsProviders`; never infer ownership from an error code.
 - Keep UI state and native bridge contracts distinct. Add or change a native result in the Kotlin contracts, TypeScript contracts, decoder, and controller together.
-- Cover races in [`simulation-controller.test.ts`](simulation-controller.test.ts), bridge shapes in [`decode-native-result.test.ts`](../../../modules/arow-mock-location/src/decode-native-result.test.ts), and hook reconciliation in [`use-simulation.test.ts`](../use-simulation.test.ts). For an Android behavior change, exercise the affected path on an emulator; [`mock-phone-location.yaml`](../../../.maestro/tests/mock-phone-location.yaml) covers the milestone journey and fail-fast mock-app check.
-- [`manage-simulation-notification.yaml`](../../../.maestro/tests/manage-simulation-notification.yaml) exercises consent, foreground/background notification visibility, Stop removal, denial continuation, warning expiry, and accessible Stop. Run it after selecting AROW as the mock-location provider. Host tests cover stale notification attempts, independent simulation startup, and warning delivery across foreground transitions.
+- Cover races in [`simulation-controller.test.ts`](simulation-controller.test.ts), bridge shapes in [`decode-native-result.test.ts`](../../../modules/arow-mock-location/src/decode-native-result.test.ts), and hook reconciliation in [`use-simulation.test.ts`](../use-simulation.test.ts). For an Android behavior change, exercise the affected path on an emulator; [`mock-phone-location.yaml`](../../../.maestro/journeys/mock-phone-location.yaml) covers the milestone journey and fail-fast mock-app check.
+- [`manage-simulation-notification.yaml`](../../../.maestro/journeys/manage-simulation-notification.yaml) exercises consent, foreground/background notification visibility, Stop removal, denial continuation, warning expiry, and accessible Stop. Run it after selecting AROW as the mock-location provider. Host tests cover stale notification attempts, independent simulation startup, and warning delivery across foreground transitions.
+- [`manage-runtime-prerequisites.yaml`](../../../.maestro/features/manage-runtime-prerequisites.yaml) checks Location revocation through Settings, background interruption feedback, explicit restart, coarse access, and notification-denied cleanup. Verify actual service/provider cleanup separately; an absent Stop button alone is not proof.
+- [`stop-simulation-from-notification.yaml`](../../../.maestro/features/stop-simulation-from-notification.yaml) checks task dismissal, continued notification visibility, native notification Stop without opening AROW, and stopped state after reopening. Independently verify advancing fixes before Stop and service/provider removal afterward.
 
 Before each notification journey or recording, reset consent on the confirmed emulator without clearing application data:
 

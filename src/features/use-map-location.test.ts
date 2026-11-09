@@ -47,6 +47,44 @@ const position = {
 };
 
 describe("useMapLocation", () => {
+  test("clean runtime interruption releases target preparation and retries the device reader once", async () => {
+    mockSimulation = { status: "running", position };
+    const { result, rerender } = await renderHook(() =>
+      useMapLocation(milestone),
+    );
+    mockSimulation = {
+      status: "error",
+      code: "LOCATION_SERVICES_DISABLED",
+      origin: "reconciliation",
+      mayBeActive: false,
+    };
+    await rerender(undefined);
+    expect(result.current.canSelectSimulationTarget).toBe(true);
+    expect(mockRetry).toHaveBeenCalledTimes(1);
+    expect(mockStart).not.toHaveBeenCalled();
+    await act(async () => result.current.onSimulationPress());
+    expect(mockStart).toHaveBeenCalledWith(milestone);
+    expect(mockStop).not.toHaveBeenCalled();
+    await rerender(undefined);
+    expect(mockRetry).toHaveBeenCalledTimes(1);
+  });
+
+  test("runtime cleanup failure blocks target changes and retains retry-stop", async () => {
+    mockSimulation = {
+      status: "error",
+      code: "CLEANUP_FAILED",
+      origin: "reconciliation",
+      mayBeActive: true,
+      position,
+    };
+    const { result } = await renderHook(() => useMapLocation());
+    expect(result.current.canSelectSimulationTarget).toBe(false);
+    expect(result.current.showSimulationAction).toBe(true);
+    await act(async () => result.current.onSimulationPress());
+    expect(mockStop).toHaveBeenCalledTimes(1);
+    expect(mockStart).not.toHaveBeenCalled();
+  });
+
   test.each<[SimulationState, boolean]>([
     [{ status: "idle" }, true],
     [{ status: "checking" }, false],

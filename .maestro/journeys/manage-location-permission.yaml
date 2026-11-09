@@ -1,7 +1,7 @@
 appId: com.leooojrrr.AROWmobile
 name: Recover location access after denial
 tags:
-  - feature
+  - journey
   - location
   - permission
 ---
@@ -11,7 +11,10 @@ tags:
     permissions:
       location: deny
 - pressKey: home
-- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
 - extendedWaitUntil:
     visible:
       id: "location-status"
@@ -49,7 +52,10 @@ tags:
 
 # Returning to the app must recheck the grant and install a location watcher.
 - pressKey: home
-- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
 - setLocation:
     latitude: 45.74491
     longitude: 4.86234
@@ -60,7 +66,10 @@ tags:
 
 # The recovered grant must survive a cold app restart.
 - stopApp
-- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
 - extendedWaitUntil:
     visible: "(Connectée|Active)"
     timeout: 30000

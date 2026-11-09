@@ -1,4 +1,4 @@
-import { type ReactElement, type ReactNode } from "react";
+import { useState, type ReactElement, type ReactNode } from "react";
 import { useColorScheme, useWindowDimensions, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -27,6 +27,7 @@ export default function MapFeatureDetailsFrame({
   onClose,
   showSimulationAction = false,
 }: MapFeatureDetailsFrameProps): ReactElement {
+  const [expanded, setExpanded] = useState(true);
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
   const palette = MAP_FEATURE_DETAILS_PALETTES[resolveColorTheme(colorScheme)];
@@ -51,17 +52,21 @@ export default function MapFeatureDetailsFrame({
       testID="map-feature-details-card"
     >
       <MapFeatureDetailsHeader
+        expanded={expanded}
+        onToggle={() => setExpanded((value) => !value)}
         eyebrow={eyebrow}
         iconColor={palette.icon}
         onClose={onClose}
         title={title}
       />
-      <ScrollView
-        className="grow-0 shrink"
-        showsVerticalScrollIndicator={false}
-      >
-        {children}
-      </ScrollView>
+      {expanded ? (
+        <ScrollView
+          className="grow-0 shrink"
+          showsVerticalScrollIndicator={false}
+        >
+          {children}
+        </ScrollView>
+      ) : null}
       {footer}
     </Card>
   );

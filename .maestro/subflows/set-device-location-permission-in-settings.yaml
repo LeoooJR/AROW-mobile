@@ -1,0 +1,77 @@
+appId: com.leooojrrr.AROWmobile
+---
+# English Android Settings; LOCATION_ACCESS is 'coarse' or 'deny'. A provider
+# guard fails this operation. Never substitute a test API for the user action.
+- pressKey: Home
+- launchApp:
+    appId: com.android.settings
+    stopApp: false
+    permissions: {}
+- extendedWaitUntil:
+    visible: "(Search Settings|Location permission|App permissions)"
+    timeout: 30000
+- runFlow:
+    when:
+      visible: "App permissions"
+    commands:
+      - tapOn: "Location"
+- runFlow:
+    when:
+      notVisible:
+        id: "com.android.permissioncontroller:id/deny_radio_button"
+    commands:
+      - scrollUntilVisible:
+          element: "Apps"
+          direction: DOWN
+      - tapOn: "Apps"
+      - tapOn: "See all [0-9]+ apps"
+      - scrollUntilVisible:
+          element: "AROW-mobile"
+          direction: DOWN
+      - tapOn: "AROW-mobile"
+      - tapOn: "Permissions"
+      - tapOn: "Location"
+- assertNotVisible: "AROW-mobile is a provider of location services.*"
+- assertVisible: "AROW-mobile"
+- runFlow:
+    when:
+      true: ${LOCATION_ACCESS === 'deny'}
+    commands:
+      - tapOn:
+          id: "com.android.permissioncontroller:id/deny_radio_button"
+      - runFlow:
+          when:
+            visible: "Don.t allow anyway"
+          commands:
+            - tapOn: "Don.t allow anyway"
+      - assertNotVisible: "AROW-mobile is a provider of location services.*"
+      - assertVisible:
+          id: "com.android.permissioncontroller:id/deny_radio_button"
+          checked: true
+- runFlow:
+    when:
+      true: ${LOCATION_ACCESS === 'coarse'}
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: "com.android.permissioncontroller:id/allow_foreground_only_radio_button"
+              checked: false
+          commands:
+            - tapOn:
+                id: "com.android.permissioncontroller:id/allow_foreground_only_radio_button"
+      - runFlow:
+          when:
+            visible:
+              id: "android:id/switch_widget"
+              checked: true
+          commands:
+            - tapOn:
+                id: "android:id/switch_widget"
+      - assertNotVisible: "AROW-mobile is a provider of location services.*"
+      - assertVisible:
+          id: "com.android.permissioncontroller:id/allow_foreground_only_radio_button"
+          checked: true
+      - assertVisible:
+          id: "android:id/switch_widget"
+          checked: false

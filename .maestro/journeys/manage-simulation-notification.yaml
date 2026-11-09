@@ -14,7 +14,7 @@ tags:
     permissions:
       location: allow
       notifications: unset
-- runFlow: ../flows/select-simulation-milestone.yaml
+- runFlow: ../subflows/select-simulation-milestone.yaml
 - retry:
     maxRetries: 3
     commands:
@@ -34,7 +34,7 @@ tags:
 - assertVisible: "Simulation de position active"
 - runFlow:
     when:
-      visible: "La simulation continue en arrière-plan\\. Vous pouvez l’arrêter dans AROW\\."
+      visible: "La simulation continue en arrière-plan\\. Vous pouvez l’arrêter ici\\."
     commands:
       - tapOn:
           id: "android:id/expand_button"
@@ -43,7 +43,7 @@ tags:
             id: "android:id/notification_header"
             containsDescendants:
               - text: "AROW-mobile"
-- assertNotVisible: "La simulation continue en arrière-plan\\. Vous pouvez l’arrêter dans AROW\\."
+- assertNotVisible: "La simulation continue en arrière-plan\\. Vous pouvez l’arrêter ici\\."
 - takeScreenshot: .maestro/artifacts/active-notification-collapsed
 - assertNotVisible: "Mettre en pause"
 - assertNotVisible: "Reprendre"
@@ -59,7 +59,8 @@ tags:
           containsDescendants:
             - text: "Simulation de position active"
 - assertVisible: "Une position ferroviaire simulée est appliquée\\."
-- assertVisible: "La simulation continue en arrière-plan\\. Vous pouvez l’arrêter dans AROW\\."
+- assertVisible: "La simulation continue en arrière-plan\\. Vous pouvez l’arrêter ici\\."
+- assertVisible: "Arrêter"
 - takeScreenshot: .maestro/artifacts/active-notification-expanded
 - pressKey: Back
 - pressKey: Home
@@ -92,7 +93,7 @@ tags:
 - setPermissions:
     permissions:
       notifications: unset
-- runFlow: ../flows/select-simulation-milestone.yaml
+- runFlow: ../subflows/select-simulation-milestone.yaml
 - tapOn:
     id: "simulation-play-pause"
 - tapOn: "Don’t allow"

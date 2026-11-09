@@ -13,7 +13,10 @@ tags:
 - setPermissions:
     permissions:
       location: allow
-- openLink: "exp+arow-mobile://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
 - extendedWaitUntil:
     visible:
       id: "arow-map"
@@ -76,7 +79,7 @@ tags:
 # Without selecting AROW as the developer mock-location app, the action fails
 # before the milestone is looked up or a foreground service is started.
 - extendedWaitUntil:
-    visible: "Sélectionnez AROW comme application de position fictive"
+    visible: "Options développeur : sélectionnez AROW comme application de position fictive\\."
     timeout: 10000
 - assertVisible: "Réessayer la simulation"
 - assertVisible: "PK 509\\+000"
@@ -88,4 +91,4 @@ tags:
 - extendedWaitUntil:
     visible: "(Connectée|Active)"
     timeout: 10000
-- assertNotVisible: "Sélectionnez AROW comme application de position fictive"
+- assertNotVisible: "Options développeur : sélectionnez AROW comme application de position fictive\\."

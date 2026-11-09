@@ -1,0 +1,101 @@
+appId: com.leooojrrr.AROWmobile
+name: Stop background simulation after dismissing the task
+tags:
+  - feature
+  - simulation
+  - notifications
+onFlowComplete:
+  - pressKey: Back
+  - launchApp:
+      stopApp: false
+      permissions: {}
+  - runFlow:
+      when:
+        visible: "(Arrêter la simulation|Réessayer l’arrêt)"
+      commands:
+        - tapOn:
+            id: "simulation-play-pause"
+---
+# Pixel launcher, three-button navigation, English Android 13+ emulator. Location on,
+# AROW selected as mock provider, notifications and location granted, no active
+# simulation. Use a standalone preview; preserves app data and permissions.
+# Native fixes and cleanup require independent diagnostics, not UI inference.
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
+- runFlow:
+    file: ../subflows/resolve-milestone.yaml
+    env:
+      KILOMETER: "509"
+      METRIC: "000"
+- runFlow:
+    file: ../subflows/assert-milestone-injection.yaml
+    env:
+      SCREENSHOT_NAME: "notification-stop-active"
+# Use the system Recents button; do not force-stop or kill the process.
+- tapOn:
+    id: "com.android.systemui:id/recent_apps"
+- assertVisible:
+    id: "com.google.android.apps.nexuslauncher:id/overview_panel"
+- assertVisible:
+    id: "com.google.android.apps.nexuslauncher:id/snapshot"
+    text: "AROW-mobile"
+- swipe:
+    start: "50%,75%"
+    end: "50%,5%"
+    duration: 500
+- assertNotVisible:
+    id: "com.google.android.apps.nexuslauncher:id/snapshot"
+    text: "AROW-mobile"
+- takeScreenshot: notification-stop-task-dismissed
+- swipe:
+    start: "50%,2%"
+    end: "50%,80%"
+    duration: 500
+- assertVisible: "Simulation de position active"
+- runFlow:
+    when:
+      notVisible: "Arrêter"
+    commands:
+      - tapOn:
+          id: "android:id/expand_button"
+          childOf:
+            id: "android:id/expand_button_touch_container"
+            childOf:
+              id: "android:id/notification_headerless_view_row"
+              childOf:
+                id: "android:id/status_bar_latest_event_content"
+                containsDescendants:
+                  - text: "Simulation de position active"
+- assertVisible: "Arrêter"
+- takeScreenshot: notification-stop-expanded
+# Keep a sampling window for native advancing fixes after task dismissal.
+- evalScript: ${output.backgroundDeadline = Date.now() + 6000}
+- repeat:
+    while:
+      true: ${Date.now() < output.backgroundDeadline}
+    commands:
+      - assertVisible: "Simulation de position active"
+- tapOn:
+    id: "com.leooojrrr.AROWmobile:id/arow_notification_stop"
+- extendedWaitUntil:
+    notVisible: "Simulation de position active"
+    timeout: 10000
+- assertNotVisible: "Arrêt de simulation incomplet"
+- takeScreenshot: notification-stop-completed
+- pressKey: Back
+# Stop must leave the launcher/Recents visible, without opening AROW.
+- assertNotVisible:
+    id: "open-point-search"
+- assertVisible:
+    id: "com.google.android.apps.nexuslauncher:id/(overview_panel|workspace)"
+- assertNotVisible:
+    id: "com.google.android.apps.nexuslauncher:id/snapshot"
+    text: "AROW-mobile"
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
+- assertNotVisible: "(Arrêter la simulation|Réessayer l’arrêt)"
+- takeScreenshot: notification-stop-reopened

@@ -57,6 +57,20 @@ test("allows shared-relative imports, aliases, re-exports, and real Node built-i
   ).toEqual([]);
 });
 
+test("does not inspect experiments but rejects maintained imports of them", () => {
+  expect(inspect({ "script/local/probe.ts": 'import "expo";' })).toEqual([]);
+  expect(
+    inspect({
+      "script/local/probe.ts": "export const value = 1;",
+      "script/tool.test.ts": 'import { value } from "./local/probe";',
+    }),
+  ).toEqual([
+    expect.objectContaining({
+      message: expect.stringMatching(/cannot import task-local/),
+    }),
+  ]);
+});
+
 test.each([
   'import React from "react";',
   'import type { AppStateStatus } from "react-native";',

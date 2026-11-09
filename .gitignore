@@ -49,6 +49,10 @@ coverage/
 .maestro/artifacts/*
 !.maestro/artifacts/.gitkeep
 
+# Task-specific scripts are local evidence, not maintained tooling.
+/script/local/*
+!/script/local/.gitkeep
+
 # Local environment files
 .env*.local
 

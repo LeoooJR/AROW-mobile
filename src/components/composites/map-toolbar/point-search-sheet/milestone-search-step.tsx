@@ -3,9 +3,11 @@ import { Keyboard, Text, View } from "react-native";
 
 import MilestoneResolutionFeedback from "@/components/composites/map-toolbar/point-search-sheet/milestone-resolution-feedback";
 import MilestoneStep from "@/components/composites/map-toolbar/point-search-sheet/milestone-step";
+import KilometerStepButton from "@/components/composites/map-toolbar/point-search-sheet/kilometer-step-button";
 import PointSearchStepHeader from "@/components/composites/map-toolbar/point-search-sheet/point-search-step-header";
 import TextField from "@/components/primitives/text-field";
 import type { MilestoneResolution } from "@/features/railway-reference/search/contracts";
+import { validateMilestoneInput } from "@/features/railway-reference/search/milestone-input";
 import type { Railway } from "@shared/railway-domain/railway";
 import type { RailwaySection } from "@shared/railway-domain/railway-section";
 
@@ -46,6 +48,35 @@ export default function MilestoneSearchStep({
   const disabled = selectedSection === undefined;
   const invalid = resolution.status === "error";
   const step = new MilestoneStep(selectedSection, resolution);
+  const currentKilometer = /^\d+$/.test(kilometer) ? Number(kilometer) : NaN;
+  const range = selectedSection?.milestoneRange;
+  const minimum = Math.floor((range?.minimumPositionMeters ?? 0) / 1000);
+  const minimumMetric = String(
+    (range?.minimumPositionMeters ?? 0) % 1000,
+  ).padStart(3, "0");
+  const canDecrease =
+    validateMilestoneInput(
+      selectedSection,
+      String(currentKilometer - 1),
+      metric,
+    ).status === "ready";
+  const canIncrease =
+    validateMilestoneInput(
+      selectedSection,
+      String(kilometer === "" ? minimum : currentKilometer + 1),
+      kilometer === "" && metric === "" ? minimumMetric : metric,
+    ).status === "ready";
+
+  function increaseKilometer(): void {
+    if (kilometer === "" && range !== undefined) {
+      onKilometerChange(String(minimum));
+      if (metric === "") {
+        onMetricChange(minimumMetric);
+      }
+      return;
+    }
+    onKilometerChange(String(currentKilometer + 1));
+  }
 
   return (
     <View
@@ -67,18 +98,30 @@ export default function MilestoneSearchStep({
           <Text className="mb-1.5 text-xs font-semibold text-text-primary">
             Kilomètre
           </Text>
-          <TextField
-            aria-invalid={invalid}
-            aria-label="Kilomètre"
-            editable={!disabled}
-            inputMode="numeric"
-            onChangeText={onKilometerChange}
-            placeholder="509"
-            placeholderTextColor={placeholderColor}
-            testID="milestone-kilometer-input"
-            value={kilometer}
-            variant="numeric"
-          />
+          <View className="flex-row items-center gap-1">
+            <KilometerStepButton
+              disabled={!canDecrease}
+              onPress={() => onKilometerChange(String(currentKilometer - 1))}
+            />
+            <TextField
+              className="min-w-0 flex-1 px-1"
+              aria-invalid={invalid}
+              aria-label="Kilomètre"
+              editable={!disabled}
+              inputMode="numeric"
+              onChangeText={onKilometerChange}
+              placeholder="509"
+              placeholderTextColor={placeholderColor}
+              testID="milestone-kilometer-input"
+              value={kilometer}
+              variant="numeric"
+            />
+            <KilometerStepButton
+              increase
+              disabled={!canIncrease}
+              onPress={increaseKilometer}
+            />
+          </View>
         </View>
         <View
           aria-hidden

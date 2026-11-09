@@ -28,11 +28,13 @@ export default function MilestoneDetailsCard({
   onNext,
   onUsePoint,
   usePointDisabled,
+  showSimulationAction = false,
   ...props
 }: MilestoneDetailsCardProps) {
   return (
     <MapFeatureDetailsFrame
       {...props}
+      showSimulationAction={showSimulationAction}
       eyebrow="Point kilométrique"
       title={`PK ${feature.label}`}
       footer={
@@ -44,12 +46,14 @@ export default function MilestoneDetailsCard({
             onPrevious={onPrevious}
             onNext={onNext}
           />
-          <View className="mt-[12px] border-t border-border-subtle pt-[12px] dark:border-[#4D4D4D]">
-            <MilestoneUsePointButton
-              disabled={usePointDisabled}
-              onPress={() => onUsePoint(feature)}
-            />
-          </View>
+          {!showSimulationAction && !usePointDisabled ? (
+            <View className="mt-[12px] border-t border-border-subtle pt-[12px] dark:border-[#4D4D4D]">
+              <MilestoneUsePointButton
+                disabled={false}
+                onPress={() => onUsePoint(feature)}
+              />
+            </View>
+          ) : null}
         </>
       }
     >

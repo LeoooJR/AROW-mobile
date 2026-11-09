@@ -3,6 +3,7 @@ package expo.modules.arowmocklocation
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.view.View
 import android.widget.RemoteViews
@@ -19,6 +20,13 @@ internal object ActiveSimulationNotification {
       compact.setViewVisibility(R.id.arow_notification_summary, View.GONE)
     }
     val expanded = RemoteViews(context.packageName, R.layout.arow_notification_expanded)
+    val stopIntent = PendingIntent.getService(
+      context,
+      notificationId,
+      Intent(context, MockLocationService::class.java).setAction(MockLocationService.ACTION_STOP),
+      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+    expanded.setOnClickPendingIntent(R.id.arow_notification_stop, stopIntent)
     val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
     val contentIntent = launchIntent?.let {
       PendingIntent.getActivity(

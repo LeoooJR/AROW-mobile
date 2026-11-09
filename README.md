@@ -40,4 +40,6 @@ local previews.
 - [Development and checks](docs/development.md) — setup, troubleshooting, and code
   quality.
 - [Android testing](.maestro/README.md) — exercise the app's user journeys.
+- [Unexpected usage scenarios](docs/usage-scenarios.md) — observations, risks,
+  current handling, and coverage gaps from exploratory use.
 - [Design guide](DESIGN.md) — the application's visual identity and conventions.

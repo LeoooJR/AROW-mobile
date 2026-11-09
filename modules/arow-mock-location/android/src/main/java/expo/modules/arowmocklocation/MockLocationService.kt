@@ -15,6 +15,7 @@ import android.util.Log
 class MockLocationService : Service() {
   companion object {
     const val ACTION_START = "expo.modules.arowmocklocation.START"
+    internal const val ACTION_STOP = "expo.modules.arowmocklocation.STOP"
     internal const val CHANNEL_ID = "arow_simulation"
     private const val NOTIFICATION_ID = 8051
     private const val REFRESH_INTERVAL_MS = 1_000L
@@ -24,14 +25,17 @@ class MockLocationService : Service() {
   private var notificationStartedAt = 0L
   private val refresh = object : Runnable {
     override fun run() {
-      if (MockLocationEngine.snapshot() !is NativeRunningSnapshot) return
-      try {
-        MockLocationEngine.inject(this@MockLocationService)
-        handler.postDelayed(this, REFRESH_INTERVAL_MS)
-      } catch (exception: Exception) {
-        MockLocationEngine.fail(this@MockLocationService, NativeErrorCode.APPLY_FAILED)
-        stopSelf()
-      }
+      MockLocationEngine.refresh(
+        this@MockLocationService,
+        { handler.postDelayed(this, REFRESH_INTERVAL_MS) },
+        { failure ->
+          try {
+            SimulationInterruptionNotification.postIfBackground(this@MockLocationService, failure)
+          } finally {
+            stopSelf()
+          }
+        },
+      )
     }
   }
 
@@ -52,6 +56,18 @@ class MockLocationService : Service() {
   }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    if (handleSimulationStopCommand(
+      intent?.action,
+      { handler.removeCallbacks(refresh) },
+      { MockLocationEngine.stop(this) },
+      { SimulationInterruptionNotification.clear(this) },
+      { SimulationInterruptionNotification.post(this, it) },
+      {
+        stopForeground(STOP_FOREGROUND_REMOVE)
+        stopSelf()
+      },
+    )) return START_NOT_STICKY
+
     if (intent?.action != ACTION_START) {
       stopSelf()
       return START_NOT_STICKY
@@ -61,6 +77,8 @@ class MockLocationService : Service() {
       promoteToForeground()
       MockLocationEngine.activate(this)
       if (MockLocationEngine.snapshot() is NativeRunningSnapshot) {
+        // Clear before ticking: a delayed Start response must not erase a newer interruption.
+        SimulationInterruptionNotification.clear(this)
         handler.removeCallbacks(refresh)
         handler.postDelayed(refresh, REFRESH_INTERVAL_MS)
       } else {

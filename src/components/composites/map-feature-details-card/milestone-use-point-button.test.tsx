@@ -60,7 +60,7 @@ test.each(["light", "dark"] as const)(
   },
 );
 
-test("simulation policy disables the action, independently of neighbour loading and failures", async () => {
+test("unavailable preparation hides the action, independently of neighbour loading and failures", async () => {
   const usePoint = jest.fn(),
     user = userEvent.setup();
   const view = await render(
@@ -73,12 +73,9 @@ test("simulation policy disables the action, independently of neighbour loading 
     />,
   );
   expect(
-    screen.getByRole("button", { name: "Utiliser ce point" }),
-  ).toBeDisabled();
-  expect(screen.getByRole("button", { name: "Utiliser ce point" })).toHaveStyle(
-    { opacity: 0.58 },
-  );
-  await user.press(screen.getByRole("button", { name: "Utiliser ce point" }));
+    screen.queryByRole("button", { name: "Utiliser ce point" }),
+  ).not.toBeOnTheScreen();
+  expect(screen.getByTestId("milestone-navigation")).toBeOnTheScreen();
   expect(usePoint).not.toHaveBeenCalled();
   await view.rerender(
     <MilestoneDetailsCard
@@ -102,3 +99,35 @@ test("simulation policy disables the action, independently of neighbour loading 
   await user.press(screen.getByRole("button", { name: "Utiliser ce point" }));
   expect(usePoint.mock.calls).toEqual([[milestone], [milestone]]);
 });
+
+test.each(["light", "dark"] as const)(
+  "%s prepared and running cards hide the redundant action in both card sizes",
+  async (theme) => {
+    jest.mocked(useColorScheme).mockReturnValue(theme);
+    const user = userEvent.setup();
+    const props = {
+      feature: milestone,
+      onClose: jest.fn(),
+      onUsePoint: jest.fn(),
+      showSimulationAction: true,
+    };
+    const view = await render(
+      <MilestoneDetailsCard {...props} usePointDisabled={false} />,
+    );
+    expect(screen.queryByTestId("use-map-milestone")).not.toBeOnTheScreen();
+    expect(screen.getByText("Coordonnées")).toBeOnTheScreen();
+    await user.press(screen.getByRole("button", { name: "Réduire la fiche" }));
+    expect(screen.queryByTestId("use-map-milestone")).not.toBeOnTheScreen();
+    expect(screen.getByTestId("milestone-navigation")).toBeOnTheScreen();
+    await view.rerender(<MilestoneDetailsCard {...props} usePointDisabled />);
+    expect(
+      screen.queryByRole("button", { name: "Utiliser ce point" }),
+    ).not.toBeOnTheScreen();
+    expect(screen.getByText("PK 509+000")).toBeOnTheScreen();
+    await user.press(
+      screen.getByRole("button", { name: "Développer la fiche" }),
+    );
+    expect(screen.queryByTestId("use-map-milestone")).not.toBeOnTheScreen();
+    expect(screen.getByText("Coordonnées")).toBeOnTheScreen();
+  },
+);

@@ -1,0 +1,161 @@
+appId: com.leooojrrr.AROWmobile
+name: Step milestone kilometers within a section
+tags:
+  - feature
+  - search
+  - milestone
+onFlowComplete:
+  - runFlow:
+      when:
+        visible:
+          id: "point-search-sheet"
+      commands:
+        - hideKeyboard
+        - pressKey: Back
+---
+# Loaded foreground map, no active simulation or sheet. Preserves permissions,
+# app data, and device settings. Does not start simulation.
+- launchApp:
+    stopApp: false
+    permissions: {}
+- runFlow: ../subflows/wait-for-ready-map.yaml
+- runFlow: ../subflows/open-milestone-search.yaml
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "kilometer-increase"
+    direction: DOWN
+- assertVisible:
+    id: "kilometer-decrease"
+    enabled: false
+- assertVisible:
+    id: "kilometer-increase"
+    enabled: true
+# First Plus initializes the exact first recorded point, including its metric.
+- tapOn:
+    id: "kilometer-increase"
+- assertVisible:
+    id: "milestone-kilometer-input"
+    text: "499"
+- assertVisible:
+    id: "milestone-metric-input"
+    text: "752"
+- extendedWaitUntil:
+    visible: "Point résolu"
+    timeout: 15000
+- assertVisible:
+    id: "kilometer-decrease"
+    enabled: false
+- takeScreenshot: milestone-first-step
+# Later presses change kilometers, not database-record order. An absent record
+# must not silently substitute a nearby point or change the metric part.
+- tapOn:
+    id: "kilometer-increase"
+- assertVisible:
+    id: "milestone-kilometer-input"
+    text: "500"
+- assertVisible:
+    id: "milestone-metric-input"
+    text: "752"
+- extendedWaitUntil:
+    visible: "Le repère 500\\+752 n’est pas disponible dans cette section\\."
+    timeout: 15000
+- tapOn:
+    id: "kilometer-decrease"
+- assertVisible:
+    id: "milestone-kilometer-input"
+    text: "499"
+- assertVisible:
+    id: "milestone-metric-input"
+    text: "752"
+- extendedWaitUntil:
+    visible: "Point résolu"
+    timeout: 15000
+- tapOn:
+    id: "kilometer-increase"
+- tapOn:
+    id: "milestone-metric-input"
+- eraseText
+- inputText: "000"
+- hideKeyboard
+- extendedWaitUntil:
+    visible: "Point résolu"
+    timeout: 15000
+# 500+000 minus one kilometer would precede the section's 499+752 minimum.
+- assertVisible:
+    id: "kilometer-decrease"
+    enabled: false
+- tapOn:
+    id: "kilometer-increase"
+- assertVisible:
+    id: "milestone-kilometer-input"
+    text: "501"
+- assertVisible:
+    id: "milestone-metric-input"
+    text: "000"
+- extendedWaitUntil:
+    visible: "Point résolu"
+    timeout: 15000
+- tapOn:
+    id: "kilometer-decrease"
+- assertVisible:
+    id: "milestone-kilometer-input"
+    text: "500"
+- assertVisible:
+    id: "milestone-metric-input"
+    text: "000"
+- extendedWaitUntil:
+    visible: "Point résolu"
+    timeout: 15000
+# 510+700 plus one kilometer would exceed the section's 511+600 maximum.
+- tapOn:
+    id: "milestone-kilometer-input"
+- eraseText
+- inputText: "510"
+- hideKeyboard
+- tapOn:
+    id: "milestone-metric-input"
+- eraseText
+- inputText: "700"
+- hideKeyboard
+- assertVisible:
+    id: "kilometer-increase"
+    enabled: false
+# Landing exactly on the full upper bound remains possible.
+- tapOn:
+    id: "milestone-metric-input"
+- eraseText
+- inputText: "600"
+- hideKeyboard
+- assertVisible:
+    id: "kilometer-increase"
+    enabled: true
+- tapOn:
+    id: "kilometer-increase"
+- assertVisible:
+    id: "milestone-kilometer-input"
+    text: "511"
+- assertVisible:
+    id: "milestone-metric-input"
+    text: "600"
+- extendedWaitUntil:
+    visible: "Point résolu"
+    timeout: 15000
+- assertVisible:
+    id: "kilometer-increase"
+    enabled: false
+- assertVisible:
+    id: "kilometer-decrease"
+    enabled: true
+- takeScreenshot: milestone-last-kilometer
+- tapOn:
+    id: "kilometer-decrease"
+- assertVisible:
+    id: "milestone-kilometer-input"
+    text: "510"
+- assertVisible:
+    id: "milestone-metric-input"
+    text: "600"
+- assertVisible:
+    id: "kilometer-increase"
+    enabled: true

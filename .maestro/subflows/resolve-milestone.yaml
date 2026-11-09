@@ -1,0 +1,38 @@
+appId: com.leooojrrr.AROWmobile
+---
+- runFlow: open-milestone-search.yaml
+- scrollUntilVisible:
+    element:
+      id: "milestone-kilometer-input"
+    direction: DOWN
+- tapOn:
+    id: "milestone-kilometer-input"
+- inputText: "${KILOMETER}"
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "milestone-metric-input"
+    direction: DOWN
+- tapOn:
+    id: "milestone-metric-input"
+- inputText: "${METRIC}"
+- pressKey: Enter
+- extendedWaitUntil:
+    visible: "Point résolu"
+    timeout: 15000
+# Android can restore the native sheet's half-height snap after the keyboard
+# closes. Expand it through its handle when the footer is below the viewport.
+- runFlow:
+    when:
+      notVisible:
+        id: "use-selected-point"
+    commands:
+      - swipe:
+          start: "50%,51%"
+          end: "50%,10%"
+          duration: 600
+      - waitForAnimationToEnd
+- tapOn:
+    id: "use-selected-point"
+- assertNotVisible:
+    id: "point-search-sheet"
