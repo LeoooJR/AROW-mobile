@@ -49,9 +49,8 @@ coverage/
 .maestro/artifacts/*
 !.maestro/artifacts/.gitkeep
 
-# Task-specific scripts are local evidence, not maintained tooling.
-/script/local/*
-!/script/local/.gitkeep
+# Local scripts
+/script/
 
 # Local environment files
 .env*.local
@@ -88,10 +87,6 @@ Thumbs.db
 /.github/
 /.prettierignore
 /tsconfig.shared.json
-/script/check-architecture.ts
-/script/architecture/
-/script/check-validation.ts
-/script/validation/
 
 # Generated local-module outputs; keep native sources and resources
 /modules/**/android/build/
@@ -112,4 +107,3 @@ Thumbs.db
 # Generated railway assets required by EAS Build
 !/src/statics/lignes-par-type.geojson
 !/src/statics/railway_reference.sqlite
-!/src/statics/railway_reference.import-report.json
