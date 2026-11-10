@@ -4,8 +4,8 @@ import {
   requireNonEmptyString,
   requirePositiveInteger,
 } from "./validation";
-import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
-import { isRecord } from "../../shared/value-validation";
+import { RailwaySectionId } from "../../../shared/railway-domain/railway-section-id";
+import { isRecord } from "../../../shared/value-validation";
 import type {
   GeoJsonPosition,
   NormalizedRailwayData,

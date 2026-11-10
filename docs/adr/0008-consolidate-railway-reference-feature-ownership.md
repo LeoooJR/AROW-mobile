@@ -53,7 +53,7 @@ framework-dependent logic into shared domain classes.
   [repository](../../src/features/railway-reference/repository.ts) and
   [entry hook](../../src/features/use-railway-reference.ts).
 - [Feature working rules](../../src/features/CONTEXT.md) and
-  [dependency boundary checks](../../script/architecture/check.ts).
+  [dependency boundary checks](../../script/ci/architecture/check.ts).
 - Organises the retrieval operations described in
   [ADR-0003](0003-precompute-section-totals-and-point-ordinals.md),
   [ADR-0004](0004-load-visible-points-from-sqlite.md) and

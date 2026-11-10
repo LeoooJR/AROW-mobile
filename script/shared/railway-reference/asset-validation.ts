@@ -1,16 +1,14 @@
 import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
 
-import { isRecord } from "../../shared/value-validation";
+import { isRecord } from "../../../shared/value-validation";
 
 import {
   DEFAULT_RAILWAY_DATABASE_PATH,
   DEFAULT_RAILWAY_GEOJSON_PATH,
   EXPECTED_RAILWAY_SNAPSHOT,
 } from "./configuration";
-import { validateRailwayDatabase } from "./database";
+import { validateRailwayDatabase } from "./database-validation";
 import { normalizeRailwayGeoJson } from "./geojson";
-import { validateImportReport } from "./import-report";
 import type { GenerationSummary } from "./types";
 
 const SETUP_INSTRUCTION =
@@ -31,7 +29,7 @@ function errorMessage(cause: unknown): string | undefined {
     : undefined;
 }
 
-function validationFailure(asset: string, cause: unknown): Error {
+export function validationFailure(asset: string, cause: unknown): Error {
   const message = errorMessage(cause);
   const detail = message === undefined ? "" : ` ${message}`;
   return new Error(
@@ -68,19 +66,11 @@ function validateRailwaySqlite(
   }
 }
 
-export function validateRailwayAssets({
+export function validateBundledRailwayAssets({
   databasePath = DEFAULT_RAILWAY_DATABASE_PATH,
   expectedSnapshot = EXPECTED_RAILWAY_SNAPSHOT,
   geojsonPath = DEFAULT_RAILWAY_GEOJSON_PATH,
 }: RailwayAssetValidationOptions = {}): void {
   validateRailwayGeoJson(geojsonPath, expectedSnapshot);
   validateRailwaySqlite(databasePath, expectedSnapshot);
-  try {
-    validateImportReport(
-      join(dirname(databasePath), "railway_reference.import-report.json"),
-      expectedSnapshot,
-    );
-  } catch (cause) {
-    throw validationFailure("Railway import report", cause);
-  }
 }

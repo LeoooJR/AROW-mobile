@@ -69,6 +69,37 @@ function dependencyViolation(
   }
   if (isTest(file)) return;
 
+  const buildTool = isWithin(file, "script/build");
+  const sharedTool = isWithin(file, "script/shared");
+  if (buildTool || sharedTool) {
+    const allowed = ["shared", "script/shared"];
+    if (buildTool) allowed.push("script/build");
+    if (
+      !isBuiltin(specifier) &&
+      (target === undefined ||
+        target.split("/").includes("node_modules") ||
+        !allowed.some((directory) => isWithin(target, directory)))
+    ) {
+      return "Build and shared tooling must stay inside their uploaded Node-only dependency boundary.";
+    }
+  }
+  if (
+    target !== undefined &&
+    isWithin(file, "script/data") &&
+    ["script/build", "script/ci", "script/development"].some((directory) =>
+      isWithin(target, directory),
+    )
+  ) {
+    return "Data preparation may depend on shared tooling, not build entry points, CI, or development helpers.";
+  }
+  if (
+    target !== undefined &&
+    isWithin(file, "src") &&
+    isWithin(target, "script")
+  ) {
+    return "Application code cannot depend on repository tooling.";
+  }
+
   const packageTarget = target?.split(/(?:^|\/)node_modules\//).at(-1);
 
   if (
@@ -172,6 +203,17 @@ export function checkArchitecture(
       : shared || isWithin(name, "src/utils")
         ? ".ts"
         : undefined;
+    if (
+      isWithin(name, "script") &&
+      !["build", "shared", "data", "ci", "development"].some((area) =>
+        isWithin(name, `script/${area}`),
+      )
+    ) {
+      report(
+        0,
+        "Place maintained tooling in build, shared, data, ci, or development.",
+      );
+    }
     if (extension !== undefined && !name.endsWith(extension))
       report(
         0,
@@ -180,10 +222,14 @@ export function checkArchitecture(
 
     const inspect = (node: ts.Node, expression: ts.Node | undefined) => {
       if (expression === undefined || !ts.isStringLiteralLike(expression)) {
-        if (shared)
+        if (
+          shared ||
+          isWithin(name, "script/build") ||
+          isWithin(name, "script/shared")
+        )
           report(
             node.getStart(source),
-            "Shared module specifiers must be string literals so their dependencies can be checked.",
+            "Shared/build module specifiers must be string literals so their dependencies can be checked.",
           );
         return;
       }

@@ -62,7 +62,7 @@ test("does not inspect experiments but rejects maintained imports of them", () =
   expect(
     inspect({
       "script/local/probe.ts": "export const value = 1;",
-      "script/tool.test.ts": 'import { value } from "./local/probe";',
+      "script/ci/tool.test.ts": 'import { value } from "../local/probe";',
     }),
   ).toEqual([
     expect.objectContaining({
@@ -70,6 +70,61 @@ test("does not inspect experiments but rejects maintained imports of them", () =
     }),
   ]);
 });
+
+test("keeps build validation and shared tooling inside the EAS upload boundary", () => {
+  expect(
+    inspect({
+      "script/build/check.ts":
+        'import { value } from "../shared/value"; import { readFileSync } from "node:fs";',
+      "script/shared/value.ts": 'export { value } from "../../shared/value";',
+      "shared/value.ts": "export const value = 1;",
+    }),
+  ).toEqual([]);
+});
+
+test.each([
+  ["script/build/check.ts", "script/data/value.ts", "../data/value"],
+  ["script/shared/check.ts", "script/ci/value.ts", "../ci/value"],
+  ["script/shared/check.ts", "script/build/value.ts", "../build/value"],
+  ["script/build/check.ts", "src/value.ts", "../../src/value"],
+])(
+  "rejects an unpackaged tooling dependency from %s",
+  (file, target, specifier) => {
+    expect(
+      inspect({
+        [file]: `import { value } from "${specifier}";`,
+        [target]: "export const value = 1;",
+      }),
+    ).toEqual([
+      expect.objectContaining({
+        message: expect.stringMatching(/uploaded Node-only/),
+      }),
+    ]);
+  },
+);
+
+test("requires an explicit owner for maintained tooling", () => {
+  expect(
+    inspect({ "script/unclassified.ts": "export const value = 1;" }),
+  ).toEqual([
+    expect.objectContaining({
+      message: expect.stringMatching(/Place maintained tooling/),
+    }),
+  ]);
+});
+
+test.each(["script/build/check.ts", "script/shared/check.ts"])(
+  "rejects computed imports that hide uploaded dependencies in %s",
+  (file) => {
+    expect(
+      inspect({ [file]: 'const name = "../data/tool"; import(name);' }),
+    ).toEqual([
+      expect.objectContaining({
+        message: expect.stringMatching(/must be string literals/),
+      }),
+    ]);
+  },
+);
 
 test.each([
   'import React from "react";',

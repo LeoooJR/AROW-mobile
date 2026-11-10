@@ -111,7 +111,7 @@ test("the local workspace is ignored by Git while its placeholder is retained", 
     ["-C", root, "check-ignore", "--no-index", "--stdin"],
     {
       input:
-        "script/local/.gitkeep\nscript/local/probe.ts\nscript/local/nested/probe.sh\nscript/build_dev_client.sh\n",
+        "script/local/.gitkeep\nscript/local/probe.ts\nscript/local/nested/probe.sh\nscript/development/build_dev_client.sh\n",
       encoding: "utf8",
     },
   );

@@ -3,7 +3,7 @@ import {
   createTableSql,
   KILOMETRIC_POINTS_TABLE,
   RAILWAY_SECTIONS_TABLE,
-} from "../../shared/railway-reference/schema";
+} from "../../../shared/railway-reference/schema";
 
 export function validateSectionEndpoints(database: DatabaseSync): void {
   // PRAGMA foreign_key_list does not expose whether a constraint is deferred.

@@ -1,7 +1,7 @@
-import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
-import type { KilometricPointDatabaseRow } from "../../shared/railway-reference/records";
+import { RailwaySectionId } from "../../../shared/railway-domain/railway-section-id";
+import type { KilometricPointDatabaseRow } from "../../../shared/railway-reference/records";
 import type { Milestone } from "./types";
-import { milestoneVisibilityClassForPosition } from "../../shared/railway-reference/milestone-visibility-class";
+import { milestoneVisibilityClassForPosition } from "../../../shared/railway-reference/milestone-visibility-class";
 
 export function milestoneRowsBySection(
   milestones: readonly Milestone[],

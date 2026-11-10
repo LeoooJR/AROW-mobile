@@ -51,8 +51,11 @@ coverage/
 .maestro/artifacts/*
 !.maestro/artifacts/.gitkeep
 
-# Local scripts
-/script/
+# Build tooling only; new script areas are excluded by default
+# EAS checks directory paths without a trailing slash while copying
+/script/*
+!/script/build
+!/script/shared
 
 # Local environment files; examples and templates must contain no secrets
 .env*

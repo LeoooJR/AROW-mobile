@@ -74,8 +74,9 @@
     "typescript-eslint": "^8.66.0"
   },
   "scripts": {
-    "database:check": "node --import=tsx ./script/check-railway-database.ts",
-    "database:setup": "node --import=tsx ./script/update-railway-database.ts",
+    "database:check": "node --import=tsx ./script/data/check-railway-database.ts",
+    "database:setup": "node --import=tsx ./script/data/update-railway-database.ts",
+    "build:check-assets": "node --import=tsx ./script/build/check-railway-assets.ts",
     "prestart": "npm run database:check",
     "start": "expo start",
     "preandroid": "npm run database:check",
@@ -84,12 +85,12 @@
     "ios": "expo start --ios",
     "preweb": "npm run database:check",
     "web": "expo start --web",
-    "check:architecture": "node --import=tsx ./script/check-architecture.ts",
+    "check:architecture": "node --import=tsx ./script/ci/check-architecture.ts",
     "format:check": "prettier --check .",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit",
     "typecheck:shared": "tsc --project tsconfig.shared.json",
-    "check:validation": "node --import=tsx ./script/check-validation.ts",
+    "check:validation": "node --import=tsx ./script/ci/check-validation.ts",
     "check": "npm run check:architecture && npm run check:validation && npm run format:check && npm run lint && npm run typecheck && npm run typecheck:shared",
     "test:ci": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --config jest.ci.config.js --ci --runInBand",
     "pretest": "npm run database:check",
@@ -99,7 +100,7 @@
     "test:e2e": "maestro test .maestro",
     "pretest:watch": "npm run database:check",
     "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch",
-    "eas-build-post-install": "npm run database:check"
+    "eas-build-post-install": "npm run build:check-assets"
   },
   "overrides": {
     "lightningcss": "1.30.1"

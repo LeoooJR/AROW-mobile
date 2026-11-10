@@ -1,7 +1,7 @@
 # Sourced by the preview and development build entry points.
 show_build_usage() {
   printf '%s\n' \
-    "usage: ./script/$BUILD_HELPER --device <AVD-name>" \
+    "usage: ./script/development/$BUILD_HELPER --device <AVD-name>" \
     '' \
     "$BUILD_DESCRIPTION" \
     'An explicit AVD name is required; physical devices are not supported.' \
@@ -20,7 +20,7 @@ build_android() {
   local ROOT_DIR DEVICE_NAME="" DEVICE="" DEVICE_ABI ANDROID_SDK_PATH DEVICES
   local serial state details name detail matches=0
   local DEVICE_DETAILS=() run_args=()
-  ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --device)

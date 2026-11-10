@@ -37,7 +37,7 @@ the current viewport, from zoom 10 while the point layer is visible.
 Start and boot your Android emulator, then build and open the development client:
 
 ```bash
-./script/build_dev_client.sh --device medium_phone
+./script/development/build_dev_client.sh --device medium_phone
 ```
 
 Replace `medium_phone` with your emulator's AVD name, rather than its ADB serial.
@@ -57,7 +57,7 @@ simulation; restoring it requires an explicit Start.
 With the development build installed, start the development server:
 
 ```bash
-./script/start_dev_client.sh --dev-client
+./script/development/start_dev_client.sh --dev-client
 ```
 
 Press **a** in the terminal to open the Android app. Rebuild after changing native
@@ -75,8 +75,11 @@ npx --yes eas-cli@27.4.1 build --platform android --profile preview
 ```
 
 If the asset check fails, run `npm run database:setup` first. The EAS upload
-includes the generated GeoJSON, SQLite database, and import report. EAS uses the
-`preview` environment and update channel for this build.
+includes the generated GeoJSON and SQLite database. The import report stays
+local. EAS uses the `preview` environment and update channel for this build.
+Its post-install hook runs `npm run build:check-assets` using only `script/build/`
+and `script/shared/`; data preparation, CI checks, and development helpers are
+excluded by directory. See [tooling ownership](../script/README.md).
 
 Share the completed build's EAS installation link with teammates. On an Android
 device, open the link, download the APK, and allow installation from that browser
@@ -112,7 +115,7 @@ is needed.
 With the prerequisites and railway assets prepared and your emulator booted, run:
 
 ```bash
-./script/build_and_run_preview.sh --device medium_phone
+./script/development/build_and_run_preview.sh --device medium_phone
 ```
 
 Use this preview to inspect the native splash and its handoff to the in-app
@@ -134,7 +137,7 @@ native template and Gradle dependencies.
 On machines with limited RAM, reduce Gradle's parallel workers:
 
 ```bash
-GRADLE_OPTS=-Dorg.gradle.workers.max=1 ./script/build_and_run_preview.sh --device medium_phone
+GRADLE_OPTS=-Dorg.gradle.workers.max=1 ./script/development/build_and_run_preview.sh --device medium_phone
 ```
 
 The preview APK is generated at
@@ -149,7 +152,7 @@ emulator's app launcher. Metro can remain stopped. To return to development,
 reinstall the development build:
 
 ```bash
-./script/build_dev_client.sh --device medium_phone
+./script/development/build_dev_client.sh --device medium_phone
 ```
 
 Starting Metro alone does not turn an installed preview into a development client.

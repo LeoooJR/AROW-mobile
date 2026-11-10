@@ -4,17 +4,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
-import { FIND_CURRENT_MILESTONE_QUERY } from "../../src/features/railway-reference/sqlite/queries";
-import {
-  completeRailwaySections,
-  createRailwayDatabase,
-  validateRailwayDatabase,
-} from "./database";
+import { FIND_CURRENT_MILESTONE_QUERY } from "../../../src/features/railway-reference/sqlite/queries";
+import { completeRailwaySections, createRailwayDatabase } from "./database";
+import { validateRailwayDatabase } from "../../shared/railway-reference/database-validation";
 import type {
   GenerationSummary,
-  Milestone,
   RailwaySectionWithGeometry,
-} from "./types";
+} from "../../shared/railway-reference/types";
+import type { Milestone } from "./types";
 
 const geometrySections: readonly RailwaySectionWithGeometry[] = [1, 2, 3].map(
   (rank) => ({

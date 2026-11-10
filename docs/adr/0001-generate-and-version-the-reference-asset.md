@@ -52,9 +52,9 @@ automatic cleanup or eliminate the temporary disk cost of an upgrade.
 - [Schema descriptors](../../shared/railway-reference/schema.ts),
   [version constants](../../shared/railway-reference/database-version.ts) and
   [native provider](../../src/features/railway-reference/provider.tsx).
-- [Generation](../../script/railway-database/database.ts),
-  [staged setup](../../script/railway-database/setup.ts) and
-  [promotion rollback](../../script/railway-database/staging.ts).
+- [Generation](../../script/data/railway-reference/database.ts),
+  [staged setup](../../script/data/railway-reference/setup.ts) and
+  [promotion rollback](../../script/data/railway-reference/staging.ts).
 - Enables [stored totals](0003-precompute-section-totals-and-point-ordinals.md),
   [visibility metadata](0005-store-visibility-classes-with-a-narrow-index.md) and
   [recorded endpoints](0006-reference-recorded-section-endpoints.md).

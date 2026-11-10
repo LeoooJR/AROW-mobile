@@ -16,18 +16,19 @@ import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { runInThisContext } from "node:vm";
 
-import { parseMilestoneCsv } from "./railway-database/csv";
-import { normalizeRailwayGeoJson } from "./railway-database/geojson";
-import { downloadResource } from "./railway-database/resources";
-import { setupRailwayDatabase } from "./railway-database/setup";
-import { validateRailwayAssets } from "./railway-database/asset-validation";
+import { parseMilestoneCsv } from "./railway-reference/csv";
+import { normalizeRailwayGeoJson } from "../shared/railway-reference/geojson";
+import { downloadResource } from "./railway-reference/resources";
+import { setupRailwayDatabase } from "./railway-reference/setup";
+import { validateRailwayAssets } from "./railway-reference/asset-validation";
+import { validateBundledRailwayAssets } from "../shared/railway-reference/asset-validation";
 import type {
   FetchImplementation,
   GenerationLogger,
   RailwayResources,
   RailwayResource,
   SetupOptions,
-} from "./railway-database/types";
+} from "./railway-reference/types";
 
 // The Expo preset installs native-app networking globals even in Node tests.
 // These host build-script tests need Node's actual fetch and stream primitives.
@@ -592,9 +593,16 @@ describe("railway database setup", () => {
     expect(readFileSync(databasePath)).toEqual(originalDatabase);
   });
 
-  test("rejects a missing import report with setup guidance", async () => {
+  test("build validation needs no import report while local validation requires it", async () => {
     await generateValidFixtureAssets();
     rmSync(join(directory, "railway_reference.import-report.json"));
+    expect(() =>
+      validateBundledRailwayAssets({
+        databasePath,
+        geojsonPath,
+        expectedSnapshot: FIXTURE_SNAPSHOT,
+      }),
+    ).not.toThrow();
     expect(() =>
       validateRailwayAssets({
         databasePath,

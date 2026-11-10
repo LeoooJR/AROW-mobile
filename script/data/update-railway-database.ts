@@ -1,4 +1,4 @@
-import { setupRailwayDatabase } from "./railway-database/setup";
+import { setupRailwayDatabase } from "./railway-reference/setup";
 
 setupRailwayDatabase().catch((cause: unknown) => {
   console.error(cause instanceof Error ? cause.message : cause);
