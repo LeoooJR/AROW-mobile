@@ -64,6 +64,45 @@ Press **a** in the terminal to open the Android app. Rebuild after changing nati
 modules or Expo configuration. The old `script/build_and_run.sh` entry point
 forwards to the development-build helper for existing Run actions.
 
+## Shared Android preview and OTA updates
+
+The EAS `preview` profile creates a standalone internal-distribution APK. Prepare
+and validate the railway assets locally before uploading this worktree:
+
+```bash
+npm run database:check
+npx --yes eas-cli@27.4.1 build --platform android --profile preview
+```
+
+If the asset check fails, run `npm run database:setup` first. The EAS upload
+includes the generated GeoJSON, SQLite database, and import report. EAS uses the
+`preview` environment and update channel for this build.
+
+Share the completed build's EAS installation link with teammates. On an Android
+device, open the link, download the APK, and allow installation from that browser
+when prompted. The app runs without Metro. For simulation, grant location access,
+enable location services, and select **AROW-mobile** as the mock location app in
+Android Developer options. Preview and development builds use the same package
+ID; a different signing key can prevent installation over an existing app.
+
+To publish a compatible JavaScript or asset update later:
+
+```bash
+npm run database:check
+npx --yes eas-cli@27.4.1 update --channel preview --platform android --environment preview --message "<description>"
+```
+
+Before publishing, verify that the `preview` channel targets the intended branch
+and that it is not shared with production. Android uses fingerprint runtime
+compatibility: changes to native dependencies, configuration, or custom native
+code require a new compatible build. The production profile uses its separate
+`production` channel.
+
+The app checks for updates on launch, downloads them in the background, and
+applies them after a restart. Allow up to two cold launches to see a new update:
+one to download it, then another to run it. Fully close the app between launches.
+The embedded bundle remains available when no compatible update can be fetched.
+
 ## Local Android preview
 
 A local release preview embeds the JavaScript and railway assets and opens
