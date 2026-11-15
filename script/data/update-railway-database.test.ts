@@ -633,6 +633,29 @@ describe("railway database setup", () => {
     ).toThrow("Run `npm run database:setup`");
   });
 
+  test.each([undefined, "001000:2"])(
+    "rejects a bundled feature with ID %s",
+    async (id) => {
+      await generateValidFixtureAssets();
+      const { geojson } = normalizeRailwayGeoJson(RAW_GEOJSON);
+      writeFileSync(
+        geojsonPath,
+        JSON.stringify({
+          ...geojson,
+          features: geojson.features.map((feature) => ({ ...feature, id })),
+        }),
+      );
+
+      expect(() =>
+        validateBundledRailwayAssets({
+          databasePath,
+          geojsonPath,
+          expectedSnapshot: FIXTURE_SNAPSHOT,
+        }),
+      ).toThrow("Railway feature 0 id must be 001000:1");
+    },
+  );
+
   test("reports a missing SQLite asset with setup guidance", async () => {
     await generateValidFixtureAssets();
 

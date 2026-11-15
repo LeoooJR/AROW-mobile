@@ -62,10 +62,11 @@ remote hook verifies only the GeoJSON and SQLite actually included in the
 archive. The reference-data policy, schema checks, pinned snapshot, and generated
 outputs remain unchanged.
 
-The [EAS contract tests](ci/eas-build-assets.node.test.ts) check directory-level
-inclusion, future-file defaults, secret exclusions, and execution of the actual
-hook from a tree containing no local tooling. Fixture-based data tests verify
-that build checks work without a report while local checks reject its absence.
+Run `npm run test:eas-archive` after preparing the railway assets. The
+[archive check](ci/check-eas-build-archive.ts) uses the pinned EAS CLI to copy a
+fixture with the generated runtime assets. It checks inclusion and exclusion
+rules and runs the actual post-install hook from the copied tree. Fixture-based
+data tests cover the asset validator in CI without the generated dataset.
 
 ## Local experiments
 

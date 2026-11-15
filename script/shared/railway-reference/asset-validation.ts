@@ -8,7 +8,7 @@ import {
   EXPECTED_RAILWAY_SNAPSHOT,
 } from "./configuration";
 import { validateRailwayDatabase } from "./database-validation";
-import { normalizeRailwayGeoJson } from "./geojson";
+import { parseRailwaySections } from "./geojson";
 import type { GenerationSummary } from "./types";
 
 const SETUP_INSTRUCTION =
@@ -44,10 +44,10 @@ function validateRailwayGeoJson(
 ): void {
   try {
     const value: unknown = JSON.parse(readFileSync(geojsonPath, "utf8"));
-    const { geojson } = normalizeRailwayGeoJson(value);
-    if (geojson.features.length !== expectedSnapshot.geometryCount) {
+    const sections = parseRailwaySections(value);
+    if (sections.length !== expectedSnapshot.geometryCount) {
       throw new Error(
-        `Expected ${expectedSnapshot.geometryCount} railway features, received ${geojson.features.length}.`,
+        `Expected ${expectedSnapshot.geometryCount} railway features, received ${sections.length}.`,
       );
     }
   } catch (cause) {

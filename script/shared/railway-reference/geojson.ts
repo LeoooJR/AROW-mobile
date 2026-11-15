@@ -99,6 +99,7 @@ function requireGeometry(
 function railwaySectionFromFeature(
   value: unknown,
   index: number,
+  allowSourceProperties = false,
 ): RailwaySectionWithGeometry {
   const context = `Railway feature ${index}`;
   if (
@@ -122,6 +123,14 @@ function railwaySectionFromFeature(
   const id = new RailwaySectionId(code, rank).value;
   if (value.id !== id) {
     throw new Error(`${context} id must be ${id}`);
+  }
+  for (const property of Object.keys(properties)) {
+    if (
+      !RAILWAY_PROPERTIES.includes(property) &&
+      !(allowSourceProperties && REMOVED_PROPERTIES.has(property))
+    ) {
+      throw new Error(`${context} contains unexpected property ${property}`);
+    }
   }
 
   return Object.freeze({
@@ -158,16 +167,9 @@ function normalizedFeature(value: unknown, index: number): RailwayFeature {
       id: normalizedId,
     },
     index,
+    true,
   );
   requireGeometry(value.geometry, context);
-  for (const property of Object.keys(value.properties)) {
-    if (
-      !RAILWAY_PROPERTIES.includes(property) &&
-      !REMOVED_PROPERTIES.has(property)
-    ) {
-      throw new Error(`${context} contains unexpected property ${property}`);
-    }
-  }
   if (value.id !== undefined && value.id !== normalizedId) {
     throw new Error(`${context} contains an invalid existing id`);
   }
@@ -218,7 +220,9 @@ export function normalizeRailwayGeoJson(value: unknown): NormalizedRailwayData {
     type: "FeatureCollection",
     features: Object.freeze(features),
   });
-  const sections = features.map(railwaySectionFromFeature);
+  const sections = features.map((feature, index) =>
+    railwaySectionFromFeature(feature, index),
+  );
   requireUniqueSections(sections);
   return Object.freeze({
     geojson,
@@ -231,7 +235,9 @@ export function parseRailwaySections(
 ): readonly RailwaySectionWithGeometry[] {
   requireFeatureCollection(value);
 
-  const sections = value.features.map(railwaySectionFromFeature);
+  const sections = value.features.map((feature, index) =>
+    railwaySectionFromFeature(feature, index),
+  );
   requireUniqueSections(sections);
 
   return sections;
