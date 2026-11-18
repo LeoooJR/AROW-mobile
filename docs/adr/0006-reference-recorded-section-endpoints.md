@@ -56,7 +56,7 @@ records Node 24.18.0, SQLite 3.53.1, a 2 MiB cache and 30 alternating rounds wit
 complete row materialization. These are desktop observations, not Android SLAs.
 
 - [Schema](../../shared/railway-reference/schema.ts),
-  [independent extrema validation](../../script/railway-database/section-endpoints.ts)
+  [independent extrema validation](../../script/shared/railway-reference/section-endpoints.ts)
   and [runtime joins](../../src/features/railway-reference/sqlite/queries.ts).
 - Extends [section totals](0003-precompute-section-totals-and-point-ordinals.md)
   and uses [versioned imports](0001-generate-and-version-the-reference-asset.md).

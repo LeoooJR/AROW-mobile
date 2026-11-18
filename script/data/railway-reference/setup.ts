@@ -4,14 +4,11 @@ import {
   DEFAULT_RAILWAY_DATABASE_PATH,
   DEFAULT_RAILWAY_GEOJSON_PATH,
   EXPECTED_RAILWAY_SNAPSHOT,
-} from "./configuration";
+} from "../../shared/railway-reference/configuration";
 import { parseMilestoneCsv } from "./csv";
-import {
-  completeRailwaySections,
-  createRailwayDatabase,
-  validateRailwayDatabase,
-} from "./database";
-import { normalizeRailwayGeoJson } from "./geojson";
+import { completeRailwaySections, createRailwayDatabase } from "./database";
+import { validateRailwayDatabase } from "../../shared/railway-reference/database-validation";
+import { normalizeRailwayGeoJson } from "../../shared/railway-reference/geojson";
 import { validateImportedMilestones } from "./asset-consistency";
 import {
   createImportReport,
@@ -26,17 +23,19 @@ import {
 } from "./staging";
 import type {
   GenerationLogger,
-  GenerationSummary,
   Milestone,
   ParsedMilestones,
-  RailwayFeatureCollection,
   RailwayResources,
-  RailwaySection,
-  RailwaySectionWithGeometry,
   SetupOptions,
   SkippedMilestone,
   StagingWorkspace,
 } from "./types";
+import type {
+  GenerationSummary,
+  RailwayFeatureCollection,
+  RailwaySection,
+  RailwaySectionWithGeometry,
+} from "../../shared/railway-reference/types";
 
 const SUMMARY_KEYS = [
   "duplicateMilestoneCount",

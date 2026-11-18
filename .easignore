@@ -15,8 +15,10 @@ expo-env.d.ts
 .kotlin/
 *.orig.*
 *.jks
+*.keystore
 *.p8
 *.p12
+*.pfx
 *.key
 *.mobileprovision
 *.pem
@@ -49,12 +51,28 @@ coverage/
 .maestro/artifacts/*
 !.maestro/artifacts/.gitkeep
 
-# Task-specific scripts are local evidence, not maintained tooling.
-/script/local/*
-!/script/local/.gitkeep
+# Build tooling only; new script areas are excluded by default
+# EAS checks directory paths without a trailing slash while copying
+/script/*
+!/script/build
+!/script/shared
 
-# Local environment files
-.env*.local
+# Local environment files; examples and templates must contain no secrets
+.env*
+!.env.example
+!.env.*.example
+!.env.template
+!.env.*.template
+
+# Local credentials; use protected environment/file variables for builds
+credentials.json
+credentials.*.json
+*.credentials.json
+service-account*.json
+*.service-account.json
+service_account*.json
+*.service_account.json
+*-firebase-adminsdk-*.json
 
 # TypeScript
 *.tsbuildinfo
@@ -88,10 +106,6 @@ Thumbs.db
 /.github/
 /.prettierignore
 /tsconfig.shared.json
-/script/check-architecture.ts
-/script/architecture/
-/script/check-validation.ts
-/script/validation/
 
 # Generated local-module outputs; keep native sources and resources
 /modules/**/android/build/
@@ -112,4 +126,3 @@ Thumbs.db
 # Generated railway assets required by EAS Build
 !/src/statics/lignes-par-type.geojson
 !/src/statics/railway_reference.sqlite
-!/src/statics/railway_reference.import-report.json

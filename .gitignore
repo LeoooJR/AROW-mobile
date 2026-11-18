@@ -15,8 +15,10 @@ expo-env.d.ts
 .kotlin/
 *.orig.*
 *.jks
+*.keystore
 *.p8
 *.p12
+*.pfx
 *.key
 *.mobileprovision
 *.pem
@@ -53,8 +55,22 @@ coverage/
 /script/local/*
 !/script/local/.gitkeep
 
-# Local environment files
-.env*.local
+# Local environment files; examples and templates must contain no secrets
+.env*
+!.env.example
+!.env.*.example
+!.env.template
+!.env.*.template
+
+# Local credentials; use protected environment/file variables for builds
+credentials.json
+credentials.*.json
+*.credentials.json
+service-account*.json
+*.service-account.json
+service_account*.json
+*.service_account.json
+*-firebase-adminsdk-*.json
 
 # TypeScript
 *.tsbuildinfo

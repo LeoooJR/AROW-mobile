@@ -1,12 +1,11 @@
-import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
-import { parseMilestoneLabel } from "../../shared/railway-domain/kilometric-position";
+import { RailwaySectionId } from "../../../shared/railway-domain/railway-section-id";
+import { parseMilestoneLabel } from "../../../shared/railway-domain/kilometric-position";
+import { canonicalLineCode, milestonePositionMeters } from "./validation";
 import {
-  canonicalLineCode,
-  milestonePositionMeters,
   requireCoordinate,
   requirePositiveInteger,
-} from "./validation";
-import { MilestoneId } from "../../shared/railway-domain/milestone-id";
+} from "../../shared/railway-reference/validation";
+import { MilestoneId } from "../../../shared/railway-domain/milestone-id";
 import type {
   DuplicateMilestone,
   Milestone,

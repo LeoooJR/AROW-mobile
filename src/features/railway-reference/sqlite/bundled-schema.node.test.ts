@@ -3,7 +3,7 @@
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { MILESTONE_DISPLAY_CLASSES } from "../milestone-display";
-import { validatePointDisplayMetadata } from "../../../../script/railway-database/point-display-metadata";
+import { validatePointDisplayMetadata } from "../../../../script/shared/railway-reference/point-display-metadata";
 
 import {
   KILOMETRIC_POINTS_TABLE,

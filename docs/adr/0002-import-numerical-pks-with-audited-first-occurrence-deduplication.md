@@ -51,9 +51,9 @@ policy requires regeneration and review of the audit.
 
 ## Evidence and related decisions
 
-- [CSV importer](../../script/railway-database/csv.ts),
-  [import report](../../script/railway-database/import-report.ts) and
-  [import tests](../../script/railway-database/csv.node.test.ts).
+- [CSV importer](../../script/data/railway-reference/csv.ts),
+  [import report](../../script/data/railway-reference/import-report.ts) and
+  [import tests](../../script/data/railway-reference/csv.node.test.ts).
 - The [documented pinned snapshot](../railway-database.md#import-policy-and-audit-trail)
   has 371,734 retained points, 181 unsupported rows and 908 discarded duplicates.
 - Derived metadata in [ADR-0003](0003-precompute-section-totals-and-point-ordinals.md)

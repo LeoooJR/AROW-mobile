@@ -1,4 +1,4 @@
-import { validateRailwayAssets } from "./railway-database/asset-validation";
+import { validateRailwayAssets } from "./railway-reference/asset-validation";
 
 try {
   validateRailwayAssets();

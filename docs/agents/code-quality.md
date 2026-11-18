@@ -1,7 +1,7 @@
 # Enforced code-quality boundaries
 
 Read this guide for JavaScript/TypeScript and architecture changes. CI enforces
-these rules through the [architecture checker](../../script/architecture/check.ts),
+these rules through the [architecture checker](../../script/ci/architecture/check.ts),
 lint, formatting, and type checks.
 
 ## Dependency and filename rules
@@ -23,6 +23,13 @@ Filename rules and shared restrictions also cover tests. Other dependency rules
 apply to production code.
 
 ## Commands and CI scope
+
+Tooling belongs to the build, shared, data, CI, or development area under
+`script/`. Build/shared tooling must stay inside the Node-only EAS upload
+boundary; data preparation cannot import CI/development code or build entry
+points. Production application code cannot import repository tooling. See
+[tooling ownership](../../script/README.md) for the allowed dependencies and
+the separate responsibility of live Maestro tests.
 
 Run `npm run check` for architecture, formatting, lint, application types, and
 isolated shared types. Run `npm run test:ci` for asset-independent code tests;

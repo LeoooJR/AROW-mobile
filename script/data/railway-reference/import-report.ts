@@ -2,10 +2,10 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { styleText } from "node:util";
 
-import { isRecord } from "../../shared/value-validation";
-import { parseMilestoneLabel } from "../../shared/railway-domain/kilometric-position";
+import { isRecord } from "../../../shared/value-validation";
+import { parseMilestoneLabel } from "../../../shared/railway-domain/kilometric-position";
+import type { GenerationSummary } from "../../shared/railway-reference/types";
 import type {
-  GenerationSummary,
   MilestoneSourceRow,
   ParsedMilestones,
   StagingWorkspace,

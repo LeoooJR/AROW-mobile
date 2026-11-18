@@ -1,55 +1,39 @@
 import { DatabaseSync } from "node:sqlite";
-import type { SQLOutputValue } from "node:sqlite";
 
 import type {
   KilometricPointDatabaseRow,
   RailwaySectionDatabaseRow,
-} from "../../shared/railway-reference/records";
+} from "../../../shared/railway-reference/records";
+
 import {
   createTableSql,
   KILOMETRIC_POINTS_TABLE,
   RAILWAY_SECTIONS_TABLE,
-} from "../../shared/railway-reference/schema";
-import { RailwaySectionId } from "../../shared/railway-domain/railway-section-id";
+} from "../../../shared/railway-reference/schema";
+
+import { RailwaySectionId } from "../../../shared/railway-domain/railway-section-id";
+
 import { milestoneRowsBySection } from "./milestone-metadata";
-import { validatePointDisplayMetadata } from "./point-display-metadata";
-import { validateSectionEndpoints } from "./section-endpoints";
 
 import {
   BEGIN_TRANSACTION,
   ANALYZE_DATABASE,
   CREATE_POINT_DISPLAY_INDEX,
-  CHECK_DATABASE_INTEGRITY,
-  CHECK_FOREIGN_KEYS,
-  CHECK_SCHEMA_VERSION,
   COMMIT_TRANSACTION,
-  DATABASE_SCHEMA_VERSION,
   ENABLE_FOREIGN_KEYS,
-  FIND_INVALID_SECTION_COUNT,
-  FIND_INVALID_MILESTONE_ORDINAL,
-  FIND_CONFLICTING_LINE_NAMES,
   INSERT_KILOMETRIC_POINT,
   INSERT_RAILWAY_SECTION,
   ROLLBACK_TRANSACTION,
-  SELECT_DATABASE_COUNTS,
   SET_SCHEMA_VERSION,
   VACUUM_DATABASE,
 } from "./queries";
+
+import type { Milestone } from "./types";
 import type {
-  GenerationSummary,
-  Milestone,
   RailwaySection,
   RailwaySectionWithGeometry,
   RailwaySectionWithoutGeometry,
-} from "./types";
-
-interface DatabaseCounts {
-  readonly fallbackSectionCount: number;
-  readonly geometryCount: number;
-  readonly geometryWithoutMilestoneCount: number;
-  readonly milestoneCount: number;
-  readonly railwaySectionCount: number;
-}
+} from "../../shared/railway-reference/types";
 
 function fallbackRailwaySection(
   milestone: Milestone,
@@ -196,97 +180,6 @@ export function createRailwayDatabase(
     database.exec(ENABLE_FOREIGN_KEYS);
     populateDatabase(database, sections, milestones);
     database.exec(VACUUM_DATABASE);
-  } finally {
-    database.close();
-  }
-}
-
-function requireCount(
-  value: SQLOutputValue | undefined,
-  column: string,
-): number {
-  if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
-    throw new Error(`Generated database returned an invalid ${column}`);
-  }
-  return value;
-}
-
-function databaseCounts(
-  row: Record<string, SQLOutputValue> | undefined,
-): DatabaseCounts {
-  if (row === undefined) {
-    throw new Error("Generated database did not return row counts");
-  }
-  return Object.freeze({
-    fallbackSectionCount: requireCount(
-      row.fallback_section_count,
-      "fallback section count",
-    ),
-    geometryCount: requireCount(row.geometry_count, "geometry count"),
-    geometryWithoutMilestoneCount: requireCount(
-      row.geometry_without_milestone_count,
-      "geometry without milestone count",
-    ),
-    milestoneCount: requireCount(row.milestone_count, "milestone count"),
-    railwaySectionCount: requireCount(
-      row.railway_section_count,
-      "railway section count",
-    ),
-  });
-}
-
-export function validateRailwayDatabase(
-  databasePath: string,
-  expected: GenerationSummary,
-): void {
-  const database = new DatabaseSync(databasePath, { readOnly: true });
-  try {
-    const version = database.prepare(CHECK_SCHEMA_VERSION).get();
-    if (version?.user_version !== DATABASE_SCHEMA_VERSION) {
-      throw new Error(
-        `Generated database schema version must be ${DATABASE_SCHEMA_VERSION}`,
-      );
-    }
-    const integrity = database.prepare(CHECK_DATABASE_INTEGRITY).get();
-    if (integrity?.integrity_check !== "ok") {
-      throw new Error("Generated database failed its integrity check");
-    }
-    if (database.prepare(CHECK_FOREIGN_KEYS).get() !== undefined) {
-      throw new Error("Generated database contains an invalid foreign key");
-    }
-    if (database.prepare(FIND_CONFLICTING_LINE_NAMES).get() !== undefined) {
-      throw new Error(
-        "Generated database contains conflicting railway line names",
-      );
-    }
-    if (database.prepare(FIND_INVALID_SECTION_COUNT).get() !== undefined) {
-      throw new Error(
-        "Generated database contains an invalid section milestone count",
-      );
-    }
-    if (database.prepare(FIND_INVALID_MILESTONE_ORDINAL).get() !== undefined) {
-      throw new Error(
-        "Generated database contains an invalid milestone section position",
-      );
-    }
-
-    validatePointDisplayMetadata(database);
-    validateSectionEndpoints(database);
-    const counts = databaseCounts(
-      database.prepare(SELECT_DATABASE_COUNTS).get(),
-    );
-    if (
-      counts.railwaySectionCount !== expected.railwaySectionCount ||
-      counts.geometryCount !== expected.geometryCount ||
-      counts.fallbackSectionCount !== expected.fallbackSectionCount ||
-      counts.geometryWithoutMilestoneCount !==
-        expected.geometryWithoutMilestoneCount ||
-      counts.milestoneCount !== expected.milestoneCount
-    ) {
-      throw new Error(
-        "Generated database row counts do not match their sources",
-      );
-    }
   } finally {
     database.close();
   }

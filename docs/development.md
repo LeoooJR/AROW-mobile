@@ -37,7 +37,7 @@ the current viewport, from zoom 10 while the point layer is visible.
 Start and boot your Android emulator, then build and open the development client:
 
 ```bash
-./script/build_dev_client.sh --device medium_phone
+./script/development/build_dev_client.sh --device medium_phone
 ```
 
 Replace `medium_phone` with your emulator's AVD name, rather than its ADB serial.
@@ -57,12 +57,54 @@ simulation; restoring it requires an explicit Start.
 With the development build installed, start the development server:
 
 ```bash
-./script/start_dev_client.sh --dev-client
+./script/development/start_dev_client.sh --dev-client
 ```
 
 Press **a** in the terminal to open the Android app. Rebuild after changing native
 modules or Expo configuration. The old `script/build_and_run.sh` entry point
 forwards to the development-build helper for existing Run actions.
+
+## Shared Android preview and OTA updates
+
+The EAS `preview` profile creates a standalone internal-distribution APK. Prepare
+and validate the railway assets locally before uploading this worktree:
+
+```bash
+npm run database:check
+npx --yes eas-cli@27.4.1 build --platform android --profile preview
+```
+
+If the asset check fails, run `npm run database:setup` first. The EAS upload
+includes the generated GeoJSON and SQLite database. The import report stays
+local. EAS uses the `preview` environment and update channel for this build.
+Its post-install hook runs `npm run build:check-assets` using only `script/build/`
+and `script/shared/`; data preparation, CI checks, and development helpers are
+excluded by directory. See [tooling ownership](../script/README.md).
+
+Share the completed build's EAS installation link with teammates. On an Android
+device, open the link, download the APK, and allow installation from that browser
+when prompted. The app runs without Metro. For simulation, grant location access,
+enable location services, and select **AROW-mobile** as the mock location app in
+Android Developer options. Preview and development builds use the same package
+ID; a different signing key can prevent installation over an existing app.
+
+To publish a compatible JavaScript or asset update later:
+
+```bash
+npm run database:check
+npx --yes eas-cli@27.4.1 update --channel preview --platform android --environment preview --message "<description>"
+```
+
+Before publishing, verify that the `preview` channel targets the intended branch
+and that it is not shared with production. Android uses fingerprint runtime
+compatibility: changes to native dependencies, configuration, or custom native
+code require a new compatible build. The production profile uses its separate
+`production` channel.
+
+The app checks for updates on launch, downloads them in the background, and
+applies them after a restart. Allow up to two cold launches to see a new update:
+one to download it, then another to run it. Fully close the app between launches.
+The embedded bundle remains available when no compatible update can be fetched.
 
 ## Local Android preview
 
@@ -73,7 +115,7 @@ is needed.
 With the prerequisites and railway assets prepared and your emulator booted, run:
 
 ```bash
-./script/build_and_run_preview.sh --device medium_phone
+./script/development/build_and_run_preview.sh --device medium_phone
 ```
 
 Use this preview to inspect the native splash and its handoff to the in-app
@@ -95,7 +137,7 @@ native template and Gradle dependencies.
 On machines with limited RAM, reduce Gradle's parallel workers:
 
 ```bash
-GRADLE_OPTS=-Dorg.gradle.workers.max=1 ./script/build_and_run_preview.sh --device medium_phone
+GRADLE_OPTS=-Dorg.gradle.workers.max=1 ./script/development/build_and_run_preview.sh --device medium_phone
 ```
 
 The preview APK is generated at
@@ -110,7 +152,7 @@ emulator's app launcher. Metro can remain stopped. To return to development,
 reinstall the development build:
 
 ```bash
-./script/build_dev_client.sh --device medium_phone
+./script/development/build_dev_client.sh --device medium_phone
 ```
 
 Starting Metro alone does not turn an installed preview into a development client.

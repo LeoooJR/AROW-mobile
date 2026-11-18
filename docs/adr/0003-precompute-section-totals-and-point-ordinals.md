@@ -45,8 +45,9 @@ recorded points, independently of map density or geometry length.
 
 ## Evidence and related decisions
 
-- [Ordinal generation](../../script/railway-database/milestone-metadata.ts),
-  [section insertion and validation](../../script/railway-database/database.ts)
+- [Ordinal generation](../../script/data/railway-reference/milestone-metadata.ts),
+  [section insertion](../../script/data/railway-reference/database.ts),
+  [independent validation](../../script/shared/railway-reference/database-validation.ts)
   and [runtime queries](../../src/features/railway-reference/sqlite/queries.ts).
 - [Navigation integration tests](../../src/features/railway-reference/milestone-neighbours.node.test.ts).
 - Relies on [immutable generation](0001-generate-and-version-the-reference-asset.md)

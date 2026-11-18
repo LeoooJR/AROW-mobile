@@ -65,7 +65,7 @@ the application has no reference-data writes.
 ## Related implementation and decisions
 
 - [Classification](../../shared/railway-reference/milestone-visibility-class.ts),
-  [index creation](../../script/railway-database/queries.ts) and
-  [independent validation](../../script/railway-database/point-display-metadata.ts).
+  [index creation](../../script/data/railway-reference/queries.ts) and
+  [independent validation](../../script/shared/railway-reference/point-display-metadata.ts).
 - Optimises [ADR-0004](0004-load-visible-points-from-sqlite.md) under the
   [asset lifecycle](0001-generate-and-version-the-reference-asset.md).

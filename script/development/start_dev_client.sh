@@ -2,13 +2,13 @@
 set -euo pipefail
 
 MODE="${1:---dev-client}"
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 cd "$ROOT_DIR"
 
 show_usage() {
   printf '%s\n' \
-    'usage: ./script/start_dev_client.sh [mode]' \
+    'usage: ./script/development/start_dev_client.sh [mode]' \
     '' \
     'Modes:' \
     '  --dev-client, dev-client  Start Metro for the development client' \
